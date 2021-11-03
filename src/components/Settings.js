@@ -63,22 +63,22 @@ export default function Settings(props) {
                         <Grid container>
                             <Grid item xs={12} className={classes.input}>
                                 <FormControl>
-                                    <Typography>Payer GFE server:</Typography>
-                                    <input list="payer-server-list" id="payer-gfe-server" name="payer-gfe-server" defaultValue={props.selectedPayerServer} onChange={handlePayerServerChanges} />
-                                    <datalist id="payer-server-list">
-                                        {props.payerServers.map((item) =>
-                                            <option key={item.value} value={item.value}/>
+                                    <Typography>Provider data server:</Typography>
+                                    <input list="data-server-list" id="provider-data-server" name="provider-data-server" defaultValue={props.selectedDataServer} onChange={handleDataServerChanges} />
+                                    <datalist id="data-server-list">
+                                        {props.dataServers.map((item) =>
+                                            <option key={item.value} value={item.value} />
                                         )}
                                     </datalist>
                                 </FormControl>
                             </Grid>
                             <Grid item xs={12} className={classes.input}>
                                 <FormControl>
-                                    <Typography>Provider data server:</Typography>
-                                    <input list="data-server-list" id="provider-data-server" name="provider-data-server" defaultValue={props.selectedDataServer} onChange={handleDataServerChanges} />
-                                    <datalist id="data-server-list">
-                                        {props.dataServers.map((item) =>
-                                            <option key={item.value} value={item.value}/>
+                                    <Typography>Payer GFE server:</Typography>
+                                    <input list="payer-server-list" id="payer-gfe-server" name="payer-gfe-server" defaultValue={props.selectedPayerServer} onChange={handlePayerServerChanges} />
+                                    <datalist id="payer-server-list">
+                                        {props.payerServers.map((item) =>
+                                            <option key={item.value} value={item.value} />
                                         )}
                                     </datalist>
                                 </FormControl>

@@ -85,7 +85,7 @@ export default function MainPanel() {
     }
     return (
         <React.Fragment>
-            <MenuBar toggleSettings={setShowSettings} showSettings={showSettings} ehrUrl={selectedDataServer} payorUrl={selectedPayerServer} />
+            <MenuBar toggleSettings={setShowSettings} showSettings={showSettings} />
             <div>
                 {
                     showSettings ? (<Grid container className={classes.settings}>
