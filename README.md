@@ -22,3 +22,7 @@ The web application is running on http://localhost:3000
    * `docker run -p 3000:3000 pct-client`
    It can also be run from Docker desktop Dashboard
 The web application is running on http://localhost:3000
+
+## Testing pointing to different servers
+By default, the client is pointing to the provider's data server and the payer's GFE server hosted on Logica server. 
+To point the client to different servers, go to "Settings" and update the settings. 

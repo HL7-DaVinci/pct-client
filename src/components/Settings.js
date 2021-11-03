@@ -39,14 +39,6 @@ export default function Settings(props) {
         props.resetState();
     }
 
-    console.log("Settings dataServers:", props.dataServers);
-
-    props.dataServers.map((item) => {
-        console.log("dataServer entry: ", item);
-        return item;
-    });
-
-
     return (
         <React.Fragment>
             <Accordion className={classes.paper} defaultExpanded={true}>
@@ -59,22 +51,22 @@ export default function Settings(props) {
                     <Typography>Client Settings</Typography>
                 </AccordionSummary>
                 <AccordionDetails>
-                    <div >
-                        <Grid container>
-                            <Grid item xs={12} className={classes.input}>
+                    <div>
+                        <Grid container className={classes.input}>
+                            <Grid item xs={12}>
                                 <FormControl>
-                                    <Typography>Provider data server:</Typography>
-                                    <input list="data-server-list" id="provider-data-server" name="provider-data-server" defaultValue={props.selectedDataServer} onChange={handleDataServerChanges} />
-                                    <datalist id="data-server-list">
-                                        {props.dataServers.map((item) =>
-                                            <option key={item.value} value={item.value} />
-                                        )}
+                                    <Typography>Provider Data Server:</Typography>
+                                    <input list="data-servers" id="provider-data-server" defaultValue={props.selectedDataServer} onChange={handleDataServerChanges} />
+                                    <datalist id="data-servers">
+                                        {
+                                            props.dataServers.map(item => <option key={item.value} value={item.value} />)
+                                        }
                                     </datalist>
                                 </FormControl>
                             </Grid>
-                            <Grid item xs={12} className={classes.input}>
+                            <Grid item xs={12}>
                                 <FormControl>
-                                    <Typography>Payer GFE server:</Typography>
+                                    <Typography>Payer GFE Server:</Typography>
                                     <input list="payer-server-list" id="payer-gfe-server" name="payer-gfe-server" defaultValue={props.selectedPayerServer} onChange={handlePayerServerChanges} />
                                     <datalist id="payer-server-list">
                                         {props.payerServers.map((item) =>
@@ -83,6 +75,7 @@ export default function Settings(props) {
                                     </datalist>
                                 </FormControl>
                             </Grid>
+
                         </Grid>
                     </div>
                 </AccordionDetails>

@@ -55,12 +55,12 @@ export default function MainPanel() {
     const [showSettings, setShowSettings] = useState(false);
     const [receivedAEOBResponse, setReceivedAEOBResponse] = useState(undefined);
     const [dataServers] = useState([
-            {
-                "value": "http://localhost:8080/fhir"
-            },
-            {
-                "value": "https://davinci-pct-ehr.logicahealth.org/fhir"
-            }
+        {
+            "value": "http://localhost:8080/fhir"
+        },
+        {
+            "value": "https://davinci-pct-ehr.logicahealth.org/fhir"
+        }
     ]);
     const [selectedDataServer, setSelectedDataServer] = useState("https://davinci-pct-ehr.logicahealth.org/fhir");
     const [payerServers] = useState([
@@ -74,7 +74,7 @@ export default function MainPanel() {
     const [selectedPayerServer, setSelectedPayerServer] = useState("https://davinci-pct-payer.logicahealth.org/fhir");
     const [dataServerChanged, setDataServerChanged] = useState(false);
     const [payerServerChanged, setPayerServerChanged] = useState(false);
-
+    
     function resetState() {
         setGfeResponse(undefined);
         setReceivedAEOBResponse(undefined);
