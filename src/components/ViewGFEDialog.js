@@ -20,7 +20,7 @@ export default function ViewGFERequestDialog(props) {
 
     return (
         <React.Fragment>
-            <Button variant="outlined" color="primary" onClick={handleClickOpen} type="submit">
+            <Button variant="outlined" color="primary" onClick={handleClickOpen}>
                 Review GFE Request
             </Button>
             <Dialog

@@ -393,7 +393,7 @@ class GFERequestBox extends Component {
 
         input.patient = {
             reference: `Patient/${this.state.selectedPatient}`,
-            resource: this.state.patientList.filter(patient => patient.resource.id === this.state.selectedPatient)[0]
+            resource: this.state.patientList.filter(patient => patient.resource.id === this.state.selectedPatient)[0].resource
         }
 
         input.bundleResources.push({
@@ -448,7 +448,7 @@ class GFERequestBox extends Component {
         })
 
         input.billing = {
-            total: this.state.totalClaim,
+            total: parseInt(this.state.totalClaim),
             interTransIntermediary: this.state.interTransIntermediary,
             gfeAssignedServiceId: this.state.gfeServiceId,
             items: [
@@ -457,10 +457,8 @@ class GFERequestBox extends Component {
                     productOrService: requestCode,
                     estimatedDateOfService: this.state.selectedDate,
                     net: {
-                        value: this.state.totalClaim,
-                        currency: {
-                            code: "USD"
-                        }
+                        value: parseInt(this.state.totalClaim),
+                        currency: "USD"
                     },
                     placeOfService: PlaceOfServiceList.filter(pos => pos.code === this.state.placeOfService)[0] 
                 }
@@ -479,7 +477,7 @@ class GFERequestBox extends Component {
 
         input.submitter = {
             reference: `Organization/${this.state.selectedSubmitter}`,
-            resource: this.state.organizationList.filter(org => org.resource.id === this.state.selectedSubmitter)[0]
+            resource: this.state.organizationList.filter(org => org.resource.id === this.state.selectedSubmitter)[0].resource
         }
 
         input.bundleResources.push({
@@ -498,7 +496,7 @@ class GFERequestBox extends Component {
 
         this.props.setSubmitting(true);
         this.props.setGfeSubmitted(true);
-        submitGFEClaim(this.props.payorUrl + "/Claim/$gfe-submit", buildGFEBundle(this.generateRequestInput()))
+        submitGFEClaim(this.props.payorUrl, buildGFEBundle(this.generateRequestInput()))
             .then(response => {
                 this.props.setSubmitting(false);
                 console.log("Payer server returned response: ", response);

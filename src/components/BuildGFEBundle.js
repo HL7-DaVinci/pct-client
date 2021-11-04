@@ -14,6 +14,7 @@ const buildGFEBundle = input => {
     }
 
     bundle.entry.push({
+        fullUrl: "http://example.org/fhir/Claim/PCT-Good-Faith-Estimate-1",
         resource: GFEClaim
     });
 

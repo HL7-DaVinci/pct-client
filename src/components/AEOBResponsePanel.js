@@ -64,7 +64,7 @@ export default function AEOBResponsePanel(props) {
     function handleSendInquiry() {
         setAeobInquirySubmitted(true);
         setAeobInquiryPending(true);
-        sendAEOInquiry(props.payorUrl, props.bundleId)
+        sendAEOInquiry(props.payorUrl, props.bundleIdentifier)
             .then(response => {
                 console.log("received resposne: ", response);
                 props.setReceivedAEOBResponse(response);

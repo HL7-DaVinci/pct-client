@@ -42,7 +42,7 @@ export const submitGFEClaim = (url, bundle) => {
         url: `${url}/Claim/$gfe-submit`,
         method: "POST",
         headers: headers,
-        body: bundle
+        body: JSON.stringify(bundle)
     });
 }
 
@@ -58,6 +58,6 @@ export const getPractitioners = (url) => {
     return FHIRClient(url).request("Practitioner");
 }
 
-export const sendAEOInquiry = (url, bundleId) => {
-    return FHIRClient(url).request(`Bundle/${bundleId}`)
+export const sendAEOInquiry = (url, bundleIdentifier) => {
+    return FHIRClient(url).request(`Bundle?identifier=${bundleIdentifier}`)
 }
