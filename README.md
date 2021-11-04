@@ -9,7 +9,7 @@ This project provides a web application that is capable of generating GFE reques
   * `npm install`
 4. Run the application
   * `npm start`
-The web application is running on http://localhost:3000
+5. The web application is running on http://localhost:3000
 
 ## Running within Docker container
 1. Install [Docker](https://docs.docker.com/get-docker/)
@@ -21,7 +21,7 @@ The web application is running on http://localhost:3000
    From command line:
    * `docker run -p 3000:3000 pct-client`
    It can also be run from Docker desktop Dashboard
-The web application is running on http://localhost:3000
+4. The web application is running on http://localhost:3000
 
 ## Testing pointing to different servers
 By default, the client is pointing to the provider's data server and the payer's GFE server hosted on Logica server. 

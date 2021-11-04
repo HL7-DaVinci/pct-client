@@ -49,6 +49,7 @@ export default function AEOBResponsePanel(props) {
     const [aeobInquiryError, setAeobInquiryError] = useState(false);
     const [aeobError, setAeobError] = useState(undefined)
     const [aeobInquiryResponseReceived, setAeobInquiryResponseReceived] = useState(false);
+    const [aeobInquiryOutcome, setAeobInquiryOutcome] = useState(undefined);
 
     useEffect(() => {
         if (props.dataServerChanged || props.payerServerChanged) {
@@ -160,6 +161,9 @@ export default function AEOBResponsePanel(props) {
                                     <Typography className={classes.blockHeader} color="textSecondary" gutterBottom>
                                         AEOB Inquiry Response received from the payer
                                     </Typography>
+                                    <Typography className={classes.title} color="textSecondary" gutterBottom>
+                                                AEOB outcome is {aeobInquiryOutcome}
+                                            </Typography>
                                 </CardContent>
                             ) : null
                         }
