@@ -19,9 +19,9 @@ This project provides a web application that is capable of generating GFE reques
    It can also be built from Docker desktop Dashboard
 3. Run pct-client within Docker
    From command line:
-   * `docker run -p 3000:3000 pct-client`
+   * `docker run -p 80:80 pct-client`
    It can also be run from Docker desktop Dashboard
-4. The web application is running on http://localhost:3000
+4. The web application is running on http://localhost
 
 ## Testing pointing to different servers
 By default, the client is pointing to the provider's data server and the payer's GFE server hosted on Logica server. 
