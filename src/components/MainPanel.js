@@ -74,6 +74,7 @@ export default function MainPanel() {
     const [selectedPayerServer, setSelectedPayerServer] = useState("https://davinci-pct-payer.logicahealth.org/fhir");
     const [dataServerChanged, setDataServerChanged] = useState(false);
     const [payerServerChanged, setPayerServerChanged] = useState(false);
+    const [gfeType, setGfeType] = useState("institutional");
     
     function resetState() {
         setGfeResponse(undefined);
@@ -117,7 +118,9 @@ export default function MainPanel() {
                             ehrUrl={selectedDataServer}
                             payorUrl={selectedPayerServer}
                             dataServerChanged={dataServerChanged}
-                            setDataServerChanged={setDataServerChanged} />
+                            setDataServerChanged={setDataServerChanged} 
+                            gfeType={gfeType}
+                            setGfeType={setGfeType}/>
                     </Grid>
                     <Grid item xs={1} direction="column">
                     </Grid>

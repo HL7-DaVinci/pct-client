@@ -1,5 +1,16 @@
 import React, { Component } from 'react';
-import { Box, Grid, withStyles, Input, Button, InputLabel, InputAdornment, Select, FormLabel, FormControl, MenuItem, Typography } from '@material-ui/core';
+import {
+    Box, Button,
+    FormLabel, FormControl, FormControlLabel,
+    Grid,
+    Input, InputAdornment, InputLabel,
+    MenuItem,
+    Radio,
+    RadioGroup,
+    Select,
+    Typography,
+    withStyles,
+} from '@material-ui/core';
 
 import { getPatients, getDeviceRequestsForPatient, submitGFEClaim, getCoverage, getPractitionerRoles, getOrganizations, getCoverageByPatient, getPractitioners } from '../api'
 
@@ -54,11 +65,11 @@ const getPatientDisplayName = patient => {
 const PatientSelect = (patients, selectPatient, handleOpenPatients, handleChange) => {
     return (<Select required labelId="select-patient-label" id="patient" value={selectPatient} onOpen={handleOpenPatients} onChange={handleChange}>
         {
-            patients? 
-            patients.map((patient) => {
-                return (<MenuItem key={patient.resource.id} value={patient.resource.id}>{getPatientDisplayName(patient)}</MenuItem>);
-            }) : (<MenuItem/>)
-        
+            patients ?
+                patients.map((patient) => {
+                    return (<MenuItem key={patient.resource.id} value={patient.resource.id}>{getPatientDisplayName(patient)}</MenuItem>);
+                }) : (<MenuItem />)
+
         }
     </Select>);
 }
@@ -66,14 +77,14 @@ const PatientSelect = (patients, selectPatient, handleOpenPatients, handleChange
 const RequestSelect = (requests, currentValue, handleOpenRequestList, handleSelectRequest) =>
     <Select labelId="select-request-label" id="request" value={currentValue || ''} onOpen={handleOpenRequestList} onChange={handleSelectRequest}>
         {
-            requests? (requests.map((request) => {
+            requests ? (requests.map((request) => {
                 var requestCode = '';
                 if (request.resourceType === 'DeviceRequest') {
                     const coding = request.codeCodeableConcept.coding[0];
                     requestCode = `${coding.code} ${coding.display}`;
                 }
                 return (<MenuItem key={request.id} value={request.id}>{requestCode}</MenuItem>)
-            })): <MenuItem/>
+            })) : <MenuItem />
         }
     </Select>
 
@@ -85,7 +96,7 @@ const PractitionerSelect = (practitioners, currentValue, handleOpenPractitionerL
                 var display = `${name.given[0]} ${name.family}`;
 
                 return (<MenuItem key={practitioner.resource.id} value={practitioner.resource.id}>{display}</MenuItem>)
-            })): <MenuItem/>
+            })) : <MenuItem />
         }
     </Select>
 
@@ -94,19 +105,19 @@ const OrganizationSelect = (organizations, label, id, handleOpen, handleSelect) 
         {
             organizations ? (organizations.map((org) => {
                 return (<MenuItem key={org.resource.id} value={org.resource.id}>{org.resource.name}</MenuItem>)
-            })) : <MenuItem/>
+            })) : <MenuItem />
         }
     </Select>
 
-const PractitionerRoleSelect = (roles, handleOpenPractitionerRoleList, handleSelectPractitionerRole, references) =>
-    <Select required labelId="select-billing-provider-label" id="request" onOpen={handleOpenPractitionerRoleList} onChange={handleSelectPractitionerRole}>
+const PractitionerRoleSelect = (roles, handleOpenPractitionerRoleList, handleSelect, references) =>
+    <Select required labelId="select-billing-provider-label" id="request" onOpen={handleOpenPractitionerRoleList} onChange={handleSelect}>
         {
             roles ? (roles.map((role) => {
                 const practitioner = references[role.practitioner.reference];
                 const organization = references[role.organization.reference];
                 const display = practitioner ? `${practitioner.name[0].text} from ${organization.name}` : "";
                 return (<MenuItem key={role.id} value={role.id}>PractitionerRole: {display}</MenuItem>)
-            })) : <MenuItem/>
+            })) : <MenuItem />
         }
     </Select>
 
@@ -121,7 +132,7 @@ const PlaceOfServiceSelect = (handleChange) =>
 
 class GFERequestBox extends Component {
 
-    
+
     constructor(props) {
         super(props);
         this.initialState = {
@@ -152,14 +163,14 @@ class GFERequestBox extends Component {
 
     componentDidUpdate(prevProps, prevState) {
         if (this.props.dataServerChanged && !prevProps.dataServerChanged) {
-          this.resetState();
-          this.props.setDataServerChanged(false);
+            this.resetState();
+            this.props.setDataServerChanged(false);
         }
     }
 
     resetState = () => {
         this.setState({
-           ...this.initialState
+            ...this.initialState
         });
     }
 
@@ -273,12 +284,10 @@ class GFERequestBox extends Component {
             })
     }
 
-    handleSelectPractitionerRole = e => {
+    handleSelectBillingProvider = e => {
         this.setState({
-            ...this.state,
             selectedBillingProvider: e.target.value
         })
-
     }
 
     handleOpenPractitionerList = e => {
@@ -298,7 +307,7 @@ class GFERequestBox extends Component {
 
     }
 
-    handleOpenSubmitterList = e => {
+    handleOpenOrganizationList = e => {
         getOrganizations(this.props.ehrUrl)
             .then(result => {
                 this.setState({
@@ -389,6 +398,8 @@ class GFERequestBox extends Component {
             return input;
         }
 
+        input.gfeType = this.props.gfeType;
+
         const fhirServerBaseUrl = this.props.ehrUrl;
 
         input.patient = {
@@ -438,8 +449,9 @@ class GFERequestBox extends Component {
         })
 
         input.provider = {
-            reference: `PractitionerRole/${this.state.selectedBillingProvider}`,
-            resource: this.state.practitionerRoleList.filter(org => org.id === this.state.selectedBillingProvider)[0]
+            reference: this.props.gfeType === "professional" ? `PractitionerRole/${this.state.selectedBillingProvider}` : `Organization/${this.state.selectedBillingProvider}`,
+            resource: this.props.gfeType === "professional" ? this.state.practitionerRoleList.filter(role => role.resource.id === this.state.selectedBillingProvider)[0] 
+                        : this.state.organizationList.filter(org => org.resource.id === this.state.selectedBillingProvider)[0]
         }
 
         input.bundleResources.push({
@@ -460,7 +472,7 @@ class GFERequestBox extends Component {
                         value: parseInt(this.state.totalClaim),
                         currency: "USD"
                     },
-                    placeOfService: PlaceOfServiceList.filter(pos => pos.code === this.state.placeOfService)[0] 
+                    placeOfService: PlaceOfServiceList.filter(pos => pos.code === this.state.placeOfService)[0]
                 }
             ],
             supportingInfo: [
@@ -563,7 +575,7 @@ class GFERequestBox extends Component {
 
     isRequestValid = () => {
         return this.state.selectedBillingProvider !== undefined && this.state.selectedPatient !== undefined && this.state.selectedDate !== undefined
-            && this.state.selectedProcedure !== undefined && this.state.selectedSubmitter !== undefined 
+            && this.state.selectedProcedure !== undefined && this.state.selectedSubmitter !== undefined
     }
 
     render() {
@@ -623,7 +635,7 @@ class GFERequestBox extends Component {
                                     <Grid item className={classes.paper} xs={12}>
                                         <FormControl>
                                             <FormLabel>Service or procedure</FormLabel>
-                                            <Select 
+                                            <Select
                                                 required
                                                 displayEmpty
                                                 id="select-service-procedure"
@@ -658,9 +670,22 @@ class GFERequestBox extends Component {
                                         <Typography variant="body2" color="initial">Billing Details</Typography>
                                     </Grid>
                                     <Grid item className={classes.paper} xs={12}>
+                                        <FormControl component="fieldset">
+                                            <FormLabel>GFE Type</FormLabel>
+                                            <RadioGroup row aria-label="GFE Type" name="row-radio-buttons-group" value={this.props.gfeTYpe} onChange={e => this.props.setGfeType(e.target.value)} defaultValue={this.props.gfeType}>
+                                                <FormControlLabel value="institutional" control={<Radio size="small" />} label="Institutional" />
+                                                <FormControlLabel value="professional" control={<Radio size="small" />} label="Professional" />
+                                            </RadioGroup>
+                                        </FormControl>
+                                    </Grid>
+                                    <Grid item className={classes.paper} xs={12}>
                                         <FormControl>
                                             <FormLabel>Billing provider</FormLabel>
-                                            {PractitionerRoleSelect(this.state.practitionerRoleList, this.handleOpenPractitionerRoleList, this.handleSelectPractitionerRole, this.state.resolvedReferences)}
+                                            {this.props.gfeType === "professional" ?
+                                                PractitionerRoleSelect(this.state.practitionerRoleList, this.handleOpenPractitionerRoleList, this.handleSelectBillingProvider, this.state.resolvedReferences)
+                                                :
+                                                OrganizationSelect(this.state.organizationList, "billing-provider-label", "billingProvider", this.handleOpenOrganizationList, this.handleSelectBillingProvider)
+                                            }
                                         </FormControl>
                                     </Grid>
                                     <Grid item className={classes.paper} xs={12}>
@@ -714,14 +739,14 @@ class GFERequestBox extends Component {
                                     <Grid item className={classes.paper} xs={12}>
                                         <FormControl>
                                             <FormLabel>Submitter</FormLabel>
-                                            {OrganizationSelect(this.state.organizationList, "submitter-label", "submitter", this.handleOpenSubmitterList, this.handleSelectSubmitter)}
+                                            {OrganizationSelect(this.state.organizationList, "submitter-label", "submitter", this.handleOpenOrganizationList, this.handleSelectSubmitter)}
                                         </FormControl>
                                     </Grid>
 
                                 </Grid>
                                 <Grid item className={classes.paper} xs={12}>
                                     <Box display="flex" justifyContent="space-between">
-                                        <ViewGFERequestDialog generateRequest={this.generateBundle} valid={this.isRequestValid}/>
+                                        <ViewGFERequestDialog generateRequest={this.generateBundle} valid={this.isRequestValid} />
                                         <FormControl>
                                             <Button loading variant="contained" color="primary" type="submit" className={classes.rightButton} disabled={this.props.submittingStatus === true}>
                                                 Submit
