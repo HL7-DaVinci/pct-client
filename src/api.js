@@ -61,3 +61,7 @@ export const getPractitioners = (url) => {
 export const sendAEOInquiry = (url, bundleIdentifier) => {
     return FHIRClient(url).request(`Bundle?identifier=${bundleIdentifier}`)
 }
+
+export const getLocations = (url) => {
+    return FHIRClient(url).request("Location");
+}

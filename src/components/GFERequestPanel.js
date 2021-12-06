@@ -12,7 +12,9 @@ import {
     withStyles,
 } from '@material-ui/core';
 
-import { getPatients, getDeviceRequestsForPatient, submitGFEClaim, getCoverage, getPractitionerRoles, getOrganizations, getCoverageByPatient, getPractitioners } from '../api'
+import { getPatients, getDeviceRequestsForPatient, submitGFEClaim, getCoverage, 
+        getPractitionerRoles, getOrganizations, getCoverageByPatient, getPractitioners,
+        getLocations } from '../api'
 
 import DateFnsUtils from '@date-io/date-fns';
 import {
@@ -213,6 +215,8 @@ class GFERequestBox extends Component {
 
 
         this.setState({
+            locationList: [],
+            organizationList: [],
             patientSelected: true,
             patientRequestList: [],
             resolvedReferences: {},
@@ -315,6 +319,11 @@ class GFERequestBox extends Component {
                     organizationList: result.entry
                 })
             })
+        
+        
+        getLocations(this.props.ehrUrl)
+            .then(result => this.setState({locationList: result.entry}));
+        
     }
 
     handleSelectSubmitter = e => {
@@ -398,6 +407,7 @@ class GFERequestBox extends Component {
             return input;
         }
 
+        let orgReferenceList = [];
         input.gfeType = this.props.gfeType;
 
         const fhirServerBaseUrl = this.props.ehrUrl;
@@ -437,21 +447,26 @@ class GFERequestBox extends Component {
                  entry: input.request.practitioner.resource
              })
          }*/
-
+         let insurerOrgRef =  `Organization/${this.state.selectedPayor.id}`;
         input.insurer = {
-            reference: `Organization/${this.state.selectedPayor.id}`,
+            reference: insurerOrgRef,
             resource: this.state.selectedPayor
         }
 
+        orgReferenceList.push(insurerOrgRef)
         input.bundleResources.push({
             fullUrl: `${fhirServerBaseUrl}/${input.insurer.reference}`,
             entry: input.insurer.resource
         })
 
+        let providerReference = this.props.gfeType === "professional" ? `PractitionerRole/${this.state.selectedBillingProvider}` : `Organization/${this.state.selectedBillingProvider}`
         input.provider = {
-            reference: this.props.gfeType === "professional" ? `PractitionerRole/${this.state.selectedBillingProvider}` : `Organization/${this.state.selectedBillingProvider}`,
+            reference: providerReference,
             resource: this.props.gfeType === "professional" ? this.state.practitionerRoleList.filter(role => role.resource.id === this.state.selectedBillingProvider)[0] 
                         : this.state.organizationList.filter(org => org.resource.id === this.state.selectedBillingProvider)[0]
+        }
+        if(this.props.gfeType === "institutional") {
+            orgReferenceList.push(providerReference)
         }
 
         input.bundleResources.push({
@@ -487,15 +502,31 @@ class GFERequestBox extends Component {
             diagnosis: this.state.selectedDiagnosis
         }
 
+        let submitterOrgReference = `Organization/${this.state.selectedSubmitter}`
         input.submitter = {
-            reference: `Organization/${this.state.selectedSubmitter}`,
+            reference: submitterOrgReference,
             resource: this.state.organizationList.filter(org => org.resource.id === this.state.selectedSubmitter)[0].resource
         }
+        orgReferenceList.push(submitterOrgReference);
 
         input.bundleResources.push({
             fullUrl: `${fhirServerBaseUrl}/${input.submitter.reference}`,
             entry: input.submitter.resource
         })
+
+
+        orgReferenceList.forEach(orgRef => {
+            let foundLocation = this.state.locationList.find(loc => 
+                loc.resource.managingOrganization.reference === orgRef
+            )
+            if(foundLocation) {
+                input.bundleResources.push({
+                    fullUrl: `${fhirServerBaseUrl}/${orgRef}`,
+                    entry: foundLocation.resource
+                })
+            }
+        });
+        // filter all the locations with all managing organization
 
         // TODO only send those needed 
         input.resourceList = this.state.resolvedReferences;
