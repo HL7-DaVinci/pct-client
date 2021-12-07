@@ -462,8 +462,8 @@ class GFERequestBox extends Component {
         let providerReference = this.props.gfeType === "professional" ? `PractitionerRole/${this.state.selectedBillingProvider}` : `Organization/${this.state.selectedBillingProvider}`
         input.provider = {
             reference: providerReference,
-            resource: this.props.gfeType === "professional" ? this.state.practitionerRoleList.filter(role => role.resource.id === this.state.selectedBillingProvider)[0] 
-                        : this.state.organizationList.filter(org => org.resource.id === this.state.selectedBillingProvider)[0]
+            resource: this.props.gfeType === "professional" ? this.state.practitionerRoleList.filter(role => role.resource.id === this.state.selectedBillingProvider)[0].resource
+                        : this.state.organizationList.filter(org => org.resource.id === this.state.selectedBillingProvider)[0].resource
         }
         if(this.props.gfeType === "institutional") {
             orgReferenceList.push(providerReference)
@@ -526,10 +526,17 @@ class GFERequestBox extends Component {
                 })
             }
         });
-        // filter all the locations with all managing organization
+        // remove duplicate bundle resources
+        let bundleResourceList = []
+        input.bundleResources.forEach(resource => {
+            if(!bundleResourceList.find(target => target.fullUrl === resource.fullUrl)) {
+                bundleResourceList.push(resource);
+            }
+        })
+        input.bundleResources = bundleResourceList;
 
         // TODO only send those needed 
-        input.resourceList = this.state.resolvedReferences;
+        // input.resourceList = this.state.resolvedReferences;
 
         return input;
     }
