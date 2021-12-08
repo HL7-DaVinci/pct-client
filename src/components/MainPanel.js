@@ -120,7 +120,8 @@ export default function MainPanel() {
                             dataServerChanged={dataServerChanged}
                             setDataServerChanged={setDataServerChanged} 
                             gfeType={gfeType}
-                            setGfeType={setGfeType}/>
+                            setGfeType={setGfeType}
+                            setReceivedAEOBResponse={setReceivedAEOBResponse}/>
                     </Grid>
                     <Grid item xs={1} direction="column">
                     </Grid>

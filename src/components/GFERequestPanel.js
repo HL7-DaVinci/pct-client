@@ -462,7 +462,7 @@ class GFERequestBox extends Component {
         let providerReference = this.props.gfeType === "professional" ? `PractitionerRole/${this.state.selectedBillingProvider}` : `Organization/${this.state.selectedBillingProvider}`
         input.provider = {
             reference: providerReference,
-            resource: this.props.gfeType === "professional" ? this.state.practitionerRoleList.filter(role => role.resource.id === this.state.selectedBillingProvider)[0].resource
+            resource: this.props.gfeType === "professional" ? this.state.practitionerRoleList.filter(role => role.id === this.state.selectedBillingProvider)[0]
                         : this.state.organizationList.filter(org => org.resource.id === this.state.selectedBillingProvider)[0].resource
         }
         if(this.props.gfeType === "institutional") {
@@ -546,6 +546,9 @@ class GFERequestBox extends Component {
 
         this.props.setSubmitting(true);
         this.props.setGfeSubmitted(true);
+        this.props.setGfeResponse(undefined);
+        this.props.setReceivedAEOBResponse(undefined);
+    
         submitGFEClaim(this.props.payorUrl, buildGFEBundle(this.generateRequestInput()))
             .then(response => {
                 this.props.setSubmitting(false);

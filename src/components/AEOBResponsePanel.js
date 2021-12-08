@@ -1,5 +1,5 @@
-import React, { useEffect, useState} from 'react';
-import { Card, CardContent, Typography, makeStyles, FormControl, Grid, Button, LinearProgress} from '@material-ui/core';
+import React, { useEffect, useState } from 'react';
+import { Card, CardContent, Typography, makeStyles, FormControl, Grid, Button, LinearProgress } from '@material-ui/core';
 import { sendAEOInquiry } from '../api';
 
 const useStyles = makeStyles({
@@ -48,17 +48,15 @@ export default function AEOBResponsePanel(props) {
     const [aeobInquiryPending, setAeobInquiryPending] = useState(false);
     const [aeobInquiryError, setAeobInquiryError] = useState(false);
     const [aeobError, setAeobError] = useState(undefined)
-    const [aeobInquiryResponseReceived, setAeobInquiryResponseReceived] = useState(false);
     const [aeobInquiryOutcome, setAeobInquiryOutcome] = useState(undefined);
 
     useEffect(() => {
-        if (props.dataServerChanged || props.payerServerChanged) {
+        if (props.dataServerChanged || props.payerServerChanged || props.receivedAEOBResponse === undefined) {
             setAeobInquirySubmitted(false);
             setAeobInquirySuccess(false);
             setAeobInquiryPending(false);
             setAeobInquiryError(false);
             setAeobError(undefined);
-            setAeobInquiryResponseReceived(false);
         }
     }, [props.dataServerChanged, props.payerServerChanged]);
 
@@ -67,12 +65,14 @@ export default function AEOBResponsePanel(props) {
         setAeobInquiryPending(true);
         sendAEOInquiry(props.payorUrl, props.bundleIdentifier)
             .then(response => {
-                console.log("received resposne: ", response);
+                console.log("received response: ", response);
                 props.setReceivedAEOBResponse(response);
+                const foundAeob = response.entry && response.entry.length >= 0 ? response.entry[0].resource.entry.find(item => item.resource.resourceType === "ExplanationOfBenefit") : undefined;
+                const outCome = foundAeob ? foundAeob.resource.outcome : "unknown";
+                setAeobInquiryOutcome(outCome);
                 setAeobInquirySuccess(true);
                 setAeobInquiryPending(false);
                 setAeobInquirySubmitted(false);
-                setAeobInquiryResponseReceived(true);
             })
             .catch(error => {
                 console.log("got error", error);
@@ -81,7 +81,6 @@ export default function AEOBResponsePanel(props) {
                 setAeobInquirySubmitted(false);
                 setAeobInquiryError(true);
                 setAeobError(error.toJSON());
-                setAeobInquiryResponseReceived(true);
             });
     }
 
@@ -156,20 +155,16 @@ export default function AEOBResponsePanel(props) {
                             ) : null
                         }
                         {
-                            aeobInquiryResponseReceived ? (
-                                <CardContent className={classes.content}>
-                                    <Typography className={classes.blockHeader} color="textSecondary" gutterBottom>
-                                        AEOB Inquiry Response received from the payer
-                                    </Typography>
-                                    <Typography className={classes.title} color="textSecondary" gutterBottom>
-                                                AEOB outcome is {aeobInquiryOutcome}
-                                            </Typography>
-                                </CardContent>
-                            ) : null
-                        }
-                        {
                             props.receivedAEOBResponse ? (
                                 <Grid item direction="row">
+                                    <CardContent className={classes.content}>
+                                        <Typography className={classes.blockHeader} color="textSecondary" gutterBottom>
+                                            AEOB Inquiry Response received from the payer
+                                        </Typography>
+                                        <Typography className={classes.title} color="textSecondary" gutterBottom>
+                                            AEOB outcome is {aeobInquiryOutcome}
+                                        </Typography>
+                                    </CardContent>
                                     <Typography className={classes.title} color="textSecondary" gutterBottom>
                                         Received AEOB response
                                     </Typography>
