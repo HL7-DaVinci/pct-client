@@ -66,6 +66,10 @@ const buildGFERequest = (input) => {
 
     GFERequest.item = input.billing.items;
 
+    GFERequest.supportingInfo = input.supportingInfo;
+
+    GFERequest.procedure = input.procedure;
+
     GFERequest.insurer = {
         reference: input.insurer.reference
     };
@@ -73,39 +77,32 @@ const buildGFERequest = (input) => {
         reference: input.provider.reference
     };
 
-    // hard code for now
-    GFERequest.diagnosis = [];
-    GFERequest.diagnosis.push({
-
-        "sequence": 1,
-        "diagnosisCodeableConcept": {
-            "coding": [
-                {
-                    "system": "http://hl7.org/fhir/sid/icd-10-cm",
-                    "code": "S06.3",
-                    "display": "Focal traumatic brain injury"
-                }
-            ]
-        },
-        "type": [
-            {
-                "coding": [
+    GFERequest.careTeam = [];
+    input.careTeam.forEach(member => {
+        GFERequest.careTeam.push({
+            sequence: member.sequence,
+            role: {
+                coding: [
                     {
-                        "code": "principal"
+                        "system": "http://hl7.org/fhir/us/davinci-pct/CodeSystem/PCTCareTeamRole",
+                        "code": member.role
+                    }
+                ]
+            },
+            provider: member.providerRef,
+            qualification: {
+                coding: [
+                    {
+                        "system": "http://terminology.hl7.org/CodeSystem/ex-providerqualification",
+                        "code": "604215",  
+                        "display": "Physician"
                     }
                 ]
             }
-        ],
-        "packageCode": {
-            "coding": [
-                {
-                    "system": "http://terminology.hl7.org/CodeSystem/ex-diagnosisrelatedgroup",
-                    "code": "400",
-                    "display": "Head trauma - concussion"
-                }
-            ]
-        }
+        })
     });
+
+    GFERequest.diagnosis = input.diagnosis;
 
     GFERequest.insurance = [
         {

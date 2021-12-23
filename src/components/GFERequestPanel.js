@@ -12,9 +12,11 @@ import {
     withStyles,
 } from '@material-ui/core';
 
-import { getPatients, getDeviceRequestsForPatient, submitGFEClaim, getCoverage, 
-        getPractitionerRoles, getOrganizations, getCoverageByPatient, getPractitioners,
-        getLocations } from '../api'
+import {
+    getPatients, getDeviceRequestsForPatient, submitGFEClaim, getCoverage,
+    getPractitionerRoles, getOrganizations, getCoverageByPatient, getPractitioners,
+    getLocations
+} from '../api'
 
 import DateFnsUtils from '@date-io/date-fns';
 import {
@@ -26,6 +28,13 @@ import GFERequestSummary from './GFERequestSummary'
 import buildGFEBundle from './BuildGFEBundle';
 import ViewGFERequestDialog from './ViewGFEDialog';
 import { PlaceOfServiceList } from '../values/PlaceOfService';
+import CareTeam from './CareTeam';
+import ClaimItem from './ClaimItem';
+import { ProcedureCodes } from '../values/ProcedureCode';
+import DiagnosisItem from './DiagnosisItem';
+import SupportingInfoItem from './SupportingInfoItem';
+import { SupportingInfoType } from '../values/SupportingInfo';
+import { DiagnosisList, DiagnosisTypeList} from '../values/DiagnosisList';
 
 
 const styles = theme => ({
@@ -158,7 +167,13 @@ class GFERequestBox extends Component {
             practitionerList: [],
             selectedCoverage: undefined,
             selectedDiagnosis: undefined,
-            gfeServiceId: undefined
+            gfeServiceId: undefined,
+            providerList: [],
+            careTeamList: [{ id: 1 }],
+            claimItemList: [{ id: 1 }],
+            diagnosisList: [{ id: 1 }],
+            supportingInfoList: [{ id: 1 }],
+            supoortingInfoType: "typeofbill"
         };
         this.state = this.initialState;
     }
@@ -168,6 +183,60 @@ class GFERequestBox extends Component {
             this.resetState();
             this.props.setDataServerChanged(false);
         }
+    }
+
+    componentDidMount() {
+        const fetchProviders = async () => {
+            try {
+                const res = await Promise.all([
+                    getPractitionerRoles(this.props.ehrUrl),
+                    getPractitioners(this.props.ehrUrl),
+                    getOrganizations(this.props.ehrUrl)
+                ]);
+                const data = await Promise.all(res.map(r => {
+                    console.log(r);
+                    if (r.data && r.data[0] && r.data[0].resourceType === "PractitionerRole") {
+                        let references = Object.assign(this.state.resolvedReferences);
+                        for (const property in r.references) {
+                            if (!(property in references)) {
+                                references[property] = r.references[property]
+                            }
+                        }
+                        this.setState({
+                            practitionerRoleList: r.data,
+                            resolvedReferences: references
+                        });
+                    } else if (r.resourceType && r.resourceType === "Bundle") {
+                        // handle practitioner and organization
+                        if (r.link && r.link[0] && r.link[0].relation === "self") {
+                            const urlParts = r.link[0].url.split("/");
+                            const type = urlParts[urlParts.length - 1];
+                            switch (type) {
+                                case "Practitioner":
+                                    this.setState({
+                                        practitionerList: r.entry
+                                    });
+                                    break;
+                                case "Organization":
+                                    this.setState({
+                                        organizationList: r.entry
+                                    })
+                                    break;
+                                default:
+                                    break;
+                            }
+                        }
+                    }
+
+                }));
+                console.log("");
+            } catch (e) {
+                console.error("Exception", e);
+                throw Error("Promise failed");
+            }
+        };
+        fetchProviders();
+        console.log("--- after fetching provider ");
     }
 
     resetState = () => {
@@ -272,20 +341,22 @@ class GFERequestBox extends Component {
     }
 
     handleOpenPractitionerRoleList = e => {
-        getPractitionerRoles(this.props.ehrUrl)
-            .then(result => {
-                let references = Object.assign(this.state.resolvedReferences);
-                for (const property in result.references) {
-                    if (!(property in references)) {
-                        references[property] = result.references[property]
+        if (this.state.practitionerRoleList.length === 0) {
+            getPractitionerRoles(this.props.ehrUrl)
+                .then(result => {
+                    let references = Object.assign(this.state.resolvedReferences);
+                    for (const property in result.references) {
+                        if (!(property in references)) {
+                            references[property] = result.references[property]
+                        }
                     }
-                }
-                this.setState({
-                    ...this.state,
-                    practitionerRoleList: result.data,
-                    resolvedReferences: references
-                });
-            })
+                    this.setState({
+                        ...this.state,
+                        practitionerRoleList: result.data,
+                        resolvedReferences: references
+                    });
+                })
+        }
     }
 
     handleSelectBillingProvider = e => {
@@ -295,12 +366,14 @@ class GFERequestBox extends Component {
     }
 
     handleOpenPractitionerList = e => {
-        getPractitioners(this.props.ehrUrl)
-            .then(result => {
-                this.setState({
-                    practitionerList: result.entry
+        if (this.state.practitionerList.length === 0) {
+            getPractitioners(this.props.ehrUrl)
+                .then(result => {
+                    this.setState({
+                        practitionerList: result.entry
+                    });
                 });
-            })
+        }
     }
 
     handleSelectPractitioner = e => {
@@ -312,18 +385,18 @@ class GFERequestBox extends Component {
     }
 
     handleOpenOrganizationList = e => {
-        getOrganizations(this.props.ehrUrl)
-            .then(result => {
-                this.setState({
-                    ...this.state,
-                    organizationList: result.entry
-                })
-            })
-        
-        
+        if (this.state.organizationList.length === 0) {
+            getOrganizations(this.props.ehrUrl)
+                .then(result => {
+                    this.setState({
+                        ...this.state,
+                        organizationList: result.entry
+                    })
+                });
+        }
         getLocations(this.props.ehrUrl)
-            .then(result => this.setState({locationList: result.entry}));
-        
+            .then(result => this.setState({ locationList: result.entry }));
+
     }
 
     handleSelectSubmitter = e => {
@@ -403,9 +476,11 @@ class GFERequestBox extends Component {
             bundleResources: []
         };
 
-        if (this.state.selectedPatient === undefined || this.state.selectedRequest === undefined) {
+        if (this.state.selectedPatient === undefined && this.state.selectedRequest === undefined) {
             return input;
         }
+
+        
 
         let orgReferenceList = [];
         input.gfeType = this.props.gfeType;
@@ -429,11 +504,7 @@ class GFERequestBox extends Component {
             coverage: {
                 reference: `Coverage/${coverage.id}`,
                 resource: coverage
-            },
-            /* practitioner: practitioner ? {
-                 reference: `Practitioner/${practitioner.id}`,
-                 resource: practitioner
-             } : undefined*/
+            }
         }
 
         input.bundleResources.push({
@@ -447,7 +518,7 @@ class GFERequestBox extends Component {
                  entry: input.request.practitioner.resource
              })
          }*/
-         let insurerOrgRef =  `Organization/${this.state.selectedPayor.id}`;
+        let insurerOrgRef = `Organization/${this.state.selectedPayor.id}`;
         input.insurer = {
             reference: insurerOrgRef,
             resource: this.state.selectedPayor
@@ -463,9 +534,9 @@ class GFERequestBox extends Component {
         input.provider = {
             reference: providerReference,
             resource: this.props.gfeType === "professional" ? this.state.practitionerRoleList.filter(role => role.id === this.state.selectedBillingProvider)[0]
-                        : this.state.organizationList.filter(org => org.resource.id === this.state.selectedBillingProvider)[0].resource
+                : this.state.organizationList.filter(org => org.resource.id === this.state.selectedBillingProvider)[0].resource
         }
-        if(this.props.gfeType === "institutional") {
+        if (this.props.gfeType === "institutional") {
             orgReferenceList.push(providerReference)
         }
 
@@ -475,21 +546,8 @@ class GFERequestBox extends Component {
         })
 
         input.billing = {
-            total: parseInt(this.state.totalClaim),
             interTransIntermediary: this.state.interTransIntermediary,
             gfeAssignedServiceId: this.state.gfeServiceId,
-            items: [
-                {
-                    sequence: 1,
-                    productOrService: requestCode,
-                    estimatedDateOfService: this.state.selectedDate,
-                    net: {
-                        value: parseInt(this.state.totalClaim),
-                        currency: "USD"
-                    },
-                    placeOfService: PlaceOfServiceList.filter(pos => pos.code === this.state.placeOfService)[0]
-                }
-            ],
             supportingInfo: [
                 {
                     sequence: 1,
@@ -498,9 +556,107 @@ class GFERequestBox extends Component {
             ]
         }
 
-        input.diagnosis = {
-            diagnosis: this.state.selectedDiagnosis
-        }
+        input.procedure = [];
+
+        input.billing.items = [];
+        let sequenceCount = 0;
+        let totalAmount = 0;
+
+        this.state.claimItemList.forEach(claimItem => {
+            const procedureCoding = ProcedureCodes.find(code => claimItem.productOrService.startsWith(code.code));
+            const pos = PlaceOfServiceList.find(pos => pos.name === claimItem.placeOfService);
+
+            input.billing.items.push({
+                sequence: sequenceCount++,
+                productOrService: {
+                    coding: [
+                        procedureCoding
+                    ]
+                },
+                estimatedDateOfService: claimItem.estimatedDateOfService ? new Date(Date.parse(claimItem.estimatedDateOfService.toString())) : undefined,
+                revenue: claimItem.revenue ? {
+                    coding: [{
+                        system: "http://hl7.org/fhir/us/davinci-pct/CodeSystem/PCTGFEItemRevenueCS",
+                        code: claimItem.revenue
+                    }]
+                } : undefined,
+                unitPrice: claimItem.unitPrice,
+                quantity: claimItem.quantity,
+                net: claimItem.unitPrice * claimItem.quantity,
+                locationCodeableConcept: {
+                    coding: [
+                        pos
+                    ]
+                }
+            });
+
+            input.procedure.push({
+                sequence: sequenceCount++,
+                procedureCodableConcept: {
+                    coding: [
+                        procedureCoding
+                    ]
+                },
+                type: {
+                    coding: [
+                        {
+                            system: "http://hl7.org/fhir/us/davinci-pct/CodeSystem/PCTProcedureType",
+                            code: claimItem.procedureType
+                        }
+                    ]
+
+                }
+            });
+            totalAmount += claimItem.unitPrice * claimItem.quantity;
+        });
+        input.billing.total = totalAmount;
+
+        input.diagnosis = []
+        let diagnosisSequence = 1;
+        this.state.diagnosisList.forEach(diagnosis => {
+            const diagnosisCode = DiagnosisList.find(code => diagnosis.diagnosis.startsWith(code.diagnosisCodeableConcept.coding[0].code));
+            input.diagnosis.push({
+                sequence: diagnosisSequence++,
+                diagnosisCodeableConcept: diagnosisCode.diagnosisCodeableConcept,
+                type: [{
+                    coding: [
+                        {
+                            code: DiagnosisTypeList.find(type => type.display === diagnosis.type).code,
+                            system: "http://hl7.org/fhir/us/davinci-pct/CodeSystem/PCTDiagnosisType"
+                        }
+                    ]
+                }],
+                packageCode: diagnosisCode.packageCode
+            })
+        });
+
+        input.supportingInfo = [];
+        let supportingInfoSequence = 1;
+        this.state.supportingInfoList.forEach(info => {
+            const categoryCodeableConcept = SupportingInfoType.find(type => type.display === info.category);
+            const code = categoryCodeableConcept.type === "typeofbill" ? {
+                coding: [
+                    {
+                        code: info.value,
+                        system: "http://hl7.org/fhir/us/davinci-pct/CodeSystem/PCTGFETypeOfBillCS"
+                    }
+                ]
+            } : {
+                coding: [
+                    {
+                        code: PlaceOfServiceList.find(pos => pos.name === info.value).code,
+                        system: "https://oidref.com/2.16.840.1.113883.15.5"
+                    }
+                ]
+            }
+
+            input.supportingInfo.push({
+                sequence: supportingInfoSequence++,
+                category: categoryCodeableConcept.codeableConcept,
+                code
+            });
+        });
+
 
         let submitterOrgReference = `Organization/${this.state.selectedSubmitter}`
         input.submitter = {
@@ -516,20 +672,38 @@ class GFERequestBox extends Component {
 
 
         orgReferenceList.forEach(orgRef => {
-            let foundLocation = this.state.locationList.find(loc => 
+            let foundLocation = this.state.locationList.find(loc =>
                 loc.resource.managingOrganization.reference === orgRef
             )
-            if(foundLocation) {
+            if (foundLocation) {
                 input.bundleResources.push({
                     fullUrl: `${fhirServerBaseUrl}/${orgRef}`,
                     entry: foundLocation.resource
                 })
             }
         });
+
+        // add care team
+        input.careTeam = [];
+        const providerMap = this.getCareTeamProviderListOptions();
+        let sequenceNumber = 0;
+        this.state.careTeamList.forEach(member => {
+            const providerResource = providerMap.find(item => item.display === member.provider);
+            input.careTeam.push({
+                sequence: sequenceNumber++,
+                role: member.role.toLowerCase(),
+                providerRef: providerResource.url
+            });
+            input.bundleResources.push({
+                fullUrl: providerResource.url,
+                entry: providerResource.resource
+            });
+        });
+
         // remove duplicate bundle resources
         let bundleResourceList = []
         input.bundleResources.forEach(resource => {
-            if(!bundleResourceList.find(target => target.fullUrl === resource.fullUrl)) {
+            if (!bundleResourceList.find(target => target.fullUrl === resource.fullUrl)) {
                 bundleResourceList.push(resource);
             }
         })
@@ -548,7 +722,7 @@ class GFERequestBox extends Component {
         this.props.setGfeSubmitted(true);
         this.props.setGfeResponse(undefined);
         this.props.setReceivedAEOBResponse(undefined);
-    
+
         submitGFEClaim(this.props.payorUrl, buildGFEBundle(this.generateRequestInput()))
             .then(response => {
                 this.props.setSubmitting(false);
@@ -615,13 +789,226 @@ class GFERequestBox extends Component {
         this.setState({ selectedDiagnosis: e.target.value })
 
     isRequestValid = () => {
-        return this.state.selectedBillingProvider !== undefined && this.state.selectedPatient !== undefined && this.state.selectedDate !== undefined
-            && this.state.selectedProcedure !== undefined && this.state.selectedSubmitter !== undefined
+        return this.state.selectedBillingProvider !== undefined && this.state.selectedPatient !== undefined
+            && this.state.selectedSubmitter !== undefined && this.state.claimItemList.length > 0
+    }
+
+    addOneCareTeam = () => {
+        console.log(this.state.careTeamList);
+        const newId = this.state.careTeamList.length + 1;
+        this.setState({
+            careTeamList: [...this.state.careTeamList, { id: newId }]
+        });
+    }
+
+    deleteOneCareTeam = id => {
+        this.setState({
+            careTeamList: this.state.careTeamList.filter(item => item.id !== id)
+        })
+    }
+
+    editCareTeam = model => {
+        console.log(model);
+        let id, fieldObject, fieldName, fieldValueObject, fieldValue;
+        for (let prop in model) {
+            id = prop;
+            fieldObject = model[id];
+        }
+        if (fieldObject) {
+            for (let name in fieldObject) {
+                fieldName = name;
+            }
+            fieldValueObject = fieldObject[fieldName];
+        }
+        if (fieldValueObject) {
+            fieldValue = fieldValueObject.value;
+        }
+        if (id && fieldName && fieldValue) {
+            this.setState({
+                careTeamList: this.state.careTeamList.map(item => {
+                    if (item.id === parseInt(id)) {
+                        item[fieldName] = fieldValue;
+                        return item;
+                    } else {
+                        return item;
+                    }
+                })
+            });
+            console.log(this.state.careTeamList);
+        }
+    }
+
+    addOneClaimItem = () => {
+        const newId = this.state.claimItemList.length + 1;
+        this.setState({
+            claimItemList: [...this.state.claimItemList, { id: newId }]
+        });
+    }
+
+    deleteOneClaimItem = id => {
+        this.setState({
+            claimItemList: this.state.claimItemList.filter(item => item.id !== id)
+        })
+    }
+
+    editClaimItem = model => {
+        console.log(model);
+        let id, fieldObject, fieldName, fieldValueObject, fieldValue;
+        for (let prop in model) {
+            id = prop;
+            fieldObject = model[id];
+        }
+        if (fieldObject) {
+            for (let name in fieldObject) {
+                fieldName = name;
+            }
+            fieldValueObject = fieldObject[fieldName];
+        }
+        if (fieldValueObject) {
+            fieldValue = fieldValueObject.value;
+        }
+        if (id && fieldName && fieldValue) {
+            this.setState({
+                claimItemList: this.state.claimItemList.map(item => {
+                    if (item.id === parseInt(id)) {
+                        item[fieldName] = fieldValue;
+                        return item;
+                    } else {
+                        return item;
+                    }
+                })
+            });
+        }
+    }
+
+    addOneDiagnosisItem = () => {
+        const newId = this.state.diagnosisList.length + 1;
+        this.setState({
+            diagnosisList: [...this.state.diagnosisList, { id: newId }]
+        });
+    }
+
+    deleteOneDiagnosisItem = id => {
+        this.setState({
+            diagnosisList: this.state.diagnosisList.filter(item => item.id !== id)
+        })
+    }
+
+    editDiagnosisItem = model => {
+        console.log(model);
+        let id, fieldObject, fieldName, fieldValueObject, fieldValue;
+        for (let prop in model) {
+            id = prop;
+            fieldObject = model[id];
+        }
+        if (fieldObject) {
+            for (let name in fieldObject) {
+                fieldName = name;
+            }
+            fieldValueObject = fieldObject[fieldName];
+        }
+        if (fieldValueObject) {
+            fieldValue = fieldValueObject.value;
+        }
+        if (id && fieldName && fieldValue) {
+            this.setState({
+                diagnosisList: this.state.diagnosisList.map(item => {
+                    if (item.id === parseInt(id)) {
+                        item[fieldName] = fieldValue;
+                        return item;
+                    } else {
+                        return item;
+                    }
+                })
+            });
+        }
+    }
+
+    editSupportingInfoItem = model => {
+        console.log(model);
+        let id, fieldObject, fieldName, fieldValueObject, fieldValue;
+        for (let prop in model) {
+            id = prop;
+            fieldObject = model[id];
+        }
+        if (fieldObject) {
+            for (let name in fieldObject) {
+                fieldName = name;
+            }
+            fieldValueObject = fieldObject[fieldName];
+        }
+        if (fieldValueObject) {
+            fieldValue = fieldValueObject.value;
+        }
+        if (id && fieldName && fieldValue) {
+            if (fieldName === "category") {
+                this.setState({
+                    supportingInfoList: this.state.supportingInfoList.map(item => {
+                        if (item.id === parseInt(id)) {
+                            item[fieldName] = fieldValue;
+                            return item;
+                        } else {
+                            return item;
+                        }
+                    }),
+                    supoortingInfoType: SupportingInfoType.find(type => type.display === fieldValue).type
+                });
+            } else {
+                this.setState({
+                    supportingInfoList: this.state.supportingInfoList.map(item => {
+                        if (item.id === parseInt(id)) {
+                            item[fieldName] = fieldValue;
+                            return item;
+                        } else {
+                            return item;
+                        }
+                    })
+                });
+            }
+        }
+    }
+
+    getCareTeamProviderListOptions() {
+        const fhirServerBaseUrl = this.props.ehrUrl;
+        const providerMap = [];
+        this.state.practitionerList.forEach(practitioner => {
+            const name = practitioner.resource.name[0]
+            providerMap.push({
+                type: "Practitioner",
+                display: `Practitioner - ${name.given[0]} ${name.family}`,
+                resource: practitioner.resource,
+                url: practitioner.fullUrl
+            });
+        });
+        this.state.practitionerRoleList.forEach(role => {
+            const practitioner = this.state.resolvedReferences[role.practitioner.reference];
+            const organization = this.state.resolvedReferences[role.organization.reference];
+            const display = practitioner ? `${practitioner.name[0].text} from ${organization.name}` : "";
+            providerMap.push({
+                type: "PractitionerRole",
+                display: `PractitionerRole - ${display}`,
+                resource: role,
+                url: `${fhirServerBaseUrl}/PractitionerRole/${role.id}`
+            })
+        });
+        this.state.organizationList.forEach(org => {
+            providerMap.push({
+                type: "Organization",
+                display: `Organization - ${org.resource.name}`,
+                resource: org.resource,
+                url: org.fullUrl
+            });
+        });
+        return providerMap;
     }
 
     render() {
         const { classes } = this.props;
         const summary = this.retrieveRequestSummary();
+        const providerMap = this.getCareTeamProviderListOptions();
+        const providerListOptions = providerMap.map(provider => provider.display);
+        const totalClaimAmount = this.state.claimItemList.reduce((previousItem, currentItem) => previousItem + currentItem.unitPrice * currentItem.quantity, 0);
+        const totalClaimAmountDisplay = isNaN(totalClaimAmount) ? 0 : totalClaimAmount;
         return (
             <div>
                 <Grid container>
@@ -648,63 +1035,43 @@ class GFERequestBox extends Component {
                                     <Grid item className={classes.paper} xs={12}>
                                         <FormControl>
                                             <FormLabel>Diagnosis</FormLabel>
-                                            <Select
-                                                required
-                                                id="select-diagnosis"
-                                                label="Diagnosis"
-                                                value={this.state.selectedDiagnosis}
-                                                onChange={this.handleSelectDiagnosis}
-                                            >
-                                                <MenuItem value="S06.3">Focal traumatic brain injury</MenuItem>
-                                            </Select>
+                                            <DiagnosisItem rows={this.state.diagnosisList} addOne={this.addOneDiagnosisItem} edit={this.editDiagnosisItem} deleteOne={this.deleteOneDiagnosisItem} />
                                         </FormControl>
                                     </Grid>
-
                                 </Grid>
-
-
                                 <Grid container className={classes.block}>
                                     <Grid item className={classes.blockHeader}>
                                         <Typography variant="body2" color="initial">Product or Service to be Estimated</Typography>
                                     </Grid>
                                     <Grid item className={classes.paper} xs={12}>
                                         <FormControl>
-                                            <FormLabel>From Draft order</FormLabel>
-                                            {RequestSelect(this.state.patientRequestList, this.state.selectedRequest, this.handleOpenRequestList, this.handleSelectRequest)}
-                                        </FormControl>
-                                    </Grid>
-                                    <Grid item className={classes.paper} xs={12}>
-                                        <FormControl>
-                                            <FormLabel>Service or procedure</FormLabel>
-                                            <Select
+                                            <InputLabel htmlFor="total-claim-amount">Total Claim Amount</InputLabel>
+                                            <Input
+                                                id="total-claim-amount"
                                                 required
-                                                displayEmpty
-                                                id="select-service-procedure"
-                                                value={this.state.selectedProcedure}
-                                                label="Service or Procedure"
-                                                onChange={this.handleSelectProcedure}
-                                            >
-                                                <MenuItem value="70551">70551</MenuItem>
-                                            </Select>
+                                                startAdornment={<InputAdornment position="start">$</InputAdornment>}
+                                                value={totalClaimAmountDisplay}
+                                            />
                                         </FormControl>
                                     </Grid>
                                     <Grid item className={classes.paper} xs={12}>
                                         <FormControl>
-                                            <FormLabel>Estimated Service Date</FormLabel>
-                                            <MuiPickersUtilsProvider utils={DateFnsUtils}>
-                                                <DatePicker required variant="inline" value={this.state.selectedDate} id="estimated-date" disablePast="true" onChange={this.updateEstimatedDate} />
-                                            </MuiPickersUtilsProvider>
+                                            <FormLabel>Claim Items</FormLabel>
+                                            <ClaimItem rows={this.state.claimItemList} addOne={this.addOneClaimItem} edit={this.editClaimItem} deleteOne={this.deleteOneClaimItem} />
                                         </FormControl>
                                     </Grid>
-                                    {false ? (
-                                        <Grid item className={classes.paper} xs={12}>
-                                            <FormControl>
-                                                <FormLabel>Care team practitioner</FormLabel>
-                                                {PractitionerSelect(this.state.practitionerList, this.state.selectedPractitioner, this.handleOpenPractitionerList, this.handleSelectPractitioner)}
-                                            </FormControl>
-                                        </Grid>
-                                    ) : null
-                                    }
+                                    <Grid item className={classes.paper} xs={12}>
+                                        <FormControl>
+                                            <FormLabel>Supporting Information</FormLabel>
+                                            <SupportingInfoItem rows={this.state.supportingInfoList} addOne={this.addOneClaimItem} edit={this.editSupportingInfoItem} deleteOne={this.deleteOneClaimItem} selectType={this.state.supoortingInfoType} />
+                                        </FormControl>
+                                    </Grid>
+                                    <Grid item className={classes.paper} xs={12}>
+                                        <FormControl>
+                                            <FormLabel>Care team</FormLabel>
+                                            <CareTeam rows={this.state.careTeamList} providerList={providerListOptions} addOne={this.addOneCareTeam} edit={this.editCareTeam} deleteOne={this.deleteOneCareTeam} />
+                                        </FormControl>
+                                    </Grid>
                                 </Grid>
                                 <Grid container className={classes.block}>
                                     <Grid item className={classes.blockHeader}>
@@ -729,18 +1096,7 @@ class GFERequestBox extends Component {
                                             }
                                         </FormControl>
                                     </Grid>
-                                    <Grid item className={classes.paper} xs={12}>
-                                        <FormControl>
-                                            <InputLabel htmlFor="total-claim-amount">Total Claim Amount</InputLabel>
-                                            <Input
-                                                id="total-claim-amount"
-                                                required
-                                                startAdornment={<InputAdornment position="start">$</InputAdornment>}
-                                                value={this.state.totalClaim}
-                                                onChange={this.updateValue}
-                                            />
-                                        </FormControl>
-                                    </Grid>
+
                                     <Grid item className={classes.paper} xs={12}>
                                         <FormControl>
                                             <FormLabel>Inter Transaction Identifier</FormLabel>

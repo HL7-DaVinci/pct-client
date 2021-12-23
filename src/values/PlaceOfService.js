@@ -5,6 +5,16 @@ export const PlaceOfServiceList = [
         description: "A facility or location where drugs and other medically related items and services are sold, dispensed, or otherwise provided directly to patients.    (Effective October 1, 2003)"
     },
     {
+        code: "11",
+        name: "Office",
+        description: ""
+    },
+    {
+        code: "12",
+        name: "Home",
+        description: ""
+    },
+    {
         code: "21",
         name: "Inpatient Hospital",
         description: "A facility, other than psychiatric, which primarily provides diagnostic, therapeutic (both surgical and nonsurgical), and rehabilitation services by, or under, the supervision of physicians to patients admitted for a variety of medical conditions."
