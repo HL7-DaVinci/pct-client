@@ -27,7 +27,7 @@ export default function DataGridComponent(props) {
     }];
 
     return (
-        <div style={{ width: '100%' }}>
+        <div style={props.style ? props.style : { width: '100%' }}>
             <IconButton aria-label="Add" onClick={() => props.add()}>
                 <AddIcon />
             </IconButton>
@@ -36,6 +36,8 @@ export default function DataGridComponent(props) {
                 columns={actionColumns.concat(props.columns)}
                 rows={props.rows}
                 onEditRowsModelChange={handleEditRowsModelChange}
+                disableColumnMenu={true}
+                disableColumnReorder={true}
             />
         </div>
     )

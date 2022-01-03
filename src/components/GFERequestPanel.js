@@ -35,6 +35,7 @@ import DiagnosisItem from './DiagnosisItem';
 import SupportingInfoItem from './SupportingInfoItem';
 import { SupportingInfoType } from '../values/SupportingInfo';
 import { DiagnosisList, DiagnosisTypeList} from '../values/DiagnosisList';
+import { RevenueCodeList } from '../values/RevenueCodeList';
 
 
 const styles = theme => ({
@@ -173,7 +174,7 @@ class GFERequestBox extends Component {
             claimItemList: [{ id: 1 }],
             diagnosisList: [{ id: 1 }],
             supportingInfoList: [{ id: 1 }],
-            supoortingInfoType: "typeofbill"
+            supportingInfoType: "typeofbill"
         };
         this.state = this.initialState;
     }
@@ -206,6 +207,7 @@ class GFERequestBox extends Component {
                             practitionerRoleList: r.data,
                             resolvedReferences: references
                         });
+                        console.log("----- Finished getting practitionerRole.");
                     } else if (r.resourceType && r.resourceType === "Bundle") {
                         // handle practitioner and organization
                         if (r.link && r.link[0] && r.link[0].relation === "self") {
@@ -216,18 +218,19 @@ class GFERequestBox extends Component {
                                     this.setState({
                                         practitionerList: r.entry
                                     });
+                                    console.log("----- Finished getting practitioner.");
                                     break;
                                 case "Organization":
                                     this.setState({
                                         organizationList: r.entry
                                     })
+                                    console.log("----- Finished getting organization.");
                                     break;
                                 default:
                                     break;
                             }
                         }
                     }
-
                 }));
                 console.log("");
             } catch (e) {
@@ -577,7 +580,7 @@ class GFERequestBox extends Component {
                 revenue: claimItem.revenue ? {
                     coding: [{
                         system: "http://hl7.org/fhir/us/davinci-pct/CodeSystem/PCTGFEItemRevenueCS",
-                        code: claimItem.revenue
+                        code: RevenueCodeList.find(code => code.display === claimItem.revenue).code
                     }]
                 } : undefined,
                 unitPrice: claimItem.unitPrice,
@@ -951,7 +954,7 @@ class GFERequestBox extends Component {
                             return item;
                         }
                     }),
-                    supoortingInfoType: SupportingInfoType.find(type => type.display === fieldValue).type
+                    supportingInfoType: SupportingInfoType.find(type => type.display === fieldValue).type
                 });
             } else {
                 this.setState({
@@ -1008,7 +1011,7 @@ class GFERequestBox extends Component {
         const providerMap = this.getCareTeamProviderListOptions();
         const providerListOptions = providerMap.map(provider => provider.display);
         const totalClaimAmount = this.state.claimItemList.reduce((previousItem, currentItem) => previousItem + currentItem.unitPrice * currentItem.quantity, 0);
-        const totalClaimAmountDisplay = isNaN(totalClaimAmount) ? 0 : totalClaimAmount;
+        const totalClaimAmountDisplay = isNaN(totalClaimAmount) ? 0 : `$ ${totalClaimAmount}`;
         return (
             <div>
                 <Grid container>
@@ -1043,16 +1046,8 @@ class GFERequestBox extends Component {
                                     <Grid item className={classes.blockHeader}>
                                         <Typography variant="body2" color="initial">Product or Service to be Estimated</Typography>
                                     </Grid>
-                                    <Grid item className={classes.paper} xs={12}>
-                                        <FormControl>
-                                            <InputLabel htmlFor="total-claim-amount">Total Claim Amount</InputLabel>
-                                            <Input
-                                                id="total-claim-amount"
-                                                required
-                                                startAdornment={<InputAdornment position="start">$</InputAdornment>}
-                                                value={totalClaimAmountDisplay}
-                                            />
-                                        </FormControl>
+                                    <Grid item className={classes.paper} xs={12}>     
+                                        <Typography><InputLabel htmlFor="total-claim-amount">Total Claim Amount: {totalClaimAmountDisplay}</InputLabel></Typography>
                                     </Grid>
                                     <Grid item className={classes.paper} xs={12}>
                                         <FormControl>
@@ -1063,7 +1058,7 @@ class GFERequestBox extends Component {
                                     <Grid item className={classes.paper} xs={12}>
                                         <FormControl>
                                             <FormLabel>Supporting Information</FormLabel>
-                                            <SupportingInfoItem rows={this.state.supportingInfoList} addOne={this.addOneClaimItem} edit={this.editSupportingInfoItem} deleteOne={this.deleteOneClaimItem} selectType={this.state.supoortingInfoType} />
+                                            <SupportingInfoItem rows={this.state.supportingInfoList} addOne={this.addOneClaimItem} edit={this.editSupportingInfoItem} deleteOne={this.deleteOneClaimItem} selectType={this.state.supportingInfoType} />
                                         </FormControl>
                                     </Grid>
                                     <Grid item className={classes.paper} xs={12}>
@@ -1096,7 +1091,6 @@ class GFERequestBox extends Component {
                                             }
                                         </FormControl>
                                     </Grid>
-
                                     <Grid item className={classes.paper} xs={12}>
                                         <FormControl>
                                             <FormLabel>Inter Transaction Identifier</FormLabel>
@@ -1139,7 +1133,6 @@ class GFERequestBox extends Component {
                                             {OrganizationSelect(this.state.organizationList, "submitter-label", "submitter", this.handleOpenOrganizationList, this.handleSelectSubmitter)}
                                         </FormControl>
                                     </Grid>
-
                                 </Grid>
                                 <Grid item className={classes.paper} xs={12}>
                                     <Box display="flex" justifyContent="space-between">

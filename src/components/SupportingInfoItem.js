@@ -7,22 +7,22 @@ export default function SupportingInfoItem(props) {
         if(props.selectType === "typeofbill") {
             return ([
                 {
-                    field: 'category', headerName: 'Category', editable: true, type: 'singleSelect',
+                    field: 'category', headerName: 'Category', editable: true, type: 'singleSelect', minWidth: 150,
                     valueOptions: SupportingInfoType.map(type => `${type.display}`)
                 },
                 {
-                    field: 'value', headerName: 'Information', editable: true, type: 'string'
+                    field: 'value', headerName: 'Information', editable: true, type: 'string', minWidth: 150
                 }
             ]);
         } else if (props.selectType === "cmspos") {
             return (
                 [
                     {
-                        field: 'category', headerName: 'Category', editable: true, type: 'singleSelect',
+                        field: 'category', headerName: 'Category', editable: true, type: 'singleSelect',minWidth: 150,
                         valueOptions: SupportingInfoType.map(type => `${type.display}`)
                     },
                     {
-                        field: 'value', headerName: 'Information', editable: true, type: 'singleSelect',
+                        field: 'value', headerName: 'Information', editable: true, type: 'singleSelect',minWidth: 150,
                         valueOptions: PlaceOfServiceList.map(pos => pos.name)
                     }
                 ]

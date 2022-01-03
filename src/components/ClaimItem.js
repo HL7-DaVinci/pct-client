@@ -1,6 +1,7 @@
 import DataGridComponent from './DataGridComponent';
 import { PlaceOfServiceList } from '../values/PlaceOfService';
 import { ProcedureCodes } from '../values/ProcedureCode';
+import { RevenueCodeList } from '../values/RevenueCodeList';
 
 export default function ClaimItem(props) {
     const columns = [
@@ -39,7 +40,7 @@ export default function ClaimItem(props) {
 
     return (
         <div>
-            <DataGridComponent rows={props.rows} columns={columns} add={props.addOne} edit={props.edit} delete={props.deleteOne}/>
+            <DataGridComponent style={{width:'850px'}} rows={props.rows} columns={columns} add={props.addOne} edit={props.edit} delete={props.deleteOne}/>
         </div>
     )
 }
