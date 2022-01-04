@@ -24,7 +24,7 @@ export default function ClaimItem(props) {
             valueOptions: PlaceOfServiceList.map(pos => pos.name)
         },
         { field: 'revenue', headerName: 'Revenue Code', editable: true, type: 'singleSelect',
-            valueOptions:['450', '0250', '030x', '0730', '0762']
+            valueOptions: RevenueCodeList.map(code => `${code.display}`)
         },
         { field: 'unitPrice', headerName: 'Unit Price', editable: true, type: 'number' },
         { field: 'quantity', headerName: 'Quantity', editable: true, type: 'number' },
