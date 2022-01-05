@@ -19,7 +19,6 @@ const useStyles = makeStyles((theme) =>
             color: theme.palette.text.secondary,
         },
         title: {
-
             top: 50,
             textAlign: 'center',
             display: "flex",
@@ -75,6 +74,8 @@ export default function MainPanel() {
     const [dataServerChanged, setDataServerChanged] = useState(false);
     const [payerServerChanged, setPayerServerChanged] = useState(false);
     const [gfeType, setGfeType] = useState("institutional");
+    const [showRequest, setShowRequest] = useState(true);
+    const [showResponse, setShowResponse] = useState(false);
     
     function resetState() {
         setGfeResponse(undefined);
@@ -90,7 +91,7 @@ export default function MainPanel() {
             <div>
                 {
                     showSettings ? (<Grid container className={classes.settings}>
-                        <Grid item xs={6}>
+                        <Grid item xs={12}>
                             <Settings className={classes.settings}
                                 dataServers={dataServers}
                                 selectedDataServer={selectedDataServer}
@@ -106,7 +107,7 @@ export default function MainPanel() {
                     </Grid>) : null
                 }
                 <Grid container spacing={1} className={classes.content}>
-                    <Grid item xs={6} direction="column">
+                    {showRequest ? (<Grid item xs={12}>
                         <RequestPanel setSubmitting={setSubmitting}
                             submittingStatus={submitting}
                             setGfeResponse={setGfeResponse}
@@ -121,11 +122,11 @@ export default function MainPanel() {
                             setDataServerChanged={setDataServerChanged} 
                             gfeType={gfeType}
                             setGfeType={setGfeType}
-                            setReceivedAEOBResponse={setReceivedAEOBResponse}/>
-                    </Grid>
-                    <Grid item xs={1} direction="column">
-                    </Grid>
-                    <Grid item xs={5} direction="column">
+                            setReceivedAEOBResponse={setReceivedAEOBResponse}
+                            setShowRequest={setShowRequest}
+                            setShowResponse={setShowResponse}/>
+                    </Grid>) : null}
+                    {showResponse ? (<Grid item xs={12}>
                         <ResponsePanel
                             gfeResponse={gfeResponse}
                             submittingStatus={submitting}
@@ -140,10 +141,10 @@ export default function MainPanel() {
                             payerServerChanged={payerServerChanged}
                             setPayerServerChanged={setPayerServerChanged}
                             dataServerChanged={dataServerChanged}
+                            setShowRequest={setShowRequest}
+                            setShowResponse={setShowResponse}
                         />
-                    </Grid>
-                    <Grid item xs={1} direction="column">
-                    </Grid>
+                    </Grid>) : null}
                 </Grid>
             </div>
         </React.Fragment>

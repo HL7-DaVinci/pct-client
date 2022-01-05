@@ -734,6 +734,8 @@ class GFERequestBox extends Component {
                 this.props.setGfeRequestSuccess(true);
                 this.props.setBundleId(response.id);
                 this.props.setBundleIdentifier(response.identifier.value);
+                this.props.setShowResponse(true);
+                this.props.setShowRequest(false);
 
                 // TODO check the response status if(response.)
                 //this.props.setGfeRequestPending(true);
@@ -747,6 +749,8 @@ class GFERequestBox extends Component {
                 } else {
                     this.props.setGfeResponse(error.toString());
                 }
+                this.props.setShowResponse(true);
+                this.props.setShowRequest(false);
             })
     }
 
@@ -927,6 +931,19 @@ class GFERequestBox extends Component {
         }
     }
 
+    addSupportingInfoItem = () => {
+        const newId = this.state.supportingInfoList.length + 1;
+        this.setState({
+            supportingInfoList: [...this.state.supportingInfoList, { id: newId }]
+        });
+    }
+
+    deleteSupportingInfoItem = id => {
+        this.setState({
+            supportingInfoList: this.state.supportingInfoList.filter(item => item.id !== id)
+        })
+    }
+
     editSupportingInfoItem = model => {
         console.log(model);
         let id, fieldObject, fieldName, fieldValueObject, fieldValue;
@@ -1058,7 +1075,7 @@ class GFERequestBox extends Component {
                                     <Grid item className={classes.paper} xs={12}>
                                         <FormControl>
                                             <FormLabel>Supporting Information</FormLabel>
-                                            <SupportingInfoItem rows={this.state.supportingInfoList} addOne={this.addOneClaimItem} edit={this.editSupportingInfoItem} deleteOne={this.deleteOneClaimItem} selectType={this.state.supportingInfoType} />
+                                            <SupportingInfoItem rows={this.state.supportingInfoList} addOne={this.addSupportingInfoItem} edit={this.editSupportingInfoItem} deleteOne={this.deleteSupportingInfoItem} selectType={this.state.supportingInfoType} />
                                         </FormControl>
                                     </Grid>
                                     <Grid item className={classes.paper} xs={12}>
