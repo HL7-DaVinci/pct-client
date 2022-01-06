@@ -27,7 +27,7 @@ export default function DataGridComponent(props) {
     }];
 
     return (
-        <div style={props.style ? props.style : { width: '100%' }}>
+        <div style={props.style ? props.style : { display: 'flex', width: '100%' }}>
             <IconButton aria-label="Add" onClick={() => props.add()}>
                 <AddIcon />
             </IconButton>

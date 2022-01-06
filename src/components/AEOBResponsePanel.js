@@ -1,10 +1,11 @@
 import React, { useEffect, useState } from 'react';
-import { Card, CardContent, Typography, makeStyles, FormControl, Grid, Button, LinearProgress } from '@material-ui/core';
+import { Card, CardContent, Typography, makeStyles, FormControl, Grid, Button, LinearProgress, IconButton, Avatar } from '@material-ui/core';
 import { sendAEOInquiry } from '../api';
+import ArrowBackIosNew from '@material-ui/icons/ArrowBackIos'
 
 const useStyles = makeStyles({
     root: {
-        minWidth: 275,
+        backgroundColor: "#dadacc"
     },
     title: {
         fontSize: 14,
@@ -18,7 +19,8 @@ const useStyles = makeStyles({
         flexGrow: 1,
         overflow: 'auto',
         maxWidth: 1200,
-        maxHeight: 400
+        maxHeight: 400,
+        marginLeft: 50
     },
     body: {
         marginTop: "12px"
@@ -34,6 +36,9 @@ const useStyles = makeStyles({
     error: {
         color: "red",
         textAlign: "center"
+    },
+    aeobResponse: {
+        minWidth: "500px"
     }
 });
 
@@ -89,132 +94,152 @@ export default function AEOBResponsePanel(props) {
     }
 
     return (
-        <Grid container spacing={2}  flex-direction="row" justify-content="center">
-            <Grid item>
-                <FormControl>
-                    <Button loading variant="contained" color="secondary" onClick={handleNewRequest}>
-                        Create New GFE Request
-                    </Button>
-                </FormControl>
-            </Grid>
-            <Grid item>
-                <Grid container spacing={1} className={classes.content} flex-direction="row">
-                    <Grid item className={classes.header}>
-                        <Typography variant="h5" color="initial">Response</Typography>
-                    </Grid>
-                    <Grid item>
-                        <Grid container flex-direction="column">
-                            <Grid item direction="column">
-                                <div className={classes.body}>
-                                    <Card className={classes.root}>
-                                        {
-                                            props.submittingStatus === true ?
-                                                (
-                                                    <Grid item direction="row"><CardContent className={classes.content}>
-                                                        <Typography />
-                                                        <Typography className={classes.title} color="textSecondary" gutterBottom>
-                                                            Sending GFE request to payer ...
-                                                        </Typography>
-                                                        <LinearProgress color="inherit" />
-                                                    </CardContent></Grid>) : null
-                                        }
-                                        {
-                                            (props.gfeSubmitted === true && props.gfeRequestSuccess === true) ?
-                                                (<Grid item direction="row">
-                                                    <CardContent>
-                                                        <Typography className={classes.blockHeader} color="textSecondary" gutterBottom>
-                                                            GFE Response received from the payer
-                                                        </Typography>
-                                                        <CardContent className={classes.content}>
-                                                            <Typography className={classes.title} color="textSecondary" gutterBottom>
-                                                                Returned bundle ID is {props.bundleId} with identifier {props.bundleIdentifier}
-                                                            </Typography>
-                                                            <Typography className={classes.response} color="textSecondary" gutterBottom>
-                                                                <div>
-                                                                    <pre>{JSON.stringify(props.gfeResponse, undefined, 2)}</pre>
-                                                                </div>
-                                                            </Typography>
-                                                        </CardContent>
-                                                    </CardContent></Grid>) : null
-                                        }
-                                        {
-                                            (props.gfeSubmitted === true && props.gfeRequestSuccess === false) ? (<CardContent className={classes.error}>
-                                                <Typography />
-                                                <Typography className={classes.title} gutterBottom>
-                                                    Error occurred
-                                                </Typography>
-                                                <CardContent className={classes.content}>
-                                                    <Typography className={classes.title} color="textSecondary" gutterBottom>
-                                                        <div>
-                                                            <pre>{JSON.stringify(props.gfeResponse, undefined, 2)}</pre>
-                                                        </div>
-                                                    </Typography>
-                                                </CardContent>
-                                            </CardContent>) : null
-                                        }
-                                    </Card>
-                                </div>
-                            </Grid>
-                            <Grid item direction="column">
-                                <div className={classes.body}>
-                                    <Card className={classes.root}>
-                                        {
-                                            (props.gfeRequestSuccess === true && props.gfeRequestPending) ? (
-                                                <Grid item direction="row">
-                                                    <FormControl>
-                                                        <Button variant="contained" color="primary" type="submit" onClick={handleSendInquiry}>
-                                                            Send AEOB Inquiry
-                                                        </Button>
-                                                    </FormControl>
-                                                </Grid>
-                                            ) : null
-                                        }
-                                        {
-                                            props.receivedAEOBResponse ? (
-                                                <Grid item direction="row">
-                                                    <CardContent className={classes.content}>
-                                                        <Typography className={classes.blockHeader} color="textSecondary" gutterBottom>
-                                                            AEOB Inquiry Response received from the payer
-                                                        </Typography>
-                                                        <Typography className={classes.title} color="textSecondary" gutterBottom>
-                                                            AEOB outcome is {aeobInquiryOutcome}
-                                                        </Typography>
-                                                    </CardContent>
-                                                    <Typography className={classes.title} color="textSecondary" gutterBottom>
-                                                        Received AEOB response
-                                                    </Typography>
-                                                    <Typography className={classes.response} color="textSecondary" gutterBottom>
-                                                        <div>
-                                                            <pre>{JSON.stringify(props.receivedAEOBResponse, undefined, 2)}</pre>
-                                                        </div>
-                                                    </Typography>
-                                                </Grid>
-                                            ) : null
-                                        }
-                                        {
-                                            aeobInquiryError ? (<Card>
-                                                <CardContent className={classes.error}>
-                                                    <Typography className={classes.title} gutterBottom>
-                                                        Error occurred
-                                                    </Typography>
-                                                </CardContent>
-                                                <CardContent className={classes.content}>
-                                                    <Typography className={classes.response} color="textSecondary" gutterBottom>
-                                                        <div>
-                                                            <pre>{JSON.stringify(aeobError, undefined, 2)}</pre>
-                                                        </div>
-                                                    </Typography>
-                                                </CardContent></Card>) : null
-                                        }
-                                    </Card>
-                                </div>
+        <div>
+            <Grid container spacing={2} direction="column" >
+                <Grid item>
+                    <FormControl>
+                        <Grid container>
+                            <Grid item>
+                                <Button loading variant="contained" color="secondary" onClick={handleNewRequest} startIcon={<ArrowBackIosNew />}>
+                                    Create New GFE Request
+                                </Button>
                             </Grid>
                         </Grid>
-                    </Grid>
+                    </FormControl>
+                </Grid>
+                <Grid item>
+                    <Grid container spacing={1} direction="row" className={classes.root}>
+                        <Grid item className={classes.header} xs={12}>
+                            <Typography variant="h5" color="initial">Response</Typography>
+                        </Grid>
+                        <Grid item xs={12}>
+                            <Grid container direction="row" spacing={2}  className={classes.aeobResponse}>
+                                <Grid item>
+                                    <Grid container spacing={2} direction="column">
+                                        <Grid item className={classes.header} xs={12}>
+                                            <Typography variant="h6" color="initial">GFE Response</Typography>
+                                        </Grid>
+                                        <Grid item className={classes.content}>
+                                            <div className={classes.body}>
+                                                <Card>
+                                                    {
+                                                        props.submittingStatus === true ?
+                                                            (
+                                                                <Grid item direction="row"><CardContent className={classes.content}>
+                                                                    <Typography />
+                                                                    <Typography className={classes.title} color="textSecondary" gutterBottom>
+                                                                        Sending GFE request to payer ...
+                                                                    </Typography>
+                                                                    <LinearProgress color="inherit" />
+                                                                </CardContent></Grid>) : null
+                                                    }
+                                                    {
+                                                        (props.gfeSubmitted === true && props.gfeRequestSuccess === true) ?
+                                                            (<Grid item direction="row">
+                                                                <CardContent>
+                                                                    <Typography className={classes.blockHeader} color="textSecondary" gutterBottom>
+                                                                        GFE Response received from the payer
+                                                                    </Typography>
+                                                                    <CardContent className={classes.content}>
+                                                                        <Typography className={classes.title} color="textSecondary" gutterBottom>
+                                                                            Returned bundle ID is {props.bundleId} with identifier {props.bundleIdentifier}
+                                                                        </Typography>
+                                                                        <Typography className={classes.response} color="textSecondary" gutterBottom>
+                                                                            <div>
+                                                                                <pre>{JSON.stringify(props.gfeResponse, undefined, 2)}</pre>
+                                                                            </div>
+                                                                        </Typography>
+                                                                    </CardContent>
+                                                                </CardContent></Grid>) : null
+                                                    }
+                                                    {
+                                                        (props.gfeSubmitted === true && props.gfeRequestSuccess === false) ? (<CardContent className={classes.error}>
+                                                            <Typography />
+                                                            <Typography className={classes.title} gutterBottom>
+                                                                Error occurred
+                                                            </Typography>
+                                                            <CardContent className={classes.content}>
+                                                                <Typography className={classes.title} color="textSecondary" gutterBottom>
+                                                                    <div>
+                                                                        <pre>{JSON.stringify(props.gfeResponse, undefined, 2)}</pre>
+                                                                    </div>
+                                                                </Typography>
+                                                            </CardContent>
+                                                        </CardContent>) : null
+                                                    }
+                                                </Card>
+                                            </div>
+                                        </Grid>
+                                    </Grid>
+                                </Grid>
+                                <Grid item>
+                                    <Grid container spacing={2} direction="column" justifyContent='center'>
+                                        <Grid item className={classes.header} xs={12}>
+                                            <Typography variant="h6" color="initial">AEOB Inquiry and Response</Typography>
+                                        </Grid>
+                                        <Grid item>
+                                            <div className={classes.body}>
+                                                <Card>
+                                                    {
+                                                        (props.gfeRequestSuccess === true && props.gfeRequestPending) ? (
+                                                            <Grid item>
+                                                                <FormControl>
+                                                                    <Button variant="contained" color="primary" type="submit" onClick={handleSendInquiry}>
+                                                                        Send AEOB Inquiry
+                                                                    </Button>
+                                                                </FormControl>
+                                                            </Grid>
+                                                        ) : null
+                                                    }
+                                                    {
+                                                        props.receivedAEOBResponse ? (
+                                                            <Grid item className={classes.content}>
+                                                                <CardContent className={classes.content}>
+                                                                    <Typography className={classes.blockHeader} color="textSecondary" gutterBottom>
+                                                                        AEOB Inquiry Response received from the payer
+                                                                    </Typography>
+                                                                    <Typography className={classes.title} color="textSecondary" gutterBottom>
+                                                                        AEOB outcome is {aeobInquiryOutcome}
+                                                                    </Typography>
+                                                                </CardContent>
+                                                                <Typography className={classes.title} color="textSecondary" gutterBottom>
+                                                                    Received AEOB response
+                                                                </Typography>
+                                                                <Typography className={classes.response} color="textSecondary" gutterBottom>
+                                                                    <div>
+                                                                        <pre>{JSON.stringify(props.receivedAEOBResponse, undefined, 2)}</pre>
+                                                                    </div>
+                                                                </Typography>
+                                                            </Grid>
+                                                        ) : null
+                                                    }
+                                                    {
+                                                        aeobInquiryError ? (<Card>
+                                                            <CardContent className={classes.error}>
+                                                                <Typography className={classes.title} gutterBottom>
+                                                                    Error occurred
+                                                                </Typography>
+                                                            </CardContent>
+                                                            <CardContent className={classes.content}>
+                                                                <Typography className={classes.response} color="textSecondary" gutterBottom>
+                                                                    <div>
+                                                                        <pre>{JSON.stringify(aeobError, undefined, 2)}</pre>
+                                                                    </div>
+                                                                </Typography>
+                                                            </CardContent></Card>) : null
+                                                    }
+                                                </Card>
+                                            </div>
+                                        </Grid>
+                                    </Grid>
+                                </Grid>
 
-                </Grid >
+                            </Grid>
+                        </Grid>
+
+                    </Grid >
+                </Grid>
             </Grid>
-
-        </Grid>
+        </div>
     );
 }

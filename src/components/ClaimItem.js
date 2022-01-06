@@ -40,7 +40,7 @@ export default function ClaimItem(props) {
 
     return (
         <div>
-            <DataGridComponent style={{width:'1500px'}} rows={props.rows} columns={columns} add={props.addOne} edit={props.edit} delete={props.deleteOne}/>
+            <DataGridComponent style={{ display: 'flex', width: '300%', flexGrow: 1 }} rows={props.rows} columns={columns} add={props.addOne} edit={props.edit} delete={props.deleteOne}/>
         </div>
     )
 }

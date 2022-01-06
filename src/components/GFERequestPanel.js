@@ -3,13 +3,14 @@ import {
     Box, Button,
     FormLabel, FormControl, FormControlLabel,
     Grid,
-    Input, InputAdornment, InputLabel,
+    InputLabel,
     MenuItem,
     Radio,
     RadioGroup,
     Select,
     Typography,
     withStyles,
+    Paper
 } from '@material-ui/core';
 
 import {
@@ -17,12 +18,6 @@ import {
     getPractitionerRoles, getOrganizations, getCoverageByPatient, getPractitioners,
     getLocations
 } from '../api'
-
-import DateFnsUtils from '@date-io/date-fns';
-import {
-    DatePicker,
-    MuiPickersUtilsProvider,
-} from '@material-ui/pickers';
 
 import GFERequestSummary from './GFERequestSummary'
 import buildGFEBundle from './BuildGFEBundle';
@@ -34,7 +29,7 @@ import { ProcedureCodes } from '../values/ProcedureCode';
 import DiagnosisItem from './DiagnosisItem';
 import SupportingInfoItem from './SupportingInfoItem';
 import { SupportingInfoType } from '../values/SupportingInfo';
-import { DiagnosisList, DiagnosisTypeList} from '../values/DiagnosisList';
+import { DiagnosisList, DiagnosisTypeList } from '../values/DiagnosisList';
 import { RevenueCodeList } from '../values/RevenueCodeList';
 
 
@@ -50,8 +45,8 @@ const styles = theme => ({
         marginRight: 20
     },
     block: {
-        marginLeft: 30,
-        marginTop: 20,
+       // marginLeft: 30,
+        //marginTop: 20,
         backgroundColor: "white"
     },
     rightButton: {
@@ -63,7 +58,7 @@ const styles = theme => ({
     },
     blockHeader: {
         backgroundColor: "#d7d3d3",
-        width: "100%"
+        //width: "100%"
     }
 });
 
@@ -285,17 +280,9 @@ class GFERequestBox extends Component {
                 }
             })
 
-
         this.setState({
-            locationList: [],
-            organizationList: [],
-            patientSelected: true,
-            patientRequestList: [],
-            resolvedReferences: {},
-            selectedRequest: undefined,
-            selectedBillingProvider: undefined,
-            selectedRequestPractitioner: undefined
-        });
+            patientSelected: true
+        })
     }
 
     handleOpenRequestList = e => {
@@ -344,22 +331,20 @@ class GFERequestBox extends Component {
     }
 
     handleOpenPractitionerRoleList = e => {
-        if (this.state.practitionerRoleList.length === 0) {
-            getPractitionerRoles(this.props.ehrUrl)
-                .then(result => {
-                    let references = Object.assign(this.state.resolvedReferences);
-                    for (const property in result.references) {
-                        if (!(property in references)) {
-                            references[property] = result.references[property]
-                        }
+        getPractitionerRoles(this.props.ehrUrl)
+            .then(result => {
+                let references = Object.assign(this.state.resolvedReferences);
+                for (const property in result.references) {
+                    if (!(property in references)) {
+                        references[property] = result.references[property]
                     }
-                    this.setState({
-                        ...this.state,
-                        practitionerRoleList: result.data,
-                        resolvedReferences: references
-                    });
-                })
-        }
+                }
+                this.setState({
+                    ...this.state,
+                    practitionerRoleList: result.data,
+                    resolvedReferences: references
+                });
+            })
     }
 
     handleSelectBillingProvider = e => {
@@ -369,14 +354,12 @@ class GFERequestBox extends Component {
     }
 
     handleOpenPractitionerList = e => {
-        if (this.state.practitionerList.length === 0) {
-            getPractitioners(this.props.ehrUrl)
-                .then(result => {
-                    this.setState({
-                        practitionerList: result.entry
-                    });
+        getPractitioners(this.props.ehrUrl)
+            .then(result => {
+                this.setState({
+                    practitionerList: result.entry
                 });
-        }
+            });
     }
 
     handleSelectPractitioner = e => {
@@ -388,15 +371,14 @@ class GFERequestBox extends Component {
     }
 
     handleOpenOrganizationList = e => {
-        if (this.state.organizationList.length === 0) {
-            getOrganizations(this.props.ehrUrl)
-                .then(result => {
-                    this.setState({
-                        ...this.state,
-                        organizationList: result.entry
-                    })
-                });
-        }
+        getOrganizations(this.props.ehrUrl)
+            .then(result => {
+                this.setState({
+                    ...this.state,
+                    organizationList: result.entry
+                })
+            });
+
         getLocations(this.props.ehrUrl)
             .then(result => this.setState({ locationList: result.entry }));
 
@@ -482,8 +464,6 @@ class GFERequestBox extends Component {
         if (this.state.selectedPatient === undefined && this.state.selectedRequest === undefined) {
             return input;
         }
-
-        
 
         let orgReferenceList = [];
         input.gfeType = this.props.gfeType;
@@ -796,6 +776,9 @@ class GFERequestBox extends Component {
         this.setState({ selectedDiagnosis: e.target.value })
 
     isRequestValid = () => {
+        // TODO check required items 
+        // check supporting info list 
+        // validate claimItem 
         return this.state.selectedBillingProvider !== undefined && this.state.selectedPatient !== undefined
             && this.state.selectedSubmitter !== undefined && this.state.claimItemList.length > 0
     }
@@ -1031,139 +1014,158 @@ class GFERequestBox extends Component {
         const totalClaimAmountDisplay = isNaN(totalClaimAmount) ? 0 : `$ ${totalClaimAmount}`;
         return (
             <div>
-                <Grid container>
-                    <div className={classes.title}>
+                <Grid container space={2} justifyContent='center'>
+                    <Grid item xs={12}>
                         <Typography variant="h5" color="initial">Request</Typography>
-                    </div>
-                    <form onSubmit={this.handleOnSubmit}>
-                        <Grid item xs={12}>
-                            <Grid container className={classes.root} spacing={2}>
-                                <Grid container className={classes.block}>
-                                    <Grid item className={classes.blockHeader}>
-                                        <Typography>Patient and Insurance Information</Typography>
-                                    </Grid>
-
-                                    <Grid item className={classes.paper} xs={12}>
-                                        <FormControl>
-                                            <FormLabel>Patient</FormLabel>
-                                            {PatientSelect(this.state.patientList, this.state.selectedPatient, this.handleOpenPatients, this.handleSelectPatient)}
-                                        </FormControl>
-                                    </Grid>
-                                    {this.state.patientSelected ?
-                                        <GFERequestSummary summary={summary} /> : null
-                                    }
-                                    <Grid item className={classes.paper} xs={12}>
-                                        <FormControl>
-                                            <FormLabel>Diagnosis</FormLabel>
-                                            <DiagnosisItem rows={this.state.diagnosisList} addOne={this.addOneDiagnosisItem} edit={this.editDiagnosisItem} deleteOne={this.deleteOneDiagnosisItem} />
-                                        </FormControl>
+                    </Grid>
+                    <Grid item xs={12}>
+                        <Grid container className={classes.root}>
+                            <form onSubmit={this.handleOnSubmit}>
+                                <Grid item xs={12}>
+                                    <Grid container className={classes.root}>
+                                        <Grid container className={classes.block}>
+                                            <Grid item className={classes.blockHeader} xs={12}>
+                                                <Typography>Patient and Insurance Information</Typography>
+                                            </Grid>
+                                            <Grid item xs={12}>
+                                                <Grid container direction="row" spacing={3}>
+                                                    <Grid item>
+                                                        <Grid container direction="column">
+                                                            <Grid item className={classes.paper}>
+                                                                <FormControl>
+                                                                    <FormLabel>Patient</FormLabel>
+                                                                    {PatientSelect(this.state.patientList, this.state.selectedPatient, this.handleOpenPatients, this.handleSelectPatient)}
+                                                                </FormControl>
+                                                            </Grid>
+                                                            {this.state.patientSelected ?
+                                                                <Grid item><GFERequestSummary summary={summary} /></Grid> : null
+                                                            }
+                                                        </Grid>
+                                                    </Grid>
+                                                    <Grid item className={classes.paper}>
+                                                        <FormControl>
+                                                            <FormLabel>Diagnosis</FormLabel>
+                                                            <DiagnosisItem rows={this.state.diagnosisList} addOne={this.addOneDiagnosisItem} edit={this.editDiagnosisItem} deleteOne={this.deleteOneDiagnosisItem} />
+                                                        </FormControl>
+                                                    </Grid>
+                                                </Grid>
+                                            </Grid>
+                                        </Grid>
+                                        <Grid container className={classes.block}>
+                                            <Grid item className={classes.blockHeader} xs={12}>
+                                                <Typography variant="body2" color="initial">Product or Service to be Estimated</Typography>
+                                            </Grid>
+                                            <Grid item className={classes.paper} xs={12}>
+                                                <Typography><InputLabel htmlFor="total-claim-amount">Total Claim Amount: {totalClaimAmountDisplay}</InputLabel></Typography>
+                                            </Grid>
+                                            <Grid item className={classes.paper} xs={12}>
+                                                <FormControl>
+                                                    <FormLabel>Claim Items</FormLabel>
+                                                    <ClaimItem rows={this.state.claimItemList} addOne={this.addOneClaimItem} edit={this.editClaimItem} deleteOne={this.deleteOneClaimItem} />
+                                                </FormControl>
+                                            </Grid>
+                                            <Grid item xs={12}>
+                                                <Grid container direction="row">
+                                                    <Grid item className={classes.paper}>
+                                                        <FormControl>
+                                                            <FormLabel>Supporting Information</FormLabel>
+                                                            <SupportingInfoItem rows={this.state.supportingInfoList} addOne={this.addSupportingInfoItem} edit={this.editSupportingInfoItem} deleteOne={this.deleteSupportingInfoItem} selectType={this.state.supportingInfoType} />
+                                                        </FormControl>
+                                                    </Grid>
+                                                    <Grid item className={classes.paper}>
+                                                        <FormControl>
+                                                            <FormLabel>Care Team</FormLabel>
+                                                            <CareTeam rows={this.state.careTeamList} providerList={providerListOptions} addOne={this.addOneCareTeam} edit={this.editCareTeam} deleteOne={this.deleteOneCareTeam} />
+                                                        </FormControl>
+                                                    </Grid>
+                                                </Grid>
+                                            </Grid>
+                                        </Grid>
+                                        <Grid container className={classes.block}>
+                                            <Grid item className={classes.blockHeader} xs={12}>
+                                                <Typography variant="body2" color="initial">Billing Details</Typography>
+                                            </Grid>
+                                            <Grid item className={classes.paper} xs={12}>
+                                                <FormControl component="fieldset">
+                                                    <FormLabel>GFE Type</FormLabel>
+                                                    <RadioGroup row aria-label="GFE Type" name="row-radio-buttons-group" value={this.props.gfeTYpe} onChange={e => this.props.setGfeType(e.target.value)} defaultValue={this.props.gfeType}>
+                                                        <FormControlLabel value="institutional" control={<Radio size="small" />} label="Institutional" />
+                                                        <FormControlLabel value="professional" control={<Radio size="small" />} label="Professional" />
+                                                    </RadioGroup>
+                                                </FormControl>
+                                            </Grid>
+                                            <Grid item className={classes.paper} xs={12}>
+                                                <FormControl>
+                                                    <FormLabel>Billing provider</FormLabel>
+                                                    {this.props.gfeType === "professional" ?
+                                                        PractitionerRoleSelect(this.state.practitionerRoleList, this.handleOpenPractitionerRoleList, this.handleSelectBillingProvider, this.state.resolvedReferences)
+                                                        :
+                                                        OrganizationSelect(this.state.organizationList, "billing-provider-label", "billingProvider", this.handleOpenOrganizationList, this.handleSelectBillingProvider)
+                                                    }
+                                                </FormControl>
+                                            </Grid>
+                                            <Grid item xs={12}>
+                                                <Grid container direction="row">
+                                                    <Grid item className={classes.paper}>
+                                                        <FormControl>
+                                                            <FormLabel>Inter Transaction Identifier</FormLabel>
+                                                            <Select
+                                                                required
+                                                                displayEmpty
+                                                                id="select-inter-trans-id"
+                                                                value={this.state.interTransIntermediary}
+                                                                label="Inter Trans Identifier"
+                                                                onChange={this.handleSelectInterTransId}
+                                                            >
+                                                                <MenuItem value="InterTransID0001">InterTransID0001</MenuItem>
+                                                            </Select>
+                                                        </FormControl>
+                                                    </Grid>
+                                                    <Grid item className={classes.paper} >
+                                                        <FormControl>
+                                                            <FormLabel>GFE assigned service identifier</FormLabel>
+                                                            <Select
+                                                                required
+                                                                displayEmpty
+                                                                id="select-gfe-service-id"
+                                                                value={this.state.gfeServiceId}
+                                                                label="GFE assigned service identifier"
+                                                                onChange={this.handleSelectGfeServiceId}
+                                                            >
+                                                                <MenuItem value="GFEAssignedServiceID0001">GFEAssignedServiceID0001</MenuItem>
+                                                            </Select>
+                                                        </FormControl>
+                                                    </Grid>
+                                                </Grid>
+                                            </Grid>
+                                        </Grid>
+                                        <Grid container className={classes.block}>
+                                            <Grid item className={classes.blockHeader} xs={12}>
+                                                <Typography>Submitter Details</Typography>
+                                            </Grid>
+                                            <Grid item className={classes.paper} xs={12}>
+                                                <FormControl>
+                                                    <FormLabel>Submitter</FormLabel>
+                                                    {OrganizationSelect(this.state.organizationList, "submitter-label", "submitter", this.handleOpenOrganizationList, this.handleSelectSubmitter)}
+                                                </FormControl>
+                                            </Grid>
+                                        </Grid>
+                                        <Grid item className={classes.paper} xs={12}>
+                                            <Box display="flex" justifyContent="space-evenly">
+                                                <ViewGFERequestDialog generateRequest={this.generateBundle} valid={this.isRequestValid} />
+                                                <FormControl>
+                                                    <Button loading variant="contained" color="primary" type="submit" disabled={this.props.submittingStatus === true}>
+                                                        Submit
+                                                    </Button>
+                                                </FormControl>
+                                            </Box>
+                                        </Grid>
                                     </Grid>
                                 </Grid>
-                                <Grid container className={classes.block}>
-                                    <Grid item className={classes.blockHeader}>
-                                        <Typography variant="body2" color="initial">Product or Service to be Estimated</Typography>
-                                    </Grid>
-                                    <Grid item className={classes.paper} xs={12}>     
-                                        <Typography><InputLabel htmlFor="total-claim-amount">Total Claim Amount: {totalClaimAmountDisplay}</InputLabel></Typography>
-                                    </Grid>
-                                    <Grid item className={classes.paper} xs={12}>
-                                        <FormControl>
-                                            <FormLabel>Claim Items</FormLabel>
-                                            <ClaimItem rows={this.state.claimItemList} addOne={this.addOneClaimItem} edit={this.editClaimItem} deleteOne={this.deleteOneClaimItem} />
-                                        </FormControl>
-                                    </Grid>
-                                    <Grid item className={classes.paper} xs={12}>
-                                        <FormControl>
-                                            <FormLabel>Supporting Information</FormLabel>
-                                            <SupportingInfoItem rows={this.state.supportingInfoList} addOne={this.addSupportingInfoItem} edit={this.editSupportingInfoItem} deleteOne={this.deleteSupportingInfoItem} selectType={this.state.supportingInfoType} />
-                                        </FormControl>
-                                    </Grid>
-                                    <Grid item className={classes.paper} xs={12}>
-                                        <FormControl>
-                                            <FormLabel>Care team</FormLabel>
-                                            <CareTeam rows={this.state.careTeamList} providerList={providerListOptions} addOne={this.addOneCareTeam} edit={this.editCareTeam} deleteOne={this.deleteOneCareTeam} />
-                                        </FormControl>
-                                    </Grid>
-                                </Grid>
-                                <Grid container className={classes.block}>
-                                    <Grid item className={classes.blockHeader}>
-                                        <Typography variant="body2" color="initial">Billing Details</Typography>
-                                    </Grid>
-                                    <Grid item className={classes.paper} xs={12}>
-                                        <FormControl component="fieldset">
-                                            <FormLabel>GFE Type</FormLabel>
-                                            <RadioGroup row aria-label="GFE Type" name="row-radio-buttons-group" value={this.props.gfeTYpe} onChange={e => this.props.setGfeType(e.target.value)} defaultValue={this.props.gfeType}>
-                                                <FormControlLabel value="institutional" control={<Radio size="small" />} label="Institutional" />
-                                                <FormControlLabel value="professional" control={<Radio size="small" />} label="Professional" />
-                                            </RadioGroup>
-                                        </FormControl>
-                                    </Grid>
-                                    <Grid item className={classes.paper} xs={12}>
-                                        <FormControl>
-                                            <FormLabel>Billing provider</FormLabel>
-                                            {this.props.gfeType === "professional" ?
-                                                PractitionerRoleSelect(this.state.practitionerRoleList, this.handleOpenPractitionerRoleList, this.handleSelectBillingProvider, this.state.resolvedReferences)
-                                                :
-                                                OrganizationSelect(this.state.organizationList, "billing-provider-label", "billingProvider", this.handleOpenOrganizationList, this.handleSelectBillingProvider)
-                                            }
-                                        </FormControl>
-                                    </Grid>
-                                    <Grid item className={classes.paper} xs={12}>
-                                        <FormControl>
-                                            <FormLabel>Inter Transaction Identifier</FormLabel>
-                                            <Select
-                                                required
-                                                displayEmpty
-                                                id="select-inter-trans-id"
-                                                value={this.state.interTransIntermediary}
-                                                label="Inter Trans Identifier"
-                                                onChange={this.handleSelectInterTransId}
-                                            >
-                                                <MenuItem value="InterTransID0001">InterTransID0001</MenuItem>
-                                            </Select>
-                                        </FormControl>
-                                    </Grid>
-                                    <Grid item className={classes.paper} xs={12}>
-                                        <FormControl>
-                                            <FormLabel>GFE assigned service identifier</FormLabel>
-                                            <Select
-                                                required
-                                                displayEmpty
-                                                id="select-gfe-service-id"
-                                                value={this.state.gfeServiceId}
-                                                label="GFE assigned service identifier"
-                                                onChange={this.handleSelectGfeServiceId}
-                                            >
-                                                <MenuItem value="GFEAssignedServiceID0001">GFEAssignedServiceID0001</MenuItem>
-                                            </Select>
-                                        </FormControl>
-                                    </Grid>
-
-                                </Grid>
-                                <Grid container className={classes.block}>
-                                    <Grid item className={classes.blockHeader}>
-                                        <Typography>Submitter Details</Typography>
-                                    </Grid>
-                                    <Grid item className={classes.paper} xs={12}>
-                                        <FormControl>
-                                            <FormLabel>Submitter</FormLabel>
-                                            {OrganizationSelect(this.state.organizationList, "submitter-label", "submitter", this.handleOpenOrganizationList, this.handleSelectSubmitter)}
-                                        </FormControl>
-                                    </Grid>
-                                </Grid>
-                                <Grid item className={classes.paper} xs={12}>
-                                    <Box display="flex" justifyContent="space-between">
-                                        <ViewGFERequestDialog generateRequest={this.generateBundle} valid={this.isRequestValid} />
-                                        <FormControl>
-                                            <Button loading variant="contained" color="primary" type="submit" className={classes.rightButton} disabled={this.props.submittingStatus === true}>
-                                                Submit
-                                            </Button>
-                                        </FormControl>
-                                    </Box>
-                                </Grid>
-                            </Grid>
+                            </form>
                         </Grid>
-                    </form>
+                    </Grid>
+
                 </Grid>
             </div>
         );

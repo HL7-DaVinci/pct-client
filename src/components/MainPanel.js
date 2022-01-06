@@ -13,28 +13,6 @@ const useStyles = makeStyles((theme) =>
             width: '100%',
             backgroundColor: theme.palette.background,
         },
-        paper: {
-            padding: theme.spacing(2),
-            textAlign: 'left',
-            color: theme.palette.text.secondary,
-        },
-        title: {
-            top: 50,
-            textAlign: 'center',
-            display: "flex",
-            backgroundColor: "#556cd6"
-        },
-        block: {
-            marginTop: 50,
-            marginBottom: 50,
-            alignContent: "left",
-            marginLeft: 50,
-            minWidth: 200
-        },
-        content: {
-            alignContent: "left",
-            marginRight: 500
-        },
         settings: {
             marginLeft: 30,
             marginTop: 20,
@@ -76,7 +54,7 @@ export default function MainPanel() {
     const [gfeType, setGfeType] = useState("institutional");
     const [showRequest, setShowRequest] = useState(true);
     const [showResponse, setShowResponse] = useState(false);
-    
+
     function resetState() {
         setGfeResponse(undefined);
         setReceivedAEOBResponse(undefined);
@@ -87,66 +65,78 @@ export default function MainPanel() {
     }
     return (
         <React.Fragment>
-            <MenuBar toggleSettings={setShowSettings} showSettings={showSettings} />
-            <div>
-                {
-                    showSettings ? (<Grid container className={classes.settings}>
-                        <Grid item xs={12}>
-                            <Settings className={classes.settings}
-                                dataServers={dataServers}
-                                selectedDataServer={selectedDataServer}
-                                setSelectedDataServer={setSelectedDataServer}
-                                setDataServerChanged={setDataServerChanged}
-                                payerServers={payerServers}
-                                selectedPayerServer={selectedPayerServer}
-                                setSelectedPayerServer={setSelectedPayerServer}
-                                setPayerServerChanged={setPayerServerChanged}
-                                resetState={resetState}
-                            />
+            <Grid container direction="column" spacing={2}>
+                <Grid item xs={12}>
+                    <Grid container direction="column">
+                        <Grid item>
+                            <MenuBar toggleSettings={setShowSettings} showSettings={showSettings} />
                         </Grid>
-                    </Grid>) : null
-                }
-                <Grid container spacing={1} className={classes.content}>
-                    {showRequest ? (<Grid item xs={12}>
-                        <RequestPanel setSubmitting={setSubmitting}
-                            submittingStatus={submitting}
-                            setGfeResponse={setGfeResponse}
-                            setGfeRequestSuccess={setGfeRequestSuccess}
-                            setGfeSubmitted={setGfeSubmitted}
-                            setGfeRequestPending={setGfeRequestPending}
-                            setBundleId={setBundleId}
-                            setBundleIdentifier={setBundleIdentifier}
-                            ehrUrl={selectedDataServer}
-                            payorUrl={selectedPayerServer}
-                            dataServerChanged={dataServerChanged}
-                            setDataServerChanged={setDataServerChanged} 
-                            gfeType={gfeType}
-                            setGfeType={setGfeType}
-                            setReceivedAEOBResponse={setReceivedAEOBResponse}
-                            setShowRequest={setShowRequest}
-                            setShowResponse={setShowResponse}/>
-                    </Grid>) : null}
-                    {showResponse ? (<Grid item xs={12}>
-                        <ResponsePanel
-                            gfeResponse={gfeResponse}
-                            submittingStatus={submitting}
-                            gfeRequestSuccess={gfeRequestSuccess}
-                            gfeSubmitted={gfeSubmitted}
-                            bundleId={bundleId}
-                            bundleIdentifier={bundleIdentifier}
-                            gfeRequestPending={gfeRequestPending}
-                            payorUrl={selectedPayerServer}
-                            receivedAEOBResponse={receivedAEOBResponse}
-                            setReceivedAEOBResponse={setReceivedAEOBResponse}
-                            payerServerChanged={payerServerChanged}
-                            setPayerServerChanged={setPayerServerChanged}
-                            dataServerChanged={dataServerChanged}
-                            setShowRequest={setShowRequest}
-                            setShowResponse={setShowResponse}
-                        />
-                    </Grid>) : null}
+                        <Grid item xs={12}>
+                            <Grid container>
+                                {
+                                    showSettings ? (<Grid container className={classes.settings}>
+                                        <Grid item xs={12}>
+                                            <Settings className={classes.settings}
+                                                dataServers={dataServers}
+                                                selectedDataServer={selectedDataServer}
+                                                setSelectedDataServer={setSelectedDataServer}
+                                                setDataServerChanged={setDataServerChanged}
+                                                payerServers={payerServers}
+                                                selectedPayerServer={selectedPayerServer}
+                                                setSelectedPayerServer={setSelectedPayerServer}
+                                                setPayerServerChanged={setPayerServerChanged}
+                                                resetState={resetState}
+                                            />
+                                        </Grid>
+                                    </Grid>) : (<Grid container><Grid item><span></span></Grid></Grid>)
+                                }
+                            </Grid>
+                        </Grid>
+                    </Grid>
                 </Grid>
-            </div>
+                <Grid item xs={12}>
+                    <Grid container spacing={1}>
+                        {showRequest ? (<Grid item xs={12}>
+                            <RequestPanel setSubmitting={setSubmitting}
+                                submittingStatus={submitting}
+                                setGfeResponse={setGfeResponse}
+                                setGfeRequestSuccess={setGfeRequestSuccess}
+                                setGfeSubmitted={setGfeSubmitted}
+                                setGfeRequestPending={setGfeRequestPending}
+                                setBundleId={setBundleId}
+                                setBundleIdentifier={setBundleIdentifier}
+                                ehrUrl={selectedDataServer}
+                                payorUrl={selectedPayerServer}
+                                dataServerChanged={dataServerChanged}
+                                setDataServerChanged={setDataServerChanged}
+                                gfeType={gfeType}
+                                setGfeType={setGfeType}
+                                setReceivedAEOBResponse={setReceivedAEOBResponse}
+                                setShowRequest={setShowRequest}
+                                setShowResponse={setShowResponse} />
+                        </Grid>) : null}
+                        {showResponse ? (<Grid item xs={12}>
+                            <ResponsePanel
+                                gfeResponse={gfeResponse}
+                                submittingStatus={submitting}
+                                gfeRequestSuccess={gfeRequestSuccess}
+                                gfeSubmitted={gfeSubmitted}
+                                bundleId={bundleId}
+                                bundleIdentifier={bundleIdentifier}
+                                gfeRequestPending={gfeRequestPending}
+                                payorUrl={selectedPayerServer}
+                                receivedAEOBResponse={receivedAEOBResponse}
+                                setReceivedAEOBResponse={setReceivedAEOBResponse}
+                                payerServerChanged={payerServerChanged}
+                                setPayerServerChanged={setPayerServerChanged}
+                                dataServerChanged={dataServerChanged}
+                                setShowRequest={setShowRequest}
+                                setShowResponse={setShowResponse}
+                            />
+                        </Grid>) : null}
+                    </Grid>
+                </Grid>
+            </Grid>
         </React.Fragment>
     );
 }
