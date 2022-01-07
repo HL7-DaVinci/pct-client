@@ -4,13 +4,16 @@ import { Box, Button, Dialog, DialogActions, DialogContent, DialogContentText, D
 export default function ViewGFERequestDialog(props) {
     const [open, setOpen] = React.useState(false);
     const [request, setRequest] = React.useState(undefined);
+    const [error, setError] = React.useState(false);
 
     const handleClickOpen = () => {
         setOpen(true);
-        if(props.valid()) {
+        const { valid, error } = props.valid()
+        if (valid) {
             setRequest(props.generateRequest());
         } else {
-            setRequest("Missing required fields. Fill out all the required fields, then try again");
+            setError(true);
+            setRequest(error);
         }
     };
 
@@ -30,9 +33,11 @@ export default function ViewGFERequestDialog(props) {
             >
                 <DialogTitle>Generated Good Faith Estimate Request</DialogTitle>
                 <DialogContent>
-                    <DialogContentText>
-                        Review Generated GFE Request
-                    </DialogContentText>
+                    {
+                        error ? null : (<DialogContentText>
+                            Review Generated GFE Request
+                        </DialogContentText>)
+                    }
                     <Box
                         noValidate
                         component="form"
@@ -43,15 +48,30 @@ export default function ViewGFERequestDialog(props) {
                             width: 'fit-content',
                         }}
                     >
-                        <div>
-                            <pre>{JSON.stringify(request, undefined, 2)}</pre>
-                        </div>
+                        {
+                            error ? (<div style={{ color: "red" }}>
+                                <span>Request Validation Errors:</span>
+                                <ul>
+                                    {
+                                        request.map(error => (
+                                            <li>
+                                                {error}
+                                            </li>
+                                        ))}
+                                </ul>
+
+                            </div>) : (
+                                <div>
+                                    <pre>{JSON.stringify(request, undefined, 2)}</pre>
+                                </div>
+                            )
+                        }
                     </Box>
                 </DialogContent>
                 <DialogActions>
                     <Button onClick={handleClose}>Close</Button>
                 </DialogActions>
-            </Dialog>
-        </React.Fragment>
+            </Dialog >
+        </React.Fragment >
     );
 }

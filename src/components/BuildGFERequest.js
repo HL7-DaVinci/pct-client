@@ -66,7 +66,9 @@ const buildGFERequest = (input) => {
 
     GFERequest.item = input.billing.items;
 
-    GFERequest.supportingInfo = input.supportingInfo;
+    if (input.supportingInfo) {
+        GFERequest.supportingInfo = input.supportingInfo;
+    }
 
     GFERequest.procedure = input.procedure;
 
@@ -77,30 +79,32 @@ const buildGFERequest = (input) => {
         reference: input.provider.reference
     };
 
-    GFERequest.careTeam = [];
-    input.careTeam.forEach(member => {
-        GFERequest.careTeam.push({
-            sequence: member.sequence,
-            role: {
-                coding: [
-                    {
-                        "system": "http://hl7.org/fhir/us/davinci-pct/CodeSystem/PCTCareTeamRole",
-                        "code": member.role
-                    }
-                ]
-            },
-            provider: member.providerRef,
-            qualification: {
-                coding: [
-                    {
-                        "system": "http://terminology.hl7.org/CodeSystem/ex-providerqualification",
-                        "code": "604215",  
-                        "display": "Physician"
-                    }
-                ]
-            }
-        })
-    });
+    if (input.careTeam) {
+        GFERequest.careTeam = [];
+        input.careTeam.forEach(member => {
+            GFERequest.careTeam.push({
+                sequence: member.sequence,
+                role: {
+                    coding: [
+                        {
+                            "system": "http://hl7.org/fhir/us/davinci-pct/CodeSystem/PCTCareTeamRole",
+                            "code": member.role
+                        }
+                    ]
+                },
+                provider: member.providerRef,
+                qualification: {
+                    coding: [
+                        {
+                            "system": "http://terminology.hl7.org/CodeSystem/ex-providerqualification",
+                            "code": "604215",
+                            "display": "Physician"
+                        }
+                    ]
+                }
+            })
+        });
+    }
 
     GFERequest.diagnosis = input.diagnosis;
 

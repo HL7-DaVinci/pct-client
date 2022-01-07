@@ -23,11 +23,11 @@ import GFERequestSummary from './GFERequestSummary'
 import buildGFEBundle from './BuildGFEBundle';
 import ViewGFERequestDialog from './ViewGFEDialog';
 import { PlaceOfServiceList } from '../values/PlaceOfService';
-import CareTeam from './CareTeam';
-import ClaimItem from './ClaimItem';
+import CareTeam, { columns as CareTeamColumns } from './CareTeam';
+import ClaimItem, { columns as ClaimItemColumns } from './ClaimItem';
 import { ProcedureCodes } from '../values/ProcedureCode';
-import DiagnosisItem from './DiagnosisItem';
-import SupportingInfoItem from './SupportingInfoItem';
+import DiagnosisItem, { columns as DiagnosisColumns } from './DiagnosisItem';
+import SupportingInfoItem, { columns as SupportingInfoColumns } from './SupportingInfoItem';
 import { SupportingInfoType } from '../values/SupportingInfo';
 import { DiagnosisList, DiagnosisTypeList } from '../values/DiagnosisList';
 import { RevenueCodeList } from '../values/RevenueCodeList';
@@ -45,7 +45,7 @@ const styles = theme => ({
         marginRight: 20
     },
     block: {
-       // marginLeft: 30,
+        // marginLeft: 30,
         //marginTop: 20,
         backgroundColor: "white"
     },
@@ -169,7 +169,8 @@ class GFERequestBox extends Component {
             claimItemList: [{ id: 1 }],
             diagnosisList: [{ id: 1 }],
             supportingInfoList: [{ id: 1 }],
-            supportingInfoType: "typeofbill"
+            supportingInfoType: "typeofbill",
+            validationErrors: undefined
         };
         this.state = this.initialState;
     }
@@ -613,32 +614,34 @@ class GFERequestBox extends Component {
             })
         });
 
-        input.supportingInfo = [];
-        let supportingInfoSequence = 1;
-        this.state.supportingInfoList.forEach(info => {
-            const categoryCodeableConcept = SupportingInfoType.find(type => type.display === info.category);
-            const code = categoryCodeableConcept.type === "typeofbill" ? {
-                coding: [
-                    {
-                        code: info.value,
-                        system: "http://hl7.org/fhir/us/davinci-pct/CodeSystem/PCTGFETypeOfBillCS"
-                    }
-                ]
-            } : {
-                coding: [
-                    {
-                        code: PlaceOfServiceList.find(pos => pos.name === info.value).code,
-                        system: "https://oidref.com/2.16.840.1.113883.15.5"
-                    }
-                ]
-            }
+        if (!this.itemListIsEmpty(this.state.supportingInfoList)) {
+            input.supportingInfo = [];
+            let supportingInfoSequence = 1;
+            this.state.supportingInfoList.forEach(info => {
+                const categoryCodeableConcept = SupportingInfoType.find(type => type.display === info.category);
+                const code = categoryCodeableConcept.type === "typeofbill" ? {
+                    coding: [
+                        {
+                            code: info.value,
+                            system: "http://hl7.org/fhir/us/davinci-pct/CodeSystem/PCTGFETypeOfBillCS"
+                        }
+                    ]
+                } : {
+                    coding: [
+                        {
+                            code: PlaceOfServiceList.find(pos => pos.name === info.value).code,
+                            system: "https://oidref.com/2.16.840.1.113883.15.5"
+                        }
+                    ]
+                }
 
-            input.supportingInfo.push({
-                sequence: supportingInfoSequence++,
-                category: categoryCodeableConcept.codeableConcept,
-                code
+                input.supportingInfo.push({
+                    sequence: supportingInfoSequence++,
+                    category: categoryCodeableConcept.codeableConcept,
+                    code
+                });
             });
-        });
+        }
 
 
         let submitterOrgReference = `Organization/${this.state.selectedSubmitter}`
@@ -667,21 +670,23 @@ class GFERequestBox extends Component {
         });
 
         // add care team
-        input.careTeam = [];
-        const providerMap = this.getCareTeamProviderListOptions();
-        let sequenceNumber = 0;
-        this.state.careTeamList.forEach(member => {
-            const providerResource = providerMap.find(item => item.display === member.provider);
-            input.careTeam.push({
-                sequence: sequenceNumber++,
-                role: member.role.toLowerCase(),
-                providerRef: providerResource.url
+        if (!this.itemListIsEmpty(this.state.careTeamList)) {
+            input.careTeam = [];
+            const providerMap = this.getCareTeamProviderListOptions();
+            let sequenceNumber = 0;
+            this.state.careTeamList.forEach(member => {
+                const providerResource = providerMap.find(item => item.display === member.provider);
+                input.careTeam.push({
+                    sequence: sequenceNumber++,
+                    role: member.role.toLowerCase(),
+                    providerRef: providerResource.url
+                });
+                input.bundleResources.push({
+                    fullUrl: providerResource.url,
+                    entry: providerResource.resource
+                });
             });
-            input.bundleResources.push({
-                fullUrl: providerResource.url,
-                entry: providerResource.resource
-            });
-        });
+        }
 
         // remove duplicate bundle resources
         let bundleResourceList = []
@@ -697,6 +702,11 @@ class GFERequestBox extends Component {
 
         return input;
     }
+
+    itemListIsEmpty = list => list.length === 0 || (list.length > 0 && list.every(item => {
+        const propsList = Object.getOwnPropertyNames(item);
+        return propsList.length === 1 && propsList[0] === "id";
+    }));
 
     handleOnSubmit = e => {
         e.preventDefault();
@@ -776,19 +786,101 @@ class GFERequestBox extends Component {
         this.setState({ selectedDiagnosis: e.target.value })
 
     isRequestValid = () => {
-        // TODO check required items 
-        // check supporting info list 
-        // validate claimItem 
-        return this.state.selectedBillingProvider !== undefined && this.state.selectedPatient !== undefined
-            && this.state.selectedSubmitter !== undefined && this.state.claimItemList.length > 0
+        // check required 
+        let errorMessage = [], valid = true;
+        if (this.state.selectedPatient === undefined) {
+            errorMessage.push("Patient is not selected.");
+            valid = false;
+        }
+        if (this.state.selectedBillingProvider === undefined) {
+            errorMessage.push("Billing provider is not selected.");
+            valid = false;
+        }
+        if (this.state.selectedSubmitter === undefined) {
+            errorMessage.push("Submitter is not selected.");
+            valid = false;
+        }
+
+        // Diagnosis
+        const diagnosisListEmpty = this.itemListIsEmpty(this.state.diagnosisList);
+        if (diagnosisListEmpty) {
+            errorMessage.push("At least one principal diagnosis is required.");
+            valid = false;
+        } else {
+            const requiredFields = DiagnosisColumns.filter(column => column.required);
+            const requiredFieldsFilled = this.state.diagnosisList.every(item => requiredFields.every(column => item[column.field]));
+
+            if (!requiredFieldsFilled) {
+                errorMessage.push("One or many diagnosis miss(es) the required field(s).");
+                valid = false;
+            } else {
+                const createdPrincipalDiagnosis = this.state.diagnosisList.some(item => item.type === "Principal");
+                if (!createdPrincipalDiagnosis) {
+                    errorMessage.push("At least one principal diagnosis is required.");
+                    valid = false;
+                }
+            }
+        }
+
+        // claim item
+        const claimItemListEmpty = this.itemListIsEmpty(this.state.claimItemList);
+        if (claimItemListEmpty) {
+            errorMessage.push("At least one claim item is required.");
+            valid = false;
+        } else {
+            const requiredFields = ClaimItemColumns.filter(column => column.required);
+            const requiredFieldsFilled = this.state.claimItemList.every(item => requiredFields.every(column => item[column.field]));
+            if (!requiredFieldsFilled) {
+                errorMessage.push("One or more claim items miss(es) the required field(s) or is(are) invalid.");
+                valid = false;
+            }
+        }
+
+        // supporting info
+        const supportingInfoEmpty = this.itemListIsEmpty(this.state.supportingInfoList);
+        if (!supportingInfoEmpty) {
+            const requiredFields = SupportingInfoColumns({ selectType: this.state.supportingInfoType }).filter(column => column.required);
+            const requiredFieldsFilled = this.state.supportingInfoList.every(item => requiredFields.every(column => item[column.field]));
+            if (!requiredFieldsFilled) {
+                errorMessage.push("One or more supporting info item miss(es) the required fields.");
+                valid = false;
+            }
+        }
+
+        const careTeamEmpty = this.itemListIsEmpty(this.state.careTeamList);
+        if (!careTeamEmpty) {
+            const requiredFields = CareTeamColumns().filter(column => column.required);
+            const requiredFieldsFilled = this.state.careTeamList.every(item => requiredFields.every(column => item[column.field]));
+            if (!requiredFieldsFilled) {
+                errorMessage.push("One or more care team item miss(es) the required fields.");
+                valid = false;
+            };
+        }
+
+        this.setState({
+            validationErrors: errorMessage
+        });
+        return { valid, error: errorMessage };
     }
 
     addOneCareTeam = () => {
-        console.log(this.state.careTeamList);
-        const newId = this.state.careTeamList.length + 1;
-        this.setState({
-            careTeamList: [...this.state.careTeamList, { id: newId }]
-        });
+        let valid = true, msg = undefined;
+        if (this.state.careTeamList.length > 0) {
+            const requiredColumns = CareTeamColumns().filter(column => column.required);
+            const fields = this.extractFieldNames(requiredColumns);
+            msg = `Complete adding existing care team member before adding a new one! ${fields} are required fields`;
+            valid = this.state.careTeamList.every(item => {
+                return requiredColumns.every(column => item[column.field] !== undefined);
+            })
+        }
+        if (valid) {
+            const newId = this.state.careTeamList.length + 1;
+            this.setState({
+                careTeamList: [...this.state.careTeamList, { id: newId }]
+            });
+        } else {
+            alert(msg);
+        }
     }
 
     deleteOneCareTeam = id => {
@@ -828,11 +920,30 @@ class GFERequestBox extends Component {
         }
     }
 
+    extractFieldNames = columns => {
+        return columns.reduce((prev, current, index) => {
+            return index === 0 ? current.headerName : prev.concat(', ').concat(current.headerName);
+        }, '');
+    }
+
     addOneClaimItem = () => {
-        const newId = this.state.claimItemList.length + 1;
-        this.setState({
-            claimItemList: [...this.state.claimItemList, { id: newId }]
-        });
+        let valid = true, msg = undefined;
+        if (this.state.claimItemList.length > 0) {
+            const requiredColumns = ClaimItemColumns.filter(column => column.required);
+            const fields = this.extractFieldNames(requiredColumns);
+            msg = `Complete adding existing claim item before adding a new one! ${fields} are required fields`;
+            valid = this.state.claimItemList.every(item => {
+                return requiredColumns.every(column => item[column.field] !== undefined);
+            })
+        }
+        if (valid) {
+            const newId = this.state.claimItemList.length + 1;
+            this.setState({
+                claimItemList: [...this.state.claimItemList, { id: newId }]
+            });
+        } else {
+            alert(msg);
+        }
     }
 
     deleteOneClaimItem = id => {
@@ -858,24 +969,67 @@ class GFERequestBox extends Component {
             fieldValue = fieldValueObject.value;
         }
         if (id && fieldName && fieldValue) {
-            this.setState({
-                claimItemList: this.state.claimItemList.map(item => {
-                    if (item.id === parseInt(id)) {
-                        item[fieldName] = fieldValue;
-                        return item;
-                    } else {
-                        return item;
+            let valid = true, errorMsg = undefined;
+            switch (fieldName) {
+                case "unitPrice":
+                    if (fieldValue < 1) {
+                        valid = false;
+                        errorMsg = "Unit Price must be greater than 1."
                     }
-                })
-            });
+                    break;
+                case "quantity":
+                    if (fieldValue < 1) {
+                        valid = false;
+                        errorMsg = "Quantity must be greater than 1."
+                    }
+                    break;
+                case "estimatedDateOfService":
+                    const setDate = new Date(Date.parse(fieldValue.toString()));
+                    const today = new Date();
+                    if (today > setDate) {
+                        valid = false;
+                        errorMsg = "Estimate date must be after today."
+                    }
+                    break;
+                default:
+                    break;
+            }
+
+            if (valid) {
+                this.setState({
+                    claimItemList: this.state.claimItemList.map(item => {
+                        if (item.id === parseInt(id)) {
+                            item[fieldName] = fieldValue;
+                            return item;
+                        } else {
+                            return item;
+                        }
+                    })
+                });
+            } else {
+                alert("Error occurred. " + errorMsg);
+            }
         }
     }
 
     addOneDiagnosisItem = () => {
-        const newId = this.state.diagnosisList.length + 1;
-        this.setState({
-            diagnosisList: [...this.state.diagnosisList, { id: newId }]
-        });
+        let valid = true, msg = undefined;
+        if (this.state.careTeamList.length > 0) {
+            const requiredColumns = DiagnosisColumns.filter(column => column.required);
+            const fields = this.extractFieldNames(requiredColumns);
+            msg = `Complete adding existing diagnosis before adding a new one! ${fields} are required fields.`;
+            valid = this.state.diagnosisList.every(item => {
+                return requiredColumns.every(column => item[column.field] !== undefined);
+            })
+        }
+        if (valid) {
+            const newId = this.state.diagnosisList.length + 1;
+            this.setState({
+                diagnosisList: [...this.state.diagnosisList, { id: newId }]
+            });
+        } else {
+            alert(msg);
+        }
     }
 
     deleteOneDiagnosisItem = id => {
@@ -915,10 +1069,24 @@ class GFERequestBox extends Component {
     }
 
     addSupportingInfoItem = () => {
-        const newId = this.state.supportingInfoList.length + 1;
-        this.setState({
-            supportingInfoList: [...this.state.supportingInfoList, { id: newId }]
-        });
+        let valid = true, msg = undefined;
+        if (this.state.supportingInfoList.length > 0) {
+            const requiredColumns = SupportingInfoColumns({ selectType: this.state.supportingInfoType }).filter(column => column.required);
+            const fields = this.extractFieldNames(requiredColumns);
+            const typeDisplay = SupportingInfoType.find(type => type.type === this.state.supportingInfoType).display;
+            msg = `Complete adding existing supporting information before adding a new one! ${fields} are required fields for \"${typeDisplay}\"`;
+            valid = this.state.supportingInfoList.every(item => {
+                return requiredColumns.every(column => item[column.field] !== undefined);
+            })
+        }
+        if (valid) {
+            const newId = this.state.supportingInfoList.length + 1;
+            this.setState({
+                supportingInfoList: [...this.state.supportingInfoList, { id: newId }]
+            });
+        } else {
+            alert(msg);
+        }
     }
 
     deleteSupportingInfoItem = id => {
@@ -1033,7 +1201,7 @@ class GFERequestBox extends Component {
                                                         <Grid container direction="column">
                                                             <Grid item className={classes.paper}>
                                                                 <FormControl>
-                                                                    <FormLabel>Patient</FormLabel>
+                                                                    <FormLabel>Patient *</FormLabel>
                                                                     {PatientSelect(this.state.patientList, this.state.selectedPatient, this.handleOpenPatients, this.handleSelectPatient)}
                                                                 </FormControl>
                                                             </Grid>
@@ -1044,7 +1212,7 @@ class GFERequestBox extends Component {
                                                     </Grid>
                                                     <Grid item className={classes.paper}>
                                                         <FormControl>
-                                                            <FormLabel>Diagnosis</FormLabel>
+                                                            <FormLabel>Diagnosis *</FormLabel>
                                                             <DiagnosisItem rows={this.state.diagnosisList} addOne={this.addOneDiagnosisItem} edit={this.editDiagnosisItem} deleteOne={this.deleteOneDiagnosisItem} />
                                                         </FormControl>
                                                     </Grid>
@@ -1060,7 +1228,7 @@ class GFERequestBox extends Component {
                                             </Grid>
                                             <Grid item className={classes.paper} xs={12}>
                                                 <FormControl>
-                                                    <FormLabel>Claim Items</FormLabel>
+                                                    <FormLabel>Claim Items *</FormLabel>
                                                     <ClaimItem rows={this.state.claimItemList} addOne={this.addOneClaimItem} edit={this.editClaimItem} deleteOne={this.deleteOneClaimItem} />
                                                 </FormControl>
                                             </Grid>
@@ -1096,7 +1264,7 @@ class GFERequestBox extends Component {
                                             </Grid>
                                             <Grid item className={classes.paper} xs={12}>
                                                 <FormControl>
-                                                    <FormLabel>Billing provider</FormLabel>
+                                                    <FormLabel>Billing provider *</FormLabel>
                                                     {this.props.gfeType === "professional" ?
                                                         PractitionerRoleSelect(this.state.practitionerRoleList, this.handleOpenPractitionerRoleList, this.handleSelectBillingProvider, this.state.resolvedReferences)
                                                         :
@@ -1110,7 +1278,6 @@ class GFERequestBox extends Component {
                                                         <FormControl>
                                                             <FormLabel>Inter Transaction Identifier</FormLabel>
                                                             <Select
-                                                                required
                                                                 displayEmpty
                                                                 id="select-inter-trans-id"
                                                                 value={this.state.interTransIntermediary}
@@ -1125,7 +1292,6 @@ class GFERequestBox extends Component {
                                                         <FormControl>
                                                             <FormLabel>GFE assigned service identifier</FormLabel>
                                                             <Select
-                                                                required
                                                                 displayEmpty
                                                                 id="select-gfe-service-id"
                                                                 value={this.state.gfeServiceId}
@@ -1145,14 +1311,14 @@ class GFERequestBox extends Component {
                                             </Grid>
                                             <Grid item className={classes.paper} xs={12}>
                                                 <FormControl>
-                                                    <FormLabel>Submitter</FormLabel>
+                                                    <FormLabel>Submitter *</FormLabel>
                                                     {OrganizationSelect(this.state.organizationList, "submitter-label", "submitter", this.handleOpenOrganizationList, this.handleSelectSubmitter)}
                                                 </FormControl>
                                             </Grid>
                                         </Grid>
                                         <Grid item className={classes.paper} xs={12}>
                                             <Box display="flex" justifyContent="space-evenly">
-                                                <ViewGFERequestDialog generateRequest={this.generateBundle} valid={this.isRequestValid} />
+                                                <ViewGFERequestDialog generateRequest={this.generateBundle} valid={this.isRequestValid} error={this.state.validationErrors} />
                                                 <FormControl>
                                                     <Button loading variant="contained" color="primary" type="submit" disabled={this.props.submittingStatus === true}>
                                                         Submit
