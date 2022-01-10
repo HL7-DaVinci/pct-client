@@ -53,11 +53,16 @@ export default function ViewGFERequestDialog(props) {
                                 <span>Request Validation Errors:</span>
                                 <ul>
                                     {
-                                        request.map(error => (
+                                        request ? (request.map(error => (
                                             <li>
                                                 {error}
                                             </li>
-                                        ))}
+                                        ))) : (props.error.map(error => (
+                                            <li>
+                                                {error}
+                                            </li>
+                                        )))
+                                    }
                                 </ul>
 
                             </div>) : (

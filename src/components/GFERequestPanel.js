@@ -31,6 +31,7 @@ import SupportingInfoItem, { columns as SupportingInfoColumns } from './Supporti
 import { SupportingInfoType } from '../values/SupportingInfo';
 import { DiagnosisList, DiagnosisTypeList } from '../values/DiagnosisList';
 import { RevenueCodeList } from '../values/RevenueCodeList';
+import ViewErrorDialog from './ViewErrorDialog';
 
 
 const styles = theme => ({
@@ -170,7 +171,8 @@ class GFERequestBox extends Component {
             diagnosisList: [{ id: 1 }],
             supportingInfoList: [{ id: 1 }],
             supportingInfoType: "typeofbill",
-            validationErrors: undefined
+            validationErrors: undefined,
+            openErrorDialog: false
         };
         this.state = this.initialState;
     }
@@ -710,38 +712,50 @@ class GFERequestBox extends Component {
 
     handleOnSubmit = e => {
         e.preventDefault();
+        this.setState({
+            openErrorDialog: false,
+            validationErrors: undefined
+        })
+        const { valid, error } = this.isRequestValid();
 
-        this.props.setSubmitting(true);
-        this.props.setGfeSubmitted(true);
-        this.props.setGfeResponse(undefined);
-        this.props.setReceivedAEOBResponse(undefined);
-
-        submitGFEClaim(this.props.payorUrl, buildGFEBundle(this.generateRequestInput()))
-            .then(response => {
-                this.props.setSubmitting(false);
-                console.log("Payer server returned response: ", response);
-                this.props.setGfeResponse(response);
-                this.props.setGfeRequestSuccess(true);
-                this.props.setBundleId(response.id);
-                this.props.setBundleIdentifier(response.identifier.value);
-                this.props.setShowResponse(true);
-                this.props.setShowRequest(false);
-
-                // TODO check the response status if(response.)
-                //this.props.setGfeRequestPending(true);
-            })
-            .catch(error => {
-                this.props.setSubmitting(false);
-                this.props.setGfeRequestSuccess(false);
-                if ('toJSON' in error) {
-                    console.log(error.toJSON());
-                    this.props.setGfeResponse(error.toJSON());
-                } else {
-                    this.props.setGfeResponse(error.toString());
-                }
-                this.props.setShowResponse(true);
-                this.props.setShowRequest(false);
-            })
+        if(valid) {
+            this.props.setSubmitting(true);
+            this.props.setGfeSubmitted(true);
+            this.props.setGfeResponse(undefined);
+            this.props.setReceivedAEOBResponse(undefined);
+    
+            submitGFEClaim(this.props.payorUrl, buildGFEBundle(this.generateRequestInput()))
+                .then(response => {
+                    this.props.setSubmitting(false);
+                    console.log("Payer server returned response: ", response);
+                    this.props.setGfeResponse(response);
+                    this.props.setGfeRequestSuccess(true);
+                    this.props.setBundleId(response.id);
+                    this.props.setBundleIdentifier(response.identifier.value);
+                    this.props.setShowResponse(true);
+                    this.props.setShowRequest(false);
+    
+                    // TODO check the response status if(response.)
+                    //this.props.setGfeRequestPending(true);
+                })
+                .catch(error => {
+                    this.props.setSubmitting(false);
+                    this.props.setGfeRequestSuccess(false);
+                    if ('toJSON' in error) {
+                        console.log(error.toJSON());
+                        this.props.setGfeResponse(error.toJSON());
+                    } else {
+                        this.props.setGfeResponse(error.toString());
+                    }
+                    this.props.setShowResponse(true);
+                    this.props.setShowRequest(false);
+                })
+        } else {
+            this.setState({
+                openErrorDialog: true,
+                submissionError: error
+            });
+        }
     }
 
     generateBundle = () => buildGFEBundle(this.generateRequestInput())
@@ -1331,6 +1345,11 @@ class GFERequestBox extends Component {
                             </form>
                         </Grid>
                     </Grid>
+                    {
+                        this.state.openErrorDialog ? (
+                            <ViewErrorDialog error={this.state.validationErrors} open={this.state.openErrorDialog} setOpen={open => this.setState({openErrorDialog: open})}/>
+                        ) : null
+                    }
 
                 </Grid>
             </div>
