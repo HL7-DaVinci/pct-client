@@ -10,7 +10,8 @@ import {
     Select,
     Typography,
     withStyles,
-    Paper
+    CircularProgress,
+    LinearProgress
 } from '@material-ui/core';
 
 import {
@@ -718,12 +719,12 @@ class GFERequestBox extends Component {
         })
         const { valid, error } = this.isRequestValid();
 
-        if(valid) {
+        if (valid) {
             this.props.setSubmitting(true);
             this.props.setGfeSubmitted(true);
             this.props.setGfeResponse(undefined);
             this.props.setReceivedAEOBResponse(undefined);
-    
+
             submitGFEClaim(this.props.payorUrl, buildGFEBundle(this.generateRequestInput()))
                 .then(response => {
                     this.props.setSubmitting(false);
@@ -734,7 +735,7 @@ class GFERequestBox extends Component {
                     this.props.setBundleIdentifier(response.identifier.value);
                     this.props.setShowResponse(true);
                     this.props.setShowRequest(false);
-    
+
                     // TODO check the response status if(response.)
                     //this.props.setGfeRequestPending(true);
                 })
@@ -1347,10 +1348,16 @@ class GFERequestBox extends Component {
                     </Grid>
                     {
                         this.state.openErrorDialog ? (
-                            <ViewErrorDialog error={this.state.validationErrors} open={this.state.openErrorDialog} setOpen={open => this.setState({openErrorDialog: open})}/>
+                            <ViewErrorDialog error={this.state.validationErrors} open={this.state.openErrorDialog} setOpen={open => this.setState({ openErrorDialog: open })} />
                         ) : null
                     }
-
+                    {
+                        this.state.submittingStatus === true ?
+                            <Box sx={{ width: '100%' }}>
+                                <LinearProgress />
+                            </Box>
+                            : null
+                    }
                 </Grid>
             </div>
         );

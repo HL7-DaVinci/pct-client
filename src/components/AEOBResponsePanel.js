@@ -39,6 +39,9 @@ const useStyles = makeStyles({
     },
     aeobResponse: {
         minWidth: "500px"
+    },
+    responseBody: {
+        minHeight: "800px"
     }
 });
 
@@ -107,8 +110,8 @@ export default function AEOBResponsePanel(props) {
                         </Grid>
                     </FormControl>
                 </Grid>
-                <Grid item>
-                    <Grid container spacing={1} direction="row" className={classes.root}>
+                <Grid item className={classes.responseBody}>
+                    <Grid container spacing={3} direction="row" className={classes.root}>
                         <Grid item className={classes.header} xs={12}>
                             <Typography variant="h5" color="initial">Response</Typography>
                         </Grid>
