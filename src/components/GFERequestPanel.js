@@ -598,7 +598,7 @@ class GFERequestBox extends Component {
                     ]
 
                 }],
-                procedureCodableConcept: {
+                procedureCodeableConcept: {
                     coding: [
                         procedureCoding
                     ]
