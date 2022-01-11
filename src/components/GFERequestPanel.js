@@ -533,11 +533,11 @@ class GFERequestBox extends Component {
         })
 
         input.billing = {};
-        if(this.state.interTransIntermediary) {
+        if (this.state.interTransIntermediary) {
             input.billing.interTransIntermediary = this.state.interTransIntermediary;
         }
 
-        if(this.state.gfeServiceId) {
+        if (this.state.gfeServiceId) {
             input.billing.gfeAssignedServiceId = this.state.gfeServiceId
         }
 
@@ -565,8 +565,8 @@ class GFERequestBox extends Component {
                     ]
                 },
                 unitPrice: {
-                   value: claimItem.unitPrice,
-                   currency:  "USD"
+                    value: claimItem.unitPrice,
+                    currency: "USD"
                 },
                 quantity: {
                     value: claimItem.quantity
@@ -578,13 +578,15 @@ class GFERequestBox extends Component {
             };
 
             newItem.extension = [];
-            if(claimItem.estimatedDateOfService) {
-                newItem.extension.push({
-                    extension: {
+            if (claimItem.estimatedDateOfService) {
+                const estimateDate = new Date(Date.parse(claimItem.estimatedDateOfService.toString()));
+                const month = estimateDate.getMonth() + 1;
+                newItem.extension.push(
+                    {
                         url: "http://hl7.org/fhir/us/davinci-pct/StructureDefinition/estimatedDateOfService",
-                    },
-                    valueDate : new Date(Date.parse(claimItem.estimatedDateOfService.toString()))
-                 })
+                        valueDate: estimateDate.getFullYear() + "-" + month + "-" + estimateDate.getDate()
+                    }
+                )
             }
 
             if (pos) {
