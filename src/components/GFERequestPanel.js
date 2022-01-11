@@ -532,6 +532,7 @@ class GFERequestBox extends Component {
             entry: input.provider.resource
         })
 
+        input.billing = {};
         if(this.state.interTransIntermediary) {
             input.billing.interTransIntermediary = this.state.interTransIntermediary;
         }
@@ -541,8 +542,6 @@ class GFERequestBox extends Component {
         }
 
         input.procedure = [];
-
-        input.billing = {};
         input.billing.items = [];
         let sequenceCount = 1;
         let totalAmount = 0;
@@ -693,7 +692,9 @@ class GFERequestBox extends Component {
                 input.careTeam.push({
                     sequence: sequenceNumber++,
                     role: member.role.toLowerCase(),
-                    providerRef: providerResource.url
+                    providerRef: {
+                        reference: providerResource.url
+                    }
                 });
                 input.bundleResources.push({
                     fullUrl: providerResource.url,
