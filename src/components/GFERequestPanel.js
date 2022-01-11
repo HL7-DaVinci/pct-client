@@ -564,7 +564,6 @@ class GFERequestBox extends Component {
                         procedureCoding
                     ]
                 },
-                estimatedDateOfService: claimItem.estimatedDateOfService ? new Date(Date.parse(claimItem.estimatedDateOfService.toString())) : undefined,
                 unitPrice: {
                    value: claimItem.unitPrice,
                    currency:  "USD"
@@ -577,6 +576,16 @@ class GFERequestBox extends Component {
                     currency: "USD"
                 }
             };
+
+            newItem.extension = [];
+            if(claimItem.estimatedDateOfService) {
+                newItem.extension.push({
+                    extension: {
+                        url: "http://hl7.org/fhir/us/davinci-pct/StructureDefinition/estimatedDateOfService",
+                    },
+                    valueDate : new Date(Date.parse(claimItem.estimatedDateOfService.toString()))
+                 })
+            }
 
             if (pos) {
                 newItem.locationCodeableConcept = {
