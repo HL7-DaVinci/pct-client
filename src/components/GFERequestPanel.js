@@ -581,10 +581,11 @@ class GFERequestBox extends Component {
             if (claimItem.estimatedDateOfService) {
                 const estimateDate = new Date(Date.parse(claimItem.estimatedDateOfService.toString()));
                 const month = estimateDate.getMonth() + 1;
+                const monthString = month < 10 ? '0'+month : month; 
                 newItem.extension.push(
                     {
                         url: "http://hl7.org/fhir/us/davinci-pct/StructureDefinition/estimatedDateOfService",
-                        valueDate: estimateDate.getFullYear() + "-" + month + "-" + estimateDate.getDate()
+                        valueDate: estimateDate.getFullYear() + "-" + monthString + "-" + estimateDate.getDate()
                     }
                 )
             }
