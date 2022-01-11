@@ -546,6 +546,7 @@ class GFERequestBox extends Component {
         input.billing.items = [];
         let sequenceCount = 1;
         let totalAmount = 0;
+        let procedureSequenceCount = 1;
 
         this.state.claimItemList.forEach(claimItem => {
             const procedureCoding = ProcedureCodes.find(code => claimItem.productOrService.startsWith(code.code));
@@ -588,7 +589,7 @@ class GFERequestBox extends Component {
             input.billing.items.push(newItem);
 
             input.procedure.push({
-                sequence: sequenceCount++,
+                sequence: procedureSequenceCount++,
                 type: [{
                     coding: [
                         {
