@@ -134,7 +134,7 @@ const PlaceOfServiceSelect = (handleChange) =>
     <Select required labelId="select-place-of-service" id="placeOfService" onChange={handleChange}>
         {
             PlaceOfServiceList.map((pos) => {
-                return (<MenuItem key={pos.code} value={pos.code}>{pos.name}</MenuItem>);
+                return (<MenuItem key={pos.code} value={pos.code}>{pos.display}</MenuItem>);
             })
         }
     </Select>
@@ -532,59 +532,64 @@ class GFERequestBox extends Component {
             entry: input.provider.resource
         })
 
-        input.billing = {
-            interTransIntermediary: this.state.interTransIntermediary,
-            gfeAssignedServiceId: this.state.gfeServiceId,
-            supportingInfo: [
-                {
-                    sequence: 1,
+        if(this.state.interTransIntermediary) {
+            input.billing.interTransIntermediary = this.state.interTransIntermediary;
+        }
 
-                }
-            ]
+        if(this.state.gfeServiceId) {
+            input.billing.gfeAssignedServiceId = this.state.gfeServiceId
         }
 
         input.procedure = [];
 
+        input.billing = {};
         input.billing.items = [];
-        let sequenceCount = 0;
+        let sequenceCount = 1;
         let totalAmount = 0;
 
         this.state.claimItemList.forEach(claimItem => {
             const procedureCoding = ProcedureCodes.find(code => claimItem.productOrService.startsWith(code.code));
-            const pos = PlaceOfServiceList.find(pos => pos.name === claimItem.placeOfService);
+            const pos = PlaceOfServiceList.find(pos => pos.display === claimItem.placeOfService);
 
-            input.billing.items.push({
+            let newItem = {
                 sequence: sequenceCount++,
-                productOrService: {
-                    coding: [
-                        procedureCoding
-                    ]
-                },
-                estimatedDateOfService: claimItem.estimatedDateOfService ? new Date(Date.parse(claimItem.estimatedDateOfService.toString())) : undefined,
                 revenue: claimItem.revenue ? {
                     coding: [{
                         system: "http://hl7.org/fhir/us/davinci-pct/CodeSystem/PCTGFEItemRevenueCS",
                         code: RevenueCodeList.find(code => code.display === claimItem.revenue).code
                     }]
                 } : undefined,
-                unitPrice: claimItem.unitPrice,
-                quantity: claimItem.quantity,
-                net: claimItem.unitPrice * claimItem.quantity,
-                locationCodeableConcept: {
-                    coding: [
-                        pos
-                    ]
-                }
-            });
-
-            input.procedure.push({
-                sequence: sequenceCount++,
-                procedureCodableConcept: {
+                productOrService: {
                     coding: [
                         procedureCoding
                     ]
                 },
-                type: {
+                estimatedDateOfService: claimItem.estimatedDateOfService ? new Date(Date.parse(claimItem.estimatedDateOfService.toString())) : undefined,
+                unitPrice: {
+                   value: claimItem.unitPrice,
+                   currency:  "USD"
+                },
+                quantity: {
+                    value: claimItem.quantity
+                },
+                net: {
+                    value: claimItem.unitPrice * claimItem.quantity,
+                    currency: "USD"
+                }
+            };
+
+            if (pos) {
+                newItem.locationCodeableConcept = {
+                    coding: [
+                        pos
+                    ]
+                };
+            };
+            input.billing.items.push(newItem);
+
+            input.procedure.push({
+                sequence: sequenceCount++,
+                type: [{
                     coding: [
                         {
                             system: "http://hl7.org/fhir/us/davinci-pct/CodeSystem/PCTProcedureType",
@@ -592,6 +597,11 @@ class GFERequestBox extends Component {
                         }
                     ]
 
+                }],
+                procedureCodableConcept: {
+                    coding: [
+                        procedureCoding
+                    ]
                 }
             });
             totalAmount += claimItem.unitPrice * claimItem.quantity;
@@ -632,7 +642,7 @@ class GFERequestBox extends Component {
                 } : {
                     coding: [
                         {
-                            code: PlaceOfServiceList.find(pos => pos.name === info.value).code,
+                            code: PlaceOfServiceList.find(pos => pos.display === info.value).code,
                             system: "https://oidref.com/2.16.840.1.113883.15.5"
                         }
                     ]
@@ -676,7 +686,7 @@ class GFERequestBox extends Component {
         if (!this.itemListIsEmpty(this.state.careTeamList)) {
             input.careTeam = [];
             const providerMap = this.getCareTeamProviderListOptions();
-            let sequenceNumber = 0;
+            let sequenceNumber = 1;
             this.state.careTeamList.forEach(member => {
                 const providerResource = providerMap.find(item => item.display === member.provider);
                 input.careTeam.push({

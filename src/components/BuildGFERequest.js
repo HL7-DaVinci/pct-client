@@ -125,20 +125,27 @@ const buildGFERequest = (input) => {
             valueReference: {
                 reference: input.submitter.reference
             }
-        },
-        {
+        }
+    ];
+
+    if (input.billing.interTransIntermediary) {
+        GFERequest.extension.push({
             url: "http://hl7.org/fhir/us/davinci-pct/StructureDefinition/InterTransIdentifier",
             valueIdentifier: {
                 value: input.billing.interTransIntermediary
             }
-        },
-        {
+        })
+    };
+
+    if (input.billing.gfeAssignedServiceId) {
+        GFERequest.extension.push({
             "url": "http://hl7.org/fhir/us/davinci-pct/StructureDefinition/gfeAssignedServiceIdentifier",
             valueIdentifier: {
                 value: input.billing.gfeAssignedServiceId
             }
-        }
-    ];
+        });
+    }
+
     return GFERequest;
 };
 

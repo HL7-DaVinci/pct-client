@@ -44,7 +44,7 @@ export const columns = [
     },
     {
         field: 'placeOfService', headerName: "Place of Service", editable: true, type: "singleSelect", minWidth: 200,
-        valueOptions: PlaceOfServiceList.map(pos => pos.name)
+        valueOptions: PlaceOfServiceList.map(pos => pos.display)
     },
     {
         field: 'revenue', headerName: 'Revenue Code', editable: true, type: 'singleSelect', minWidth: 180,

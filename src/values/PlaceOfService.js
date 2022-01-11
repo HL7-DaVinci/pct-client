@@ -1,32 +1,32 @@
 export const PlaceOfServiceList = [
     {
         code: "01",
-        name: "Pharmacy",
-        description: "A facility or location where drugs and other medically related items and services are sold, dispensed, or otherwise provided directly to patients.    (Effective October 1, 2003)"
+        display: "Pharmacy",
+        system: "https://oidref.com/2.16.840.1.113883.15.5"
     },
     {
         code: "11",
-        name: "Office",
-        description: ""
+        display: "Office",
+        system: "https://oidref.com/2.16.840.1.113883.15.5"
     },
     {
         code: "12",
-        name: "Home",
-        description: ""
+        display: "Home",
+        system: "https://oidref.com/2.16.840.1.113883.15.5"
     },
     {
         code: "21",
-        name: "Inpatient Hospital",
-        description: "A facility, other than psychiatric, which primarily provides diagnostic, therapeutic (both surgical and nonsurgical), and rehabilitation services by, or under, the supervision of physicians to patients admitted for a variety of medical conditions."
+        display: "Inpatient Hospital",
+        system: "https://oidref.com/2.16.840.1.113883.15.5"
     },
     {
         code: "22",
-        name: "On Campus-Outpatient Hospital",
-        description: "A portion of a hospital’s main campus which provides diagnostic, therapeutic (both surgical and nonsurgical), and rehabilitation services to sick or injured persons who do not require hospitalization or institutionalization.  (Description change effective January 1, 2016)"
+        display: "On Campus-Outpatient Hospital",
+        system: "https://oidref.com/2.16.840.1.113883.15.5"
     },
     {
         code: "99",
-        name: "Other Place of Service",
-        description: "Other place of service not identified above."
+        display: "Other Place of Service",
+        system: "https://oidref.com/2.16.840.1.113883.15.5"
     }
 ];

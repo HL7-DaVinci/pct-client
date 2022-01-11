@@ -28,7 +28,7 @@ export const columns = props => {
                 },
                 {
                     field: 'value', headerName: 'Information', editable: true, type: 'singleSelect',minWidth: 150,
-                    valueOptions: PlaceOfServiceList.map(pos => pos.name), 
+                    valueOptions: PlaceOfServiceList.map(pos => pos.display), 
                     renderHeader: renderRequiredHeader,
                     required: true
                 }
