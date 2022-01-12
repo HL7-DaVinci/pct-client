@@ -130,6 +130,15 @@ const PractitionerRoleSelect = (roles, handleOpenPractitionerRoleList, handleSel
         }
     </Select>
 
+const ProfessionalBillingProviderSelect = (providers, handleSelect) => 
+ ( <Select required labelId="select-billing-provider-label" id="request" onChange={handleSelect}>
+     {
+         providers.map(provider => {
+             return (<MenuItem key={provider.id} value={provider.id}>{provider.display}</MenuItem>)
+         })
+     }
+ </Select>)
+
 const PlaceOfServiceSelect = (handleChange) =>
     <Select required labelId="select-place-of-service" id="placeOfService" onChange={handleChange}>
         {
@@ -517,14 +526,25 @@ class GFERequestBox extends Component {
             entry: input.insurer.resource
         })
 
-        let providerReference = this.props.gfeType === "professional" ? `PractitionerRole/${this.state.selectedBillingProvider}` : `Organization/${this.state.selectedBillingProvider}`
+        let providerReference = undefined, findProfessionalProvider = undefined;
+        if(this.props.gfeType === "professional") {
+            const professionalProviderList = this.getProfessionalBillingProviderList();
+            findProfessionalProvider = professionalProviderList.find(provider => provider.id === this.state.selectedBillingProvider);
+            providerReference = findProfessionalProvider.reference
+        } else {
+            providerReference = `Organization/${this.state.selectedBillingProvider}`;
+        }
+
+        //let providerReference = this.props.gfeType === "professional" ? `PractitionerRole/${this.state.selectedBillingProvider}` : `Organization/${this.state.selectedBillingProvider}`
         input.provider = {
             reference: providerReference,
-            resource: this.props.gfeType === "professional" ? this.state.practitionerRoleList.filter(role => role.id === this.state.selectedBillingProvider)[0]
-                : this.state.organizationList.filter(org => org.resource.id === this.state.selectedBillingProvider)[0].resource
+            resource: this.props.gfeType === "professional" ? findProfessionalProvider.resource
+                : this.state.organizationList.find(org => org.resource.id === this.state.selectedBillingProvider).resource
         }
         if (this.props.gfeType === "institutional") {
             orgReferenceList.push(providerReference)
+        } else if(findProfessionalProvider.type === "Organization") {
+            orgReferenceList.push(providerReference);
         }
 
         input.bundleResources.push({
@@ -1212,6 +1232,36 @@ class GFERequestBox extends Component {
         return providerMap;
     }
 
+    getProfessionalBillingProviderList() {
+        const fhirServerBaseUrl = this.props.ehrUrl;
+        const providerMap = [];
+        this.state.practitionerRoleList.forEach(role => {
+            const practitioner = this.state.resolvedReferences[role.practitioner.reference];
+            const organization = this.state.resolvedReferences[role.organization.reference];
+            const display = practitioner ? `${practitioner.name[0].text} from ${organization.name}` : "";
+            providerMap.push({
+                type: "PractitionerRole",
+                display: `PractitionerRole - ${display}`,
+                resource: role,
+                reference: `PractitionerRole/${role.id}`,
+                url: `${fhirServerBaseUrl}/PractitionerRole/${role.id}`,
+                id: role.id
+            })
+        });
+        this.state.organizationList.forEach(org => {
+            providerMap.push({
+                type: "Organization",
+                display: `Organization - ${org.resource.name}`,
+                resource: org.resource,
+                reference: `Organization/${org.resource.id}`,
+                url: org.fullUrl,
+                id: org.resource.id
+            });
+        });
+        return providerMap;
+    }
+
+
     render() {
         const { classes } = this.props;
         const summary = this.retrieveRequestSummary();
@@ -1219,6 +1269,7 @@ class GFERequestBox extends Component {
         const providerListOptions = providerMap.map(provider => provider.display);
         const totalClaimAmount = this.state.claimItemList.reduce((previousItem, currentItem) => previousItem + currentItem.unitPrice * currentItem.quantity, 0);
         const totalClaimAmountDisplay = isNaN(totalClaimAmount) ? 0 : `$ ${totalClaimAmount}`;
+        const professionalBillingProviderList = this.getProfessionalBillingProviderList();
         return (
             <div>
                 <Grid container space={2} justifyContent='center'>
@@ -1305,7 +1356,7 @@ class GFERequestBox extends Component {
                                                 <FormControl>
                                                     <FormLabel>Billing provider *</FormLabel>
                                                     {this.props.gfeType === "professional" ?
-                                                        PractitionerRoleSelect(this.state.practitionerRoleList, this.handleOpenPractitionerRoleList, this.handleSelectBillingProvider, this.state.resolvedReferences)
+                                                        ProfessionalBillingProviderSelect(professionalBillingProviderList, this.handleSelectBillingProvider)
                                                         :
                                                         OrganizationSelect(this.state.organizationList, "billing-provider-label", "billingProvider", this.handleOpenOrganizationList, this.handleSelectBillingProvider)
                                                     }
