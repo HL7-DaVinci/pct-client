@@ -25,20 +25,42 @@ export const columns = [
         required: true
     },
     {
-        field: 'unitPrice', headerName: 'Unit Price', editable: true, type: 'number', minWidth: 120,
+        field: 'unitPrice', headerName: 'Unit Price', type: 'number', minWidth: 120,
         renderHeader: renderRequiredHeader,
-        required: true
+        required: true,
+        valueGetter: (params) => {
+            if (params.row.productOrService) {
+                const productOrService = ProcedureCodes.find(code => `${code.code}: ${code.display}` === params.row.productOrService);
+                if (productOrService.unitPrice !== undefined) {
+                    params.row.unitPrice = productOrService.unitPrice;
+                    return params.row.unitPrice;
+                } 
+            }
+        }
     },
     {
         field: 'quantity', headerName: 'Quantity', editable: true, type: 'number', minWidth: 120,
         renderHeader: renderRequiredHeader,
-        required: true
+        required: true,
+        valueGetter: (params) => {
+            if (params.row.quantity === undefined) {
+                params.row.quantity = 1;
+                return params.row.quantity;
+            } else {
+                return params.row.quantity;
+            }
+        }
     },
     {
         field: 'net', headerName: 'Net', type: 'number',
         valueGetter: (params) => {
-            if (params.row.unitPrice && params.row.quantity) {
+            if (params.row.unitPrice) {
+                if ( params.row.quantity === undefined) {
+                    params.row.quantity = 1;
+                    return params.row.unitPrice * params.row.quantity;
+                } else {
                 return params.row.unitPrice * params.row.quantity;
+                }
             }
         }
     },
