@@ -1268,7 +1268,7 @@ class GFERequestBox extends Component {
         const providerMap = this.getCareTeamProviderListOptions();
         const providerListOptions = providerMap.map(provider => provider.display);
         const totalClaimAmount = this.state.claimItemList.reduce((previousItem, currentItem) => previousItem + currentItem.unitPrice * currentItem.quantity, 0);
-        const totalClaimAmountDisplay = isNaN(totalClaimAmount) ? 0 : `$ ${totalClaimAmount}`;
+        const totalClaimAmountDisplay = isNaN(totalClaimAmount) ? 'TBD' : `$ ${totalClaimAmount}`;
         const professionalBillingProviderList = this.getProfessionalBillingProviderList();
         return (
             <div>
