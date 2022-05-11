@@ -568,7 +568,10 @@ class GFERequestBox extends Component {
         let procedureSequenceCount = 1;
 
         this.state.claimItemList.forEach(claimItem => {
-            const procedureCoding = ProcedureCodes.find(code => claimItem.productOrService.startsWith(code.code));
+            const procedureCodingOrig = ProcedureCodes.find(code => claimItem.productOrService.startsWith(code.code));
+            let procedureCoding = Object.assign({}, procedureCodingOrig);
+            delete procedureCoding["unitPrice"];
+
             const pos = PlaceOfServiceList.find(pos => pos.display === claimItem.placeOfService);
 
             let newItem = {
@@ -624,7 +627,7 @@ class GFERequestBox extends Component {
                 type: [{
                     coding: [
                         {
-                            system: "http://hl7.org/fhir/us/davinci-pct/CodeSystem/PCTProcedureType",
+                            system: "http://terminology.hl7.org/CodeSystem/ex-procedure-type",
                             code: claimItem.procedureType
                         }
                     ]
@@ -651,7 +654,7 @@ class GFERequestBox extends Component {
                     coding: [
                         {
                             code: DiagnosisTypeList.find(type => type.display === diagnosis.type).code,
-                            system: "http://hl7.org/fhir/us/davinci-pct/CodeSystem/PCTDiagnosisType"
+                            system: "http://terminology.hl7.org/CodeSystem/ex-diagnosistype"
                         }
                     ]
                 }],

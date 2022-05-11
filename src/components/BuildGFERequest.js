@@ -11,7 +11,8 @@ const buildGFERequest = (input) => {
         "priority": {
             "coding": [
                 {
-                    "code": "normal"
+                    "code": "normal", 
+                    "system": "http://terminology.hl7.org/CodeSystem/processpriority"
                 }
             ]
         },
@@ -121,7 +122,7 @@ const buildGFERequest = (input) => {
 
     GFERequest.extension = [
         {
-            url: "http://hl7.org/fhir/us/davinci-pct/StructureDefinition/GFESubmitter",
+            url: "http://hl7.org/fhir/us/davinci-pct/StructureDefinition/gfeSubmitter",
             valueReference: {
                 reference: input.submitter.reference
             }
@@ -130,7 +131,7 @@ const buildGFERequest = (input) => {
 
     if (input.billing.interTransIntermediary) {
         GFERequest.extension.push({
-            url: "http://hl7.org/fhir/us/davinci-pct/StructureDefinition/InterTransIdentifier",
+            url: "http://hl7.org/fhir/us/davinci-pct/StructureDefinition/interTransIdentifier",
             valueIdentifier: {
                 value: input.billing.interTransIntermediary
             }
@@ -139,7 +140,7 @@ const buildGFERequest = (input) => {
 
     if (input.billing.gfeAssignedServiceId) {
         GFERequest.extension.push({
-            "url": "http://hl7.org/fhir/us/davinci-pct/StructureDefinition/gfeAssignedServiceIdentifier",
+            "url": "http://hl7.org/fhir/us/davinci-pct/StructureDefinition/gfeProviderAssignedIdentifier",
             valueIdentifier: {
                 value: input.billing.gfeAssignedServiceId
             }

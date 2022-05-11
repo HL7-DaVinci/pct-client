@@ -12,6 +12,13 @@ const buildGFEBundle = input => {
     bundle.meta = {
         lastUpdated: new Date().toISOString()
     }
+    
+    bundle.identifier = {
+        "system" : "http://example.org/documentIDs",
+        "value" : "A12345"
+    }
+
+    bundle.timestamp = new Date().toISOString();
 
     bundle.entry.push({
         fullUrl: "http://example.org/fhir/Claim/PCT-Good-Faith-Estimate-1",
