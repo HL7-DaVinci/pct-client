@@ -53,6 +53,7 @@ export const columns = [
     },
     {
         field: 'net', headerName: 'Net', type: 'number',
+        renderHeader: renderRequiredHeader,
         valueGetter: (params) => {
             if (params.row.unitPrice) {
                 if ( params.row.quantity === undefined) {
@@ -65,12 +66,14 @@ export const columns = [
         }
     },
     {
-        field: 'placeOfService', headerName: "Place of Service", editable: true, type: "singleSelect", minWidth: 200,
-        valueOptions: PlaceOfServiceList.map(pos => pos.display)
+        field: 'revenue', headerName: 'Revenue Code', editable: true, type: 'singleSelect', minWidth: 180,
+        renderHeader: renderRequiredHeader,
+        required: true,
+        valueOptions: RevenueCodeList.map(code => `${code.display}`)
     },
     {
-        field: 'revenue', headerName: 'Revenue Code', editable: true, type: 'singleSelect', minWidth: 180,
-        valueOptions: RevenueCodeList.map(code => `${code.display}`)
+        field: 'placeOfService', headerName: "Place of Service", editable: true, type: "singleSelect", minWidth: 200,
+        valueOptions: PlaceOfServiceList.map(pos => pos.display)
     }
 ];
 
