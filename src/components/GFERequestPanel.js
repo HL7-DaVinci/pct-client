@@ -605,10 +605,11 @@ class GFERequestBox extends Component {
                 const estimateDate = new Date(Date.parse(claimItem.estimatedDateOfService.toString()));
                 const month = estimateDate.getMonth() + 1;
                 const monthString = month < 10 ? '0'+month : month; 
+                const dateString = estimateDate.getDate() < 10 ? '0' + estimateDate.getDate() : estimateDate.getDate();
                 newItem.extension.push(
                     {
                         url: "http://hl7.org/fhir/us/davinci-pct/StructureDefinition/estimatedDateOfService",
-                        valueDate: estimateDate.getFullYear() + "-" + monthString + "-" + estimateDate.getDate()
+                        valueDate: estimateDate.getFullYear() + "-" + monthString + "-" + dateString
                     }
                 )
             }
