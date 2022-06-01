@@ -901,7 +901,7 @@ class GFERequestBox extends Component {
         // supporting info
         const supportingInfoEmpty = this.itemListIsEmpty(this.state.supportingInfoList);
         if (!supportingInfoEmpty) {
-            const requiredFields = this.getSupportingInfoColumns({ selectType: this.state.supportingInfoType }).filter(column => column.required);
+            const requiredFields = this.getSupportingInfoColumns(this.state.supportingInfoType).filter(column => column.required);
             const requiredFieldsFilled = this.state.supportingInfoList.every(item => requiredFields.every(column => item[column.field]));
             if (!requiredFieldsFilled) {
                 errorMessage.push("One or more supporting info item miss(es) the required fields.");
@@ -1133,7 +1133,7 @@ class GFERequestBox extends Component {
     addSupportingInfoItem = () => {
         let valid = true, msg = undefined;
         if (this.state.supportingInfoList.length > 0) {
-            const requiredColumns = this.getSupportingInfoColumns({ selectType: this.state.supportingInfoType }).filter(column => column.required);
+            const requiredColumns = this.getSupportingInfoColumns(this.state.supportingInfoType).filter(column => column.required);
             const fields = this.extractFieldNames(requiredColumns);
             const typeDisplay = SupportingInfoType.find(type => type.type === this.state.supportingInfoType).display;
             msg = `Complete adding existing supporting information before adding a new one! ${fields} are required fields for \"${typeDisplay}\"`;
@@ -1205,10 +1205,10 @@ class GFERequestBox extends Component {
     getSupportingInfoColumns = selectType => {
         if(selectType === "typeofbill") {
             console.log("SupportingInfoType is typeofbill");
-            return PlaceOfServiceColumns;
+            return TypeOfBillColumns;
         } else if (selectType === "cmspos") {
             console.log("SupportingInfoType is cmspos");
-            return TypeOfBillColumns;     
+            return PlaceOfServiceColumns;     
         }
     };
 

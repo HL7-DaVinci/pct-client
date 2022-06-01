@@ -2,7 +2,7 @@ import DataGridComponent, {renderRequiredHeader} from './DataGridComponent';
 import { SupportingInfoType } from '../values/SupportingInfo';
 import { PlaceOfServiceList } from '../values/PlaceOfService';
 
-export const PlaceOfServiceColumns = [
+export const TypeOfBillColumns = [
     {
         field: 'category', headerName: 'Category', editable: true, type: 'singleSelect', minWidth: 150,
         valueOptions: SupportingInfoType.map(type => `${type.display}`), 
@@ -16,7 +16,7 @@ export const PlaceOfServiceColumns = [
     }
 ];
 
-export const TypeOfBillColumns = [
+export const PlaceOfServiceColumns = [
     {
         field: 'category', headerName: 'Category', editable: true, type: 'singleSelect',minWidth: 150,
         valueOptions: SupportingInfoType.map(type => `${type.display}`), 
