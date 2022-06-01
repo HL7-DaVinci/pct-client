@@ -4,6 +4,7 @@ import { PlaceOfServiceList } from '../values/PlaceOfService';
 
 export const columns = props => {
     if(props.selectType === "typeofbill") {
+        console.log("SupportingInfoType is typeofbill");
         return ([
             {
                 field: 'category', headerName: 'Category', editable: true, type: 'singleSelect', minWidth: 150,
@@ -18,6 +19,7 @@ export const columns = props => {
             }
         ]);
     } else if (props.selectType === "cmspos") {
+        console.log("SupportingInfoType is cmspos");
         return (
             [
                 {

@@ -180,7 +180,7 @@ class GFERequestBox extends Component {
             claimItemList: [{ id: 1 }],
             diagnosisList: [{ id: 1 }],
             supportingInfoList: [{ id: 1 }],
-            supportingInfoType: "typeofbill",
+            supportingInfoType: "cmspos",
             validationErrors: undefined,
             openErrorDialog: false
         };
@@ -1331,7 +1331,7 @@ class GFERequestBox extends Component {
                                                     <Grid item className={classes.paper}>
                                                         <FormControl>
                                                             <FormLabel>Supporting Information</FormLabel>
-                                                            <SupportingInfoItem rows={this.state.supportingInfoList} props={this.props} addOne={this.addSupportingInfoItem} edit={this.editSupportingInfoItem} deleteOne={this.deleteSupportingInfoItem} selectType={this.state.supportingInfoType} />
+                                                            <SupportingInfoItem rows={this.state.supportingInfoList} addOne={this.addSupportingInfoItem} edit={this.editSupportingInfoItem} deleteOne={this.deleteSupportingInfoItem} selectType={this.state.supportingInfoType} />
                                                         </FormControl>
                                                     </Grid>
                                                     <Grid item className={classes.paper}>
