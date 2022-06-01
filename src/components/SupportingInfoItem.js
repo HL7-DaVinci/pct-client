@@ -42,7 +42,7 @@ export const columns = props => {
 export default function SupportingInfoItem(props) {  
     return (
         <div>
-            <DataGridComponent rows={props.rows} columns={columns(props)} add={props.addOne} edit={props.edit} delete={props.deleteOne}/>
+            <DataGridComponent rows={props.rows} columns={props.columns} add={props.addOne} edit={props.edit} delete={props.deleteOne}/>
         </div>
     )
 };

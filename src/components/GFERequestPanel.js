@@ -34,6 +34,7 @@ import { DiagnosisList, DiagnosisTypeList } from '../values/DiagnosisList';
 import { RevenueCodeList } from '../values/RevenueCodeList';
 import ViewErrorDialog from './ViewErrorDialog';
 
+import DataGridComponent, {renderRequiredHeader} from './DataGridComponent';
 
 const styles = theme => ({
     root: {
@@ -182,7 +183,20 @@ class GFERequestBox extends Component {
             supportingInfoList: [{ id: 1 }],
             supportingInfoType: "cmspos",
             validationErrors: undefined,
-            openErrorDialog: false
+            openErrorDialog: false,
+            supportingInfoColumns: [
+                {
+                    field: 'category', headerName: 'Category', editable: true, type: 'singleSelect', minWidth: 150,
+                    valueOptions: SupportingInfoType.map(type => `${type.display}`), 
+                    renderHeader: renderRequiredHeader,
+                    required: true
+                },
+                {
+                    field: 'value', headerName: 'Information', editable: true, type: 'string', minWidth: 150, 
+                    renderHeader: renderRequiredHeader,
+                    required: true
+                }
+            ]
         };
         this.state = this.initialState;
     }
@@ -1185,7 +1199,8 @@ class GFERequestBox extends Component {
                             return item;
                         }
                     }),
-                    supportingInfoType: SupportingInfoType.find(type => type.display === fieldValue).type
+                    supportingInfoType: SupportingInfoType.find(type => type.display === fieldValue).type,
+                    supportingInfoColumns: this.getSupportingInfoColumns(SupportingInfoType.find(type => type.display === fieldValue).type)
                 });
             } else {
                 this.setState({
@@ -1201,6 +1216,43 @@ class GFERequestBox extends Component {
             }
         }
     }
+
+    getSupportingInfoColumns = selectType => {
+        if(selectType === "typeofbill") {
+            console.log("SupportingInfoType is typeofbill");
+            const columns = [
+                {
+                    field: 'category', headerName: 'Category', editable: true, type: 'singleSelect', minWidth: 150,
+                    valueOptions: SupportingInfoType.map(type => `${type.display}`), 
+                    renderHeader: renderRequiredHeader,
+                    required: true
+                },
+                {
+                    field: 'value', headerName: 'Information', editable: true, type: 'string', minWidth: 150, 
+                    renderHeader: renderRequiredHeader,
+                    required: true
+                }
+            ];
+            return columns;
+        } else if (selectType === "cmspos") {
+            console.log("SupportingInfoType is cmspos");
+            const columns = [
+                {
+                    field: 'category', headerName: 'Category', editable: true, type: 'singleSelect',minWidth: 150,
+                    valueOptions: SupportingInfoType.map(type => `${type.display}`), 
+                    renderHeader: renderRequiredHeader,
+                    required: true
+                },
+                {
+                    field: 'value', headerName: 'Information', editable: true, type: 'singleSelect',minWidth: 150,
+                    valueOptions: PlaceOfServiceList.map(pos => pos.display), 
+                    renderHeader: renderRequiredHeader,
+                    required: true
+                }
+            ];
+            return columns;     
+        }
+    };
 
     getCareTeamProviderListOptions() {
         const fhirServerBaseUrl = this.props.ehrUrl;
@@ -1331,7 +1383,7 @@ class GFERequestBox extends Component {
                                                     <Grid item className={classes.paper}>
                                                         <FormControl>
                                                             <FormLabel>Supporting Information</FormLabel>
-                                                            <SupportingInfoItem rows={this.state.supportingInfoList} addOne={this.addSupportingInfoItem} edit={this.editSupportingInfoItem} deleteOne={this.deleteSupportingInfoItem} selectType={this.state.supportingInfoType} />
+                                                            <SupportingInfoItem rows={this.state.supportingInfoList} addOne={this.addSupportingInfoItem} edit={this.editSupportingInfoItem} deleteOne={this.deleteSupportingInfoItem} selectType={this.state.supportingInfoType} columns={this.state.supportingInfoColumns}/>
                                                         </FormControl>
                                                     </Grid>
                                                     <Grid item className={classes.paper}>
