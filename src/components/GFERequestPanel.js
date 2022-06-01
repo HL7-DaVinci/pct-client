@@ -10,7 +10,6 @@ import {
     Select,
     Typography,
     withStyles,
-    CircularProgress,
     LinearProgress
 } from '@material-ui/core';
 
@@ -28,13 +27,11 @@ import CareTeam, { columns as CareTeamColumns } from './CareTeam';
 import ClaimItem, { columns as ClaimItemColumns } from './ClaimItem';
 import { ProcedureCodes } from '../values/ProcedureCode';
 import DiagnosisItem, { columns as DiagnosisColumns } from './DiagnosisItem';
-import SupportingInfoItem, { columns as SupportingInfoColumns } from './SupportingInfoItem';
+import SupportingInfoItem, { PlaceOfServiceColumns,  TypeOfBillColumns} from './SupportingInfoItem';
 import { SupportingInfoType } from '../values/SupportingInfo';
 import { DiagnosisList, DiagnosisTypeList } from '../values/DiagnosisList';
 import { RevenueCodeList } from '../values/RevenueCodeList';
 import ViewErrorDialog from './ViewErrorDialog';
-
-import DataGridComponent, {renderRequiredHeader} from './DataGridComponent';
 
 const styles = theme => ({
     root: {
@@ -184,19 +181,7 @@ class GFERequestBox extends Component {
             supportingInfoType: "cmspos",
             validationErrors: undefined,
             openErrorDialog: false,
-            supportingInfoColumns: [
-                {
-                    field: 'category', headerName: 'Category', editable: true, type: 'singleSelect', minWidth: 150,
-                    valueOptions: SupportingInfoType.map(type => `${type.display}`), 
-                    renderHeader: renderRequiredHeader,
-                    required: true
-                },
-                {
-                    field: 'value', headerName: 'Information', editable: true, type: 'string', minWidth: 150, 
-                    renderHeader: renderRequiredHeader,
-                    required: true
-                }
-            ]
+            supportingInfoColumns: PlaceOfServiceColumns
         };
         this.state = this.initialState;
     }
@@ -916,7 +901,7 @@ class GFERequestBox extends Component {
         // supporting info
         const supportingInfoEmpty = this.itemListIsEmpty(this.state.supportingInfoList);
         if (!supportingInfoEmpty) {
-            const requiredFields = SupportingInfoColumns({ selectType: this.state.supportingInfoType }).filter(column => column.required);
+            const requiredFields = this.getSupportingInfoColumns({ selectType: this.state.supportingInfoType }).filter(column => column.required);
             const requiredFieldsFilled = this.state.supportingInfoList.every(item => requiredFields.every(column => item[column.field]));
             if (!requiredFieldsFilled) {
                 errorMessage.push("One or more supporting info item miss(es) the required fields.");
@@ -1148,7 +1133,7 @@ class GFERequestBox extends Component {
     addSupportingInfoItem = () => {
         let valid = true, msg = undefined;
         if (this.state.supportingInfoList.length > 0) {
-            const requiredColumns = SupportingInfoColumns({ selectType: this.state.supportingInfoType }).filter(column => column.required);
+            const requiredColumns = this.getSupportingInfoColumns({ selectType: this.state.supportingInfoType }).filter(column => column.required);
             const fields = this.extractFieldNames(requiredColumns);
             const typeDisplay = SupportingInfoType.find(type => type.type === this.state.supportingInfoType).display;
             msg = `Complete adding existing supporting information before adding a new one! ${fields} are required fields for \"${typeDisplay}\"`;
@@ -1220,37 +1205,10 @@ class GFERequestBox extends Component {
     getSupportingInfoColumns = selectType => {
         if(selectType === "typeofbill") {
             console.log("SupportingInfoType is typeofbill");
-            const columns = [
-                {
-                    field: 'category', headerName: 'Category', editable: true, type: 'singleSelect', minWidth: 150,
-                    valueOptions: SupportingInfoType.map(type => `${type.display}`), 
-                    renderHeader: renderRequiredHeader,
-                    required: true
-                },
-                {
-                    field: 'value', headerName: 'Information', editable: true, type: 'string', minWidth: 150, 
-                    renderHeader: renderRequiredHeader,
-                    required: true
-                }
-            ];
-            return columns;
+            return PlaceOfServiceColumns;
         } else if (selectType === "cmspos") {
             console.log("SupportingInfoType is cmspos");
-            const columns = [
-                {
-                    field: 'category', headerName: 'Category', editable: true, type: 'singleSelect',minWidth: 150,
-                    valueOptions: SupportingInfoType.map(type => `${type.display}`), 
-                    renderHeader: renderRequiredHeader,
-                    required: true
-                },
-                {
-                    field: 'value', headerName: 'Information', editable: true, type: 'singleSelect',minWidth: 150,
-                    valueOptions: PlaceOfServiceList.map(pos => pos.display), 
-                    renderHeader: renderRequiredHeader,
-                    required: true
-                }
-            ];
-            return columns;     
+            return TypeOfBillColumns;     
         }
     };
 
