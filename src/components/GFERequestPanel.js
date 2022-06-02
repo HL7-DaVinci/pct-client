@@ -10,7 +10,8 @@ import {
     Select,
     Typography,
     withStyles,
-    LinearProgress
+    LinearProgress,
+    TextField
 } from '@material-ui/core';
 
 import {
@@ -137,8 +138,8 @@ const ProfessionalBillingProviderSelect = (providers, handleSelect) =>
      }
  </Select>)
 
-const PlaceOfServiceSelect = (handleChange) =>
-    <Select required labelId="select-place-of-service" id="placeOfService" onChange={handleChange}>
+const PlaceOfServiceSelect = (placeOfService, handleChange) =>
+    <Select required labelId="select-place-of-service" id="placeOfService" value={placeOfService} onChange={handleChange}>
         {
             PlaceOfServiceList.map((pos) => {
                 return (<MenuItem key={pos.code} value={pos.code}>{pos.display}</MenuItem>);
@@ -181,7 +182,9 @@ class GFERequestBox extends Component {
             supportingInfoType: "cmspos",
             validationErrors: undefined,
             openErrorDialog: false,
-            supportingInfoColumns: PlaceOfServiceColumns
+            supportingInfoColumns: PlaceOfServiceColumns,
+            supportingInfoPlaceOfService: undefined,
+            supportingInfoTypeOfBill: undefined
         };
         this.state = this.initialState;
     }
@@ -662,35 +665,33 @@ class GFERequestBox extends Component {
             })
         });
 
-        if (!this.itemListIsEmpty(this.state.supportingInfoList)) {
+        // supportingInfo
+        if(this.state.supportingInfoPlaceOfService || this.state.supportingInfoTypeOfBill) {
             input.supportingInfo = [];
             let supportingInfoSequence = 1;
-            this.state.supportingInfoList.forEach(info => {
-                const categoryCodeableConcept = SupportingInfoType.find(type => type.display === info.category);
-                const code = categoryCodeableConcept.type === "typeofbill" ? {
-                    coding: [
-                        {
-                            code: info.value,
-                            system: "http://hl7.org/fhir/us/davinci-pct/CodeSystem/PCTGFETypeOfBillCS"
-                        }
-                    ]
-                } : {
-                    coding: [
-                        {
-                            code: PlaceOfServiceList.find(pos => pos.display === info.value).code,
-                            system: "https://oidref.com/2.16.840.1.113883.15.5"
-                        }
-                    ]
-                }
 
+            const categoryCodeableConcept = inputType =>  SupportingInfoType.find(type => type.type === inputType);
+
+            if(this.state.supportingInfoPlaceOfService) {
                 input.supportingInfo.push({
                     sequence: supportingInfoSequence++,
-                    category: categoryCodeableConcept.codeableConcept,
-                    code
-                });
-            });
-        }
+                    category: categoryCodeableConcept("cmspos").codeableConcept,
+                    code: {
+                        coding: [
+                            PlaceOfServiceList.find(pos => pos.code === this.state.supportingInfoPlaceOfService),
+                        ]
+                    }
+                })
+            }
 
+            if(this.state.supportingInfoTypeOfBill) {
+                input.supportingInfo.push({
+                    sequence: supportingInfoSequence++,
+                    category: categoryCodeableConcept("typeofbill").codeableConcept,
+                    valueString: this.state.supportingInfoTypeOfBill
+                })
+            }
+        }
 
         let submitterOrgReference = `Organization/${this.state.selectedSubmitter}`
         input.submitter = {
@@ -846,6 +847,14 @@ class GFERequestBox extends Component {
 
     handleSelectDiagnosis = e =>
         this.setState({ selectedDiagnosis: e.target.value })
+
+    handleSupportingInfoPOS = e => {
+        this.setState({ supportingInfoPlaceOfService: e.target.value})
+    }
+
+    handleSupportingInfoTypeOfBill = e => {
+        this.setState({supportingInfoTypeOfBill: e.target.value})
+    }
 
     isRequestValid = () => {
         // check required 
@@ -1341,7 +1350,15 @@ class GFERequestBox extends Component {
                                                     <Grid item className={classes.paper}>
                                                         <FormControl>
                                                             <FormLabel>Supporting Information</FormLabel>
-                                                            <SupportingInfoItem rows={this.state.supportingInfoList} addOne={this.addSupportingInfoItem} edit={this.editSupportingInfoItem} deleteOne={this.deleteSupportingInfoItem} selectType={this.state.supportingInfoType} columns={this.state.supportingInfoColumns}/>
+                                                            <Grid item className={classes.paper}>
+                                                                <FormLabel>Place of Service</FormLabel>
+                                                                {PlaceOfServiceSelect(this.state.supportingInfoPlaceOfService, this.handleSupportingInfoPOS)}
+                                                            </Grid>
+                                                            <Grid item className={classes.paper}>
+                                                                <FormLabel>Type of Bill</FormLabel>
+                                                                <TextField id="supportingInfoTypeOfBill" variant="standard" value={this.state.supportingInfoTypeOfBill} onChange={this.handleSupportingInfoTypeOfBill}/>
+                                                            </Grid>
+                                                            
                                                         </FormControl>
                                                     </Grid>
                                                     <Grid item className={classes.paper}>
