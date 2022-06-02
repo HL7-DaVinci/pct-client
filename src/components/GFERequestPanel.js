@@ -28,7 +28,6 @@ import CareTeam, { columns as CareTeamColumns } from './CareTeam';
 import ClaimItem, { columns as ClaimItemColumns } from './ClaimItem';
 import { ProcedureCodes } from '../values/ProcedureCode';
 import DiagnosisItem, { columns as DiagnosisColumns } from './DiagnosisItem';
-import SupportingInfoItem, { PlaceOfServiceColumns,  TypeOfBillColumns} from './SupportingInfoItem';
 import { SupportingInfoType } from '../values/SupportingInfo';
 import { DiagnosisList, DiagnosisTypeList } from '../values/DiagnosisList';
 import { RevenueCodeList } from '../values/RevenueCodeList';
@@ -60,6 +59,14 @@ const styles = theme => ({
     blockHeader: {
         backgroundColor: "#d7d3d3",
         //width: "100%"
+    },
+    singleSelect: {
+        marginLeft: 20,
+        width: 120
+    },
+    inputBox: {
+        marginLeft: 30,
+        width: 150
     }
 });
 
@@ -129,14 +136,14 @@ const PractitionerRoleSelect = (roles, handleOpenPractitionerRoleList, handleSel
         }
     </Select>
 
-const ProfessionalBillingProviderSelect = (providers, handleSelect) => 
- ( <Select required labelId="select-billing-provider-label" id="request" onChange={handleSelect}>
-     {
-         providers.map(provider => {
-             return (<MenuItem key={provider.id} value={provider.id}>{provider.display}</MenuItem>)
-         })
-     }
- </Select>)
+const ProfessionalBillingProviderSelect = (providers, handleSelect) =>
+(<Select required labelId="select-billing-provider-label" id="request" onChange={handleSelect}>
+    {
+        providers.map(provider => {
+            return (<MenuItem key={provider.id} value={provider.id}>{provider.display}</MenuItem>)
+        })
+    }
+</Select>)
 
 const PlaceOfServiceSelect = (placeOfService, handleChange) =>
     <Select required labelId="select-place-of-service" id="placeOfService" value={placeOfService} onChange={handleChange}>
@@ -178,11 +185,9 @@ class GFERequestBox extends Component {
             careTeamList: [{ id: 1 }],
             claimItemList: [{ id: 1 }],
             diagnosisList: [{ id: 1 }],
-            supportingInfoList: [{ id: 1 }],
             supportingInfoType: "cmspos",
             validationErrors: undefined,
             openErrorDialog: false,
-            supportingInfoColumns: PlaceOfServiceColumns,
             supportingInfoPlaceOfService: undefined,
             supportingInfoTypeOfBill: undefined
         };
@@ -529,7 +534,7 @@ class GFERequestBox extends Component {
         })
 
         let providerReference = undefined, findProfessionalProvider = undefined;
-        if(this.props.gfeType === "professional") {
+        if (this.props.gfeType === "professional") {
             const professionalProviderList = this.getProfessionalBillingProviderList();
             findProfessionalProvider = professionalProviderList.find(provider => provider.id === this.state.selectedBillingProvider);
             providerReference = findProfessionalProvider.reference
@@ -545,7 +550,7 @@ class GFERequestBox extends Component {
         }
         if (this.props.gfeType === "institutional") {
             orgReferenceList.push(providerReference)
-        } else if(findProfessionalProvider.type === "Organization") {
+        } else if (findProfessionalProvider.type === "Organization") {
             orgReferenceList.push(providerReference);
         }
 
@@ -606,7 +611,7 @@ class GFERequestBox extends Component {
             if (claimItem.estimatedDateOfService) {
                 const estimateDate = new Date(Date.parse(claimItem.estimatedDateOfService.toString()));
                 const month = estimateDate.getMonth() + 1;
-                const monthString = month < 10 ? '0'+month : month; 
+                const monthString = month < 10 ? '0' + month : month;
                 const dateString = estimateDate.getDate() < 10 ? '0' + estimateDate.getDate() : estimateDate.getDate();
                 newItem.extension.push(
                     {
@@ -666,13 +671,13 @@ class GFERequestBox extends Component {
         });
 
         // supportingInfo
-        if(this.state.supportingInfoPlaceOfService || this.state.supportingInfoTypeOfBill) {
+        if (this.state.supportingInfoPlaceOfService || this.state.supportingInfoTypeOfBill) {
             input.supportingInfo = [];
             let supportingInfoSequence = 1;
 
-            const categoryCodeableConcept = inputType =>  SupportingInfoType.find(type => type.type === inputType);
+            const categoryCodeableConcept = inputType => SupportingInfoType.find(type => type.type === inputType);
 
-            if(this.state.supportingInfoPlaceOfService) {
+            if (this.state.supportingInfoPlaceOfService) {
                 input.supportingInfo.push({
                     sequence: supportingInfoSequence++,
                     category: categoryCodeableConcept("cmspos").codeableConcept,
@@ -684,7 +689,7 @@ class GFERequestBox extends Component {
                 })
             }
 
-            if(this.state.supportingInfoTypeOfBill) {
+            if (this.state.supportingInfoTypeOfBill) {
                 input.supportingInfo.push({
                     sequence: supportingInfoSequence++,
                     category: categoryCodeableConcept("typeofbill").codeableConcept,
@@ -849,11 +854,11 @@ class GFERequestBox extends Component {
         this.setState({ selectedDiagnosis: e.target.value })
 
     handleSupportingInfoPOS = e => {
-        this.setState({ supportingInfoPlaceOfService: e.target.value})
+        this.setState({ supportingInfoPlaceOfService: e.target.value })
     }
 
     handleSupportingInfoTypeOfBill = e => {
-        this.setState({supportingInfoTypeOfBill: e.target.value})
+        this.setState({ supportingInfoTypeOfBill: e.target.value })
     }
 
     isRequestValid = () => {
@@ -903,17 +908,6 @@ class GFERequestBox extends Component {
             const requiredFieldsFilled = this.state.claimItemList.every(item => requiredFields.every(column => item[column.field]));
             if (!requiredFieldsFilled) {
                 errorMessage.push("One or more claim items miss(es) the required field(s) or is(are) invalid.");
-                valid = false;
-            }
-        }
-
-        // supporting info
-        const supportingInfoEmpty = this.itemListIsEmpty(this.state.supportingInfoList);
-        if (!supportingInfoEmpty) {
-            const requiredFields = this.getSupportingInfoColumns(this.state.supportingInfoType).filter(column => column.required);
-            const requiredFieldsFilled = this.state.supportingInfoList.every(item => requiredFields.every(column => item[column.field]));
-            if (!requiredFieldsFilled) {
-                errorMessage.push("One or more supporting info item miss(es) the required fields.");
                 valid = false;
             }
         }
@@ -1139,88 +1133,6 @@ class GFERequestBox extends Component {
         }
     }
 
-    addSupportingInfoItem = () => {
-        let valid = true, msg = undefined;
-        if (this.state.supportingInfoList.length > 0) {
-            const requiredColumns = this.getSupportingInfoColumns(this.state.supportingInfoType).filter(column => column.required);
-            const fields = this.extractFieldNames(requiredColumns);
-            const typeDisplay = SupportingInfoType.find(type => type.type === this.state.supportingInfoType).display;
-            msg = `Complete adding existing supporting information before adding a new one! ${fields} are required fields for \"${typeDisplay}\"`;
-            valid = this.state.supportingInfoList.every(item => {
-                return requiredColumns.every(column => item[column.field] !== undefined);
-            })
-        }
-        if (valid) {
-            const newId = this.state.supportingInfoList.length + 1;
-            this.setState({
-                supportingInfoList: [...this.state.supportingInfoList, { id: newId }]
-            });
-        } else {
-            alert(msg);
-        }
-    }
-
-    deleteSupportingInfoItem = id => {
-        this.setState({
-            supportingInfoList: this.state.supportingInfoList.filter(item => item.id !== id)
-        })
-    }
-
-    editSupportingInfoItem = model => {
-        console.log(model);
-        let id, fieldObject, fieldName, fieldValueObject, fieldValue;
-        for (let prop in model) {
-            id = prop;
-            fieldObject = model[id];
-        }
-        if (fieldObject) {
-            for (let name in fieldObject) {
-                fieldName = name;
-            }
-            fieldValueObject = fieldObject[fieldName];
-        }
-        if (fieldValueObject) {
-            fieldValue = fieldValueObject.value;
-        }
-        if (id && fieldName && fieldValue) {
-            if (fieldName === "category") {
-                this.setState({
-                    supportingInfoList: this.state.supportingInfoList.map(item => {
-                        if (item.id === parseInt(id)) {
-                            item[fieldName] = fieldValue;
-                            return item;
-                        } else {
-                            return item;
-                        }
-                    }),
-                    supportingInfoType: SupportingInfoType.find(type => type.display === fieldValue).type,
-                    supportingInfoColumns: this.getSupportingInfoColumns(SupportingInfoType.find(type => type.display === fieldValue).type)
-                });
-            } else {
-                this.setState({
-                    supportingInfoList: this.state.supportingInfoList.map(item => {
-                        if (item.id === parseInt(id)) {
-                            item[fieldName] = fieldValue;
-                            return item;
-                        } else {
-                            return item;
-                        }
-                    })
-                });
-            }
-        }
-    }
-
-    getSupportingInfoColumns = selectType => {
-        if(selectType === "typeofbill") {
-            console.log("SupportingInfoType is typeofbill");
-            return TypeOfBillColumns;
-        } else if (selectType === "cmspos") {
-            console.log("SupportingInfoType is cmspos");
-            return PlaceOfServiceColumns;     
-        }
-    };
-
     getCareTeamProviderListOptions() {
         const fhirServerBaseUrl = this.props.ehrUrl;
         const providerMap = [];
@@ -1350,21 +1262,34 @@ class GFERequestBox extends Component {
                                                     <Grid item className={classes.paper}>
                                                         <FormControl>
                                                             <FormLabel>Supporting Information</FormLabel>
-                                                            <Grid item className={classes.paper}>
-                                                                <FormLabel>Place of Service</FormLabel>
-                                                                {PlaceOfServiceSelect(this.state.supportingInfoPlaceOfService, this.handleSupportingInfoPOS)}
+                                                            <Grid container direction="column">
+                                                                <Grid item className={classes.paper}>
+                                                                    <Grid container direction="row">
+                                                                        <Grid item>
+                                                                            <FormLabel>Place of Service</FormLabel>
+                                                                        </Grid>
+                                                                        <Grid item className={classes.singleSelect}>
+                                                                            {PlaceOfServiceSelect(this.state.supportingInfoPlaceOfService, this.handleSupportingInfoPOS)}
+                                                                        </Grid>
+                                                                    </Grid>
+                                                                </Grid>
+                                                                <Grid item className={classes.paper}>
+                                                                    <Grid container direction="row">
+                                                                        <Grid item>
+                                                                            <FormLabel>Type of Bill</FormLabel>
+                                                                        </Grid>
+                                                                        <Grid item className={classes.inputBox}>
+                                                                            <TextField id="supportingInfoTypeOfBill" variant="standard" value={this.state.supportingInfoTypeOfBill} onChange={this.handleSupportingInfoTypeOfBill} />
+                                                                        </Grid>
+                                                                    </Grid>
+                                                                </Grid>
                                                             </Grid>
-                                                            <Grid item className={classes.paper}>
-                                                                <FormLabel>Type of Bill</FormLabel>
-                                                                <TextField id="supportingInfoTypeOfBill" variant="standard" value={this.state.supportingInfoTypeOfBill} onChange={this.handleSupportingInfoTypeOfBill}/>
-                                                            </Grid>
-                                                            
                                                         </FormControl>
                                                     </Grid>
                                                     <Grid item className={classes.paper}>
                                                         <FormControl>
                                                             <FormLabel>Care Team</FormLabel>
-                                                            <CareTeam rows={this.state.careTeamList}  providerList={providerListOptions} addOne={this.addOneCareTeam} edit={this.editCareTeam} deleteOne={this.deleteOneCareTeam} />
+                                                            <CareTeam rows={this.state.careTeamList} providerList={providerListOptions} addOne={this.addOneCareTeam} edit={this.editCareTeam} deleteOne={this.deleteOneCareTeam} />
                                                         </FormControl>
                                                     </Grid>
                                                 </Grid>
