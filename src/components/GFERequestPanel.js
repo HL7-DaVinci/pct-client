@@ -30,7 +30,6 @@ import { ProcedureCodes } from '../values/ProcedureCode';
 import DiagnosisItem, { columns as DiagnosisColumns } from './DiagnosisItem';
 import { SupportingInfoType } from '../values/SupportingInfo';
 import { DiagnosisList, DiagnosisTypeList } from '../values/DiagnosisList';
-import { RevenueCodeList } from '../values/RevenueCodeList';
 import ViewErrorDialog from './ViewErrorDialog';
 
 const styles = theme => ({
@@ -578,17 +577,18 @@ class GFERequestBox extends Component {
             const procedureCodingOrig = ProcedureCodes.find(code => claimItem.productOrService.startsWith(code.code));
             let procedureCoding = Object.assign({}, procedureCodingOrig);
             delete procedureCoding["unitPrice"];
+            delete procedureCoding["revenue"];
 
             const pos = PlaceOfServiceList.find(pos => pos.display === claimItem.placeOfService);
 
             let newItem = {
                 sequence: sequenceCount++,
-                revenue: claimItem.revenue ? {
+                revenue: {
                     coding: [{
                         system: "http://hl7.org/fhir/us/davinci-pct/CodeSystem/PCTGFEItemRevenueCS",
-                        code: RevenueCodeList.find(code => code.display === claimItem.revenue).code
+                        code: procedureCodingOrig.revenue.code
                     }]
-                } : undefined,
+                },
                 productOrService: {
                     coding: [
                         procedureCoding
