@@ -1247,7 +1247,7 @@ class GFERequestBox extends Component {
                                         </Grid>
                                         <Grid container className={classes.block}>
                                             <Grid item className={classes.blockHeader} xs={12}>
-                                                <Typography variant="body2" color="initial">Product or Service to be Estimated</Typography>
+                                                <Typography color="initial">Product or Service to be Estimated</Typography>
                                             </Grid>
                                             <Grid item className={classes.paper} xs={12}>
                                                 <Typography><InputLabel htmlFor="total-claim-amount">Total Claim Amount: {totalClaimAmountDisplay}</InputLabel></Typography>
@@ -1298,7 +1298,7 @@ class GFERequestBox extends Component {
                                         </Grid>
                                         <Grid container className={classes.block}>
                                             <Grid item className={classes.blockHeader} xs={12}>
-                                                <Typography variant="body2" color="initial">Billing Details</Typography>
+                                                <Typography color="initial">Billing Details</Typography>
                                             </Grid>
                                             <Grid item className={classes.paper} xs={12}>
                                                 <FormControl component="fieldset">
