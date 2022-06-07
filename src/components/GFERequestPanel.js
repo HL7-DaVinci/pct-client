@@ -63,7 +63,8 @@ const styles = theme => ({
     },
     singleSelect: {
         marginLeft: 20,
-        width: 120
+        marginRight: 3,
+        //width: 180
     },
     inputBox: {
         marginLeft: 30,
@@ -1254,7 +1255,7 @@ class GFERequestBox extends Component {
                                                 <Typography color="initial">Product or Service to be Estimated</Typography>
                                             </Grid>
                                             <Grid item className={classes.paper} xs={12}>
-                                                <Typography><InputLabel htmlFor="total-claim-amount">Total Claim Amount: {totalClaimAmountDisplay}</InputLabel></Typography>
+                                                <Typography><InputLabel htmlFor="total-claim-amount" className={classes.smallerHeader}>Total Claim Amount: {totalClaimAmountDisplay}</InputLabel></Typography>
                                             </Grid>
                                             <Grid item className={classes.paper} xs={12}>
                                                 <FormControl>
