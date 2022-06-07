@@ -1258,7 +1258,7 @@ class GFERequestBox extends Component {
                                             </Grid>
                                             <Grid item className={classes.paper} xs={12}>
                                                 <FormControl>
-                                                    <FormLabel>Claim Items *</FormLabel>
+                                                    <FormLabel className={classes.smallerHeader}>Claim Items *</FormLabel>
                                                     <ClaimItem rows={this.state.claimItemList} addOne={this.addOneClaimItem} edit={this.editClaimItem} deleteOne={this.deleteOneClaimItem} />
                                                 </FormControl>
                                             </Grid>
@@ -1266,7 +1266,7 @@ class GFERequestBox extends Component {
                                                 <Grid container direction="row">
                                                     <Grid item className={classes.paper}>
                                                         <FormControl>
-                                                            <FormLabel>Supporting Information</FormLabel>
+                                                            <FormLabel className={classes.smallerHeader}>Supporting Information</FormLabel>
                                                             <Grid container direction="column">
                                                                 <Grid item className={classes.paper}>
                                                                     <Grid container direction="row">
@@ -1293,7 +1293,7 @@ class GFERequestBox extends Component {
                                                     </Grid>
                                                     <Grid item className={classes.paper}>
                                                         <FormControl>
-                                                            <FormLabel>Care Team</FormLabel>
+                                                            <FormLabel className={classes.smallerHeader}>Care Team</FormLabel>
                                                             <CareTeam rows={this.state.careTeamList} providerList={providerListOptions} addOne={this.addOneCareTeam} edit={this.editCareTeam} deleteOne={this.deleteOneCareTeam} />
                                                         </FormControl>
                                                     </Grid>
@@ -1306,7 +1306,7 @@ class GFERequestBox extends Component {
                                             </Grid>
                                             <Grid item className={classes.paper} xs={12}>
                                                 <FormControl component="fieldset">
-                                                    <FormLabel>GFE Type</FormLabel>
+                                                    <FormLabel className={classes.smallerHeader}>GFE Type</FormLabel>
                                                     <RadioGroup row aria-label="GFE Type" name="row-radio-buttons-group" value={this.props.gfeTYpe} onChange={e => this.props.setGfeType(e.target.value)} defaultValue={this.props.gfeType}>
                                                         <FormControlLabel value="institutional" control={<Radio size="small" />} label="Institutional" />
                                                         <FormControlLabel value="professional" control={<Radio size="small" />} label="Professional" />
@@ -1362,7 +1362,7 @@ class GFERequestBox extends Component {
                                             </Grid>
                                             <Grid item className={classes.paper} xs={12}>
                                                 <FormControl>
-                                                    <FormLabel>Submitter *</FormLabel>
+                                                    <FormLabel className={classes.smallerHeader}>Submitter *</FormLabel>
                                                     {OrganizationSelect(this.state.organizationList, "submitter-label", "submitter", this.handleOpenOrganizationList, this.handleSelectSubmitter)}
                                                 </FormControl>
                                             </Grid>
