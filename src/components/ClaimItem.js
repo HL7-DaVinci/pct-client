@@ -17,7 +17,7 @@ export const columns = [
         required: true
     },
     {
-        field: 'estimatedDateOfService', headerName: 'Estimate Date', editable: true, type: 'date', minWidth: 200,
+        field: 'estimatedDateOfService', headerName: 'Estimate Date', editable: true, type: 'date', minWidth: 10,
         valueGetter: (params) => {
             return params.value;
         },
@@ -82,7 +82,7 @@ export default function ClaimItem(props) {
 
     return (
         <div>
-            <DataGridComponent style={{ display: 'flex', width: '280%', flexGrow: 1 }} rows={props.rows} columns={columns} add={props.addOne} edit={props.edit} delete={props.deleteOne} />
+            <DataGridComponent style={{ display: 'flex', width: '90vw', flexGrow: 1 }} rows={props.rows} columns={columns} add={props.addOne} edit={props.edit} delete={props.deleteOne} />
         </div>
     )
 }
