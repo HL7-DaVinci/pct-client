@@ -43,7 +43,7 @@ const styles = theme => ({
         color: theme.palette.text.secondary,
         marginLeft: 30,
         marginRight: 20,
-        paddingBottom: 50
+        paddingBottom: 30
     },
     block: {
         // marginLeft: 30,
@@ -68,6 +68,10 @@ const styles = theme => ({
     inputBox: {
         marginLeft: 30,
         width: 150
+    },
+    smallerHeader:{
+        marginTop: 10,
+        marginBottom: 20
     }
 });
 
@@ -1222,12 +1226,12 @@ class GFERequestBox extends Component {
                                                 <Typography>Patient and Insurance Information</Typography>
                                             </Grid>
                                             <Grid item className={classes.paper} xs={12}>
-                                                <Grid container direction="row" spacing={3}>
+                                                <Grid container direction="row" >
                                                     <Grid item>
                                                         <Grid container direction="column">
                                                             <Grid item className={classes.paper}>
                                                                 <FormControl>
-                                                                    <FormLabel>Patient *</FormLabel>
+                                                                    <FormLabel className={classes.smallerHeader}>Patient *</FormLabel>
                                                                     {PatientSelect(this.state.patientList, this.state.selectedPatient, this.handleOpenPatients, this.handleSelectPatient)}
                                                                 </FormControl>
                                                             </Grid>
@@ -1238,7 +1242,7 @@ class GFERequestBox extends Component {
                                                     </Grid>
                                                     <Grid item className={classes.paper}>
                                                         <FormControl>
-                                                            <FormLabel>Diagnosis *</FormLabel>
+                                                            <FormLabel className={classes.smallerHeader}>Diagnosis *</FormLabel>
                                                             <DiagnosisItem rows={this.state.diagnosisList} addOne={this.addOneDiagnosisItem} edit={this.editDiagnosisItem} deleteOne={this.deleteOneDiagnosisItem} />
                                                         </FormControl>
                                                     </Grid>
