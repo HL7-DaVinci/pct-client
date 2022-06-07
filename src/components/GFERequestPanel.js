@@ -42,7 +42,8 @@ const styles = theme => ({
         textAlign: 'left',
         color: theme.palette.text.secondary,
         marginLeft: 30,
-        marginRight: 20
+        marginRight: 20,
+        paddingBottom: 50
     },
     block: {
         // marginLeft: 30,
@@ -1220,7 +1221,7 @@ class GFERequestBox extends Component {
                                             <Grid item className={classes.blockHeader} xs={12}>
                                                 <Typography>Patient and Insurance Information</Typography>
                                             </Grid>
-                                            <Grid item xs={12}>
+                                            <Grid item className={classes.paper} xs={12}>
                                                 <Grid container direction="row" spacing={3}>
                                                     <Grid item>
                                                         <Grid container direction="column">
