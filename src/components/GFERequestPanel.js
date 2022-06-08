@@ -41,7 +41,8 @@ const styles = theme => ({
         textAlign: 'left',
         color: theme.palette.text.secondary,
         marginLeft: 30,
-        marginRight: 20
+        marginRight: 20,
+        paddingBottom: 30
     },
     block: {
         // marginLeft: 30,
@@ -61,11 +62,16 @@ const styles = theme => ({
     },
     singleSelect: {
         marginLeft: 20,
-        width: 120
+        marginRight: 3,
+        //width: 180
     },
     inputBox: {
         marginLeft: 30,
         width: 150
+    },
+    smallerHeader:{
+        marginTop: 10,
+        marginBottom: 20
     }
 });
 
@@ -1204,13 +1210,13 @@ class GFERequestBox extends Component {
                                             <Grid item className={classes.blockHeader} xs={12}>
                                                 <Typography>Patient and Insurance Information</Typography>
                                             </Grid>
-                                            <Grid item xs={12}>
-                                                <Grid container direction="row" spacing={3}>
+                                            <Grid item className={classes.paper} xs={12}>
+                                                <Grid container direction="row" >
                                                     <Grid item>
                                                         <Grid container direction="column">
                                                             <Grid item className={classes.paper}>
                                                                 <FormControl>
-                                                                    <FormLabel>Patient *</FormLabel>
+                                                                    <FormLabel className={classes.smallerHeader}>Patient *</FormLabel>
                                                                     {PatientSelect(this.state.patientList, this.state.selectedPatient, this.handleOpenPatients, this.handleSelectPatient)}
                                                                 </FormControl>
                                                             </Grid>
@@ -1221,7 +1227,7 @@ class GFERequestBox extends Component {
                                                     </Grid>
                                                     <Grid item className={classes.paper}>
                                                         <FormControl>
-                                                            <FormLabel>Diagnosis *</FormLabel>
+                                                            <FormLabel className={classes.smallerHeader}>Diagnosis *</FormLabel>
                                                             <DiagnosisItem rows={this.state.diagnosisList} addOne={this.addOneDiagnosisItem} edit={this.editDiagnosisItem} deleteOne={this.deleteOneDiagnosisItem} />
                                                         </FormControl>
                                                     </Grid>
@@ -1230,22 +1236,28 @@ class GFERequestBox extends Component {
                                         </Grid>
                                         <Grid container className={classes.block}>
                                             <Grid item className={classes.blockHeader} xs={12}>
-                                                <Typography variant="body2" color="initial">Product or Service to be Estimated</Typography>
+                                                <Typography color="initial">Product or Service to be Estimated</Typography>
                                             </Grid>
                                             <Grid item className={classes.paper} xs={12}>
-                                                <Typography><InputLabel htmlFor="total-claim-amount">Total Claim Amount: {totalClaimAmountDisplay}</InputLabel></Typography>
+                                                <Typography><InputLabel htmlFor="total-claim-amount" className={classes.smallerHeader}>Total Claim Amount: {totalClaimAmountDisplay}</InputLabel></Typography>
                                             </Grid>
                                             <Grid item className={classes.paper} xs={12}>
                                                 <FormControl>
-                                                    <FormLabel>Claim Items *</FormLabel>
+                                                    <FormLabel className={classes.smallerHeader}>Claim Items *</FormLabel>
                                                     <ClaimItem rows={this.state.claimItemList} addOne={this.addOneClaimItem} edit={this.editClaimItem} deleteOne={this.deleteOneClaimItem} />
                                                 </FormControl>
                                             </Grid>
                                             <Grid item xs={12}>
                                                 <Grid container direction="row">
+                                                <Grid item className={classes.paper}>
+                                                        <FormControl>
+                                                            <FormLabel className={classes.smallerHeader}>Care Team</FormLabel>
+                                                            <CareTeam rows={this.state.careTeamList} providerList={providerListOptions} addOne={this.addOneCareTeam} edit={this.editCareTeam} deleteOne={this.deleteOneCareTeam} />
+                                                        </FormControl>
+                                                    </Grid>
                                                     <Grid item className={classes.paper}>
                                                         <FormControl>
-                                                            <FormLabel>Supporting Information</FormLabel>
+                                                            <FormLabel className={classes.smallerHeader}>Supporting Information</FormLabel>
                                                             <Grid container direction="column">
                                                                 <Grid item className={classes.paper}>
                                                                     <Grid container direction="row">
@@ -1259,23 +1271,17 @@ class GFERequestBox extends Component {
                                                                 </Grid>
                                                             </Grid>
                                                         </FormControl>
-                                                    </Grid>
-                                                    <Grid item className={classes.paper}>
-                                                        <FormControl>
-                                                            <FormLabel>Care Team</FormLabel>
-                                                            <CareTeam rows={this.state.careTeamList} providerList={providerListOptions} addOne={this.addOneCareTeam} edit={this.editCareTeam} deleteOne={this.deleteOneCareTeam} />
-                                                        </FormControl>
-                                                    </Grid>
+                                                    </Grid>    
                                                 </Grid>
                                             </Grid>
                                         </Grid>
                                         <Grid container className={classes.block}>
                                             <Grid item className={classes.blockHeader} xs={12}>
-                                                <Typography variant="body2" color="initial">Billing Details</Typography>
+                                                <Typography color="initial">Billing Details</Typography>
                                             </Grid>
                                             <Grid item className={classes.paper} xs={12}>
                                                 <FormControl component="fieldset">
-                                                    <FormLabel>GFE Type</FormLabel>
+                                                    <FormLabel className={classes.smallerHeader}>GFE Type</FormLabel>
                                                     <RadioGroup row aria-label="GFE Type" name="row-radio-buttons-group" value={this.props.gfeTYpe} onChange={e => this.props.setGfeType(e.target.value)} defaultValue={this.props.gfeType}>
                                                         <FormControlLabel value="institutional" control={<Radio size="small" />} label="Institutional" />
                                                         <FormControlLabel value="professional" control={<Radio size="small" />} label="Professional" />
@@ -1331,7 +1337,7 @@ class GFERequestBox extends Component {
                                             </Grid>
                                             <Grid item className={classes.paper} xs={12}>
                                                 <FormControl>
-                                                    <FormLabel>Submitter *</FormLabel>
+                                                    <FormLabel className={classes.smallerHeader}>Submitter *</FormLabel>
                                                     {OrganizationSelect(this.state.organizationList, "submitter-label", "submitter", this.handleOpenOrganizationList, this.handleSelectSubmitter)}
                                                 </FormControl>
                                             </Grid>
