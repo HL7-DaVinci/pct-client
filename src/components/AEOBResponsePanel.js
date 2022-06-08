@@ -42,6 +42,11 @@ const useStyles = makeStyles({
     },
     responseBody: {
         minHeight: "800px"
+    },
+    topbutton:{
+        marginTop: 10,
+        marginBottom: 20,
+        marginLeft: 20
     }
 });
 
@@ -100,15 +105,13 @@ export default function AEOBResponsePanel(props) {
         <div>
             <Grid container spacing={2} direction="column" >
                 <Grid item>
-                    <FormControl>
-                        <Grid container>
-                            <Grid item>
+                        <Grid container justifyContent='left'>
+                            <Grid item className={classes.topbutton}>
                                 <Button loading variant="contained" color="secondary" onClick={handleNewRequest} startIcon={<ArrowBackIosNew />}>
                                     Create New GFE Request
                                 </Button>
                             </Grid>
                         </Grid>
-                    </FormControl>
                 </Grid>
                 <Grid item className={classes.responseBody}>
                     <Grid container spacing={3} direction="row" className={classes.root}>
