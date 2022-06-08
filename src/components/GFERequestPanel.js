@@ -1265,6 +1265,12 @@ class GFERequestBox extends Component {
                                             </Grid>
                                             <Grid item xs={12}>
                                                 <Grid container direction="row">
+                                                <Grid item className={classes.paper}>
+                                                        <FormControl>
+                                                            <FormLabel className={classes.smallerHeader}>Care Team</FormLabel>
+                                                            <CareTeam rows={this.state.careTeamList} providerList={providerListOptions} addOne={this.addOneCareTeam} edit={this.editCareTeam} deleteOne={this.deleteOneCareTeam} />
+                                                        </FormControl>
+                                                    </Grid>
                                                     <Grid item className={classes.paper}>
                                                         <FormControl>
                                                             <FormLabel className={classes.smallerHeader}>Supporting Information</FormLabel>
@@ -1291,13 +1297,7 @@ class GFERequestBox extends Component {
                                                                 </Grid>
                                                             </Grid>
                                                         </FormControl>
-                                                    </Grid>
-                                                    <Grid item className={classes.paper}>
-                                                        <FormControl>
-                                                            <FormLabel className={classes.smallerHeader}>Care Team</FormLabel>
-                                                            <CareTeam rows={this.state.careTeamList} providerList={providerListOptions} addOne={this.addOneCareTeam} edit={this.editCareTeam} deleteOne={this.deleteOneCareTeam} />
-                                                        </FormControl>
-                                                    </Grid>
+                                                    </Grid>    
                                                 </Grid>
                                             </Grid>
                                         </Grid>
