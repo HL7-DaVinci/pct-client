@@ -1,7 +1,6 @@
 import DataGridComponent, { renderRequiredHeader } from './DataGridComponent';
 import { PlaceOfServiceList } from '../values/PlaceOfService';
 import { ProcedureCodes } from '../values/ProcedureCode';
-import { RevenueCodeList } from '../values/RevenueCodeList';
 
 export const columns = [
     {
@@ -66,20 +65,12 @@ export const columns = [
         }
     },
     {
-        field: 'revenue', headerName: 'Revenue Code', editable: true, type: 'singleSelect', minWidth: 180,
-        renderHeader: renderRequiredHeader,
-        required: true,
-        valueOptions: RevenueCodeList.map(code => `${code.display}`)
-    },
-    {
         field: 'placeOfService', headerName: "Place of Service", editable: true, type: "singleSelect", minWidth: 200,
         valueOptions: PlaceOfServiceList.map(pos => pos.display)
     }
 ];
 
 export default function ClaimItem(props) {
-
-
     return (
         <div>
             <DataGridComponent style={{ display: 'flex', width: '90vw', flexGrow: 1 }} rows={props.rows} columns={columns} add={props.addOne} edit={props.edit} delete={props.deleteOne} />

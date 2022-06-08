@@ -30,7 +30,6 @@ import { ProcedureCodes } from '../values/ProcedureCode';
 import DiagnosisItem, { columns as DiagnosisColumns } from './DiagnosisItem';
 import { SupportingInfoType } from '../values/SupportingInfo';
 import { DiagnosisList, DiagnosisTypeList } from '../values/DiagnosisList';
-import { RevenueCodeList } from '../values/RevenueCodeList';
 import ViewErrorDialog from './ViewErrorDialog';
 
 const styles = theme => ({
@@ -584,17 +583,18 @@ class GFERequestBox extends Component {
             const procedureCodingOrig = ProcedureCodes.find(code => claimItem.productOrService.startsWith(code.code));
             let procedureCoding = Object.assign({}, procedureCodingOrig);
             delete procedureCoding["unitPrice"];
+            delete procedureCoding["revenue"];
 
             const pos = PlaceOfServiceList.find(pos => pos.display === claimItem.placeOfService);
 
             let newItem = {
                 sequence: sequenceCount++,
-                revenue: claimItem.revenue ? {
+                revenue: {
                     coding: [{
                         system: "http://hl7.org/fhir/us/davinci-pct/CodeSystem/PCTGFEItemRevenueCS",
-                        code: RevenueCodeList.find(code => code.display === claimItem.revenue).code
+                        code: procedureCodingOrig.revenue.code
                     }]
-                } : undefined,
+                },
                 productOrService: {
                     coding: [
                         procedureCoding
@@ -677,23 +677,11 @@ class GFERequestBox extends Component {
         });
 
         // supportingInfo
-        if (this.state.supportingInfoPlaceOfService || this.state.supportingInfoTypeOfBill) {
+        if (this.state.supportingInfoTypeOfBill) {
             input.supportingInfo = [];
             let supportingInfoSequence = 1;
 
             const categoryCodeableConcept = inputType => SupportingInfoType.find(type => type.type === inputType);
-
-            if (this.state.supportingInfoPlaceOfService) {
-                input.supportingInfo.push({
-                    sequence: supportingInfoSequence++,
-                    category: categoryCodeableConcept("cmspos").codeableConcept,
-                    code: {
-                        coding: [
-                            PlaceOfServiceList.find(pos => pos.code === this.state.supportingInfoPlaceOfService),
-                        ]
-                    }
-                })
-            }
 
             if (this.state.supportingInfoTypeOfBill) {
                 input.supportingInfo.push({
@@ -858,10 +846,6 @@ class GFERequestBox extends Component {
 
     handleSelectDiagnosis = e =>
         this.setState({ selectedDiagnosis: e.target.value })
-
-    handleSupportingInfoPOS = e => {
-        this.setState({ supportingInfoPlaceOfService: e.target.value })
-    }
 
     handleSupportingInfoTypeOfBill = e => {
         this.setState({ supportingInfoTypeOfBill: e.target.value })
@@ -1275,16 +1259,6 @@ class GFERequestBox extends Component {
                                                         <FormControl>
                                                             <FormLabel className={classes.smallerHeader}>Supporting Information</FormLabel>
                                                             <Grid container direction="column">
-                                                                <Grid item className={classes.paper}>
-                                                                    <Grid container direction="row">
-                                                                        <Grid item>
-                                                                            <FormLabel>Place of Service</FormLabel>
-                                                                        </Grid>
-                                                                        <Grid item className={classes.singleSelect}>
-                                                                            {PlaceOfServiceSelect(this.state.supportingInfoPlaceOfService, this.handleSupportingInfoPOS)}
-                                                                        </Grid>
-                                                                    </Grid>
-                                                                </Grid>
                                                                 <Grid item className={classes.paper}>
                                                                     <Grid container direction="row">
                                                                         <Grid item>
