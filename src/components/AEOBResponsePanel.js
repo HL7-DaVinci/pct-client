@@ -1,7 +1,9 @@
 import React, { useEffect, useState } from 'react';
-import { Card, CardContent, Typography, makeStyles, FormControl, Grid, Button, LinearProgress, IconButton, Avatar } from '@material-ui/core';
+import { Box, Card, CardContent, Dialog, DialogTitle, DialogContent, DialogContentText, DialogActions, Typography, makeStyles, FormControl, Grid, Button, LinearProgress, IconButton, Avatar } from '@material-ui/core';
 import { sendAEOInquiry } from '../api';
 import ArrowBackIosNew from '@material-ui/icons/ArrowBackIos'
+import ViewGFERequestDialog from './ViewGFEDialog';
+
 
 const useStyles = makeStyles({
     root: {
@@ -100,6 +102,26 @@ export default function AEOBResponsePanel(props) {
         props.setShowResponse(false)
         props.setShowRequest(true);
     }
+
+
+    const [open, setOpen] = React.useState(false);
+    const [request, setRequest] = React.useState(undefined);
+    const [error, setError] = React.useState(false);
+
+    const handleClickOpen = () => {
+        setOpen(true);
+        const { valid, error } = props.valid()
+        if (valid) {
+            setRequest(props.generateRequest());
+        } else {
+            setError(true);
+            setRequest(error);
+        }
+    };
+
+    const handleClose = () => {
+        setOpen(false);
+    };
 
     return (
         <div>
@@ -235,6 +257,66 @@ export default function AEOBResponsePanel(props) {
                                                             </CardContent></Card>) : null
                                                     }
                                                 </Card>
+                                                <Grid item xs={12}>
+                                                    <Box>
+                                                <Button variant="outlined" color="primary" onClick={handleClickOpen}>
+                                                    Review GFE Request
+                                                </Button>
+                                                    <Dialog
+                                                        
+                                                        maxWidth="lg"
+                                                        open={open}
+                                                        onClose={handleClose}
+                                                    >
+                                                        <DialogTitle>Review Submitted GFE Request</DialogTitle>
+                                                        <DialogContent>
+                                                            {
+                                                            error ? null : (<DialogContentText>
+                                                                Submitted GFE Request:
+                                                            </DialogContentText>)
+                                                            }
+                                                        <Box
+                                                            noValidate
+                                                            component="form"
+                                                            sx={{
+                                                                display: 'flex',
+                                                                flexDirection: 'column',
+                                                                m: 'auto',
+                                                                width: 'fit-content',
+                                                                
+                                                            }}
+                                                        >
+                                                            {
+                                                                error ? (<div style={{ color: "red" }}>
+                                                                    <span>Request Validation Errors:</span>
+                                                                    <ul>
+                                                                        {
+                                                                            request ? (request.map(error => (
+                                                                                <li>
+                                                                                    {error}
+                                                                                </li>
+                                                                            ))) : (props.error.map(error => (
+                                                                                <li>
+                                                                                    {error}
+                                                                                </li>
+                                                                            )))
+                                                                        }
+                                                                    </ul>
+
+                                                                </div>) : (
+                                                                    <div>
+                                                                        <pre>{JSON.stringify(props.gfeResponse, undefined, 2)}</pre>
+                                                                    </div>
+                                                                )
+                                                            }
+                                                        </Box>
+                                                        </DialogContent>
+                                                        <DialogActions>
+                                                            <Button onClick={handleClose}>Close</Button>
+                                                        </DialogActions>
+                                                    </Dialog>
+                                                    </Box>
+                                                    </Grid>
                                             </div>
                                         </Grid>
                                     </Grid>
