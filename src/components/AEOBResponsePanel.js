@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { Box, Card, CardContent, Dialog, DialogTitle, DialogContent, DialogContentText, DialogActions, Typography, makeStyles, FormControl, Grid, Button, LinearProgress, IconButton, Avatar } from '@material-ui/core';
+import { Box, Card, CardContent, Dialog, DialogTitle, DialogContent, DialogContentText, DialogActions, Divider, List, Typography, makeStyles, FormControl, Grid, Button, LinearProgress, IconButton, Avatar } from '@material-ui/core';
 import { sendAEOInquiry } from '../api';
 import ArrowBackIosNew from '@material-ui/icons/ArrowBackIos'
 import ViewGFERequestDialog from './ViewGFEDialog';
@@ -7,7 +7,7 @@ import ViewGFERequestDialog from './ViewGFEDialog';
 
 const useStyles = makeStyles({
     root: {
-        backgroundColor: "#dadacc"
+        //backgroundColor: "#dadacc"
     },
     title: {
         fontSize: 14,
@@ -45,7 +45,7 @@ const useStyles = makeStyles({
     responseBody: {
         minHeight: "800px"
     },
-    topbutton:{
+    topbutton: {
         marginTop: 10,
         marginBottom: 20,
         marginLeft: 20
@@ -105,48 +105,55 @@ export default function AEOBResponsePanel(props) {
 
 
     const [open, setOpen] = React.useState(false);
+    const [openAEOB, setOpenAEOB] = React.useState(false);
+
     const [request, setRequest] = React.useState(undefined);
     const [error, setError] = React.useState(false);
 
     const handleClickOpen = () => {
         setOpen(true);
-        const { valid, error } = props.valid()
-        if (valid) {
-            setRequest(props.generateRequest());
-        } else {
-            setError(true);
-            setRequest(error);
-        }
     };
 
     const handleClose = () => {
         setOpen(false);
     };
 
+    const handleClickOpenAEOB = () => {
+        setOpenAEOB(true);
+    };
+
+    const handleCloseAEOB = () => {
+        setOpenAEOB(false);
+    };
+
     return (
         <div>
+
             <Grid container spacing={2} direction="column" >
                 <Grid item>
-                        <Grid container justifyContent='left'>
-                            <Grid item className={classes.topbutton}>
-                                <Button loading variant="contained" color="secondary" onClick={handleNewRequest} startIcon={<ArrowBackIosNew />}>
-                                    Create New GFE Request
-                                </Button>
-                            </Grid>
+                    <Grid container justifyContent='left'>
+                        <Grid item className={classes.topbutton}>
+                            <Button loading variant="contained" color="secondary" onClick={handleNewRequest} startIcon={<ArrowBackIosNew />}>
+                                Create New GFE Request
+                            </Button>
                         </Grid>
+                    </Grid>
                 </Grid>
                 <Grid item className={classes.responseBody}>
+
                     <Grid container spacing={3} direction="row" className={classes.root}>
                         <Grid item className={classes.header} xs={12}>
-                            <Typography variant="h5" color="initial">Response</Typography>
+                            <Typography variant="h5" color="initial">Estimate Details</Typography>
                         </Grid>
                         <Grid item xs={12}>
-                            <Grid container direction="row" spacing={2}  className={classes.aeobResponse}>
+                            <Grid container direction="row" spacing={2} className={classes.aeobResponse}>
+                                <Divider />
                                 <Grid item>
                                     <Grid container spacing={2} direction="column">
                                         <Grid item className={classes.header} xs={12}>
                                             <Typography variant="h6" color="initial">GFE Response</Typography>
                                         </Grid>
+                                        <Divider light />
                                         <Grid item className={classes.content}>
                                             <div className={classes.body}>
                                                 <Card>
@@ -257,77 +264,174 @@ export default function AEOBResponsePanel(props) {
                                                             </CardContent></Card>) : null
                                                     }
                                                 </Card>
-                                                <Grid item xs={12}>
-                                                    <Box>
-                                                <Button variant="outlined" color="primary" onClick={handleClickOpen}>
-                                                    Review GFE Request
-                                                </Button>
-                                                    <Dialog
-                                                        
-                                                        maxWidth="lg"
-                                                        open={open}
-                                                        onClose={handleClose}
-                                                    >
-                                                        <DialogTitle>Review Submitted GFE Request</DialogTitle>
-                                                        <DialogContent>
-                                                            {
-                                                            error ? null : (<DialogContentText>
-                                                                Submitted GFE Request:
-                                                            </DialogContentText>)
-                                                            }
-                                                        <Box
-                                                            noValidate
-                                                            component="form"
-                                                            sx={{
-                                                                display: 'flex',
-                                                                flexDirection: 'column',
-                                                                m: 'auto',
-                                                                width: 'fit-content',
-                                                                
-                                                            }}
-                                                        >
-                                                            {
-                                                                error ? (<div style={{ color: "red" }}>
-                                                                    <span>Request Validation Errors:</span>
-                                                                    <ul>
-                                                                        {
-                                                                            request ? (request.map(error => (
-                                                                                <li>
-                                                                                    {error}
-                                                                                </li>
-                                                                            ))) : (props.error.map(error => (
-                                                                                <li>
-                                                                                    {error}
-                                                                                </li>
-                                                                            )))
-                                                                        }
-                                                                    </ul>
-
-                                                                </div>) : (
-                                                                    <div>
-                                                                        <pre>{JSON.stringify(props.gfeResponse, undefined, 2)}</pre>
-                                                                    </div>
-                                                                )
-                                                            }
-                                                        </Box>
-                                                        </DialogContent>
-                                                        <DialogActions>
-                                                            <Button onClick={handleClose}>Close</Button>
-                                                        </DialogActions>
-                                                    </Dialog>
-                                                    </Box>
-                                                    </Grid>
                                             </div>
                                         </Grid>
                                     </Grid>
                                 </Grid>
-
                             </Grid>
                         </Grid>
-
                     </Grid >
                 </Grid>
             </Grid>
-        </div>
+
+
+
+            <Grid item xs={12}>
+                <Box>
+                    <Button variant="outlined" color="primary" onClick={handleClickOpen}>
+                        Review GFE Request
+                    </Button>
+                    <Dialog
+
+                        maxWidth="lg"
+                        open={open}
+                        onClose={handleClose}
+                    >
+
+
+                        <DialogTitle>
+                            Review Submitted GFE Request
+
+                        </DialogTitle>
+                        <DialogContent>
+                            {
+                                error ? null : (<DialogContentText>
+                                    Submitted GFE Request:
+                                </DialogContentText>)
+                            }
+                            <Box
+                                noValidate
+                                component="form"
+                                sx={{
+                                    display: 'flex',
+                                    flexDirection: 'column',
+                                    m: 'auto',
+                                    width: 'fit-content',
+
+                                }}
+                            >
+                                {
+                                    error ? (<div style={{ color: "red" }}>
+                                        <span>Request Validation Errors:</span>
+                                        <ul>
+                                            {
+                                                request ? (request.map(error => (
+                                                    <li>
+                                                        {error}
+                                                    </li>
+                                                ))) : (props.error.map(error => (
+                                                    <li>
+                                                        {error}
+                                                    </li>
+                                                )))
+                                            }
+                                        </ul>
+
+                                    </div>) : (
+                                        <div>
+                                            <pre>{JSON.stringify(props.gfeResponse, undefined, 2)}</pre>
+                                        </div>
+                                    )
+                                }
+                                <DialogActions>
+                                    <Button onClick={handleClose}>Close</Button>
+                                </DialogActions>
+                            </Box>
+                        </DialogContent>
+                    </Dialog>
+                </Box>
+
+                <Box>
+                    <Button variant="outlined" color="primary" onClick={() => {
+                        handleSendInquiry();
+                        handleClickOpenAEOB();
+                    }}>
+                        Review Submitted AEOB Bundle
+                    </Button>
+                    <Dialog
+                        maxWidth="lg"
+                        open={openAEOB}
+                        onClose={handleCloseAEOB}
+                    >
+
+
+                        <DialogTitle>
+                            Review Submitted AEOB Bundle
+
+                        </DialogTitle>
+                        <DialogContent>
+                            {
+                                error ? null : (<DialogContentText>
+                                    Submitted GFE Request:
+                                </DialogContentText>)
+                            }
+                            <Box
+                                noValidate
+                                component="form"
+                                sx={{
+                                    display: 'flex',
+                                    flexDirection: 'column',
+                                    m: 'auto',
+                                    width: 'fit-content',
+
+                                }}
+                            >
+                                {
+                                    error ? (<div style={{ color: "red" }}>
+                                        <span>Request Validation Errors:</span>
+                                        <ul>
+                                            {
+                                                request ? (request.map(error => (
+                                                    <li>
+                                                        {error}
+                                                    </li>
+                                                ))) : (props.error.map(error => (
+                                                    <li>
+                                                        {error}
+                                                    </li>
+                                                )))
+                                            }
+                                        </ul>
+
+                                    </div>) : (
+                                        <div>
+                                            <pre>{
+                                                props.receivedAEOBResponse ? (
+                                                    <Grid item className={classes.content}>
+                                                        <CardContent className={classes.content}>
+                                                            <Typography className={classes.blockHeader} color="textSecondary" gutterBottom>
+                                                                AEOB Inquiry Response received from the payer
+                                                            </Typography>
+                                                            <Typography className={classes.title} color="textSecondary" gutterBottom>
+                                                                AEOB outcome is {aeobInquiryOutcome}
+                                                            </Typography>
+                                                        </CardContent>
+                                                        <Typography className={classes.title} color="textSecondary" gutterBottom>
+                                                            Received AEOB response
+                                                        </Typography>
+                                                        <Typography className={classes.response} color="textSecondary" gutterBottom>
+                                                            <div>
+                                                                <pre>{JSON.stringify(props.receivedAEOBResponse, undefined, 2)}</pre>
+                                                            </div>
+                                                        </Typography>
+                                                    </Grid>
+                                                ) : null
+                                            }
+
+
+                                            </pre>
+                                        </div>
+                                    )
+                                }
+                                <DialogActions>
+                                    <Button onClick={handleCloseAEOB}>Close</Button>
+                                </DialogActions>
+                            </Box>
+                        </DialogContent>
+                    </Dialog>
+                </Box>
+            </Grid>
+
+        </div >
     );
 }
