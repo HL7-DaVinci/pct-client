@@ -1,4 +1,4 @@
-import React, { Component } from 'react';
+import React, { Component, useState } from 'react';
 import {
     Box, Button,
     FormLabel, FormControl, FormControlLabel,
@@ -11,8 +11,13 @@ import {
     Typography,
     withStyles,
     LinearProgress,
-    TextField
+    TextField,
+    Tabs,
+    Tab,
+    AppBar
 } from '@material-ui/core';
+
+
 
 import {
     getPatients, getDeviceRequestsForPatient, submitGFEClaim, getCoverage,
@@ -31,13 +36,27 @@ import DiagnosisItem, { columns as DiagnosisColumns } from './DiagnosisItem';
 import { SupportingInfoType } from '../values/SupportingInfo';
 import { DiagnosisList, DiagnosisTypeList } from '../values/DiagnosisList';
 import ViewErrorDialog from './ViewErrorDialog';
+import { useTheme } from '@mui/material/styles';
+import PropTypes from 'prop-types';
+import TabContext from '@material-ui/lab/TabContext';
+import { ViewHeadline } from '@material-ui/icons';
+
+
+
+
+
 
 const styles = theme => ({
     root: {
         flexGrow: 1,
+        //padding: 0,
+        //margin: 0,
+        //height: "100vh"
+
+
     },
     paper: {
-        padding: theme.spacing(1),
+        //padding: theme.spacing(1),
         textAlign: 'left',
         color: theme.palette.text.secondary,
         marginLeft: 30,
@@ -69,12 +88,131 @@ const styles = theme => ({
         marginLeft: 30,
         width: 150
     },
-    smallerHeader:{
+    smallerHeader: {
         marginTop: 10,
         marginBottom: 20
+    },
+    tabs: {
+        marginTop: 20
     }
 });
 
+
+function TabPanel(props) {
+    const { children, value, index, ...other } = props;
+
+    return (
+        <div
+            role="tabpanel"
+            hidden={value !== index}
+            id={`full-width-tabpanel-${index}`}
+            aria-labelledby={`full-width-tab-${index}`}
+            {...other}
+        >
+            {value === index && (
+                <Box sx={{ p: 2 }}>
+                    <Typography>{children}</Typography>
+                </Box>
+            )}
+        </div>
+    );
+}
+
+TabPanel.propTypes = {
+    children: PropTypes.node,
+    index: PropTypes.number.isRequired,
+    value: PropTypes.number.isRequired,
+};
+
+function a11yProps(index) {
+    return {
+        id: `full-width-tab-${index}`,
+        'aria-controls': `full-width-tabpanel-${index}`,
+    };
+}
+
+
+//sourced from: https://stackoverflow.com/questions/48031753/material-ui-tab-react-change-active-tab-onclick
+function TabContainer(props) {
+    return (
+        <Typography {...props} component="div" style={{ padding: 8 * 3 }}>
+            {props.children}
+        </Typography>
+    );
+}
+
+//sourced from: https://stackoverflow.com/questions/48031753/material-ui-tab-react-change-active-tab-onclick
+TabContainer.propTypes = {
+    children: PropTypes.node.isRequired,
+};
+
+
+
+
+class GFERequestBox extends Component {
+
+    constructor(props) {
+        super(props);
+        this.initialState = {
+            currentTabIndex: 0,
+        }
+        this.state = this.initialState;
+    };
+
+
+    //sourced from: https://stackoverflow.com/questions/48031753/material-ui-tab-react-change-active-tab-onclick
+    handleChange = (event, value) => {
+        this.setState({ currentTabIndex: value });
+    };
+
+    render() {
+        const { classes } = this.props;
+        const { currentTabIndex } = this.state;
+
+        return (
+            <div>
+                <Grid container space={2} justifyContent='center'>
+                    <AppBar position="static">
+                        <Tabs
+                            value={currentTabIndex}
+                            onChange={this.handleChange}
+                            indicatorColor="secondary"
+                            textColor="inherit"
+                            variant="fullWidth"
+                            aria-label="full width tabs example"
+
+                        >
+                            <Tab label="Good Faith Estimate" {...a11yProps(0)} />
+                            <Tab label="Advanced Explanation of Benefits" {...a11yProps(1)} />
+                        </Tabs>
+                    </AppBar>
+                    <Box
+                        index={currentTabIndex}
+                        onChangeIndex={this.handleChangeIndex}
+                    >
+                        <TabPanel value={currentTabIndex} index={0} >
+                            Item One
+                        </TabPanel>
+                        <TabPanel value={currentTabIndex} index={1} >
+                            Item Two
+                        </TabPanel>
+                    </Box>
+                </Grid>
+            </div >
+        );
+    }
+}
+
+
+
+
+export default withStyles(styles, { withTheme: true })(GFERequestBox);
+
+
+
+
+
+{/*
 const getPatientDisplayName = patient => {
     if (patient === undefined) return null;
     const name = patient.resource.name[0];
@@ -159,6 +297,45 @@ const PlaceOfServiceSelect = (placeOfService, handleChange) =>
         }
     </Select>
 
+//source: mui
+function a11yProps(index) {
+    return {
+        id: `full-width-tab-${index}`,
+        'aria-controls': `full-width-tabpanel-${index}`,
+    };
+}
+
+//source:mui
+function TabPanel(props) {
+    const { children, value, index, ...other } = props;
+    return (
+        <div
+            role="tabpanel"
+            hidden={value !== index}
+            id={`full-width-tabpanel-${index}`}
+            aria-labelledby={`full-width-tab-${index}`}
+            {...other}
+        >
+            {value === index && (
+                <Box sx={{ p: 2 }}>
+                    <Typography>{children}</Typography>
+                </Box>
+            )}
+        </div>
+    );
+}
+
+//source:mui
+TabPanel.propTypes = {
+    children: PropTypes.node,
+    index: PropTypes.number.isRequired,
+    value: PropTypes.number.isRequired,
+};
+
+
+
+
+
 class GFERequestBox extends Component {
 
 
@@ -194,10 +371,14 @@ class GFERequestBox extends Component {
             validationErrors: undefined,
             openErrorDialog: false,
             supportingInfoPlaceOfService: undefined,
-            supportingInfoTypeOfBill: undefined
+            supportingInfoTypeOfBill: undefined,
+            value: 0
+            //index: 0
         };
         this.state = this.initialState;
     }
+
+
 
     componentDidUpdate(prevProps, prevState) {
         if (this.props.dataServerChanged && !prevProps.dataServerChanged) {
@@ -519,13 +700,19 @@ class GFERequestBox extends Component {
             fullUrl: `${fhirServerBaseUrl}/${input.request.coverage.reference}`,
             entry: input.request.coverage.resource
         })
+    */}
 
-        /* if (input.request.practitioner) {
-             input.bundleResources.push({
-                 fullUrl: `${fhirServerBaseUrl}/${input.request.practitioner.reference}`,
-                 entry: input.request.practitioner.resource
-             })
-         }*/
+
+//NOTE COMMENTED OUT HERE
+/* if (input.request.practitioner) {
+                    input.bundleResources.push({
+                        fullUrl: `${fhirServerBaseUrl}/${input.request.practitioner.reference}`,
+                        entry: input.request.practitioner.resource
+                    })
+                }*/
+
+
+{/*
         let insurerOrgRef = `Organization/${this.state.selectedPayor.id}`;
         input.insurer = {
             reference: insurerOrgRef,
@@ -1186,6 +1373,9 @@ class GFERequestBox extends Component {
         return providerMap;
     }
 
+    handleChange = (newTab) => {
+        this.setState({ value: newTab })
+    }
 
     render() {
         const { classes } = this.props;
@@ -1195,6 +1385,12 @@ class GFERequestBox extends Component {
         const totalClaimAmount = this.state.claimItemList.reduce((previousItem, currentItem) => previousItem + currentItem.unitPrice * currentItem.quantity, 0);
         const totalClaimAmountDisplay = isNaN(totalClaimAmount) ? 'TBD' : `$ ${totalClaimAmount}`;
         const professionalBillingProviderList = this.getProfessionalBillingProviderList();
+
+
+
+
+
+
         return (
             <div>
                 <Grid container space={2} justifyContent='center'>
@@ -1249,7 +1445,7 @@ class GFERequestBox extends Component {
                                             </Grid>
                                             <Grid item xs={12}>
                                                 <Grid container direction="row">
-                                                <Grid item className={classes.paper}>
+                                                    <Grid item className={classes.paper}>
                                                         <FormControl>
                                                             <FormLabel className={classes.smallerHeader}>Care Team</FormLabel>
                                                             <CareTeam rows={this.state.careTeamList} providerList={providerListOptions} addOne={this.addOneCareTeam} edit={this.editCareTeam} deleteOne={this.deleteOneCareTeam} />
@@ -1271,7 +1467,7 @@ class GFERequestBox extends Component {
                                                                 </Grid>
                                                             </Grid>
                                                         </FormControl>
-                                                    </Grid>    
+                                                    </Grid>
                                                 </Grid>
                                             </Grid>
                                         </Grid>
@@ -1371,8 +1567,15 @@ class GFERequestBox extends Component {
                     }
                 </Grid>
             </div>
+
         );
+
     }
-}
+
+
+
+
 
 export default withStyles(styles, { withTheme: true })(GFERequestBox);
+
+*/}
