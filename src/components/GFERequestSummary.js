@@ -6,11 +6,11 @@ import Divider from '@mui/material/Divider';
 const useStyles = makeStyles((theme) =>
     createStyles({
         card: {
-            minWidth: 200,
+            minWidth: 300,
             textAlign: "left",
-            marginLeft: 20,
+            marginLeft: 0,
             color: theme.palette.text.secondary,
-            backgroundColor: "#fff"
+            backgroundColor: "#D3D3D3"
         }
     }),
 );

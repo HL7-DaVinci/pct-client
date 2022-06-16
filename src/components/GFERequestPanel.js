@@ -105,11 +105,12 @@ const styles = theme => ({
         width: 150
     },
     smallerHeader: {
-        marginTop: 10,
-        marginBottom: 20
+        marginTop: 0,
+        marginBottom: 0
     },
     tabs: {
-        marginTop: 20
+        marginTop: 10,
+        marginBottom: 10
     }
 });
 
@@ -1396,10 +1397,10 @@ class GFERequestBox extends Component {
                                     aria-label="Vertical tabs example"
                                     sx={{ borderRight: 1, borderColor: 'divider' }}
                                 >
-                                    <Tab label="Patient" {...a11yPropsVertical(0)} />
-                                    <Tab label="Care Team" {...a11yPropsVertical(1)} />
-                                    <Tab label="Encounter" {...a11yPropsVertical(2)} />
-                                    <Tab label="Summary" {...a11yPropsVertical(3)} />
+                                    <Tab label="Patient" {...a11yPropsVertical(0)} className={classes.tabs} />
+                                    <Tab label="Care Team" {...a11yPropsVertical(1)} className={classes.tabs} />
+                                    <Tab label="Encounter" {...a11yPropsVertical(2)} className={classes.tabs} />
+                                    <Tab label="Summary" {...a11yPropsVertical(3)} className={classes.tabs} />
 
                                 </Tabs>
                                 <VerticalTabPanel value={verticalTabIndex} index={0}>
