@@ -65,7 +65,7 @@ export default function MainPanel() {
     }
     return (
         <React.Fragment>
-            <Grid container direction="column" spacing={2}>
+            <Grid container direction="column" >
                 <Grid item xs={12}>
                     <Grid container direction="column">
                         <Grid item>
