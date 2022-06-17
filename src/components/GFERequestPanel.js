@@ -14,7 +14,8 @@ import {
     TextField,
     Tabs,
     Tab,
-    AppBar
+    AppBar,
+    CardContent
 } from '@material-ui/core';
 
 
@@ -26,6 +27,8 @@ import {
 } from '../api'
 
 import GFERequestSummary from './GFERequestSummary'
+import GFEEncounterSummary from './GFEEncounterSummary'
+
 import buildGFEBundle from './BuildGFEBundle';
 import ViewGFERequestDialog from './ViewGFEDialog';
 import { PlaceOfServiceList } from '../values/PlaceOfService';
@@ -33,8 +36,12 @@ import CareTeam, { columns as CareTeamColumns } from './CareTeam';
 import ClaimItem, { columns as ClaimItemColumns } from './ClaimItem';
 import { ProcedureCodes } from '../values/ProcedureCode';
 import DiagnosisItem, { columns as DiagnosisColumns } from './DiagnosisItem';
+import ProcedureItem, { columns as ProcedureColumns } from './ProcedureItem';
+
 import { SupportingInfoType } from '../values/SupportingInfo';
 import { DiagnosisList, DiagnosisTypeList } from '../values/DiagnosisList';
+import { ProcedureList, ProcedureTypeList } from '../values/ProcedureList';
+
 import ViewErrorDialog from './ViewErrorDialog';
 import { useTheme } from '@mui/material/styles';
 import PropTypes from 'prop-types';
@@ -54,6 +61,16 @@ import SendIcon from '@mui/icons-material/Send';
 import ExpandLess from '@mui/icons-material/ExpandLess';
 import ExpandMore from '@mui/icons-material/ExpandMore';
 import StarBorder from '@mui/icons-material/StarBorder';
+
+
+import Stack from '@mui/material/Stack';
+import { AdapterDateFns } from '@mui/x-date-pickers/AdapterDateFns';
+import { LocalizationProvider } from '@mui/x-date-pickers/LocalizationProvider';
+import { TimePicker } from '@mui/x-date-pickers/TimePicker';
+import { DateTimePicker } from '@mui/x-date-pickers/DateTimePicker';
+import { DesktopDatePicker } from '@mui/x-date-pickers/DesktopDatePicker';
+import { MobileDatePicker } from '@mui/x-date-pickers/MobileDatePicker';
+
 
 
 
@@ -111,6 +128,22 @@ const styles = theme => ({
     tabs: {
         marginTop: 10,
         marginBottom: 10
+    },
+    calendar: {
+        maxWidth: 140
+    },
+    headerSpacing: {
+        marginTop: 10,
+        marginBottom: 10
+    },
+    card: {
+        minWidth: 300,
+        textAlign: "left",
+        color: theme.palette.text.secondary,
+        backgroundColor: "#D3D3D3"
+    },
+    newColor: {
+        backgroundColor: "#FFC0CB"
     }
 });
 
@@ -321,6 +354,7 @@ class GFERequestBox extends Component {
             careTeamList: [{ id: 1 }],
             claimItemList: [{ id: 1 }],
             diagnosisList: [{ id: 1 }],
+            procedureList: [{ id: 1 }],
             supportingInfoType: "cmspos",
             validationErrors: undefined,
             openErrorDialog: false,
@@ -329,7 +363,9 @@ class GFERequestBox extends Component {
             currentTabIndex: 0,
             open: true,
             verticalTabIndex: 0,
-            birthdate: undefined
+            birthdate: undefined,
+            dateStart: new Date('2022-08-18T21:11:54'),
+            dateEnd: new Date('2022-08-18T21:11:54')
         }
         this.state = this.initialState;
     };
@@ -1267,6 +1303,62 @@ class GFERequestBox extends Component {
         }
     }
 
+    addOneProcedureItem = () => {
+        let valid = true, msg = undefined;
+        if (this.state.careTeamList.length > 0) {
+            const requiredColumns = ProcedureColumns.filter(column => column.required);
+            const fields = this.extractFieldNames(requiredColumns);
+            msg = `Complete adding existing diagnosis before adding a new one! ${fields} are required fields.`;
+            valid = this.state.procedureList.every(item => {
+                return requiredColumns.every(column => item[column.field] !== undefined);
+            })
+        }
+        if (valid) {
+            const newId = this.state.procedureList.length + 1;
+            this.setState({
+                procedureList: [...this.state.procedureList, { id: newId }]
+            });
+        } else {
+            alert(msg);
+        }
+    }
+
+    deleteOneProcedureItem = id => {
+        this.setState({
+            procedureList: this.state.procedureList.filter(item => item.id !== id)
+        })
+    }
+
+    editProcedureItem = model => {
+        console.log(model);
+        let id, fieldObject, fieldName, fieldValueObject, fieldValue;
+        for (let prop in model) {
+            id = prop;
+            fieldObject = model[id];
+        }
+        if (fieldObject) {
+            for (let name in fieldObject) {
+                fieldName = name;
+            }
+            fieldValueObject = fieldObject[fieldName];
+        }
+        if (fieldValueObject) {
+            fieldValue = fieldValueObject.value;
+        }
+        if (id && fieldName && fieldValue) {
+            this.setState({
+                procedureList: this.state.procedureList.map(item => {
+                    if (item.id === parseInt(id)) {
+                        item[fieldName] = fieldValue;
+                        return item;
+                    } else {
+                        return item;
+                    }
+                })
+            });
+        }
+    }
+
     getCareTeamProviderListOptions() {
         const fhirServerBaseUrl = this.props.ehrUrl;
         const providerMap = [];
@@ -1340,6 +1432,15 @@ class GFERequestBox extends Component {
         this.setState({ verticalTabIndex: value });
     };
 
+    handleDateStartChange = (event, value) => {
+        this.setState({ dateStart: value });
+    };
+    handleDateEndChange = (event, value) => {
+        this.setState({ dateEnd: value });
+    };
+
+
+
 
 
     render() {
@@ -1353,6 +1454,12 @@ class GFERequestBox extends Component {
         const { classes } = this.props;
         const { currentTabIndex } = this.state;
         const { verticalTabIndex } = this.state;
+        const { dateStart, dateEnd } = this.state;
+
+
+
+
+
 
 
 
@@ -1404,7 +1511,7 @@ class GFERequestBox extends Component {
 
                                 </Tabs>
                                 <VerticalTabPanel value={verticalTabIndex} index={0}>
-                                    <Grid item>
+                                    <Grid item >
                                         <Grid container direction="column">
                                             <Grid item className={classes.paper}>
                                                 <FormControl>
@@ -1421,8 +1528,103 @@ class GFERequestBox extends Component {
                                 <VerticalTabPanel value={verticalTabIndex} index={1}>
                                     Item Two
                                 </VerticalTabPanel>
+
+                                {/* Encounter tab */}
                                 <VerticalTabPanel value={verticalTabIndex} index={2}>
-                                    Item Three
+                                    <Grid item className={classes.paper} xs={12}>
+                                        <FormControl component="fieldset">
+                                            <FormLabel className={classes.smallerHeader}>GFE Type</FormLabel>
+                                            <RadioGroup row aria-label="GFE Type" name="row-radio-buttons-group" value={this.props.gfeTYpe} onChange={e => this.props.setGfeType(e.target.value)} defaultValue={this.props.gfeType}>
+                                                <FormControlLabel value="institutional" control={<Radio size="small" />} label="Institutional" />
+                                                <FormControlLabel value="professional" control={<Radio size="small" />} label="Professional" />
+                                            </RadioGroup>
+                                        </FormControl>
+
+
+
+
+                                        <CardContent justifyContent="left" className={classes.card} >
+
+
+                                            <Grid container className={classes.calendar} >
+                                                <Typography variant="subtitle1" component="h3" className={classes.card}>
+                                                    Service Details:
+                                                </Typography>
+
+                                                <LocalizationProvider dateAdapter={AdapterDateFns} >
+
+                                                    <Grid item>
+
+                                                        <DesktopDatePicker
+                                                            label="Start Date"
+                                                            inputFormat="MM/dd/yyyy"
+                                                            value={dateStart}
+                                                            onChange={this.handleDateStartChange}
+                                                            renderInput={(props) => <TextField {...props} />}
+                                                        />
+                                                        <Typography variant="subtitle1" component="h3" className={classes.card}>
+                                                            to
+                                                        </Typography>
+                                                        <DesktopDatePicker
+                                                            label="End Date"
+                                                            inputFormat="MM/dd/yyyy"
+                                                            value={dateEnd}
+                                                            onChange={this.handleDateEndChange}
+                                                            renderInput={(props) => <TextField {...props} />}
+                                                        />
+                                                    </Grid>
+
+
+
+
+                                                </LocalizationProvider>
+
+                                            </Grid>
+
+
+
+
+
+
+
+
+
+
+                                            <Grid item>
+                                                <FormControl>
+
+                                                    <FormLabel className={classes.headerSpacing}>Diagnosis *</FormLabel>
+                                                    <DiagnosisItem rows={this.state.diagnosisList} addOne={this.addOneDiagnosisItem} edit={this.editDiagnosisItem} deleteOne={this.deleteOneDiagnosisItem} />
+                                                </FormControl>
+                                            </Grid>
+
+                                            <Grid item>
+                                                <FormControl className={classes.headerSpacing}>
+                                                    <Typography variant="subtitle1" component="h3" className={classes.card}>
+                                                        Procedure:
+                                                    </Typography>
+                                                    <ProcedureItem rows={this.state.procedureList} addOne={this.addOneProcedureItem} edit={this.editProcedureItem} deleteOne={this.deleteOneProcedureItem} />
+                                                </FormControl>
+                                            </Grid>
+
+
+                                            {/* TODO: hides the side bar when the third chart is on the encounter pg--layout dynamic?*/}
+
+                                            <Grid item>
+                                                <FormControl>
+                                                    <FormLabel >Claim Items *</FormLabel>
+                                                    <ClaimItem rows={this.state.claimItemList} addOne={this.addOneClaimItem} edit={this.editClaimItem} deleteOne={this.deleteOneClaimItem} />
+                                                </FormControl>
+                                            </Grid>
+
+
+                                        </CardContent>
+
+
+
+
+
+                                    </Grid>
                                 </VerticalTabPanel>
                                 <VerticalTabPanel value={verticalTabIndex} index={3}>
                                     Item Four
