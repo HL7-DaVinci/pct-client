@@ -24,7 +24,7 @@ export default function ViewGFERequestDialog(props) {
     return (
         <React.Fragment>
             <Button variant="outlined" color="primary" onClick={handleClickOpen}>
-                Review GFE Request
+                Raw JSON{/*Review GFE Request*/}
             </Button>
             <Dialog
                 maxWidth="lg"

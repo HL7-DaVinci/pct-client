@@ -37,6 +37,8 @@ import ClaimItem, { columns as ClaimItemColumns } from './ClaimItem';
 import { ProcedureCodes } from '../values/ProcedureCode';
 import DiagnosisItem, { columns as DiagnosisColumns } from './DiagnosisItem';
 import ProcedureItem, { columns as ProcedureColumns } from './ProcedureItem';
+import SummaryItem, { columns as SummaryItems } from './SummaryItem';
+
 
 import { SupportingInfoType } from '../values/SupportingInfo';
 import { DiagnosisList, DiagnosisTypeList } from '../values/DiagnosisList';
@@ -123,7 +125,7 @@ const styles = theme => ({
     },
     smallerHeader: {
         marginTop: 0,
-        marginBottom: 0
+        marginBottom: 5
     },
     tabs: {
         marginTop: 10,
@@ -144,7 +146,14 @@ const styles = theme => ({
     },
     newColor: {
         backgroundColor: "#FFC0CB"
+    },
+    fixedTabWidth: {
+        width: "30%"
+    },
+    leftTabs: {
+        minWidth: 120
     }
+
 });
 
 
@@ -465,6 +474,7 @@ class GFERequestBox extends Component {
                             console.log(coverageResult);
                             const reference = Object.keys(coverageResult.references)[0]
                             const resource = coverageResult.references[reference]
+                            //const patientAddress = coverageResult.references[reference]
 
                             this.setState({
                                 selectedPayor: resource,
@@ -477,6 +487,31 @@ class GFERequestBox extends Component {
                     console.log("couldn't retrieve patient's coverage and payor info");
                 }
             })
+
+        /*
+    getAddressByPatient(this.props.ehrUrl, patientId)
+        .then(result => {
+            console.log(" Patient ", result);
+            if (result.data && result.data.length > 0) {
+                getPatient(this.props.ehrUrl, result.data[0].id)
+                    .then(coverageResult => {
+                        console.log(coverageResult);
+                        const reference = Object.keys(coverageResult.references)[0]
+                        const resource = coverageResult.references[reference]
+                        //const patientAddress = coverageResult.references[reference]
+
+                        this.setState({
+                            selectedPayor: resource,
+                            selectedCoverage: coverageResult.data,
+                            selectedProcedure: undefined,
+                            selectedRequest: undefined
+                        });
+                    })
+            } else {
+                console.log("couldn't retrieve patient's coverage and payor info");
+            }
+        })
+        */
 
         this.setState({
             patientSelected: true
@@ -1465,7 +1500,7 @@ class GFERequestBox extends Component {
 
         return (
             <div>
-                <Grid container space={2} justifyContent='center'>
+                <Grid container space={0} justifyContent='center' > {/* container size is adjusted here for main screen */}
                     <AppBar position="static">
                         <Tabs
                             value={currentTabIndex}
@@ -1480,6 +1515,10 @@ class GFERequestBox extends Component {
                             <Tab label="Advanced Explanation of Benefits" {...a11yProps(1)} />
                         </Tabs>
                     </AppBar>
+
+
+
+
                     <Box
                         index={currentTabIndex}
                         onChangeIndex={this.handleChangeIndex}
@@ -1487,22 +1526,23 @@ class GFERequestBox extends Component {
 
                         {/* TODO: adding additional gfe screens with dynamically changing tabs */}
                         {/* first tab at the top(GFE) */}
-                        <VerticalTabPanel value={currentTabIndex} index={0} >
+                        <TabPanel value={currentTabIndex} index={0} >
 
-                            {/* Vertical tabs to left side on the GFE page */}
+                            {/* THIS BOX IS SPACING PROB: Vertical tabs to left side on the GFE page */}
                             <Box
-                                sx={{ flexGrow: 1, bgcolor: 'background.paper', display: 'flex', height: "100vw", width: '100vw' }}
+                                sx={{ flexGrow: 1, bgcolor: 'background.paper', display: 'flex', width: '100vw', height: '100vh' }}
+
                             >
-
-
-
                                 <Tabs
+                                    TabIndicatorProps={{ style: { backgroundColor: "#FFC0CB" } }}
                                     orientation="vertical"
                                     variant="scrollable"
                                     value={verticalTabIndex}
                                     onChange={this.handleVerticalChange}
                                     aria-label="Vertical tabs example"
                                     sx={{ borderRight: 1, borderColor: 'divider' }}
+                                    classes={{ root: classes.leftTabs }}
+
                                 >
                                     <Tab label="Patient" {...a11yPropsVertical(0)} className={classes.tabs} />
                                     <Tab label="Care Team" {...a11yPropsVertical(1)} className={classes.tabs} />
@@ -1510,7 +1550,9 @@ class GFERequestBox extends Component {
                                     <Tab label="Summary" {...a11yPropsVertical(3)} className={classes.tabs} />
 
                                 </Tabs>
-                                <VerticalTabPanel value={verticalTabIndex} index={0}>
+
+                                {/* Patient tab */}
+                                <TabPanel value={verticalTabIndex} index={0} >
                                     <Grid item >
                                         <Grid container direction="column">
                                             <Grid item className={classes.paper}>
@@ -1524,13 +1566,20 @@ class GFERequestBox extends Component {
                                             }
                                         </Grid>
                                     </Grid>
-                                </VerticalTabPanel>
-                                <VerticalTabPanel value={verticalTabIndex} index={1}>
-                                    Item Two
-                                </VerticalTabPanel>
+                                </TabPanel>
+
+                                {/* Care Team tab */}
+                                <TabPanel value={verticalTabIndex} index={1}>
+                                    <Grid item className={classes.paper} xs={12}>
+                                        <FormControl component="fieldset">
+                                            <FormLabel className={classes.smallerHeader}>Care Team</FormLabel>
+                                            <CareTeam rows={this.state.careTeamList} providerList={providerListOptions} addOne={this.addOneCareTeam} edit={this.editCareTeam} deleteOne={this.deleteOneCareTeam} />
+                                        </FormControl>
+                                    </Grid>
+                                </TabPanel>
 
                                 {/* Encounter tab */}
-                                <VerticalTabPanel value={verticalTabIndex} index={2}>
+                                <TabPanel value={verticalTabIndex} index={2}>
                                     <Grid item className={classes.paper} xs={12}>
                                         <FormControl component="fieldset">
                                             <FormLabel className={classes.smallerHeader}>GFE Type</FormLabel>
@@ -1538,100 +1587,93 @@ class GFERequestBox extends Component {
                                                 <FormControlLabel value="institutional" control={<Radio size="small" />} label="Institutional" />
                                                 <FormControlLabel value="professional" control={<Radio size="small" />} label="Professional" />
                                             </RadioGroup>
-                                        </FormControl>
 
-
-
-
-                                        <CardContent justifyContent="left" className={classes.card} >
-
-
-                                            <Grid container className={classes.calendar} >
-                                                <Typography variant="subtitle1" component="h3" className={classes.card}>
-                                                    Service Details:
-                                                </Typography>
-
-                                                <LocalizationProvider dateAdapter={AdapterDateFns} >
-
-                                                    <Grid item>
-
-                                                        <DesktopDatePicker
-                                                            label="Start Date"
-                                                            inputFormat="MM/dd/yyyy"
-                                                            value={dateStart}
-                                                            onChange={this.handleDateStartChange}
-                                                            renderInput={(props) => <TextField {...props} />}
-                                                        />
-                                                        <Typography variant="subtitle1" component="h3" className={classes.card}>
-                                                            to
-                                                        </Typography>
-                                                        <DesktopDatePicker
-                                                            label="End Date"
-                                                            inputFormat="MM/dd/yyyy"
-                                                            value={dateEnd}
-                                                            onChange={this.handleDateEndChange}
-                                                            renderInput={(props) => <TextField {...props} />}
-                                                        />
-                                                    </Grid>
-
-
-
-
-                                                </LocalizationProvider>
-
-                                            </Grid>
-
-
-
-
-
-
-
-
-
-
-                                            <Grid item>
-                                                <FormControl>
-
-                                                    <FormLabel className={classes.headerSpacing}>Diagnosis *</FormLabel>
-                                                    <DiagnosisItem rows={this.state.diagnosisList} addOne={this.addOneDiagnosisItem} edit={this.editDiagnosisItem} deleteOne={this.deleteOneDiagnosisItem} />
-                                                </FormControl>
-                                            </Grid>
-
-                                            <Grid item>
-                                                <FormControl className={classes.headerSpacing}>
+                                            <CardContent justifyContent="left" className={classes.card} >
+                                                <Grid container >
                                                     <Typography variant="subtitle1" component="h3" className={classes.card}>
-                                                        Procedure:
+                                                        Service Details:
                                                     </Typography>
-                                                    <ProcedureItem rows={this.state.procedureList} addOne={this.addOneProcedureItem} edit={this.editProcedureItem} deleteOne={this.deleteOneProcedureItem} />
-                                                </FormControl>
-                                            </Grid>
+
+                                                    <LocalizationProvider dateAdapter={AdapterDateFns} >
+
+                                                        <Grid item>
+
+                                                            <DesktopDatePicker
+                                                                label="Start Date"
+                                                                inputFormat="MM/dd/yyyy"
+                                                                value={dateStart}
+                                                                onChange={this.handleDateStartChange}
+                                                                renderInput={(props) => <TextField {...props} />}
+                                                            />
+                                                            <Typography variant="subtitle1" component="h3" className={classes.card}>
+                                                                to
+                                                            </Typography>
+                                                            <DesktopDatePicker
+                                                                label="End Date"
+                                                                inputFormat="MM/dd/yyyy"
+                                                                value={dateEnd}
+                                                                onChange={this.handleDateEndChange}
+                                                                renderInput={(props) => <TextField {...props} />}
+                                                            />
+                                                        </Grid>
+                                                    </LocalizationProvider>
+                                                </Grid>
+                                                <Grid item>
+                                                    <FormControl>
+
+                                                        <FormLabel className={classes.headerSpacing}>Diagnosis *</FormLabel>
+                                                        <DiagnosisItem rows={this.state.diagnosisList} addOne={this.addOneDiagnosisItem} edit={this.editDiagnosisItem} deleteOne={this.deleteOneDiagnosisItem} />
+                                                    </FormControl>
+                                                </Grid>
+
+                                                <Grid item>
+                                                    <FormControl className={classes.headerSpacing}>
+                                                        <Typography variant="subtitle1" component="h3" className={classes.card}>
+                                                            Procedure:
+                                                        </Typography>
+                                                        <ProcedureItem rows={this.state.procedureList} addOne={this.addOneProcedureItem} edit={this.editProcedureItem} deleteOne={this.deleteOneProcedureItem} />
+                                                    </FormControl>
+                                                </Grid>
 
 
-                                            {/* TODO: hides the side bar when the third chart is on the encounter pg--layout dynamic?*/}
+                                                {/* TODO: hides the side bar when the third chart is on the encounter pg--layout dynamic?*/}
 
-                                            <Grid item>
-                                                <FormControl>
-                                                    <FormLabel >Claim Items *</FormLabel>
-                                                    <ClaimItem rows={this.state.claimItemList} addOne={this.addOneClaimItem} edit={this.editClaimItem} deleteOne={this.deleteOneClaimItem} />
-                                                </FormControl>
-                                            </Grid>
+                                                <Grid item>
+                                                    <FormControl>
+                                                        <FormLabel >Claim Items *</FormLabel>
+                                                        <ClaimItem rows={this.state.claimItemList} addOne={this.addOneClaimItem} edit={this.editClaimItem} deleteOne={this.deleteOneClaimItem} />
+                                                    </FormControl>
+                                                </Grid>
+                                            </CardContent>
+                                        </FormControl>
+                                    </Grid>
+                                </TabPanel>
 
-
-                                        </CardContent>
-
-
-
-
+                                {/* Summary tab*/}
+                                <TabPanel value={verticalTabIndex} index={3}>
+                                    <Grid>
+                                        <ViewGFERequestDialog generateRequest={this.generateBundle} valid={this.isRequestValid} error={this.state.validationErrors} />
 
                                     </Grid>
-                                </VerticalTabPanel>
-                                <VerticalTabPanel value={verticalTabIndex} index={3}>
-                                    Item Four
-                                </VerticalTabPanel>
+                                    <Grid item className={classes.paper} xs={12}>
+                                        <FormControl component="fieldset">
+                                            <FormLabel className={classes.smallerHeader}>Summary</FormLabel>
+                                            <Grid item><SummaryItem summary={summary} /></Grid>
+                                        </FormControl>
 
+                                        {/* Submit button*/}
+
+                                        <Box display="flex" justifyContent="space-evenly">
+                                            <FormControl>
+                                                <Button loading variant="contained" color="primary" type="submit" disabled={this.props.submittingStatus === true}>
+                                                    Submit
+                                                </Button>
+                                            </FormControl>
+                                        </Box>
+                                    </Grid>
+                                </TabPanel>
                             </Box>
-                        </VerticalTabPanel>
+                        </TabPanel>
 
 
                         {/* Second tab on the top (AEOB) */}
