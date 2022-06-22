@@ -139,10 +139,11 @@ const styles = theme => ({
         marginBottom: 10
     },
     card: {
-        minWidth: 300,
+        minWidth: 100,
         textAlign: "left",
         color: theme.palette.text.secondary,
-        backgroundColor: "#D3D3D3"
+        backgroundColor: "#D3D3D3",
+        minWidth: "70vw"
     },
     newColor: {
         backgroundColor: "#FFC0CB"
@@ -151,7 +152,7 @@ const styles = theme => ({
         width: "30%"
     },
     leftTabs: {
-        minWidth: 120
+        minWidth: 170
     }
 
 });
@@ -1596,31 +1597,35 @@ class GFERequestBox extends Component {
 
                                                     <LocalizationProvider dateAdapter={AdapterDateFns} >
 
-                                                        <Grid item>
-
-                                                            <DesktopDatePicker
-                                                                label="Start Date"
-                                                                inputFormat="MM/dd/yyyy"
-                                                                value={dateStart}
-                                                                onChange={this.handleDateStartChange}
-                                                                renderInput={(props) => <TextField {...props} />}
-                                                            />
-                                                            <Typography variant="subtitle1" component="h3" className={classes.card}>
-                                                                to
-                                                            </Typography>
-                                                            <DesktopDatePicker
-                                                                label="End Date"
-                                                                inputFormat="MM/dd/yyyy"
-                                                                value={dateEnd}
-                                                                onChange={this.handleDateEndChange}
-                                                                renderInput={(props) => <TextField {...props} />}
-                                                            />
+                                                        <Grid container spacing={5}>
+                                                            <Grid item s={1}>
+                                                                <DesktopDatePicker
+                                                                    label="Start Date"
+                                                                    inputFormat="MM/dd/yyyy"
+                                                                    value={dateStart}
+                                                                    onChange={this.handleDateStartChange}
+                                                                    renderInput={(props) => <TextField {...props} />}
+                                                                />
+                                                            </Grid>
+                                                            <Grid item s={1}>
+                                                                <Typography variant="body1" component="body1" >
+                                                                    to
+                                                                </Typography>
+                                                            </Grid>
+                                                            <Grid item s={1}>
+                                                                <DesktopDatePicker
+                                                                    label="End Date"
+                                                                    inputFormat="MM/dd/yyyy"
+                                                                    value={dateEnd}
+                                                                    onChange={this.handleDateEndChange}
+                                                                    renderInput={(props) => <TextField {...props} />}
+                                                                />
+                                                            </Grid>
                                                         </Grid>
                                                     </LocalizationProvider>
                                                 </Grid>
                                                 <Grid item>
                                                     <FormControl>
-
                                                         <FormLabel className={classes.headerSpacing}>Diagnosis *</FormLabel>
                                                         <DiagnosisItem rows={this.state.diagnosisList} addOne={this.addOneDiagnosisItem} edit={this.editDiagnosisItem} deleteOne={this.deleteOneDiagnosisItem} />
                                                     </FormControl>

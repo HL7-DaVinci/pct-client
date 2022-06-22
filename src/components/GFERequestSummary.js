@@ -6,7 +6,7 @@ import Divider from '@mui/material/Divider';
 const useStyles = makeStyles((theme) =>
     createStyles({
         card: {
-            minWidth: 300,
+            minWidth: "70vw",
             textAlign: "left",
             marginLeft: 0,
             color: theme.palette.text.secondary,
