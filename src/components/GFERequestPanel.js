@@ -29,6 +29,7 @@ import {
 import GFERequestSummary from './GFERequestSummary'
 import GFEEncounterSummary from './GFEEncounterSummary'
 
+
 import buildGFEBundle from './BuildGFEBundle';
 import ViewGFERequestDialog from './ViewGFEDialog';
 import { PlaceOfServiceList } from '../values/PlaceOfService';
@@ -43,6 +44,8 @@ import SummaryItem, { columns as SummaryItems } from './SummaryItem';
 import { SupportingInfoType } from '../values/SupportingInfo';
 import { DiagnosisList, DiagnosisTypeList } from '../values/DiagnosisList';
 import { ProcedureList, ProcedureTypeList } from '../values/ProcedureList';
+import { PriorityList } from '../values/PriorityList';
+
 
 import ViewErrorDialog from './ViewErrorDialog';
 import { useTheme } from '@mui/material/styles';
@@ -193,6 +196,26 @@ const PatientSelect = (patients, selectPatient, handleOpenPatients, handleChange
     </Select>);
 }
 
+/*
+const getPriorityDisplayName = priority => {
+    if (priority === undefined) return null;
+    const name = priority.resource.name[0];
+    if (name.text != null) return name.text;
+    else return `${name.given[0]} ${name.family}`;
+}
+const PrioritySelect = (priority, selectPriority, handleOpenPriority, handleChange) => {
+    return (<Select required labelId="select-priority-label" id="priority" value={selectPriority} onOpen={handleOpenPriority} onChange={handleChange}>
+        {
+            priority ?
+                priority.map((priority) => {
+                    return (<MenuItem key={priority.resource.id} value={priority.resource.id}>{getPriorityDisplayName(priority)}</MenuItem>);
+                }) : (<MenuItem />)
+
+        }
+    </Select>);
+}
+*/
+
 const RequestSelect = (requests, currentValue, handleOpenRequestList, handleSelectRequest) =>
     <Select labelId="select-request-label" id="request" value={currentValue || ''} onOpen={handleOpenRequestList} onChange={handleSelectRequest}>
         {
@@ -211,7 +234,8 @@ const PractitionerSelect = (practitioners, currentValue, handleOpenPractitionerL
     <Select labelId="select-practitioner-label" id="practitioner" value={currentValue || ''} multiple onOpen={handleOpenPractitionerList} onChange={handleSelectPractitioner}>
         {
             practitioners ? (practitioners.map((practitioner) => {
-                const name = practitioner.resource.name[0]
+                const name = practitioner.resource.name[0] //undefined here
+                //console.log("PRACTICTIONER", name);
                 var display = `${name.given[0]} ${name.family}`;
 
                 return (<MenuItem key={practitioner.resource.id} value={practitioner.resource.id}>{display}</MenuItem>)
@@ -366,16 +390,19 @@ class GFERequestBox extends Component {
     constructor(props) {
         super(props);
         this.initialState = {
-            patientList: [],
-            patientRequestList: [],
-            practitionerRoleList: [],
-            selectedPatient: undefined,
+            patientList: [], //
+            priorityList: [],
+            patientRequestList: [], //
+            practitionerRoleList: [], //
+            selectedPatient: undefined, //
+            selectedPriority: undefined, //
             selectedRequest: undefined,
-            patientSelected: false,
-            organizationList: [],
+            patientSelected: false, //
+            prioritySelected: false,
+            organizationList: [], //
             selectedBillingProvider: undefined,
             selectedSubmitter: undefined,
-            selectedPayor: undefined,
+            selectedPayor: undefined, //
             resolvedReferences: {},
             totalClaim: 0,
             placeOfService: undefined,
@@ -392,7 +419,7 @@ class GFERequestBox extends Component {
             claimItemList: [{ id: 1 }],
             diagnosisList: [{ id: 1 }],
             procedureList: [{ id: 1 }],
-            supportingInfoType: "cmspos",
+            supportingInfoType: "cmspos", //
             validationErrors: undefined,
             openErrorDialog: false,
             supportingInfoPlaceOfService: undefined,
@@ -502,6 +529,16 @@ class GFERequestBox extends Component {
             });
     }
 
+    /*
+    handleOpenPriority = () => {
+        getPriority(this.props.ehrUrl) //PROB HERE --> import data from priorityList.js
+            .then(result => {
+                const priority = result.entry;
+                this.setState({ ...this.state, priorityList: priority });
+            });
+    }
+    */
+
 
     //when select the patient, changes fields within the form specific
     handleSelectPatient = e => {
@@ -560,8 +597,27 @@ class GFERequestBox extends Component {
                 const birthdateText = result[0].birthDate
                 const genderText = result[0].gender
                 const telephoneText = result[0].telecom[0].value
-                const memberNumText = result[0].identifier[0].value //TODO: select member not employee?
 
+
+                //ensure correct id for member
+
+                for (var i = 0; i < result[0].identifier.length; i++) {
+                    console.log("LENGTH", result[0].identifier[i].type.coding[0].code)
+
+                    for (var j = 0; j < result[0].identifier[i].type.coding.length; j++) {
+
+
+                        if (result[0].identifier[i].type.coding[j].code === ("MB")) {
+
+                            const memberNumText = result[0].identifier[0].value
+                            this.setState({
+                                memberNumber: memberNumText
+
+                            })
+
+                        }
+                    }
+                }
 
 
                 if (addressText && addressText.length > 0) {
@@ -570,7 +626,7 @@ class GFERequestBox extends Component {
                         birthdate: birthdateText,
                         gender: genderText,
                         telephone: telephoneText,
-                        memberNumber: memberNumText
+                        //memberNumber: memberNumText
                     });
                     //console.log("address saved in this:", this.state.selectedAddress)
                 } else {
@@ -586,6 +642,18 @@ class GFERequestBox extends Component {
             patientSelected: true
         })
     }
+
+    /*
+    handleSelectPriority = e => {
+        const prioritylevel = e.target.value;
+        this.setState({
+            selectedPriority: prioritylevel
+        })
+        this.setState({
+            prioritySelected: true
+        })
+    }
+    */
 
     handleOpenRequestList = e => {
         getDeviceRequestsForPatient(this.props.ehrUrl, this.state.selectedPatient)
@@ -651,6 +719,7 @@ class GFERequestBox extends Component {
     }
 
     handleSelectBillingProvider = e => {
+        console.log("SHOULD BE;", e.target.value)
         this.setState({
             selectedBillingProvider: e.target.value
         })
@@ -667,9 +736,9 @@ class GFERequestBox extends Component {
 
     handleSelectPractitioner = e => {
         this.setState({
-            ...this.state,
             selectedPractitioner: e.target.value
         })
+        //console.log('TARGET VAL', e.target.value);
 
     }
 
@@ -759,6 +828,7 @@ class GFERequestBox extends Component {
     }
 
 
+    //might need for priority
     generateRequestInput = () => {
         let input = {
             bundleResources: []
@@ -1133,6 +1203,9 @@ class GFERequestBox extends Component {
     generateBundle = () => buildGFEBundle(this.generateRequestInput())
 
     retrieveRequestSummary = () => {
+
+        console.log("CARE TEAM LIST HERE", this.state.careTeamList)
+        //PATIENT DETAILS
         return {
             patientId: this.state.selectedPatient,
             coverageId: this.state.selectedCoverage ? this.state.selectedCoverage.id : undefined,
@@ -1145,7 +1218,18 @@ class GFERequestBox extends Component {
             memberId: this.state.memberNumber,
             subscriberRelationship: this.state.subscriberRelationship,
             coveragePlan: this.state.coveragePlan,
-            coveragePeriod: this.state.coveragePeriod
+            coveragePeriod: this.state.coveragePeriod,
+            practitionerSelected: this.state.careTeamList, //Care team list holds list of current providers
+            //practitioner: this.state.selectedBillingProvider
+            practitionerRoleSelected: this.state.careTeamList,
+            gfeType: this.props.gfeType,
+            diagnosisList: this.state.diagnosisList,
+            procedureList: this.state.procedureList,
+            servicesList: this.state.claimItemList
+
+
+
+
 
 
         };
@@ -1634,12 +1718,6 @@ class GFERequestBox extends Component {
         const { dateStart, dateEnd, GFEtabs, maxTabIndex } = this.state;
 
 
-
-
-
-
-
-
         return (
             <div>
                 <Grid container space={0} justifyContent='center' > {/* container size is adjusted here for main screen */}
@@ -1761,6 +1839,13 @@ class GFERequestBox extends Component {
                                                         Service Details:
                                                     </Typography>
 
+                                                    <Grid item>
+                                                        <FormLabel>Priority: </FormLabel>
+                                                        {/*
+                                                        {PrioritySelect(this.state.priorityList, this.state.selectedPriority, this.handleOpenPriority, this.handleSelectPriority)}
+                                        */}
+                                                    </Grid>
+
                                                     <LocalizationProvider dateAdapter={AdapterDateFns} >
 
                                                         <Grid container spacing={5}>
@@ -1831,6 +1916,7 @@ class GFERequestBox extends Component {
                                     <Grid item className={classes.paper} xs={12}>
                                         <FormControl component="fieldset">
                                             <FormLabel className={classes.smallerHeader}>Summary</FormLabel>
+
                                             <Grid item><SummaryItem summary={summary} /></Grid>
                                         </FormControl>
 

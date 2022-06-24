@@ -16,7 +16,7 @@ export const getDeviceRequestsForPatient = (url, patientId) => {
 };
 
 
-export const getAddress = (url, patientId) => {
+export const getPatient = (url, patientId) => {
     return FHIRClient(url).request(`Patient/${patientId}`, {
         graph: false,
         flat: true,
@@ -24,7 +24,7 @@ export const getAddress = (url, patientId) => {
 }
 
 //gets the address of the patient to display on patient tab
-export const getAddressByPatient = (url, patientId) => {
+export const getPatientInfo = (url, patientId) => {
     return FHIRClient(url).request(`Patient?_id=${patientId}`, {
         graph: false,
         flat: true,
