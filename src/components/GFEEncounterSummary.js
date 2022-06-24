@@ -8,10 +8,10 @@ import DiagnosisItem, { columns as DiagnosisColumns } from './DiagnosisItem';
 const useStyles = makeStyles((theme) =>
     createStyles({
         card: {
-            minWidth: "70vw",
+            minWidth: "50vw",
             textAlign: "left",
             marginLeft: 0,
-            marginRight: 20,
+            //marginRight: 20,
             color: theme.palette.text.secondary,
             backgroundColor: "#D3D3D3"
 
@@ -104,7 +104,7 @@ export default function GFEEncounterSummary(props) {
                     </Grid>
                 </Grid>
                 <Grid container>
-                    <Grid item className={classes.paper}>
+                    <Grid item xs={6} >
                         <FormControl>
                             <FormLabel>Diagnosis *</FormLabel>
                             <DiagnosisItem rows={summary.diagnosisList} />

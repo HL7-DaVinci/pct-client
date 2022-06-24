@@ -23,7 +23,7 @@ import {
 import {
     getPatients, getDeviceRequestsForPatient, submitGFEClaim, getCoverage,
     getPractitionerRoles, getOrganizations, getCoverageByPatient, getPractitioners,
-    getLocations
+    getLocations, getAddressByPatient, getAddress
 } from '../api'
 
 import GFERequestSummary from './GFERequestSummary'
@@ -72,6 +72,8 @@ import { TimePicker } from '@mui/x-date-pickers/TimePicker';
 import { DateTimePicker } from '@mui/x-date-pickers/DateTimePicker';
 import { DesktopDatePicker } from '@mui/x-date-pickers/DesktopDatePicker';
 import { MobileDatePicker } from '@mui/x-date-pickers/MobileDatePicker';
+import { PostAdd } from "@material-ui/icons";
+
 
 
 
@@ -84,7 +86,8 @@ import { MobileDatePicker } from '@mui/x-date-pickers/MobileDatePicker';
 const styles = theme => ({
     root: {
         flexGrow: 1,
-        //padding: 0,
+
+        padding: 0,
         //margin: 0,
         //height: "100vh"
 
@@ -153,6 +156,19 @@ const styles = theme => ({
     },
     leftTabs: {
         minWidth: 170
+    },
+    tabBackground: {
+        backgroundColor: "#FFFFFF"
+    },
+    patientBox: {
+        marginLeft: 30
+    },
+    encounterBox: {
+        textAlign: 'left',
+        color: theme.palette.text.secondary,
+        marginLeft: 30,
+        marginRight: 20,
+        paddingBottom: 30
     }
 
 });
@@ -331,6 +347,17 @@ function a11yPropsVertical(index) {
     };
 }
 
+//vertical panel tabs
+function a11yPropsGFE(index) {
+    return {
+        id: `simple-tab-${index}`,
+        'aria-controls': `simple-tabpanel-${index}`,
+    };
+}
+
+
+
+
 
 
 
@@ -371,11 +398,19 @@ class GFERequestBox extends Component {
             supportingInfoPlaceOfService: undefined,
             supportingInfoTypeOfBill: undefined,
             currentTabIndex: 0,
+            currentGFETabIndex: 0,
+            GFEtabs: [],
+            setAddTab: [],
+            maxTabIndex: 0,
+            setTabsContent: <TabPanel currentTabIndex={this.currentTabIndex}>Default Panel - {Math.random()}</TabPanel>,
+
+
             open: true,
             verticalTabIndex: 0,
             birthdate: undefined,
             dateStart: new Date('2022-08-18T21:11:54'),
-            dateEnd: new Date('2022-08-18T21:11:54')
+            dateEnd: new Date('2022-08-18T21:11:54'),
+            selectedAddress: undefined
         }
         this.state = this.initialState;
     };
@@ -459,6 +494,8 @@ class GFERequestBox extends Component {
             });
     }
 
+
+    //when select the patient, changes fields within the form specific
     handleSelectPatient = e => {
         const patientId = e.target.value;
         this.setState({
@@ -466,6 +503,7 @@ class GFERequestBox extends Component {
         })
 
         // retrieve coverage and payer info about patient 
+        //adding other patient info here too
         getCoverageByPatient(this.props.ehrUrl, patientId)
             .then(result => {
                 console.log(" Coverage ", result);
@@ -475,13 +513,12 @@ class GFERequestBox extends Component {
                             console.log(coverageResult);
                             const reference = Object.keys(coverageResult.references)[0]
                             const resource = coverageResult.references[reference]
-                            //const patientAddress = coverageResult.references[reference]
 
                             this.setState({
                                 selectedPayor: resource,
                                 selectedCoverage: coverageResult.data,
                                 selectedProcedure: undefined,
-                                selectedRequest: undefined
+                                selectedRequest: undefined,
                             });
                         })
                 } else {
@@ -489,30 +526,31 @@ class GFERequestBox extends Component {
                 }
             })
 
-        /*
-    getAddressByPatient(this.props.ehrUrl, patientId)
-        .then(result => {
-            console.log(" Patient ", result);
-            if (result.data && result.data.length > 0) {
-                getPatient(this.props.ehrUrl, result.data[0].id)
-                    .then(coverageResult => {
-                        console.log(coverageResult);
-                        const reference = Object.keys(coverageResult.references)[0]
-                        const resource = coverageResult.references[reference]
-                        //const patientAddress = coverageResult.references[reference]
 
-                        this.setState({
-                            selectedPayor: resource,
-                            selectedCoverage: coverageResult.data,
-                            selectedProcedure: undefined,
-                            selectedRequest: undefined
-                        });
-                    })
-            } else {
-                console.log("couldn't retrieve patient's coverage and payor info");
-            }
-        })
-        */
+
+        getAddressByPatient(this.props.ehrUrl, patientId)
+            .then(result => {
+                console.log(" OUR Patient ", result);
+                console.log(" OUR PATIENT ADDRESS", result[0].address[0].text)
+                const addressText = result[0].address[0].text
+
+                if (addressText && addressText.length > 0) {
+
+
+                    this.setState({
+                        selectedAddress: addressText
+
+                    });
+                    console.log("address saved in this:", this.state.selectedAddress)
+
+                } else {
+                    console.log("couldn't retrieve patient's coverage and payor info");
+                }
+
+
+            })
+
+
 
         this.setState({
             patientSelected: true
@@ -557,7 +595,8 @@ class GFERequestBox extends Component {
                     ...this.state,
                     selectedPayor: resource,
                     selectedRequest: requestId,
-                    selectedProcedure: undefined
+                    selectedProcedure: undefined,
+                    //selectedAddress: undefined
                 });
             }).catch(error =>
                 console.log(error)
@@ -700,6 +739,7 @@ class GFERequestBox extends Component {
         }
 
         let orgReferenceList = [];
+        let patientAddressList = [];
         input.gfeType = this.props.gfeType;
 
         const fhirServerBaseUrl = this.props.ehrUrl;
@@ -714,7 +754,10 @@ class GFERequestBox extends Component {
             entry: input.patient.resource
         })
 
-        const { request, coverage, practitioner, requestCode } = this.getClaimDetails();
+
+
+
+        const { request, coverage, practitioner, requestAd, addressReq } = this.getClaimDetails();
 
         input.request = {
             resource: request,
@@ -728,6 +771,24 @@ class GFERequestBox extends Component {
             fullUrl: `${fhirServerBaseUrl}/${input.request.coverage.reference}`,
             entry: input.request.coverage.resource
         })
+
+
+
+        /*
+        input.request = {
+            resource: request,
+            coverage: {
+                reference: `Patient/${addressReq.address}`,
+                resource: addressReq
+            }
+        }
+    
+        input.bundleResources.push({
+            fullUrl: `${fhirServerBaseUrl}/${input.request.patient.reference}`,
+            entry: input.request.patient.resource
+        })
+        */
+
 
 
 
@@ -752,6 +813,24 @@ class GFERequestBox extends Component {
             fullUrl: `${fhirServerBaseUrl}/${input.insurer.reference}`,
             entry: input.insurer.resource
         })
+
+
+        {/*
+        let patientAddressRef = `Patient/${this.state.selectedAddress.address}`;
+        input.address = {
+            reference: patientAddressRef,
+            resource: this.state.selectedAddress
+        }
+
+
+        patientAddressList.push(patientAddressRef)
+        input.bundleResources.push({
+            fullUrl: `${fhirServerBaseUrl}/${input.address.reference}`,
+            entry: input.address.resource
+        })
+    */}
+
+
 
         let providerReference = undefined, findProfessionalProvider = undefined;
         if (this.props.gfeType === "professional") {
@@ -1028,7 +1107,8 @@ class GFERequestBox extends Component {
             patientId: this.state.selectedPatient,
             coverageId: this.state.selectedCoverage ? this.state.selectedCoverage.id : undefined,
             payorId: this.state.selectedPayor ? this.state.selectedPayor.id : undefined,
-            birthdate: this.state.birthdate ? this.state.selectedPayor.id : undefined
+            addressId: this.state.selectedAddress //remove these
+
         };
     }
 
@@ -1468,11 +1548,33 @@ class GFERequestBox extends Component {
         this.setState({ verticalTabIndex: value });
     };
 
+    handleGFEChange = (event, value) => {
+        this.setState({ currentGFETabIndex: value });
+    };
+
+
     handleDateStartChange = (event, value) => {
         this.setState({ dateStart: value });
     };
     handleDateEndChange = (event, value) => {
         this.setState({ dateEnd: value });
+    };
+
+    // Handle Add Tab Button
+    handleAddTab = () => {
+        this.state.maxTabIndex = this.state.maxTabIndex + 1;
+        this.setAddTab([
+            ...this.state.GFEtabs,
+            <Tab label={`New Tab ${this.state.maxTabIndex}`} key={this.state.maxTabIndex} />
+        ]);
+        this.handleTabsContent();
+    };
+
+    handleTabsContent = () => {
+        this.state.setTabsContent([
+            ...this.state.tabsContent,
+            <TabPanel currentTabIndex={this.state.currentTabIndex}>New Tab Panel - {Math.random()}</TabPanel>
+        ]);
     };
 
 
@@ -1488,9 +1590,9 @@ class GFERequestBox extends Component {
         const totalClaimAmountDisplay = isNaN(totalClaimAmount) ? 'TBD' : `$ ${totalClaimAmount}`;
         const professionalBillingProviderList = this.getProfessionalBillingProviderList();
         const { classes } = this.props;
-        const { currentTabIndex } = this.state;
+        const { currentTabIndex, currentGFETabIndex } = this.state;
         const { verticalTabIndex } = this.state;
-        const { dateStart, dateEnd } = this.state;
+        const { dateStart, dateEnd, GFEtabs, maxTabIndex } = this.state;
 
 
 
@@ -1517,21 +1619,45 @@ class GFERequestBox extends Component {
                         </Tabs>
                     </AppBar>
 
-
-
-
                     <Box
                         index={currentTabIndex}
-                        onChangeIndex={this.handleChangeIndex}
+                    //onChangeIndex={this.handleChangeIndex}
                     >
 
                         {/* TODO: adding additional gfe screens with dynamically changing tabs */}
                         {/* first tab at the top(GFE) */}
-                        <TabPanel value={currentTabIndex} index={0} >
+                        <TabPanel value={currentTabIndex} index={0} className={classes.tabBackground}>
+
+
+
+
+
+                            {/* Second tab panel for each GFE here
+                            <AppBar position="static">
+                                <Tabs
+                                    value={currentGFETabIndex}
+                                    onChange={this.handleGFEChange}
+                                    indicatorColor="secondary"
+                                    textColor="inherit"
+                                    variant="scrollable"
+                                    aria-label="gfe tab dynamic"
+                                    scrollButtons='on'
+                                >
+                                    <Tab label="Default" />
+                                    {GFEtabs.map(child => child)}
+                                    <Tab icon={<PostAdd />} value="tabProperties" />
+                                    
+                                </Tabs>
+                            </AppBar>
+                            <Box padding={2}>{this.tabsContent.map(child => child)}</Box>
+                            */}
+
 
                             {/* THIS BOX IS SPACING PROB: Vertical tabs to left side on the GFE page */}
                             <Box
-                                sx={{ flexGrow: 1, bgcolor: 'background.paper', display: 'flex', width: '100vw', height: '100vh' }}
+                                sx={{ flexGrow: 1, display: 'flex', width: '100vw', height: '100vh' }}
+
+
 
                             >
                                 <Tabs
@@ -1553,17 +1679,18 @@ class GFERequestBox extends Component {
                                 </Tabs>
 
                                 {/* Patient tab */}
-                                <TabPanel value={verticalTabIndex} index={0} >
+                                <TabPanel value={verticalTabIndex} index={0}>
                                     <Grid item >
                                         <Grid container direction="column">
                                             <Grid item className={classes.paper}>
                                                 <FormControl>
                                                     <FormLabel className={classes.smallerHeader}>Patient *</FormLabel>
                                                     {PatientSelect(this.state.patientList, this.state.selectedPatient, this.handleOpenPatients, this.handleSelectPatient)}
+
                                                 </FormControl>
                                             </Grid>
                                             {this.state.patientSelected ?
-                                                <Grid item><GFERequestSummary summary={summary} /></Grid> : null
+                                                < Grid item className={classes.patientBox}><GFERequestSummary summary={summary} /></Grid> : null
                                             }
                                         </Grid>
                                     </Grid>
@@ -1571,7 +1698,7 @@ class GFERequestBox extends Component {
 
                                 {/* Care Team tab */}
                                 <TabPanel value={verticalTabIndex} index={1}>
-                                    <Grid item className={classes.paper} xs={12}>
+                                    <Grid item className={classes.encounterBox} xs={12}>
                                         <FormControl component="fieldset">
                                             <FormLabel className={classes.smallerHeader}>Care Team</FormLabel>
                                             <CareTeam rows={this.state.careTeamList} providerList={providerListOptions} addOne={this.addOneCareTeam} edit={this.editCareTeam} deleteOne={this.deleteOneCareTeam} />
@@ -1581,7 +1708,7 @@ class GFERequestBox extends Component {
 
                                 {/* Encounter tab */}
                                 <TabPanel value={verticalTabIndex} index={2}>
-                                    <Grid item className={classes.paper} xs={12}>
+                                    <Grid item className={classes.encounterBox} xs={12}>
                                         <FormControl component="fieldset">
                                             <FormLabel className={classes.smallerHeader}>GFE Type</FormLabel>
                                             <RadioGroup row aria-label="GFE Type" name="row-radio-buttons-group" value={this.props.gfeTYpe} onChange={e => this.props.setGfeType(e.target.value)} defaultValue={this.props.gfeType}>
@@ -1626,7 +1753,7 @@ class GFERequestBox extends Component {
                                                 </Grid>
                                                 <Grid item>
                                                     <FormControl>
-                                                        <FormLabel className={classes.headerSpacing}>Diagnosis *</FormLabel>
+                                                        <FormLabel className={classes.headerSpacing}>Diagnosis*:</FormLabel>
                                                         <DiagnosisItem rows={this.state.diagnosisList} addOne={this.addOneDiagnosisItem} edit={this.editDiagnosisItem} deleteOne={this.deleteOneDiagnosisItem} />
                                                     </FormControl>
                                                 </Grid>
@@ -1644,8 +1771,10 @@ class GFERequestBox extends Component {
                                                 {/* TODO: hides the side bar when the third chart is on the encounter pg--layout dynamic?*/}
 
                                                 <Grid item>
-                                                    <FormControl>
-                                                        <FormLabel >Claim Items *</FormLabel>
+                                                    <FormControl className={classes.headerSpacing}>
+                                                        <Typography variant="subtitle1" component="h3" className={classes.card}>
+                                                            Claim Items*:
+                                                        </Typography>
                                                         <ClaimItem rows={this.state.claimItemList} addOne={this.addOneClaimItem} edit={this.editClaimItem} deleteOne={this.deleteOneClaimItem} />
                                                     </FormControl>
                                                 </Grid>
@@ -1681,12 +1810,13 @@ class GFERequestBox extends Component {
                         </TabPanel>
 
 
+
                         {/* Second tab on the top (AEOB) */}
                         <TabPanel value={currentTabIndex} index={1} >
                             Item Two
                         </TabPanel>
                     </Box>
-                </Grid>
+                </Grid >
             </div >
         );
     }

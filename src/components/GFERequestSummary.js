@@ -6,9 +6,8 @@ import Divider from '@mui/material/Divider';
 const useStyles = makeStyles((theme) =>
     createStyles({
         card: {
-            minWidth: "70vw",
+            minWidth: "50vw",
             textAlign: "left",
-            marginLeft: 0,
             color: theme.palette.text.secondary,
             backgroundColor: "#D3D3D3"
         }
@@ -21,7 +20,14 @@ export default function GFERequestsummary(props) {
 
     const SummaryText = props => (
         <div>
-            <Typography variant="subtitle1" component="h3" className={classes.card}>
+            <Typography variant="subtitle2" component="h6" className={classes.card}>
+                {props.content}
+            </Typography>
+        </div>
+    )
+    const TitleText = props => (
+        <div>
+            <Typography variant="h6" className={classes.card}>
                 {props.content}
             </Typography>
         </div>
@@ -33,13 +39,13 @@ export default function GFERequestsummary(props) {
                 <Grid container>
                     <Grid item xs={6} >
                         <Box sx={{ mb: 2 }}>
-                            <SummaryText content="Demographics:" class="label" />
+                            <TitleText content="Demographics:" class="label" />
                         </Box>
                     </Grid>
                 </Grid>
                 <Grid container>
                     <Grid item xs={6} >
-                        <SummaryText content="Patient" class="label" />
+                        <SummaryText content="Patient:" class="label" />
                     </Grid>
                     <Grid item xs={6}>
                         <SummaryText content={summary.patientId} />
@@ -50,7 +56,7 @@ export default function GFERequestsummary(props) {
                         <SummaryText content="Birthdate:" class="label" />
                     </Grid>
                     <Grid item xs={6}>
-                        <SummaryText content={summary.birthdate} />
+                        <SummaryText content={"x"} />
                     </Grid>
                 </Grid>
                 <Grid container>
@@ -58,7 +64,7 @@ export default function GFERequestsummary(props) {
                         <SummaryText content="Gender:" class="label" />
                     </Grid>
                     <Grid item xs={6}>
-                        <SummaryText content={summary.gender} />
+                        <SummaryText content={"x"} />
                     </Grid>
                 </Grid>
 
@@ -67,16 +73,17 @@ export default function GFERequestsummary(props) {
                         <SummaryText content="Telephone:" class="label" />
                     </Grid>
                     <Grid item xs={6}>
-                        <SummaryText content={summary.telecom} />
+                        <SummaryText content={"x"} />
                     </Grid>
                 </Grid>
+
 
                 <Grid container>
                     <Grid item xs={6} >
                         <SummaryText content="Address:" class="label" />
                     </Grid>
                     <Grid item xs={6}>
-                        <SummaryText content={summary.address} />
+                        <SummaryText content={summary.addressId} />
                     </Grid>
                 </Grid>
                 <Box sx={{ my: 2 }}>
@@ -86,14 +93,14 @@ export default function GFERequestsummary(props) {
 
                 <Grid container>
                     <Box sx={{ mb: 2 }}>
-                        <SummaryText content="Insurance:" class="label" />
+                        <TitleText content="Insurance:" class="label" />
                     </Box>
                 </Grid>
 
                 {(summary.payorId !== undefined) ?
                     <Grid container>
                         <Grid item xs={6} >
-                            <SummaryText content="Payor" class="label" />
+                            <SummaryText content="Payor:" class="label" />
                         </Grid>
                         <Grid item xs={6}>
                             <SummaryText content={summary.payorId} />
@@ -105,7 +112,7 @@ export default function GFERequestsummary(props) {
                         <SummaryText content="Subscriber ID:" class="label" />
                     </Grid>
                     <Grid item xs={6}>
-                        <SummaryText content={summary.subscriberid} />
+                        <SummaryText content={"x"} />
                     </Grid>
                 </Grid>
                 <Grid container>
@@ -113,7 +120,7 @@ export default function GFERequestsummary(props) {
                         <SummaryText content="Member ID:" class="label" />
                     </Grid>
                     <Grid item xs={6}>
-                        <SummaryText content={summary.subscriberid} />
+                        <SummaryText content={"x"} />
                     </Grid>
                 </Grid>
                 <Grid container>
@@ -121,7 +128,7 @@ export default function GFERequestsummary(props) {
                         <SummaryText content="Subscriber Relationship:" class="label" />
                     </Grid>
                     <Grid item xs={6}>
-                        <SummaryText content={summary.subscriberid} />
+                        <SummaryText content={"x"} />
                     </Grid>
                 </Grid>
                 <Grid container>
@@ -129,7 +136,7 @@ export default function GFERequestsummary(props) {
                         <SummaryText content="Plan:" class="label" />
                     </Grid>
                     <Grid item xs={6}>
-                        <SummaryText content={summary.subscriberid} />
+                        <SummaryText content={"x"} />
                     </Grid>
                 </Grid>
                 <Grid container>
@@ -137,12 +144,14 @@ export default function GFERequestsummary(props) {
                         <SummaryText content="Coverage Period:" class="label" />
                     </Grid>
                     <Grid item xs={6}>
-                        <SummaryText content={summary.subscriberid} />
+                        <SummaryText content={"x"} />
                     </Grid>
                 </Grid>
             </CardContent>
         </React.Fragment >
     )
+
+    console.log('THIS SHOULD PRINT ADDRESS', summary.addressId)
 
     return (
         <div>
