@@ -56,7 +56,7 @@ export default function GFERequestsummary(props) {
                         <SummaryText content="Birthdate:" class="label" />
                     </Grid>
                     <Grid item xs={6}>
-                        <SummaryText content={"x"} />
+                        <SummaryText content={summary.birthdate} />
                     </Grid>
                 </Grid>
                 <Grid container>
@@ -64,7 +64,7 @@ export default function GFERequestsummary(props) {
                         <SummaryText content="Gender:" class="label" />
                     </Grid>
                     <Grid item xs={6}>
-                        <SummaryText content={"x"} />
+                        <SummaryText content={summary.gender} />
                     </Grid>
                 </Grid>
 
@@ -73,7 +73,7 @@ export default function GFERequestsummary(props) {
                         <SummaryText content="Telephone:" class="label" />
                     </Grid>
                     <Grid item xs={6}>
-                        <SummaryText content={"x"} />
+                        <SummaryText content={summary.telephone} />
                     </Grid>
                 </Grid>
 
@@ -112,7 +112,7 @@ export default function GFERequestsummary(props) {
                         <SummaryText content="Subscriber ID:" class="label" />
                     </Grid>
                     <Grid item xs={6}>
-                        <SummaryText content={"x"} />
+                        <SummaryText content={summary.subscriberId} />
                     </Grid>
                 </Grid>
                 <Grid container>
@@ -120,7 +120,7 @@ export default function GFERequestsummary(props) {
                         <SummaryText content="Member ID:" class="label" />
                     </Grid>
                     <Grid item xs={6}>
-                        <SummaryText content={"x"} />
+                        <SummaryText content={summary.memberId} />
                     </Grid>
                 </Grid>
                 <Grid container>
@@ -128,7 +128,7 @@ export default function GFERequestsummary(props) {
                         <SummaryText content="Subscriber Relationship:" class="label" />
                     </Grid>
                     <Grid item xs={6}>
-                        <SummaryText content={"x"} />
+                        <SummaryText content={summary.subscriberRelationship} />
                     </Grid>
                 </Grid>
                 <Grid container>
@@ -136,7 +136,7 @@ export default function GFERequestsummary(props) {
                         <SummaryText content="Plan:" class="label" />
                     </Grid>
                     <Grid item xs={6}>
-                        <SummaryText content={"x"} />
+                        <SummaryText content={summary.coveragePlan} />
                     </Grid>
                 </Grid>
                 <Grid container>
@@ -144,7 +144,7 @@ export default function GFERequestsummary(props) {
                         <SummaryText content="Coverage Period:" class="label" />
                     </Grid>
                     <Grid item xs={6}>
-                        <SummaryText content={"x"} />
+                        <SummaryText content={summary.coveragePeriod} />
                     </Grid>
                 </Grid>
             </CardContent>

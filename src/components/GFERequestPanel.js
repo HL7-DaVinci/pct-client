@@ -23,7 +23,7 @@ import {
 import {
     getPatients, getDeviceRequestsForPatient, submitGFEClaim, getCoverage,
     getPractitionerRoles, getOrganizations, getCoverageByPatient, getPractitioners,
-    getLocations, getAddressByPatient, getAddress
+    getLocations, getPatientInfo
 } from '../api'
 
 import GFERequestSummary from './GFERequestSummary'
@@ -403,14 +403,22 @@ class GFERequestBox extends Component {
             setAddTab: [],
             maxTabIndex: 0,
             setTabsContent: <TabPanel currentTabIndex={this.currentTabIndex}>Default Panel - {Math.random()}</TabPanel>,
-
-
             open: true,
             verticalTabIndex: 0,
             birthdate: undefined,
+            gender: undefined,
+            telephone: undefined,
+
             dateStart: new Date('2022-08-18T21:11:54'),
             dateEnd: new Date('2022-08-18T21:11:54'),
-            selectedAddress: undefined
+            selectedAddress: undefined,
+
+            subscriber: undefined,
+            memberNumber: undefined,
+            subscriberRelationship: undefined,
+            coveragePlan: undefined,
+            coveragePeriod: undefined
+
         }
         this.state = this.initialState;
     };
@@ -507,6 +515,18 @@ class GFERequestBox extends Component {
         getCoverageByPatient(this.props.ehrUrl, patientId)
             .then(result => {
                 console.log(" Coverage ", result);
+                //console.log("COVERAGE", result.data[0].subscriberId);
+                const subscriberText = result.data[0].subscriberId;
+                const relationshipText = result.data[0].relationship.coding[0].display;
+                const planName = result.data[0].class[0].name;
+                const coveragePeriodTextStart = result.data[0].period.start;
+                const coveragePeriodTextEnd = result.data[0].period.end;
+
+                const coveragePeriod = coveragePeriodTextStart + " to " + coveragePeriodTextEnd
+
+
+
+
                 if (result.data && result.data.length > 0) {
                     getCoverage(this.props.ehrUrl, result.data[0].id)
                         .then(coverageResult => {
@@ -519,6 +539,10 @@ class GFERequestBox extends Component {
                                 selectedCoverage: coverageResult.data,
                                 selectedProcedure: undefined,
                                 selectedRequest: undefined,
+                                subscriber: subscriberText,
+                                subscriberRelationship: relationshipText,
+                                coveragePlan: planName,
+                                coveragePeriod: coveragePeriod
                             });
                         })
                 } else {
@@ -528,23 +552,29 @@ class GFERequestBox extends Component {
 
 
 
-        getAddressByPatient(this.props.ehrUrl, patientId)
+        getPatientInfo(this.props.ehrUrl, patientId)
             .then(result => {
                 console.log(" OUR Patient ", result);
-                console.log(" OUR PATIENT ADDRESS", result[0].address[0].text)
+                //console.log(" OUR PATIENT ADDRESS", result[0].address[0].text)
                 const addressText = result[0].address[0].text
+                const birthdateText = result[0].birthDate
+                const genderText = result[0].gender
+                const telephoneText = result[0].telecom[0].value
+                const memberNumText = result[0].identifier[0].value //TODO: select member not employee?
+
+
 
                 if (addressText && addressText.length > 0) {
-
-
                     this.setState({
-                        selectedAddress: addressText
-
+                        selectedAddress: addressText,
+                        birthdate: birthdateText,
+                        gender: genderText,
+                        telephone: telephoneText,
+                        memberNumber: memberNumText
                     });
-                    console.log("address saved in this:", this.state.selectedAddress)
-
+                    //console.log("address saved in this:", this.state.selectedAddress)
                 } else {
-                    console.log("couldn't retrieve patient's coverage and payor info");
+                    console.log("couldn't retrieve patient's personal info");
                 }
 
 
@@ -1107,7 +1137,16 @@ class GFERequestBox extends Component {
             patientId: this.state.selectedPatient,
             coverageId: this.state.selectedCoverage ? this.state.selectedCoverage.id : undefined,
             payorId: this.state.selectedPayor ? this.state.selectedPayor.id : undefined,
-            addressId: this.state.selectedAddress //remove these
+            addressId: this.state.selectedAddress, //remove these
+            birthdate: this.state.birthdate,
+            gender: this.state.gender,
+            telephone: this.state.telephone,
+            subscriberId: this.state.subscriber,
+            memberId: this.state.memberNumber,
+            subscriberRelationship: this.state.subscriberRelationship,
+            coveragePlan: this.state.coveragePlan,
+            coveragePeriod: this.state.coveragePeriod
+
 
         };
     }
