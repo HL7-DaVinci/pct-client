@@ -151,8 +151,6 @@ export default function GFERequestsummary(props) {
         </React.Fragment >
     )
 
-    console.log('THIS SHOULD PRINT ADDRESS', summary.addressId)
-
     return (
         <div>
             <Card variant="outlined">{card}</Card>

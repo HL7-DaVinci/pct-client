@@ -270,8 +270,6 @@ const ProfessionalBillingProviderSelect = (providers, selectedProvider, handleSe
         {
             providers ?
                 providers.map(provider => {
-
-                    console.log(providers);
                     return (<MenuItem key={provider.id} value={provider.id}>{provider.display}</MenuItem>)
                 }) : (<MenuItem />)
         }
@@ -449,42 +447,33 @@ class GFERequestBox extends Component {
     constructor(props) {
         super(props);
         this.initialState = {
+
             patientList: [], //
+            selectedPatient: undefined, //
+            patientRequestList: [], //
+            patientSelected: false, //
             priorityList: [],
+            selectedPriority: undefined, //
             providerList: [],
             billingProviderList: [],
-
-            patientRequestList: [], //
             practitionerRoleList: [], //
-            selectedPatient: undefined, //
-            selectedPriority: undefined, //
-            selectedRequest: undefined,
-            patientSelected: false, //
-
-
-
-
-
-
-
-            organizationList: [], //
             selectedBillingProvider: undefined,
             selectedSubmitter: undefined,
+            selectedPractitioner: [],
+            practitionerList: [],
             selectedPayor: undefined, //
-
-            selectedProviderBilling: undefined,
+            organizationList: [], //
+            selectedRequest: undefined,
             resolvedReferences: {},
             totalClaim: 0,
             placeOfService: undefined,
             interTransIntermediary: undefined,
             selectedDate: undefined,
             selectedProcedure: undefined,
-            selectedPractitioner: [],
-            practitionerList: [],
             selectedCoverage: undefined,
             selectedDiagnosis: undefined,
             gfeServiceId: undefined,
-            providerList: [], //USE
+            providerList: [],
             careTeamList: [{ id: 1 }],
             claimItemList: [{ id: 1 }],
             diagnosisList: [{ id: 1 }],
@@ -509,26 +498,18 @@ class GFERequestBox extends Component {
             dateStart: undefined, //new Date('2014-08-18T21:11:54'),
             dateEnd: new Date('2022-08-18T21:11:54'),
             selectedAddress: undefined,
-
             subscriber: undefined,
             memberNumber: undefined,
             subscriberRelationship: undefined,
             coveragePlan: undefined,
             coveragePeriod: undefined,
 
-
-
-
             selectedDate: new Date(),
             setSelectedDate: new Date(),
-
-            value: null,
-            setValue: null,
 
             startDate: null,
             setStartDate: null,
             endDate: null,
-            //currentPriorityLevel
 
 
 
@@ -555,15 +536,6 @@ class GFERequestBox extends Component {
     handleDateEndUpdate = (value) => {
         return <TextField {...value} />
     };
-
-    /*
- 
-    setCurrentPriority = (priorityLevel) => {
-        this.setState({ currentPriorityLevel: priorityLevel });
-    }
-    */
-
-
 
 
     componentDidUpdate(prevProps, prevState) {
@@ -639,16 +611,9 @@ class GFERequestBox extends Component {
         getPatients(this.props.ehrUrl)
             .then(result => {
                 const patients = result.entry;
-
-                console.log("PATIENTS HERE", patients);
                 this.setState({ ...this.state, patientList: patients });
             });
     }
-
-
-
-
-
 
     handleOpenPriority = () => {
         getClaims(this.props.ehrUrl)
@@ -660,8 +625,6 @@ class GFERequestBox extends Component {
 
             });
     }
-
-
 
     //when select the patient, changes fields within the form specific
     handleSelectPatient = e => {
@@ -675,7 +638,6 @@ class GFERequestBox extends Component {
         //adding other patient info here too
         getCoverageByPatient(this.props.ehrUrl, patientId)
             .then(result => {
-                console.log(" Coverage ", result);
                 const subscriberText = result.data[0].subscriberId;
                 const relationshipText = result.data[0].relationship.coding[0].display;
                 const planName = result.data[0].class[0].name;
@@ -690,7 +652,6 @@ class GFERequestBox extends Component {
                 if (result.data && result.data.length > 0) {
                     getCoverage(this.props.ehrUrl, result.data[0].id)
                         .then(coverageResult => {
-                            console.log(coverageResult);
                             const reference = Object.keys(coverageResult.references)[0]
                             const resource = coverageResult.references[reference]
 
@@ -724,7 +685,6 @@ class GFERequestBox extends Component {
                 //ensure correct id for member
 
                 for (var i = 0; i < result[0].identifier.length; i++) {
-                    console.log("LENGTH", result[0].identifier[i].type.coding[0].code)
 
                     for (var j = 0; j < result[0].identifier[i].type.coding.length; j++) {
 
@@ -945,7 +905,6 @@ class GFERequestBox extends Component {
     }
 
 
-    //might need for priority
     generateRequestInput = () => {
         let input = {
             bundleResources: []
@@ -1313,6 +1272,7 @@ class GFERequestBox extends Component {
             this.setState({
                 openErrorDialog: true,
                 submissionError: error
+
             });
         }
     }
@@ -1320,14 +1280,11 @@ class GFERequestBox extends Component {
     generateBundle = () => buildGFEBundle(this.generateRequestInput())
 
     retrieveRequestSummary = () => {
-
-
-        //PATIENT DETAILS
         return {
             patientId: this.state.selectedPatient,
             coverageId: this.state.selectedCoverage ? this.state.selectedCoverage.id : undefined,
             payorId: this.state.selectedPayor ? this.state.selectedPayor.id : undefined,
-            addressId: this.state.selectedAddress, //remove these
+            addressId: this.state.selectedAddress,
             birthdate: this.state.birthdate,
             gender: this.state.gender,
             telephone: this.state.telephone,
@@ -1336,8 +1293,7 @@ class GFERequestBox extends Component {
             subscriberRelationship: this.state.subscriberRelationship,
             coveragePlan: this.state.coveragePlan,
             coveragePeriod: this.state.coveragePeriod,
-            practitionerSelected: this.state.careTeamList, //Care team list holds list of current providers
-            //practitioner: this.state.selectedBillingProvider
+            practitionerSelected: this.state.careTeamList,
             practitionerRoleSelected: this.state.careTeamList,
             gfeType: this.props.gfeType,
             diagnosisList: this.state.diagnosisList,
@@ -1346,14 +1302,6 @@ class GFERequestBox extends Component {
             startDateService: moment(this.state.startDate).format('L'),
             endDateService: moment(this.state.endDate).format('L'),
             priorityLevel: this.state.selectedPriority
-
-
-
-
-
-
-
-
         };
     }
 
@@ -1797,13 +1745,9 @@ class GFERequestBox extends Component {
         this.setState({ currentGFETabIndex: value });
     };
 
-
     handleDateStartChange = (event, value) => {
         this.setState({ dateStart: value });
     };
-
-
-
 
     handleDateEndChange = (event, value) => {
         this.setState({ dateEnd: value });
@@ -1846,7 +1790,6 @@ class GFERequestBox extends Component {
         const { currentTabIndex, currentGFETabIndex } = this.state;
         const { verticalTabIndex } = this.state;
         const { dateStart, dateEnd, GFEtabs, maxTabIndex, selectedDate } = this.state;
-        const { value, setValue } = this.state;
 
 
         return (
@@ -1867,20 +1810,22 @@ class GFERequestBox extends Component {
                         </Tabs>
                     </AppBar>
 
-                    <Box
-                        index={currentTabIndex}
-                    //onChangeIndex={this.handleChangeIndex}
-                    >
+                    <form onSubmit={this.handleOnSubmit}>
 
-                        {/* TODO: adding additional gfe screens with dynamically changing tabs */}
-                        {/* first tab at the top(GFE) */}
-                        <TabPanel value={currentTabIndex} index={0} className={classes.tabBackground}>
+                        <Box
+                            index={currentTabIndex}
+                        //onChangeIndex={this.handleChangeIndex}
+                        >
+
+                            {/* TODO: adding additional gfe screens with dynamically changing tabs */}
+                            {/* first tab at the top(GFE) */}
+                            <TabPanel value={currentTabIndex} index={0} className={classes.tabBackground}>
 
 
 
 
 
-                            {/* Second tab panel for each GFE here
+                                {/* Second tab panel for each GFE here
                             <AppBar position="static">
                                 <Tabs
                                     value={currentGFETabIndex}
@@ -1901,402 +1846,288 @@ class GFERequestBox extends Component {
                             */}
 
 
-                            {/* THIS BOX IS SPACING PROB: Vertical tabs to left side on the GFE page */}
-                            <Box
-                                sx={{ flexGrow: 1, display: 'flex', width: '100vw', height: '100vh' }}
+                                {/* THIS BOX IS SPACING PROB: Vertical tabs to left side on the GFE page */}
+                                <Box
+                                    sx={{ flexGrow: 1, display: 'flex', width: '100vw', height: '100vh' }}
 
 
 
-                            >
-                                <Tabs
-                                    TabIndicatorProps={{ style: { backgroundColor: "#FFC0CB" } }}
-                                    orientation="vertical"
-                                    variant="scrollable"
-                                    value={verticalTabIndex}
-                                    onChange={this.handleVerticalChange}
-                                    aria-label="Vertical tabs example"
-                                    sx={{ borderRight: 1, borderColor: 'divider' }}
-                                    classes={{ root: classes.leftTabs }}
                                 >
-                                    <Tab label="Patient" {...a11yPropsVertical(0)} className={classes.tabs} />
-                                    <Tab label="Care Team" {...a11yPropsVertical(1)} className={classes.tabs} />
-                                    <Tab label="Encounter" {...a11yPropsVertical(2)} className={classes.tabs} />
-                                    <Tab label="Summary" {...a11yPropsVertical(3)} className={classes.tabs} />
-                                </Tabs>
+                                    <Tabs
+                                        TabIndicatorProps={{ style: { backgroundColor: "#FFC0CB" } }}
+                                        orientation="vertical"
+                                        variant="scrollable"
+                                        value={verticalTabIndex}
+                                        onChange={this.handleVerticalChange}
+                                        aria-label="Vertical tabs example"
+                                        sx={{ borderRight: 1, borderColor: 'divider' }}
+                                        classes={{ root: classes.leftTabs }}
+                                    >
+                                        <Tab label="Patient" {...a11yPropsVertical(0)} className={classes.tabs} />
+                                        <Tab label="Care Team" {...a11yPropsVertical(1)} className={classes.tabs} />
+                                        <Tab label="Encounter" {...a11yPropsVertical(2)} className={classes.tabs} />
+                                        <Tab label="Summary" {...a11yPropsVertical(3)} className={classes.tabs} />
+                                    </Tabs>
 
-                                {/* Patient tab */}
-                                <TabPanel value={verticalTabIndex} index={0}>
-                                    <Grid item >
-                                        <Grid container direction="column">
-                                            <Grid item className={classes.paper}>
-                                                <FormControl>
-                                                    <FormLabel className={classes.inputBox}>Patient *</FormLabel>
-                                                    {PatientSelect(this.state.patientList, this.state.selectedPatient, this.handleOpenPatients, this.handleSelectPatient)}
+                                    {/* Patient tab */}
+                                    <TabPanel value={verticalTabIndex} index={0}>
+                                        <Grid item >
+                                            <Grid container direction="column">
+                                                <Grid item className={classes.paper}>
+                                                    <FormControl>
+                                                        <FormLabel className={classes.inputBox}>Patient *</FormLabel>
+                                                        {PatientSelect(this.state.patientList, this.state.selectedPatient, this.handleOpenPatients, this.handleSelectPatient)}
 
-                                                </FormControl>
+                                                    </FormControl>
+                                                </Grid>
+                                                {this.state.patientSelected ?
+                                                    < Grid item className={classes.patientBox}><GFERequestSummary summary={summary} /></Grid> : null
+                                                }
                                             </Grid>
-                                            {this.state.patientSelected ?
-                                                < Grid item className={classes.patientBox}><GFERequestSummary summary={summary} /></Grid> : null
-                                            }
                                         </Grid>
-                                    </Grid>
-                                </TabPanel>
+                                    </TabPanel>
 
-                                {/* Care Team tab */}
-                                <TabPanel value={verticalTabIndex} index={1}>
-                                    <Grid item >
-                                        <Grid container direction="column">
-                                            <Grid item className={classes.paper}>
-                                                <FormControl>
-                                                    <FormLabel>GFE Type</FormLabel>
-                                                    <RadioGroup row aria-label="GFE Type" name="row-radio-buttons-group" value={this.props.gfeTYpe} onChange={e => this.props.setGfeType(e.target.value)} defaultValue={this.props.gfeType}>
-                                                        <FormControlLabel value="institutional" control={<Radio size="small" />} label="Institutional" />
-                                                        <FormControlLabel value="professional" control={<Radio size="small" />} label="Professional" />
-                                                    </RadioGroup>
+                                    {/* Care Team tab */}
+                                    <TabPanel value={verticalTabIndex} index={1}>
+                                        <Grid item >
+                                            <Grid container direction="column">
+                                                <Grid item className={classes.paper}>
+                                                    <FormControl>
+                                                        <FormLabel>GFE Type</FormLabel>
+                                                        <RadioGroup row aria-label="GFE Type" name="row-radio-buttons-group" value={this.props.gfeTYpe} onChange={e => this.props.setGfeType(e.target.value)} defaultValue={this.props.gfeType}>
+                                                            <FormControlLabel value="institutional" control={<Radio size="small" />} label="Institutional" />
+                                                            <FormControlLabel value="professional" control={<Radio size="small" />} label="Professional" />
+                                                        </RadioGroup>
+                                                    </FormControl>
+                                                </Grid>
+
+                                                <Grid item className={classes.paper}>
+                                                    <FormControl>
+                                                        <FormLabel>Billing Provider</FormLabel>
+
+                                                        {this.props.gfeType === "professional" ?
+                                                            ProfessionalBillingProviderSelect(professionalBillingProviderList, this.state.selectedBillingProvider, this.handleSelectBillingProvider)
+                                                            :
+                                                            OrganizationSelect(this.state.organizationList, this.state.selectedBillingProvider, "billing-provider-label", "billingProvider", this.handleOpenOrganizationList, this.handleSelectBillingProvider)
+                                                        }
+
+                                                    </FormControl>
+                                                </Grid>
+
+                                                <Grid item className={classes.paper}>
+                                                    <FormControl>
+                                                        <FormLabel>Submitting Provider</FormLabel>
+                                                        {this.props.gfeType === "professional" ?
+                                                            ProfessionalBillingProviderSelect(professionalBillingProviderList, this.state.selectedSubmitter, this.handleSelectSubmitter)
+                                                            :
+                                                            OrganizationSelect(this.state.organizationList, this.state.selectedSubmitter, "submitting-provider-label", "submittingProvider", this.handleOpenOrganizationList, this.handleSelectSubmitter)
+                                                        }
+
+                                                    </FormControl>
+                                                </Grid>
+
+                                                <FormControl component="fieldset">
+                                                    <FormLabel className={classes.paper}>Care Team</FormLabel>
+                                                    <CareTeam rows={this.state.careTeamList} providerList={providerListOptions} addOne={this.addOneCareTeam} edit={this.editCareTeam} deleteOne={this.deleteOneCareTeam} />
                                                 </FormControl>
                                             </Grid>
+                                        </Grid>
+                                    </TabPanel>
 
-                                            <Grid item className={classes.paper}>
-                                                <FormControl>
-                                                    <FormLabel>Billing Provider</FormLabel>
+                                    <TabPanel value={verticalTabIndex} index={2}>
+                                        <Grid item>
+                                            <Grid container direction="column" >
+                                                <Grid item className={classes.paper}>
+                                                    <FormControl>
+                                                        <FormLabel>Service Details:</FormLabel>
+                                                    </FormControl>
+                                                </Grid>
 
-                                                    {this.props.gfeType === "professional" ?
-                                                        ProfessionalBillingProviderSelect(professionalBillingProviderList, this.state.selectedBillingProvider, this.handleSelectBillingProvider)
-                                                        :
-                                                        OrganizationSelect(this.state.organizationList, this.state.selectedBillingProvider, "billing-provider-label", "billingProvider", this.handleOpenOrganizationList, this.handleSelectBillingProvider)
-                                                    }
+                                                <Grid item className={classes.paper}>
+                                                    <FormControl>
+                                                        <Grid>
 
-                                                </FormControl>
+
+                                                            <Grid container spacing={5}>
+                                                                <Grid item s={1}>
+                                                                    <LocalizationProvider dateAdapter={AdapterDateFns}>
+                                                                        <DatePicker
+                                                                            label="start date"
+
+                                                                            value={this.state.startDate}
+                                                                            onChange={this.handleStartDateChange}
+                                                                            renderInput={this.handleDateStartUpdate}
+                                                                        //format="DD-MM-YYYY"
+
+                                                                        />
+                                                                    </LocalizationProvider>
+
+                                                                </Grid>
+                                                                <Grid item s={1}>
+                                                                    <Typography>
+                                                                        to
+                                                                    </Typography>
+                                                                </Grid>
+                                                                <Grid item s={1}>
+
+                                                                    <LocalizationProvider dateAdapter={AdapterDateFns}>
+                                                                        <DatePicker
+                                                                            label="end date"
+                                                                            value={this.state.endDate}
+                                                                            minDate={this.state.startDate}
+                                                                            onChange={this.handleEndDateChange}
+                                                                            renderInput={this.handleDateEndUpdate}
+                                                                        />
+                                                                    </LocalizationProvider>
+                                                                </Grid>
+                                                            </Grid>
+                                                        </Grid>
+                                                    </FormControl>
+                                                </Grid>
+
+                                                <Grid item className={classes.paper}>
+                                                    <FormControl>
+                                                        <FormLabel className={classes.inputBox}>Priority: </FormLabel>
+                                                        {PrioritySelect(this.state.priorityList, this.state.selectedPriority, this.handleOpenPriority, this.handleSelectPriority)}
+                                                    </FormControl>
+                                                </Grid>
+
+
+
+                                                <Grid item className={classes.paper}>
+                                                    <Grid container direction="row" spacing={3}>
+                                                        <Grid item >
+                                                            <FormControl >
+                                                                <FormLabel className={classes.smallerHeader}>Diagnosis*:</FormLabel>
+                                                                <DiagnosisItem rows={this.state.diagnosisList} addOne={this.addOneDiagnosisItem} edit={this.editDiagnosisItem} deleteOne={this.deleteOneDiagnosisItem} />
+                                                            </FormControl>
+                                                        </Grid>
+                                                        <Grid item>
+                                                            <Grid container direction="column" spacing={3}>
+                                                                <Grid item>
+                                                                    <FormLabel>Type of Bill</FormLabel>
+                                                                </Grid>
+                                                                <Grid item className={classes.inputBox}>
+                                                                    <TextField id="supportingInfoTypeOfBill" variant="standard" value={this.state.supportingInfoTypeOfBill} onChange={this.handleSupportingInfoTypeOfBill} />
+                                                                </Grid>
+
+                                                                <Grid item>
+                                                                    <FormLabel>Inter Transaction Identifier</FormLabel>
+                                                                </Grid>
+                                                                <Grid item >
+                                                                    <Select
+                                                                        displayEmpty
+                                                                        id="select-inter-trans-id"
+                                                                        value={this.state.interTransIntermediary}
+                                                                        label="Inter Trans Identifier"
+                                                                        onChange={this.handleSelectInterTransId}
+                                                                        className={classes.inputBox}
+                                                                    >
+                                                                        <MenuItem value="InterTransID0001">InterTransID0001</MenuItem>
+                                                                    </Select>
+
+
+                                                                </Grid>
+                                                            </Grid>
+                                                        </Grid>
+                                                    </Grid>
+                                                </Grid>
+
+                                                <Grid item className={classes.paper}>
+                                                    <Grid container direction="row" spacing={3}>
+                                                        <Grid item >
+                                                            <FormControl>
+                                                                <FormLabel className={classes.smallerHeader}>Procedure: </FormLabel>
+                                                                <ProcedureItem rows={this.state.procedureList} addOne={this.addOneProcedureItem} edit={this.editProcedureItem} deleteOne={this.deleteOneProcedureItem} />
+                                                            </FormControl>
+                                                        </Grid>
+                                                        <Grid item>
+                                                            <Grid container direction="column" spacing={3}>
+
+                                                                <Grid item>
+                                                                    <FormLabel>GFE assigned service identifier</FormLabel>
+                                                                </Grid>
+                                                                <Grid item>
+                                                                    <Select
+                                                                        displayEmpty
+                                                                        id="select-gfe-service-id"
+                                                                        value={this.state.gfeServiceId}
+                                                                        label="GFE assigned service identifier"
+                                                                        onChange={this.handleSelectGfeServiceId}
+                                                                        className={classes.inputBox}
+                                                                    >
+                                                                        <MenuItem value="GFEAssignedServiceID0001">GFEAssignedServiceID0001</MenuItem>
+                                                                    </Select>
+
+                                                                </Grid>
+                                                            </Grid>
+                                                        </Grid>
+
+                                                        <Grid item>
+                                                            <FormControl>
+                                                                <FormLabel className={classes.smallerHeader}>Services: </FormLabel>
+                                                                <ClaimItem rows={this.state.claimItemList} addOne={this.addOneClaimItem} edit={this.editClaimItem} deleteOne={this.deleteOneClaimItem} />
+                                                            </FormControl>
+                                                        </Grid>
+                                                    </Grid>
+                                                </Grid>
                                             </Grid>
+                                        </Grid>
+                                    </TabPanel>
 
-                                            <Grid item className={classes.paper}>
-                                                <FormControl>
-                                                    <FormLabel>Submitting Provider</FormLabel>
-                                                    {this.props.gfeType === "professional" ?
-                                                        ProfessionalBillingProviderSelect(professionalBillingProviderList, this.state.selectedSubmitter, this.handleSelectSubmitter)
-                                                        :
-                                                        OrganizationSelect(this.state.organizationList, this.state.selectedSubmitter, "submitting-provider-label", "submittingProvider", this.handleOpenOrganizationList, this.handleSelectSubmitter)
-                                                    }
 
-                                                </FormControl>
-                                            </Grid>
+                                    {/* Summary tab*/}
+                                    <TabPanel value={verticalTabIndex} index={3}>
 
+                                        <Grid item className={classes.paper} xs={12}>
                                             <FormControl component="fieldset">
-                                                <FormLabel className={classes.paper}>Care Team</FormLabel>
-                                                <CareTeam rows={this.state.careTeamList} providerList={providerListOptions} addOne={this.addOneCareTeam} edit={this.editCareTeam} deleteOne={this.deleteOneCareTeam} />
+                                                <Grid container direction="row">
+                                                    <Grid item xs={10}>
+                                                        <FormLabel className={classes.smallerHeader}>Summary</FormLabel>
+                                                    </Grid>
+                                                    <Grid item xs={2}>
+                                                        <ViewGFERequestDialog generateRequest={this.generateBundle} valid={this.isRequestValid} error={this.state.validationErrors} />
+                                                    </Grid>
+                                                </Grid>
+
+
+                                                <Grid item><SummaryItem summary={summary} /></Grid>
                                             </FormControl>
-                                        </Grid>
-                                    </Grid>
-                                </TabPanel>
 
-                                <TabPanel value={verticalTabIndex} index={2}>
-                                    <Grid item>
-                                        <Grid container direction="column" >
-                                            <Grid item className={classes.paper}>
+                                            {/* Submit button*/}
+                                            <Box display="flex" justifyContent="space-evenly">
                                                 <FormControl>
-                                                    <FormLabel>Service Details:</FormLabel>
+                                                    <Button loading variant="contained" color="primary" type="submit" disabled={this.props.submittingStatus === true}>
+                                                        Submit GFE
+                                                    </Button>
                                                 </FormControl>
-                                            </Grid>
-
-                                            <Grid item className={classes.paper}>
-                                                <FormControl>
-                                                    <Grid>
-
-
-                                                        <Grid container spacing={5}>
-                                                            <Grid item s={1}>
-                                                                <LocalizationProvider dateAdapter={AdapterDateFns}>
-                                                                    <DatePicker
-                                                                        label="start date"
-
-                                                                        value={this.state.startDate}
-                                                                        onChange={this.handleStartDateChange}
-                                                                        renderInput={this.handleDateStartUpdate}
-                                                                    //format="DD-MM-YYYY"
-
-                                                                    />
-                                                                </LocalizationProvider>
-
-                                                            </Grid>
-                                                            <Grid item s={1}>
-                                                                <Typography>
-                                                                    to
-                                                                </Typography>
-                                                            </Grid>
-                                                            <Grid item s={1}>
-
-                                                                <LocalizationProvider dateAdapter={AdapterDateFns}>
-                                                                    <DatePicker
-                                                                        label="end date"
-                                                                        value={this.state.endDate}
-                                                                        minDate={this.state.startDate}
-                                                                        onChange={this.handleEndDateChange}
-                                                                        renderInput={this.handleDateEndUpdate}
-                                                                    />
-                                                                </LocalizationProvider>
-                                                            </Grid>
-                                                        </Grid>
-                                                    </Grid>
-                                                </FormControl>
-                                            </Grid>
-
-                                            <Grid item className={classes.paper}>
-                                                <FormControl>
-                                                    <FormLabel className={classes.inputBox}>Priority: </FormLabel>
-                                                    {PrioritySelect(this.state.priorityList, this.state.selectedPriority, this.handleOpenPriority, this.handleSelectPriority)}
-                                                </FormControl>
-                                            </Grid>
-
-
-
-                                            <Grid item className={classes.paper}>
-                                                <Grid container direction="row" spacing={3}>
-                                                    <Grid item >
-                                                        <FormControl >
-                                                            <FormLabel className={classes.smallerHeader}>Diagnosis*:</FormLabel>
-                                                            <DiagnosisItem rows={this.state.diagnosisList} addOne={this.addOneDiagnosisItem} edit={this.editDiagnosisItem} deleteOne={this.deleteOneDiagnosisItem} />
-                                                        </FormControl>
-                                                    </Grid>
-                                                    <Grid item>
-                                                        <Grid container direction="column" spacing={3}>
-                                                            <Grid item>
-                                                                <FormLabel>Type of Bill</FormLabel>
-                                                            </Grid>
-                                                            <Grid item className={classes.inputBox}>
-                                                                <TextField id="supportingInfoTypeOfBill" variant="standard" value={this.state.supportingInfoTypeOfBill} onChange={this.handleSupportingInfoTypeOfBill} />
-                                                            </Grid>
-
-                                                            <Grid item>
-                                                                <FormLabel>Inter Transaction Identifier</FormLabel>
-                                                            </Grid>
-                                                            <Grid item >
-                                                                <Select
-                                                                    displayEmpty
-                                                                    id="select-inter-trans-id"
-                                                                    value={this.state.interTransIntermediary}
-                                                                    label="Inter Trans Identifier"
-                                                                    onChange={this.handleSelectInterTransId}
-                                                                    className={classes.inputBox}
-                                                                >
-                                                                    <MenuItem value="InterTransID0001">InterTransID0001</MenuItem>
-                                                                </Select>
-
-
-                                                            </Grid>
-                                                        </Grid>
-                                                    </Grid>
-                                                </Grid>
-                                            </Grid>
-
-                                            <Grid item className={classes.paper}>
-                                                <Grid container direction="row" spacing={3}>
-                                                    <Grid item >
-                                                        <FormControl>
-                                                            <FormLabel className={classes.smallerHeader}>Procedure: </FormLabel>
-                                                            <ProcedureItem rows={this.state.procedureList} addOne={this.addOneProcedureItem} edit={this.editProcedureItem} deleteOne={this.deleteOneProcedureItem} />
-                                                        </FormControl>
-                                                    </Grid>
-                                                    <Grid item>
-                                                        <Grid container direction="column" spacing={3}>
-
-                                                            <Grid item>
-                                                                <FormLabel>GFE assigned service identifier</FormLabel>
-                                                            </Grid>
-                                                            <Grid item>
-                                                                <Select
-                                                                    displayEmpty
-                                                                    id="select-gfe-service-id"
-                                                                    value={this.state.gfeServiceId}
-                                                                    label="GFE assigned service identifier"
-                                                                    onChange={this.handleSelectGfeServiceId}
-                                                                    className={classes.inputBox}
-                                                                >
-                                                                    <MenuItem value="GFEAssignedServiceID0001">GFEAssignedServiceID0001</MenuItem>
-                                                                </Select>
-
-                                                            </Grid>
-                                                        </Grid>
-                                                    </Grid>
-
-                                                    <Grid item>
-                                                        <FormControl>
-                                                            <FormLabel className={classes.smallerHeader}>Services: </FormLabel>
-                                                            <ClaimItem rows={this.state.claimItemList} addOne={this.addOneClaimItem} edit={this.editClaimItem} deleteOne={this.deleteOneClaimItem} />
-                                                        </FormControl>
-                                                    </Grid>
-                                                </Grid>
-                                            </Grid>
+                                            </Box>
                                         </Grid>
-                                    </Grid>
-                                </TabPanel>
-
-
-                                {/* Encounter tab 
-                        <TabPanel value={verticalTabIndex} index={2}>
-                            <Grid item className={classes.encounterBox} xs={12}>
-                                <FormControl component="fieldset">
-                                    <CardContent justifyContent="left" className={classes.card} >
-                                        <Grid container >
-                                            <Typography variant="subtitle1" component="h3" className={classes.card}>
-                                                Service Details:
-                                            </Typography>
-
-                                            <LocalizationProvider dateAdapter={AdapterDateFns} >
-
-                                                <Grid container spacing={5}>
-                                                    <Grid item s={1}>
-                                                        <DesktopDatePicker
-                                                            label="Start Date"
-                                                            inputFormat="MM/dd/yyyy"
-                                                            value={dateStart}
-                                                            onChange={this.handleDateStartChange}
-                                                            renderInput={(props) => <TextField {...props} />}
-                                                        />
-                                                    </Grid>
-                                                    <Grid item s={1}>
-                                                        <Typography variant="body1" component="body1" >
-                                                            to
-                                                        </Typography>
-                                                    </Grid>
-                                                    <Grid item s={1}>
-                                                        <DesktopDatePicker
-                                                            label="End Date"
-                                                            inputFormat="MM/dd/yyyy"
-                                                            value={dateEnd}
-                                                            onChange={this.handleDateEndChange}
-                                                            renderInput={(props) => <TextField {...props} />}
-                                                        />
-                                                    </Grid>
-
-                                                </Grid>
-                                            </LocalizationProvider>
-                                        </Grid>
-                                        <Grid>
-                                            <Grid item >
-                                                <FormLabel>Priority: </FormLabel>
-
-                                                {PrioritySelect(this.state.priorityList, this.state.selectedPriority, this.handleOpenPriority, this.handleSelectPriority)}
-
-                                            </Grid>
-                                        </Grid>
-                                        <Grid item container spacing={5}>
-                                            <Grid item s={1}>
-                                                <FormControl>
-                                                    <FormLabel className={classes.headerSpacing}>Diagnosis*:</FormLabel>
-                                                    <DiagnosisItem rows={this.state.diagnosisList} addOne={this.addOneDiagnosisItem} edit={this.editDiagnosisItem} deleteOne={this.deleteOneDiagnosisItem} />
-                                                </FormControl>
-                                            </Grid>
-
-                                            <Grid item s={1}>
-                                                <FormLabel className={classes.smallerHeader}>Supporting Information</FormLabel>
-                                                <Grid container direction="column">
-                                                    <Grid item>
-                                                        <FormLabel>Type of Bill</FormLabel>
-                                                    </Grid>
-                                                    <Grid item className={classes.inputBox}>
-                                                        <TextField id="supportingInfoTypeOfBill" variant="standard" value={this.state.supportingInfoTypeOfBill} onChange={this.handleSupportingInfoTypeOfBill} />
-                                                    </Grid>
-
-
-                                                    <Grid item >
-                                                        <FormLabel>Inter Transaction Identifier</FormLabel>
-                                                    </Grid>
-                                                    <Grid item className={classes.inputBox}>
-                                                        <Select
-                                                            displayEmpty
-                                                            id="select-inter-trans-id"
-                                                            value={this.state.interTransIntermediary}
-                                                            label="Inter Trans Identifier"
-                                                            onChange={this.handleSelectInterTransId}
-                                                        >
-                                                            <MenuItem value="InterTransID0001">InterTransID0001</MenuItem>
-                                                        </Select>
-
-                                                        <Grid>
-                                                            <FormLabel>GFE assigned service identifier</FormLabel>
-                                                        </Grid>
-                                                        <Grid>
-                                                            <Select
-                                                                displayEmpty
-                                                                id="select-gfe-service-id"
-                                                                value={this.state.gfeServiceId}
-                                                                label="GFE assigned service identifier"
-                                                                onChange={this.handleSelectGfeServiceId}
-                                                            >
-                                                                <MenuItem value="GFEAssignedServiceID0001">GFEAssignedServiceID0001</MenuItem>
-                                                            </Select>
-                                                        </Grid>
-                                                    </Grid>
-                                                </Grid>
-                                            </Grid>
-                                        </Grid>
+                                    </TabPanel>
+                                </Box>
+                            </TabPanel>
 
 
 
-                                        <Grid item>
-                                            <FormControl className={classes.headerSpacing}>
-                                                <Typography variant="subtitle1" component="h3" className={classes.card}>
-                                                    Procedure:
-                                                </Typography>
-                                                <ProcedureItem rows={this.state.procedureList} addOne={this.addOneProcedureItem} edit={this.editProcedureItem} deleteOne={this.deleteOneProcedureItem} />
-                                            </FormControl>
-                                        </Grid>
+                            {/* Second tab on the top (AEOB) */}
+                            <TabPanel value={currentTabIndex} index={1} >
+                                Item Two
+                            </TabPanel>
+                        </Box >
+                    </form>
 
-
-
-
-                                        <Grid item>
-                                            <FormControl className={classes.headerSpacing}>
-                                                <Typography variant="subtitle1" component="h3" className={classes.card}>
-                                                    Claim Items*:
-                                                </Typography>
-                                                <ClaimItem rows={this.state.claimItemList} addOne={this.addOneClaimItem} edit={this.editClaimItem} deleteOne={this.deleteOneClaimItem} />
-                                            </FormControl>
-                                        </Grid>
-                                    </CardContent>
-                                </FormControl>
-                            </Grid>
-                        </TabPanel>
-                    */}
-
-                                {/* Summary tab*/}
-                                <TabPanel value={verticalTabIndex} index={3}>
-
-                                    <Grid item className={classes.paper} xs={12}>
-                                        <FormControl component="fieldset">
-                                            <Grid container direction="row">
-                                                <Grid item xs={10}>
-                                                    <FormLabel className={classes.smallerHeader}>Summary</FormLabel>
-                                                </Grid>
-                                                <Grid xs={2}>
-                                                    <ViewGFERequestDialog generateRequest={this.generateBundle} valid={this.isRequestValid} error={this.state.validationErrors} />
-                                                </Grid>
-                                            </Grid>
-
-
-                                            <Grid item><SummaryItem summary={summary} /></Grid>
-                                        </FormControl>
-
-                                        {/* Submit button*/}
-                                        <Box display="flex" justifyContent="space-evenly">
-                                            <FormControl>
-                                                <Button loading variant="contained" color="primary" type="submit" disabled={this.props.submittingStatus === true}>
-                                                    Submit GFE
-                                                </Button>
-                                            </FormControl>
-                                        </Box>
-                                    </Grid>
-                                </TabPanel>
+                    {
+                        this.state.openErrorDialog ? (
+                            <ViewErrorDialog error={this.state.validationErrors} open={this.state.openErrorDialog} setOpen={open => this.setState({ openErrorDialog: open })} />
+                        ) : null
+                    }
+                    {
+                        this.state.submittingStatus === true ?
+                            <Box sx={{ width: '100%' }}>
+                                <LinearProgress />
                             </Box>
-                        </TabPanel>
-
-
-
-                        {/* Second tab on the top (AEOB) */}
-                        <TabPanel value={currentTabIndex} index={1} >
-                            Item Two
-                        </TabPanel>
-                    </Box >
+                            : null
+                    }
                 </Grid >
             </div >
         );
