@@ -199,7 +199,7 @@ export default function SummaryItem(props) {
                         <SummaryText content="Date:" class="label" />
                     </Grid>
                     <Grid item xs={6}>
-                        <SummaryText content={summary.subscriberid} />
+                        <SummaryText content={summary.startDateService + " - " + summary.endDateService} />
                     </Grid>
                 </Grid>
                 <Grid container>
@@ -207,7 +207,7 @@ export default function SummaryItem(props) {
                         <SummaryText content="Priority:" class="label" />
                     </Grid>
                     <Grid item xs={6}>
-                        <SummaryText content={summary.subscriberid} />
+                        <SummaryText content={summary.priorityLevel.priority.coding[0].code} />
                     </Grid>
                 </Grid>
                 <Grid container>
@@ -240,7 +240,6 @@ export default function SummaryItem(props) {
         </React.Fragment >
     )
 
-    //console.log("SHOULD SHOW PROVIDER ROLE LIST HERE:", summary.servicesList[0].productOrService)
 
     return (
         <div>

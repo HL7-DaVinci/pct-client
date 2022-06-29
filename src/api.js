@@ -6,6 +6,12 @@ export const FHIRClient = url => FHIR.client({
 
 export const getPatients = (url) => FHIRClient(url).request("Patient");
 
+
+
+export const getClaims = (url) => FHIRClient(url).request("Claim");
+
+
+
 export const getDeviceRequestsForPatient = (url, patientId) => {
     return FHIRClient(url)
         .request(`DeviceRequest?subject=Patient/${patientId}`, {
