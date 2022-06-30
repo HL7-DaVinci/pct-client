@@ -510,6 +510,7 @@ class GFERequestBox extends Component {
             startDate: null,
             setStartDate: null,
             endDate: null,
+            locationList: []
 
 
 
@@ -1165,8 +1166,9 @@ class GFERequestBox extends Component {
         let submitterOrgReference = `Organization/${this.state.selectedSubmitter}`
         input.submitter = {
             reference: submitterOrgReference,
-            resource: this.state.organizationList.filter(org => org.resource.id === this.state.selectedSubmitter)[0].resource
+            resource: this.state.organizationList.filter(org => org.resource.id === this.state.selectedSubmitter)[0].resource //undefined resource?
         }
+        console.log("this is the resource", this.state.organizationList.filter(org => org.resource.id === this.state.selectedSubmitter)[0].resource)
         orgReferenceList.push(submitterOrgReference);
 
         input.bundleResources.push({
@@ -1176,7 +1178,7 @@ class GFERequestBox extends Component {
 
 
         orgReferenceList.forEach(orgRef => {
-            let foundLocation = this.state.locationList.find(loc =>
+            let foundLocation = this.state.locationList.find(loc => //problem when professional, not institutional : added locationlist to constructor
                 loc.resource.managingOrganization.reference === orgRef
             )
             if (foundLocation) {
@@ -1798,7 +1800,7 @@ class GFERequestBox extends Component {
                     <AppBar position="static">
                         <Tabs
                             value={currentTabIndex}
-                            onChange={this.handleChange}
+                            //onChange={this.handleChange} //don't want the user to click aeob button before submit gfe's
                             indicatorColor="secondary"
                             textColor="inherit"
                             variant="fullWidth"
