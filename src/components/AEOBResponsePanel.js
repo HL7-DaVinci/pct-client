@@ -338,14 +338,26 @@ export default function AEOBResponsePanel(props) {
         //props.receivedAEOBResponse.entry[0].resource.entry[3].resource.id}
 
         //get the insurance url from insurance ref
-        //const patientURL = jp.query(props, '$..[?(@.resourceType == "ExplanationOfBenefit")].insurance[0].coverage.reference')[0];
+        const insuranceURL = jp.query(props, '$..[?(@.resourceType == "ExplanationOfBenefit")].insurance[0].coverage.reference')[0];
 
-        //get the id of the patient using that url
-        //const fullString = "$..[?(@.fullUrl ==" + "'" + patientURL + "'" + ")].resource.id"
+        //get the id of the insurance using that url
+        const fullString = "$..[?(@.fullUrl ==" + "'" + insuranceURL + "'" + ")].resource.id"
 
-        //returns string: patient1001
-        //return jp.query(props, (fullString))[0];
-        return
+        //returns string: coverage1001
+        return jp.query(props, (fullString))[0];
+
+    }
+    function getSubmittingProviderId() {
+
+        //get the insurance url from insurance ref
+        const submitterProviderURL = jp.query(props, '$..[?(@.resourceType == "ExplanationOfBenefit")].provider.reference')[0];
+
+        //get the id of the provider organization using that url
+        const fullString = "$..[?(@.fullUrl ==" + "'" + submitterProviderURL + "'" + ")].resource.id"
+
+        //returns string: submitter-org-1
+        return jp.query(props, (fullString))[0];
+
     }
 
     return (
@@ -591,7 +603,7 @@ export default function AEOBResponsePanel(props) {
                                         </Grid>
                                         <Grid item>
                                             <Typography variant="body1" gutterBottom>
-                                                Submitting Provider: {props.receivedAEOBResponse.entry[0].resource.entry[6].resource.id}
+                                                Submitting Provider: {getSubmittingProviderId()}
                                             </Typography>
                                         </Grid>
                                     </Grid>
