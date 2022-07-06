@@ -24,6 +24,8 @@ import { DataGrid } from '@mui/x-data-grid';
 //import { JSONPath } from 'jsonpath/lib';
 import jp from "jsonpath";
 import parse from "jsonpath";
+import moment from 'moment';
+
 
 
 
@@ -204,7 +206,7 @@ export default function AEOBResponsePanel(props) {
             sortable: false,
             width: 120,
             valueGetter: (params) =>
-                `${props.receivedAEOBResponse.entry[0].resource.entry[0].resource.item[0].productOrService.coding[0].code || ''}`,
+                `${jp.query(props, '$..[?(@.resourceType == "ExplanationOfBenefit")].item[0].productOrService.coding[0].code')[0] || ''}`,
         },
         {
             field: 'serviceDate',
@@ -213,7 +215,7 @@ export default function AEOBResponsePanel(props) {
             sortable: false,
             width: 120,
             valueGetter: (params) =>
-                `${props.receivedAEOBResponse.entry[0].resource.entry[0].resource.item[0].extension[0].valueDate || ''}`,
+                `${moment(jp.query(props, '$..[?(@.resourceType == "ExplanationOfBenefit")].item[0].extension[0].valueDate')[0]).format('L') || ''}`,
         },
         {
             field: 'quantity',
@@ -222,7 +224,7 @@ export default function AEOBResponsePanel(props) {
             sortable: false,
             width: 120,
             valueGetter: (params) =>
-                `${props.receivedAEOBResponse.entry[0].resource.entry[1].resource.item[0].quantity.value || ''}`,
+                `${jp.query(props, '$..[?(@.resourceType == "Claim")].item[0].quantity.value')[0] || ''}`,
         },
         {
             field: 'itemCost',
@@ -231,7 +233,8 @@ export default function AEOBResponsePanel(props) {
             sortable: false,
             width: 120,
             valueGetter: (params) =>
-                `${props.receivedAEOBResponse.entry[0].resource.entry[0].resource.item[0].adjudication[0].amount.value || ''} ${props.receivedAEOBResponse.entry[0].resource.entry[0].resource.item[0].adjudication[0].amount.currency}`,
+
+                `${jp.query(props, '$..[?(@.resourceType == "ExplanationOfBenefit")].item[0].adjudication[0].amount.value')[0] || ''} ${jp.query(props, '$..[?(@.resourceType == "ExplanationOfBenefit")].item[0].adjudication[0].amount.currency')[0]}`,
         },
         {
             field: 'eligibleAmount',
@@ -240,7 +243,7 @@ export default function AEOBResponsePanel(props) {
             sortable: false,
             width: 120,
             valueGetter: (params) =>
-                `${props.receivedAEOBResponse.entry[0].resource.entry[0].resource.id || ''}`,
+                `${''}`,
         },
         {
             field: 'deductible',
@@ -249,7 +252,7 @@ export default function AEOBResponsePanel(props) {
             sortable: false,
             width: 120,
             valueGetter: (params) =>
-                `${props.receivedAEOBResponse.entry[0].resource.entry[0].resource.id || ''}`,
+                `${''}`,
         },
     ];
 
@@ -357,8 +360,28 @@ export default function AEOBResponsePanel(props) {
 
         //returns string: submitter-org-1
         return jp.query(props, (fullString))[0];
+    }
+
+    function getDate() {
+
+        const date = jp.query(props, '$..[?(@.resourceType == "ExplanationOfBenefit")].meta.lastUpdated')[0];
+        return moment(date).format('lll');
 
     }
+
+    function calcCopay() {
+
+        const copayPercentage = jp.query(props, '$..[?(@.resourceType == "Coverage")].costToBeneficiary[0].valueQuantity.value')[0];
+        const copayDeci = copayPercentage / 100;
+        const copayAmount = (copayDeci * jp.query(props, '$..[?(@.resourceType == "ExplanationOfBenefit")].total[0].amount.value')[0]).toFixed(2);
+        const currency = jp.query(props, '$..[?(@.resourceType == "ExplanationOfBenefit")].total[0].amount.currency')[0];
+
+        return copayAmount + " " + currency;
+    }
+
+
+
+
 
     return (
         <div>
@@ -455,12 +478,12 @@ export default function AEOBResponsePanel(props) {
                                     </Grid>
                                     <Grid item md={4}>
                                         <Typography variant="body1" gutterBottom>
-                                            ID: {jp.query(props, '$..[?(@.resourceType == "Patient")].id')[0]}
+                                            ID: {jp.query(props, '$..[?(@.resourceType == "Bundle")].id')[0]}
                                         </Typography>
                                     </Grid>
                                     <Grid item md={4}>
                                         <Typography variant="body1" gutterBottom>
-                                            Identifier: {props.bundleIdentifier}
+                                            Identifier: {jp.query(props, '$..[?(@.resourceType == "Bundle")].identifier.value')[0]}
                                         </Typography>
                                     </Grid>
                                 </Grid>
@@ -513,17 +536,17 @@ export default function AEOBResponsePanel(props) {
                             </Grid>
                             <Grid item>
                                 <Typography variant="body1" gutterBottom>
-                                    id: {props.receivedAEOBResponse.entry[0].resource.entry[0].resource.id}
+                                    ID: {jp.query(props, '$..[?(@.resourceType == "ExplanationOfBenefit")].id')[0]}
                                 </Typography>
                             </Grid>
                             <Grid item>
                                 <Typography variant="body1" gutterBottom>
-                                    Start date: {props.receivedAEOBResponse.entry[0].resource.entry[0].resource.created}
+                                    Created: {getDate()}
                                 </Typography>
                             </Grid>
                             <Grid item>
                                 <Typography variant="body1" gutterBottom className={classes.spaceBelow}>
-                                    Outcome: {props.receivedAEOBResponse.entry[0].resource.entry[0].resource.outcome}
+                                    Outcome: {jp.query(props, '$..[?(@.resourceType == "ExplanationOfBenefit")].outcome')[0]}
                                 </Typography>
                             </Grid>
 
@@ -538,7 +561,7 @@ export default function AEOBResponsePanel(props) {
                                         </Grid>
                                         <Grid item>
                                             <Typography variant="body1" gutterBottom>
-                                                Submitted Amount: {props.receivedAEOBResponse.entry[0].resource.entry[0].resource.total[0].amount.value} {props.receivedAEOBResponse.entry[0].resource.entry[0].resource.total[0].amount.currency}
+                                                Submitted Amount: {jp.query(props, '$..[?(@.resourceType == "ExplanationOfBenefit")].total[0].amount.value')[0]} {jp.query(props, '$..[?(@.resourceType == "ExplanationOfBenefit")].total[0].amount.currency')[0]}
                                             </Typography>
                                         </Grid>
                                         <Grid item>
@@ -553,7 +576,7 @@ export default function AEOBResponsePanel(props) {
                                         </Grid>
                                         <Grid item>
                                             <Typography variant="body1" gutterBottom>
-                                                Copay: {props.receivedAEOBResponse.entry[0].resource.entry[3].resource.costToBeneficiary[0].valueQuantity.value}% = {(props.receivedAEOBResponse.entry[0].resource.entry[3].resource.costToBeneficiary[0].valueQuantity.value) / 100 * props.receivedAEOBResponse.entry[0].resource.entry[0].resource.total[0].amount.value}
+                                                Copay: {calcCopay()}
                                             </Typography>
                                         </Grid>
                                     </Grid>
@@ -573,7 +596,7 @@ export default function AEOBResponsePanel(props) {
                                         </Grid>
                                         <Grid item>
                                             <Typography variant="body1" gutterBottom>
-                                                Paid to Provider: {props.receivedAEOBResponse.entry[0].resource.entry[0].resource.item[0].adjudication[0].amount.value}{props.receivedAEOBResponse.entry[0].resource.entry[0].resource.item[0].adjudication[0].amount.currency}
+                                                Paid to Provider: {jp.query(props, '$..[?(@.resourceType == "ExplanationOfBenefit")].item[0].adjudication[0].amount.value')[0] + " " + jp.query(props, '$..[?(@.resourceType == "ExplanationOfBenefit")].item[0].adjudication[0].amount.currency')[0]}
                                             </Typography>
                                         </Grid>
                                         <Grid item>
