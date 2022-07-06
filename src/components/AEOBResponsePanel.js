@@ -28,12 +28,6 @@ import moment from 'moment';
 
 
 
-
-
-
-
-
-
 const useStyles = makeStyles({
     root: {
         backgroundColor: "#dadacc"
@@ -115,7 +109,6 @@ const useStyles = makeStyles({
 });
 
 
-
 const style = {
     position: 'absolute',
     top: '50%',
@@ -127,9 +120,6 @@ const style = {
     boxShadow: 24,
     p: 4,
 };
-
-
-
 
 
 //GFE and AEOB tabs
@@ -378,9 +368,6 @@ export default function AEOBResponsePanel(props) {
 
         return copayAmount + " " + currency;
     }
-
-
-
 
 
     return (
