@@ -46,6 +46,7 @@ export default function ViewGFERequestDialog(props) {
                             flexDirection: 'column',
                             m: 'auto',
                             width: 'fit-content',
+                            height: "fit-content"
                         }}
                     >
                         {

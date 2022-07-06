@@ -44,7 +44,7 @@ export default function SummaryItem(props) {
                         <SummaryText content="Patient:" class="label" />
                     </Grid>
                     <Grid item xs={6}>
-                        <SummaryText content={summary.patientId} />
+                        <SummaryText content={(summary.patientId)} />
                     </Grid>
                 </Grid>
                 <Grid container>

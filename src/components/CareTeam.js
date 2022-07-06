@@ -1,9 +1,9 @@
-import DataGridComponent, {renderRequiredHeader} from './DataGridComponent';
+import DataGridComponent, { renderRequiredHeader } from './DataGridComponent';
 
 export const columns = providerOptions => [
     {
         field: 'role', headerName: 'Role', editable: true, type: 'singleSelect',
-        valueOptions: ['Rendering', 'Attending', 'Operating', 'Primary', "Other Operating"], 
+        valueOptions: ['Rendering', 'Attending', 'Operating', 'Primary', "Other Operating"],
         renderHeader: renderRequiredHeader,
         required: true
     },
@@ -16,11 +16,9 @@ export const columns = providerOptions => [
 ];
 
 export default function CareTeam(props) {
-    
-
     return (
         <div style={{ width: '100%' }}>
-            <DataGridComponent rows={props.rows} columns={columns(props.providerList)} edit={props.edit} add={props.addOne} delete={props.deleteOne}/>
+            <DataGridComponent rows={props.rows} columns={columns(props.providerList)} edit={props.edit} add={props.addOne} delete={props.deleteOne} />
         </div>
     )
 }

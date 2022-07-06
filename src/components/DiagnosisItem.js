@@ -1,4 +1,4 @@
-import DataGridComponent, {renderRequiredHeader} from './DataGridComponent';
+import DataGridComponent, { renderRequiredHeader } from './DataGridComponent';
 import { DiagnosisList, DiagnosisTypeList } from '../values/DiagnosisList';
 
 export const columns = [
@@ -16,10 +16,10 @@ export const columns = [
     }
 ];
 
-export default function DiagnosisItem(props) {  
+export default function DiagnosisItem(props) {
     return (
         <div>
-        <DataGridComponent rows={props.rows} columns={columns} add={props.addOne} edit={props.edit} delete={props.deleteOne}/>
-    </div>
+            <DataGridComponent rows={props.rows} columns={columns} add={props.addOne} edit={props.edit} delete={props.deleteOne} />
+        </div>
     );
 }

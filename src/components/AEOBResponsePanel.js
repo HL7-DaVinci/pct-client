@@ -18,6 +18,13 @@ import Paper from '@mui/material/Paper';
 import Modal from '@mui/material/Modal';
 import Divider from '@mui/material/Divider';
 
+import AEOBItems, { columns as AEOBItemsColumns } from './ClaimItem';
+
+import { DataGrid } from '@mui/x-data-grid';
+//import { JSONPath } from 'jsonpath/lib';
+import jp from "jsonpath";
+
+
 
 
 
@@ -80,15 +87,30 @@ const useStyles = makeStyles({
         border: '2px solid #000',
         boxShadow: 24,
         p: 4,
+        //objectFit: "fill"
     },
     aeobQueryButton: {
         marginTop: 20,
         alignItems: "right"
     },
-    aeobText: {
+    spaceTop: {
+        marginTop: 40
+    },
+    spaceBelow: {
+        marginBottom: 20
+    },
+    card: {
+        //minWidth: "80%",
+        minWidth: "70vw",
+        textAlign: "left",
+        marginLeft: 0,
+        //color: theme.palette.text.secondary,
 
+        backgroundColor: "#D3D3D3"
     }
 });
+
+
 
 const style = {
     position: 'absolute',
@@ -101,6 +123,9 @@ const style = {
     boxShadow: 24,
     p: 4,
 };
+
+
+
 
 
 //GFE and AEOB tabs
@@ -158,16 +183,81 @@ TabContainer.propTypes = {
 
 export default function AEOBResponsePanel(props) {
 
+    const [openAEOBContent, setOpenAEOBContent] = React.useState(false);
+
+    const handleCloseAEOBContent = () => {
+        setOpenAEOBContent(false);
+    };
+
+    const rows = [
+        { id: 1, lastName: 'Example', firstName: 'Example', age: 35 },
+    ];
 
 
-    const [open, setOpen] = React.useState(false);
-    const handleOpen = () => setOpen(true);
-    const handleClose = () => setOpen(false);
+    const columns = [
+        {
+            field: 'service',
+            headerName: 'Service',
+            description: 'Item Service',
+            sortable: false,
+            width: 120,
+            valueGetter: (params) =>
+                `${props.receivedAEOBResponse.entry[0].resource.entry[0].resource.item[0].productOrService.coding[0].code || ''}`,
+        },
+        {
+            field: 'serviceDate',
+            headerName: 'Service Date',
+            description: 'Service date.',
+            sortable: false,
+            width: 120,
+            valueGetter: (params) =>
+                `${props.receivedAEOBResponse.entry[0].resource.entry[0].resource.item[0].extension[0].valueDate || ''}`,
+        },
+        {
+            field: 'quantity',
+            headerName: 'Quantity',
+            description: 'quantity.',
+            sortable: false,
+            width: 120,
+            valueGetter: (params) =>
+                `${props.receivedAEOBResponse.entry[0].resource.entry[1].resource.item[0].quantity.value || ''}`,
+        },
+        {
+            field: 'itemCost',
+            headerName: 'Item Cost',
+            description: 'item cost.',
+            sortable: false,
+            width: 120,
+            valueGetter: (params) =>
+                `${props.receivedAEOBResponse.entry[0].resource.entry[0].resource.item[0].adjudication[0].amount.value || ''} ${props.receivedAEOBResponse.entry[0].resource.entry[0].resource.item[0].adjudication[0].amount.currency}`,
+        },
+        {
+            field: 'eligibleAmount',
+            headerName: 'Eligible Amount',
+            description: 'eligible amount.',
+            sortable: false,
+            width: 120,
+            valueGetter: (params) =>
+                `${props.receivedAEOBResponse.entry[0].resource.entry[0].resource.id || ''}`,
+        },
+        {
+            field: 'deductible',
+            headerName: 'Deductible',
+            description: 'deductible.',
+            sortable: false,
+            width: 120,
+            valueGetter: (params) =>
+                `${props.receivedAEOBResponse.entry[0].resource.entry[0].resource.id || ''}`,
+        },
+    ];
+
+    const [openGFEResponse, setOpenGFEResponse] = React.useState(false);
+    const handleOpenGFEResponse = () => setOpenGFEResponse(true);
+    const handleCloseGFEResponse = () => setOpenGFEResponse(false);
 
     const [openAEOB, setOpenAEOB] = React.useState(false);
     const handleOpenAEOB = () => setOpenAEOB(true);
     const handleCloseAEOB = () => setOpenAEOB(false);
-
 
 
     const classes = useStyles();
@@ -191,10 +281,6 @@ export default function AEOBResponsePanel(props) {
     }, [props.dataServerChanged, props.payerServerChanged]);
 
     function handleSendInquiry() {
-
-        //set time of current request
-
-
         setAeobInquirySubmitted(true);
         setAeobInquiryPending(true);
         sendAEOInquiry(props.payorUrl, props.bundleIdentifier)
@@ -227,15 +313,15 @@ export default function AEOBResponsePanel(props) {
         return new Date().toLocaleString();
     }
 
-
-
-
-
-
-
+    const SummaryText = props => (
+        <div>
+            <Typography variant="subtitle1" component="h3" className={classes.card}>
+                {props.content}
+            </Typography>
+        </div>
+    )
 
     return (
-
         <div>
             <AppBar position="static">
                 <Tabs
@@ -245,7 +331,6 @@ export default function AEOBResponsePanel(props) {
                     textColor="inherit"
                     variant="fullWidth"
                     aria-label="full width tabs example"
-
                 >
                     <Tab label="Good Faith Estimate" {...a11yProps(0)} />
                     <Tab label="Advanced Explanation of Benefits" {...a11yProps(1)} />
@@ -273,27 +358,24 @@ export default function AEOBResponsePanel(props) {
                                     <Typography variant="body1" gutterBottom>
                                         ID: {props.bundleId}
                                     </Typography>
-
                                 </Grid>
                                 <Grid item md={4}>
                                     <Typography variant="body1" gutterBottom>
-
                                         Identifier: {props.bundleIdentifier}
                                     </Typography>
-
                                 </Grid>
-
                             </Grid>
 
                             <Grid item alignItems="flex-end" xs={2}>
                                 <Grid item>
 
-                                    <Button loading variant="contained" color="primary" type="show-raw-gfe" onClick={handleOpen}>
+                                    <Button loading variant="contained" color="primary" type="show-raw-gfe" onClick={handleOpenGFEResponse}>
                                         Raw JSON
                                     </Button>
+
                                     <Modal
-                                        open={open}
-                                        onClose={handleClose}
+                                        open={openGFEResponse}
+                                        onClose={handleCloseGFEResponse}
                                         aria-labelledby="modal-modal-title"
                                         aria-describedby="modal-modal-description"
                                     >
@@ -336,54 +418,54 @@ export default function AEOBResponsePanel(props) {
                                         <Typography variant="body1" gutterBottom>
                                             ID: {props.bundleId}
                                         </Typography>
-
                                     </Grid>
                                     <Grid item md={4}>
                                         <Typography variant="body1" gutterBottom>
-
                                             Identifier: {props.bundleIdentifier}
                                         </Typography>
-
                                     </Grid>
-
-
                                 </Grid>
-
-
 
                                 <Grid item alignItems="flex-end" xs={2}>
                                     <Grid item>
                                         <Button loading variant="contained" color="primary" type="show-raw-gfe" onClick={handleOpenAEOB}>
                                             Raw JSON
                                         </Button>
-                                        <Modal
+                                        <Dialog
+                                            maxWidth="lg"
                                             open={openAEOB}
                                             onClose={handleCloseAEOB}
-                                            aria-labelledby="modal-modal-title"
-                                            aria-describedby="modal-modal-description"
                                         >
-                                            <Box sx={style}>
-                                                <Typography id="modal-modal-title" variant="h6" component="h2">
-                                                    Raw JSON of Initial Response from GFE Submission:
-                                                </Typography>
-                                                <Typography className={classes.response} color="textSecondary" gutterBottom>
+                                            <DialogTitle>Raw JSON of AEOB Response:</DialogTitle>
+                                            <DialogContent>
+                                                <Box
+                                                    noValidate
+                                                    component="form"
+                                                    sx={{
+                                                        display: 'flex',
+                                                        flexDirection: 'column',
+                                                        m: 'auto',
+                                                        width: 'fit-content',
+                                                        height: "fit-content"
+                                                    }}
+                                                >
                                                     <div>
                                                         <pre>{JSON.stringify(props.receivedAEOBResponse, undefined, 2)}</pre>
                                                     </div>
-                                                </Typography>
-                                            </Box>
-                                        </Modal>
+                                                </Box>
+
+                                                <DialogActions>
+                                                    <Button onClick={handleCloseAEOBContent}>Close</Button>
+                                                </DialogActions>
+                                            </DialogContent>
+                                        </Dialog>
                                     </Grid>
                                 </Grid>
-
                             </Grid>
                         </Grid>
-
                         <Grid>
                             <Divider />
                             <Divider light />
-
-
 
                             <Grid item>
                                 <Typography variant="h5" gutterBottom>
@@ -392,27 +474,32 @@ export default function AEOBResponsePanel(props) {
                             </Grid>
                             <Grid item>
                                 <Typography variant="body1" gutterBottom>
-                                    id:
+                                    id: {props.receivedAEOBResponse.entry[0].resource.entry[0].resource.id}
                                 </Typography>
                             </Grid>
                             <Grid item>
                                 <Typography variant="body1" gutterBottom>
-                                    Start date:
+                                    Start date: {props.receivedAEOBResponse.entry[0].resource.entry[0].resource.created}
+                                </Typography>
+                            </Grid>
+                            <Grid item>
+                                <Typography variant="body1" gutterBottom className={classes.spaceBelow}>
+                                    Outcome: {props.receivedAEOBResponse.entry[0].resource.entry[0].resource.outcome}
                                 </Typography>
                             </Grid>
 
 
-                            <Grid container direction="row">
+                            <Grid container direction="row" spacing={9}>
                                 <Grid item>
-                                    <Grid container direction="column">
+                                    <Grid container direction="column" >
                                         <Grid item>
-                                            <Typography variant="body1" gutterBottom>
+                                            <Typography variant="h6" gutterBottom>
                                                 Totals:
                                             </Typography>
                                         </Grid>
                                         <Grid item>
                                             <Typography variant="body1" gutterBottom>
-                                                Submitted Amount:
+                                                Submitted Amount: {props.receivedAEOBResponse.entry[0].resource.entry[0].resource.total[0].amount.value} {props.receivedAEOBResponse.entry[0].resource.entry[0].resource.total[0].amount.currency}
                                             </Typography>
                                         </Grid>
                                         <Grid item>
@@ -427,7 +514,7 @@ export default function AEOBResponsePanel(props) {
                                         </Grid>
                                         <Grid item>
                                             <Typography variant="body1" gutterBottom>
-                                                Copay:
+                                                Copay: {props.receivedAEOBResponse.entry[0].resource.entry[3].resource.costToBeneficiary[0].valueQuantity.value}% = {(props.receivedAEOBResponse.entry[0].resource.entry[3].resource.costToBeneficiary[0].valueQuantity.value) / 100 * props.receivedAEOBResponse.entry[0].resource.entry[0].resource.total[0].amount.value}
                                             </Typography>
                                         </Grid>
                                     </Grid>
@@ -435,8 +522,8 @@ export default function AEOBResponsePanel(props) {
 
                                 <Grid item>
                                     <Grid container direction="column">
-                                        <Grid item>
-                                            <Typography variant="body1" gutterBottom>
+                                        <Grid item >
+                                            <Typography variant="body1" gutterBottom className={classes.spaceTop}>
                                                 Coinsurance:
                                             </Typography>
                                         </Grid>
@@ -447,17 +534,12 @@ export default function AEOBResponsePanel(props) {
                                         </Grid>
                                         <Grid item>
                                             <Typography variant="body1" gutterBottom>
-                                                Paid to Provider:
+                                                Paid to Provider: {props.receivedAEOBResponse.entry[0].resource.entry[0].resource.item[0].adjudication[0].amount.value}{props.receivedAEOBResponse.entry[0].resource.entry[0].resource.item[0].adjudication[0].amount.currency}
                                             </Typography>
                                         </Grid>
                                         <Grid item>
                                             <Typography variant="body1" gutterBottom>
                                                 Member Liability:
-                                            </Typography>
-                                        </Grid>
-                                        <Grid item>
-                                            <Typography variant="body1" gutterBottom>
-                                                Copay:
                                             </Typography>
                                         </Grid>
                                     </Grid>
@@ -466,40 +548,62 @@ export default function AEOBResponsePanel(props) {
                                 <Grid item>
                                     <Grid container direction="column">
                                         <Grid item>
-                                            <Typography variant="body1" gutterBottom>
-                                                Details:
+                                            <Typography variant="h6" gutterBottom>
+                                                Details:{console.log(props)}
                                             </Typography>
                                         </Grid>
                                         <Grid item>
                                             <Typography variant="body1" gutterBottom>
-                                                Insurance:
+                                                Patient: {console.log(props.receivedAEOBResponse.entry[0].resource.entry[2].resource.id)}
                                             </Typography>
                                         </Grid>
                                         <Grid item>
                                             <Typography variant="body1" gutterBottom>
-                                                Submitting Provider:
+                                                Insurance: {props.receivedAEOBResponse.entry[0].resource.entry[3].resource.id}
+                                            </Typography>
+                                        </Grid>
+                                        <Grid item>
+                                            <Typography variant="body1" gutterBottom>
+                                                Submitting Provider: {props.receivedAEOBResponse.entry[0].resource.entry[6].resource.id}
                                             </Typography>
                                         </Grid>
                                     </Grid>
                                 </Grid>
                             </Grid>
+
+                            <Grid item>
+                                <Typography variant="h6" gutterBottom>
+                                    Items:
+                                </Typography>
+                                <Box sx={{ height: 400, width: '100%' }}>
+                                    <DataGrid
+                                        rows={rows}
+                                        columns={columns}
+                                        pageSize={5}
+                                        rowsPerPageOptions={[5]}
+                                        disableSelectionOnClick
+                                    />
+                                </Box>
+                            </Grid>
                         </Grid>
-
-
                     </AccordionDetails>
-                </Accordion>
+                </Accordion >
             ) : null
             }
 
-            {(props.gfeRequestSuccess === true && props.gfeRequestPending) ? (
-                <Grid item className={classes.aeobQueryButton}>
-                    <FormControl>
-                        <Button variant="contained" color="primary" type="submit" onClick={handleSendInquiry}>
-                            Query AEOB Bundle
-                        </Button>
-                    </FormControl>
-                </Grid>
-            ) : null
+
+
+            {
+                (props.gfeRequestSuccess === true && props.gfeRequestPending) ? (
+
+                    <Grid item className={classes.aeobQueryButton}>
+                        <FormControl>
+                            <Button variant="contained" color="primary" type="submit" onClick={handleSendInquiry}>
+                                Query AEOB Bundle
+                            </Button>
+                        </FormControl>
+                    </Grid>
+                ) : null
             }
 
             {/*
@@ -706,5 +810,6 @@ export default function AEOBResponsePanel(props) {
             </Grid>
                                                 */}
         </div >
+
     );
 }
