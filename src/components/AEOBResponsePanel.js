@@ -23,6 +23,8 @@ import AEOBItems, { columns as AEOBItemsColumns } from './ClaimItem';
 import { DataGrid } from '@mui/x-data-grid';
 //import { JSONPath } from 'jsonpath/lib';
 import jp from "jsonpath";
+import parse from "jsonpath";
+
 
 
 
@@ -321,6 +323,31 @@ export default function AEOBResponsePanel(props) {
         </div>
     )
 
+    function getPatientId() {
+
+        //get the patient url from the patient ref
+        const patientURL = jp.query(props, '$..[?(@.resourceType == "ExplanationOfBenefit")].patient.reference')[0];
+
+        //get the id of the patient using that url
+        const fullString = "$..[?(@.fullUrl ==" + "'" + patientURL + "'" + ")].resource.id"
+
+        //returns string: patient1001
+        return jp.query(props, (fullString))[0];
+    }
+    function getInsuranceId() {
+        //props.receivedAEOBResponse.entry[0].resource.entry[3].resource.id}
+
+        //get the insurance url from insurance ref
+        //const patientURL = jp.query(props, '$..[?(@.resourceType == "ExplanationOfBenefit")].insurance[0].coverage.reference')[0];
+
+        //get the id of the patient using that url
+        //const fullString = "$..[?(@.fullUrl ==" + "'" + patientURL + "'" + ")].resource.id"
+
+        //returns string: patient1001
+        //return jp.query(props, (fullString))[0];
+        return
+    }
+
     return (
         <div>
             <AppBar position="static">
@@ -416,7 +443,7 @@ export default function AEOBResponsePanel(props) {
                                     </Grid>
                                     <Grid item md={4}>
                                         <Typography variant="body1" gutterBottom>
-                                            ID: {props.bundleId}
+                                            ID: {jp.query(props, '$..[?(@.resourceType == "Patient")].id')[0]}
                                         </Typography>
                                     </Grid>
                                     <Grid item md={4}>
@@ -554,12 +581,12 @@ export default function AEOBResponsePanel(props) {
                                         </Grid>
                                         <Grid item>
                                             <Typography variant="body1" gutterBottom>
-                                                Patient: {console.log(props.receivedAEOBResponse.entry[0].resource.entry[2].resource.id)}
+                                                Patient: {getPatientId()}
                                             </Typography>
                                         </Grid>
                                         <Grid item>
                                             <Typography variant="body1" gutterBottom>
-                                                Insurance: {props.receivedAEOBResponse.entry[0].resource.entry[3].resource.id}
+                                                Insurance: {getInsuranceId()}
                                             </Typography>
                                         </Grid>
                                         <Grid item>
