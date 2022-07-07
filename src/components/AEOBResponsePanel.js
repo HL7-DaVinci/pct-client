@@ -105,6 +105,9 @@ const useStyles = makeStyles({
         //color: theme.palette.text.secondary,
 
         backgroundColor: "#D3D3D3"
+    },
+    info: {
+        backgroundColor: "#EEEEEE"
     }
 });
 
@@ -316,17 +319,155 @@ export default function AEOBResponsePanel(props) {
         </div>
     )
 
+    function getNameDisplay(resource) {
+
+        //get the patient url from the patient ref
+        //const patientURL = jp.query(props, '$..[?(@.resourceType == "ExplanationOfBenefit")].patient.reference')[0];
+        var returnString = "";
+        //get the id of the patient using that url
+        //const fullString = "$..[?(@.fullUrl ==" + "'" + patientURL + "'" + ")].resource.id"
+        //console.log(JSON.stringify(humanName));
+        if (resource.constructor.name === 'Object' && resource !== null)
+        {
+            if (resource.resourceType == 'Organization')
+                returnString = resource.name;
+            else if (resource.resourceType == 'Patient' || resource.resourceType == 'Practitioner' || resource.resourceType == 'relatedPerson')
+            {
+                returnString = getHumanNameDisplay(resource.name[0]);
+            }
+            else
+            {
+                returnString = "Name for resource of type " & resource.resourceType & " is not supported.";
+            }
+        }
+
+        return returnString;
+    }
+
+    function getHumanNameDisplay(humanName) {
+
+        //get the patient url from the patient ref
+        //const patientURL = jp.query(props, '$..[?(@.resourceType == "ExplanationOfBenefit")].patient.reference')[0];
+        var returnString = "";
+        //get the id of the patient using that url
+        //const fullString = "$..[?(@.fullUrl ==" + "'" + patientURL + "'" + ")].resource.id"
+        //console.log(JSON.stringify(humanName));
+        if (humanName.constructor.name === 'Object' && humanName !== null)
+        {
+            if ('text' in humanName)
+                returnString = humanName.text;
+            else if ('family' in humanName)
+            {
+                returnString = humanName.family;
+                if ('given' in humanName)
+                    returnString += ", " + humanName.given[0];
+                    if (humanName.given.length > 1)
+                    returnString += " " + humanName.given[1];
+            }
+        }
+        else   
+        returnString = "Human Name for object of type " & typeof humanName & " is not supported.";
+        //returns string: patient1001
+        return returnString;
+    }
+
+
+    function getPatientResource() {
+        return jp.query(props, "$..[?(@.fullUrl ==" + "'" + jp.query(props, '$..[?(@.resourceType == "ExplanationOfBenefit")].patient.reference')[0] + "')].resource")[0];
+    }
+
+    function getPayorResource() {
+        return jp.query(props, "$..[?(@.fullUrl ==" + "'" + jp.query(props, '$..[?(@.resourceType == "ExplanationOfBenefit")].insurer.reference')[0] + "')].resource")[0];
+    }
+
+    function getCoverageResource() {
+        return jp.query(props, "$..[?(@.fullUrl ==" + "'" + jp.query(props, '$..[?(@.resourceType == "ExplanationOfBenefit")].insurance[0].coverage.reference')[0] + "')].resource")[0];
+    }
+
+    // The subscriber URL can be retrieved from Coverage.subscriber.reference, however unlike some references it is not the full url in the reference. 
+    // Tried to use a partial match, but that is not working with the jsonpath implementation. 
+    // Generally it is not expected that references will have the fullURL. May to implement a check to see if full url is provided, and if not prefix the base. 
+    // This base will need to be determined somehow, perhaps the fullUrl of the ExplanationOfBenefit
+    function getSubscriberResource() {
+        return jp.query(props, "$..[?(@.fullUrl =~ " + "'/.*" + getCoverageResource().subscriber.reference + "/')].resource")[0];
+    }
+
+    function getPatientResource() {
+        return jp.query(props, "$..[?(@.fullUrl ==" + "'" + jp.query(props, '$..[?(@.resourceType == "ExplanationOfBenefit")].patient.reference')[0] + "')].resource")[0];
+    }
+
+    function getSubmittingProviderResource(eobResource) {
+        return jp.query(props, "$..[?(@.fullUrl ==" + "'" + eobResource.provider.reference + "')].resource")[0];
+    }
+
     function getPatientId() {
 
         //get the patient url from the patient ref
-        const patientURL = jp.query(props, '$..[?(@.resourceType == "ExplanationOfBenefit")].patient.reference')[0];
+        //const patientURL = jp.query(props, '$..[?(@.resourceType == "ExplanationOfBenefit")].patient.reference')[0];
 
         //get the id of the patient using that url
-        const fullString = "$..[?(@.fullUrl ==" + "'" + patientURL + "'" + ")].resource.id"
+        //const fullString = "$..[?(@.fullUrl ==" + "'" + patientURL + "'" + ")].resource.identifier[?(@.type.coding[0].code == 'MB')].value"
 
         //returns string: patient1001
-        return jp.query(props, (fullString))[0];
+        //return jp.query(props, (fullString))[0];
+
+        return jp.query(getPatientResource(), '$..identifier[?(@.type.coding[0].code == "MB")].value')[0];
     }
+
+    function getTelecomDisplay(telecomArray)
+    {
+        var returnString = "";
+
+        if (Array.isArray(telecomArray))
+        {
+            telecomArray.forEach(function(telecom) {
+                returnString += telecom.value;
+                if ('use' in telecom)
+                {
+                    returnString += " (" + telecom.use;
+                    if ('system' in telecom)
+                    {
+                        returnString += " " + telecom.system;
+                    }
+                    returnString += ")";
+                }
+                else if ('system' in telecom)
+                {
+                    returnString += "(" + telecom.system + ")";
+                }
+                returnString += "; ";
+              });
+        }
+        else
+            console.log(telecomArray);
+
+        return returnString;
+    }
+
+    function getAddressDisplay(addressArray)
+    {
+        var returnString = "";
+
+        if (Array.isArray(addressArray))
+        {
+            addressArray.forEach(function(address) {
+                if ('text' in address)
+                {
+                    returnString += " " + address.text;
+                }
+                else
+                {
+                    returnString += "TODO Address without text";
+                }
+              });
+        }
+        else
+            console.log(addressArray);
+
+        return returnString;
+    }
+
+
     function getInsuranceId() {
         //props.receivedAEOBResponse.entry[0].resource.entry[3].resource.id}
 
@@ -460,7 +601,7 @@ export default function AEOBResponsePanel(props) {
                                 <Grid item xs={10}>
                                     <Grid item md={4}>
                                         <Typography variant="h5" gutterBottom>
-                                            Bundle:
+                                        <b><u>Bundle</u></b>
                                         </Typography>
                                     </Grid>
                                     <Grid item md={4}>
@@ -512,28 +653,134 @@ export default function AEOBResponsePanel(props) {
                                 </Grid>
                             </Grid>
                         </Grid>
+
+
+
+
+
+
+
+
                         <Grid>
                             <Divider />
                             <Divider light />
 
                             <Grid item>
                                 <Typography variant="h5" gutterBottom>
-                                    Advanced Explanation of Benefits
+                                    <b><u>Patient Information</u></b>
+                                </Typography>
+                            </Grid>
+                            <Grid container direction="row" spacing={9} className={classes.info}>
+                                <Grid item>
+                                    <Grid container direction="column" >
+                                        <Grid item>
+                                            <Typography variant="h6" gutterBottom>
+                                            <b>Demographics:</b>
+                                            </Typography>
+                                        </Grid>
+                                        <Grid item>
+                                            <Typography variant="body1" gutterBottom>
+                                               <b>Name:</b> {/*getHumanNameDisplay(jp.query("$..[?(@.fullUrl ==" + "'" + jp.query(props, '$..[?(@.resourceType == "ExplanationOfBenefit")].patient.reference')[0] + "'" + ")].resource.id"))*/}
+                                                {/*getHumanNameDisplay(jp.query(props, "$..[?(@.fullUrl ==" + "'" + jp.query(props, '$..[?(@.resourceType == "ExplanationOfBenefit")].patient.reference')[0] + "')].resource.name[0]")[0])*/}
+                                                {getHumanNameDisplay(getPatientResource().name[0])}
+                                            </Typography>
+                                        </Grid>
+                                        <Grid item>
+                                            <Typography variant="body1" gutterBottom>
+                                                <b>Birthdate:</b> {getPatientResource().birthDate}
+                                            </Typography>
+                                        </Grid>
+                                        <Grid item>
+                                            <Typography variant="body1" gutterBottom>
+                                                <b>Gender:</b> {getPatientResource().gender}
+                                            </Typography>
+                                        </Grid>
+                                        <Grid item>
+                                            <Typography variant="body1" gutterBottom>
+                                                <b>Telephone:</b> {getTelecomDisplay(getPatientResource().telecom)}
+                                            </Typography>
+                                        </Grid>
+                                        <Grid item>
+                                            <Typography variant="body1" gutterBottom>
+                                                <b>Address:</b> {getAddressDisplay(getPatientResource().address)}
+                                            </Typography>
+                                        </Grid>
+                                    </Grid>
+                                </Grid>
+                                <Grid item>
+                                    <Grid container direction="column">
+                                        <Grid item>
+                                            <Typography variant="h6" gutterBottom>
+                                                <b>Insurance:</b>{console.log(props)}
+                                            </Typography>
+                                        </Grid>
+                                        <Grid item>
+                                            <Typography variant="body1" gutterBottom>
+                                                <b>Payor:</b> {getPayorResource().name}
+                                            </Typography>
+                                        </Grid>
+                                        <Grid item>
+                                            <Typography variant="body1" gutterBottom>
+                                                <b>Subscriber:</b> {getCoverageResource().subscriberId} ({getCoverageResource().relationship.coding[0].display})
+                                            </Typography>
+                                        </Grid>
+                                        <Grid item>
+                                            <Typography variant="body1" gutterBottom>
+                                                <b>Member ID:</b> {getCoverageResource().id}
+                                            </Typography>
+                                        </Grid>
+                                        <Grid item>
+                                            <Typography variant="body1" gutterBottom>
+                                                <b>Plan:</b> {getCoverageResource().class[0].name}
+                                            </Typography>
+                                        </Grid>
+                                        <Grid item>
+                                            <Typography variant="body1" gutterBottom>
+                                                <b>Coverage Period:</b> {getCoverageResource().period.start} to {getCoverageResource().period.end}
+                                            </Typography>
+                                        </Grid>
+                                    </Grid>
+                                </Grid>
+                            </Grid>
+
+                        </Grid>
+
+
+
+
+
+
+                        <Grid>
+                            <Divider />
+                            <Divider light />
+                        </Grid>
+
+
+
+
+                        
+                        <Grid>
+                            <Divider />
+                            <Divider light />
+
+                            <Grid item>
+                                <Typography variant="h5" gutterBottom>
+                                <b><u>Advanced Explanation of Benefits</u></b>
                                 </Typography>
                             </Grid>
                             <Grid item>
                                 <Typography variant="body1" gutterBottom>
-                                    ID: {jp.query(props, '$..[?(@.resourceType == "ExplanationOfBenefit")].id')[0]}
+                                    <b>ID:</b> {jp.query(props, '$..[?(@.resourceType == "ExplanationOfBenefit")].id')[0]}
                                 </Typography>
                             </Grid>
                             <Grid item>
                                 <Typography variant="body1" gutterBottom>
-                                    Created: {getDate()}
+                                    <b>Created:</b> {getDate()}
                                 </Typography>
                             </Grid>
                             <Grid item>
                                 <Typography variant="body1" gutterBottom className={classes.spaceBelow}>
-                                    Outcome: {jp.query(props, '$..[?(@.resourceType == "ExplanationOfBenefit")].outcome')[0]}
+                                    <b>Outcome:</b> {jp.query(props, '$..[?(@.resourceType == "ExplanationOfBenefit")].outcome')[0]}
                                 </Typography>
                             </Grid>
 
@@ -543,9 +790,18 @@ export default function AEOBResponsePanel(props) {
                                     <Grid container direction="column" >
                                         <Grid item>
                                             <Typography variant="h6" gutterBottom>
-                                                Totals:
+                                                <b>Totals:</b>
                                             </Typography>
                                         </Grid>
+                                        {jp.query(props, '$..[?(@.resourceType == "ExplanationOfBenefit")].total').map((value, index) => {
+                                            return <Grid item>
+                                                <Typography variant="body1" gutterBottom>
+                                                    <b>{value[0].category.coding[0].display}:</b> {value[0].amount.value} {value[0].amount.currency}
+                                                </Typography>
+                                            </Grid>
+                                        })}
+                                        {/*
+                                        The Categories (labels) need to be dynamic and based on the data in the AEOB
                                         <Grid item>
                                             <Typography variant="body1" gutterBottom>
                                                 Submitted Amount: {jp.query(props, '$..[?(@.resourceType == "ExplanationOfBenefit")].total[0].amount.value')[0]} {jp.query(props, '$..[?(@.resourceType == "ExplanationOfBenefit")].total[0].amount.currency')[0]}
@@ -561,9 +817,10 @@ export default function AEOBResponsePanel(props) {
                                                 Deductible:
                                             </Typography>
                                         </Grid>
+                                    */}
                                         <Grid item>
                                             <Typography variant="body1" gutterBottom>
-                                                Copay: {calcCopay()}
+                                                <b>Copay:</b> {calcCopay()}
                                             </Typography>
                                         </Grid>
                                     </Grid>
@@ -571,6 +828,8 @@ export default function AEOBResponsePanel(props) {
 
                                 <Grid item>
                                     <Grid container direction="column">
+                                        {/*
+                                        This is actually line item adjudication data that should go in the items grid.
                                         <Grid item >
                                             <Typography variant="body1" gutterBottom className={classes.spaceTop}>
                                                 Coinsurance:
@@ -591,6 +850,7 @@ export default function AEOBResponsePanel(props) {
                                                 Member Liability:
                                             </Typography>
                                         </Grid>
+                                */}
                                     </Grid>
                                 </Grid>
 
@@ -598,9 +858,10 @@ export default function AEOBResponsePanel(props) {
                                     <Grid container direction="column">
                                         <Grid item>
                                             <Typography variant="h6" gutterBottom>
-                                                Details:{console.log(props)}
+                                                <b>Details:</b>{console.log(props)}
                                             </Typography>
                                         </Grid>
+                                        {/* This information is header level
                                         <Grid item>
                                             <Typography variant="body1" gutterBottom>
                                                 Patient: {getPatientId()}
@@ -611,9 +872,10 @@ export default function AEOBResponsePanel(props) {
                                                 Insurance: {getInsuranceId()}
                                             </Typography>
                                         </Grid>
+                            */}
                                         <Grid item>
                                             <Typography variant="body1" gutterBottom>
-                                                Submitting Provider: {getSubmittingProviderId()}
+                                                <b>Submitting Provider:</b> {getNameDisplay(getSubmittingProviderResource(jp.query(props, '$..[?(@.resourceType == "ExplanationOfBenefit")]')[0]))} ({getSubmittingProviderId()})
                                             </Typography>
                                         </Grid>
                                     </Grid>
@@ -622,8 +884,12 @@ export default function AEOBResponsePanel(props) {
 
                             <Grid item>
                                 <Typography variant="h6" gutterBottom>
-                                    Items:
+                                    <b>Items:</b>
                                 </Typography>
+                                {
+                                    //Load columns dynamically
+                                    
+                                }
                                 <Box sx={{ height: 400, width: '100%' }}>
                                     <DataGrid
                                         rows={rows}
