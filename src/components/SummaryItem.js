@@ -26,7 +26,23 @@ function createProcedureList(procedureList) {
     console.log(procedureList)
 
     return procedureList.map(el => {
-        return <ListItem disableGutters>{el.id}: {el.procedure}, {el.type}</ListItem>
+        return <ListItem disableGutters>{el.type}: {el.procedure} </ListItem>
+    })
+}
+
+function createDiagnosisList(diagnosisList) {
+    console.log(diagnosisList)
+
+    return diagnosisList.map(el => {
+        return <ListItem disableGutters>{el.type}: {el.diagnosis}</ListItem>
+    })
+}
+
+function createServiceList(serviceList) {
+    console.log(serviceList)
+
+    return serviceList.map(el => {
+        return <ListItem disableGutters>{el.placeOfService}: {el.productOrService}</ListItem>
     })
 }
 
@@ -241,7 +257,7 @@ export default function SummaryItem(props) {
                         <SummaryText content="Diagnosis:" class="label" />
                     </Grid>
                     <Grid item xs={6}>
-                        <SummaryText content={summary.diagnosisList[0].diagnosis} />
+                        <SummaryText content={createDiagnosisList(summary.diagnosisList)} />
                     </Grid>
                 </Grid>
 
@@ -260,7 +276,7 @@ export default function SummaryItem(props) {
                         <SummaryText content="Services:" class="label" />
                     </Grid>
                     <Grid item xs={6}>
-                        <SummaryText content={summary.servicesList[0].productOrService} />
+                        <SummaryText content={createServiceList(summary.servicesList)} />
                     </Grid>
                 </Grid>
 
