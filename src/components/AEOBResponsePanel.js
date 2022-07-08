@@ -26,6 +26,9 @@ import jp from "jsonpath";
 import parse from "jsonpath";
 import moment from 'moment';
 
+import AEOBItemsTable from "./AEOBItemsTable";
+
+
 
 
 const useStyles = makeStyles({
@@ -186,6 +189,9 @@ export default function AEOBResponsePanel(props) {
         setOpenAEOBContent(false);
     };
 
+
+
+
     const rows = [
         { id: 1, lastName: 'Example', firstName: 'Example', age: 35 },
     ];
@@ -200,6 +206,15 @@ export default function AEOBResponsePanel(props) {
             width: 120,
             valueGetter: (params) =>
                 `${jp.query(props, '$..[?(@.resourceType == "ExplanationOfBenefit")].item[0].productOrService.coding[0].code')[0] || ''}`,
+        },
+        {
+            field: 'description',
+            headerName: 'Description',
+            description: 'Item Description',
+            sortable: false,
+            width: 120,
+            valueGetter: (params) =>
+                `${jp.query(props, '$..[?(@.resourceType == "ExplanationOfBenefit")].item[0].productOrService.coding[0].display')[0] || ''}`,
         },
         {
             field: 'serviceDate',
@@ -248,6 +263,7 @@ export default function AEOBResponsePanel(props) {
                 `${''}`,
         },
     ];
+
 
     const [openGFEResponse, setOpenGFEResponse] = React.useState(false);
     const handleOpenGFEResponse = () => setOpenGFEResponse(true);
@@ -327,16 +343,13 @@ export default function AEOBResponsePanel(props) {
         //get the id of the patient using that url
         //const fullString = "$..[?(@.fullUrl ==" + "'" + patientURL + "'" + ")].resource.id"
         //console.log(JSON.stringify(humanName));
-        if (resource.constructor.name === 'Object' && resource !== null)
-        {
+        if (resource.constructor.name === 'Object' && resource !== null) {
             if (resource.resourceType == 'Organization')
                 returnString = resource.name;
-            else if (resource.resourceType == 'Patient' || resource.resourceType == 'Practitioner' || resource.resourceType == 'relatedPerson')
-            {
+            else if (resource.resourceType == 'Patient' || resource.resourceType == 'Practitioner' || resource.resourceType == 'relatedPerson') {
                 returnString = getHumanNameDisplay(resource.name[0]);
             }
-            else
-            {
+            else {
                 returnString = "Name for resource of type " & resource.resourceType & " is not supported.";
             }
         }
@@ -352,21 +365,19 @@ export default function AEOBResponsePanel(props) {
         //get the id of the patient using that url
         //const fullString = "$..[?(@.fullUrl ==" + "'" + patientURL + "'" + ")].resource.id"
         //console.log(JSON.stringify(humanName));
-        if (humanName.constructor.name === 'Object' && humanName !== null)
-        {
+        if (humanName.constructor.name === 'Object' && humanName !== null) {
             if ('text' in humanName)
                 returnString = humanName.text;
-            else if ('family' in humanName)
-            {
+            else if ('family' in humanName) {
                 returnString = humanName.family;
                 if ('given' in humanName)
                     returnString += ", " + humanName.given[0];
-                    if (humanName.given.length > 1)
+                if (humanName.given.length > 1)
                     returnString += " " + humanName.given[1];
             }
         }
-        else   
-        returnString = "Human Name for object of type " & typeof humanName & " is not supported.";
+        else
+            returnString = "Human Name for object of type " & typeof humanName & " is not supported.";
         //returns string: patient1001
         return returnString;
     }
@@ -414,29 +425,24 @@ export default function AEOBResponsePanel(props) {
         return jp.query(getPatientResource(), '$..identifier[?(@.type.coding[0].code == "MB")].value')[0];
     }
 
-    function getTelecomDisplay(telecomArray)
-    {
+    function getTelecomDisplay(telecomArray) {
         var returnString = "";
 
-        if (Array.isArray(telecomArray))
-        {
-            telecomArray.forEach(function(telecom) {
+        if (Array.isArray(telecomArray)) {
+            telecomArray.forEach(function (telecom) {
                 returnString += telecom.value;
-                if ('use' in telecom)
-                {
+                if ('use' in telecom) {
                     returnString += " (" + telecom.use;
-                    if ('system' in telecom)
-                    {
+                    if ('system' in telecom) {
                         returnString += " " + telecom.system;
                     }
                     returnString += ")";
                 }
-                else if ('system' in telecom)
-                {
+                else if ('system' in telecom) {
                     returnString += "(" + telecom.system + ")";
                 }
                 returnString += "; ";
-              });
+            });
         }
         else
             console.log(telecomArray);
@@ -444,22 +450,18 @@ export default function AEOBResponsePanel(props) {
         return returnString;
     }
 
-    function getAddressDisplay(addressArray)
-    {
+    function getAddressDisplay(addressArray) {
         var returnString = "";
 
-        if (Array.isArray(addressArray))
-        {
-            addressArray.forEach(function(address) {
-                if ('text' in address)
-                {
+        if (Array.isArray(addressArray)) {
+            addressArray.forEach(function (address) {
+                if ('text' in address) {
                     returnString += " " + address.text;
                 }
-                else
-                {
+                else {
                     returnString += "TODO Address without text";
                 }
-              });
+            });
         }
         else
             console.log(addressArray);
@@ -481,6 +483,7 @@ export default function AEOBResponsePanel(props) {
         return jp.query(props, (fullString))[0];
 
     }
+
     function getSubmittingProviderId() {
 
         //get the insurance url from insurance ref
@@ -508,6 +511,10 @@ export default function AEOBResponsePanel(props) {
         const currency = jp.query(props, '$..[?(@.resourceType == "ExplanationOfBenefit")].total[0].amount.currency')[0];
 
         return copayAmount + " " + currency;
+    }
+
+    function getAEOBItems() {
+        return jp.query(props, '$..[?(@.resourceType == "ExplanationOfBenefit")]')[0]
     }
 
 
@@ -601,7 +608,7 @@ export default function AEOBResponsePanel(props) {
                                 <Grid item xs={10}>
                                     <Grid item md={4}>
                                         <Typography variant="h5" gutterBottom>
-                                        <b><u>Bundle</u></b>
+                                            <b><u>Bundle</u></b>
                                         </Typography>
                                     </Grid>
                                     <Grid item md={4}>
@@ -675,12 +682,12 @@ export default function AEOBResponsePanel(props) {
                                     <Grid container direction="column" >
                                         <Grid item>
                                             <Typography variant="h6" gutterBottom>
-                                            <b>Demographics:</b>
+                                                <b>Demographics:</b>
                                             </Typography>
                                         </Grid>
                                         <Grid item>
                                             <Typography variant="body1" gutterBottom>
-                                               <b>Name:</b> {/*getHumanNameDisplay(jp.query("$..[?(@.fullUrl ==" + "'" + jp.query(props, '$..[?(@.resourceType == "ExplanationOfBenefit")].patient.reference')[0] + "'" + ")].resource.id"))*/}
+                                                <b>Name:</b> {/*getHumanNameDisplay(jp.query("$..[?(@.fullUrl ==" + "'" + jp.query(props, '$..[?(@.resourceType == "ExplanationOfBenefit")].patient.reference')[0] + "'" + ")].resource.id"))*/}
                                                 {/*getHumanNameDisplay(jp.query(props, "$..[?(@.fullUrl ==" + "'" + jp.query(props, '$..[?(@.resourceType == "ExplanationOfBenefit")].patient.reference')[0] + "')].resource.name[0]")[0])*/}
                                                 {getHumanNameDisplay(getPatientResource().name[0])}
                                             </Typography>
@@ -742,30 +749,20 @@ export default function AEOBResponsePanel(props) {
                                     </Grid>
                                 </Grid>
                             </Grid>
-
                         </Grid>
-
-
-
-
-
 
                         <Grid>
                             <Divider />
                             <Divider light />
                         </Grid>
 
-
-
-
-                        
                         <Grid>
                             <Divider />
                             <Divider light />
 
                             <Grid item>
                                 <Typography variant="h5" gutterBottom>
-                                <b><u>Advanced Explanation of Benefits</u></b>
+                                    <b><u>Advanced Explanation of Benefits</u></b>
                                 </Typography>
                             </Grid>
                             <Grid item>
@@ -800,7 +797,7 @@ export default function AEOBResponsePanel(props) {
                                                 </Typography>
                                             </Grid>
                                         })}
-                                        {/*
+                                        {/* 
                                         The Categories (labels) need to be dynamic and based on the data in the AEOB
                                         <Grid item>
                                             <Typography variant="body1" gutterBottom>
@@ -817,7 +814,7 @@ export default function AEOBResponsePanel(props) {
                                                 Deductible:
                                             </Typography>
                                         </Grid>
-                                    */}
+                                        */}
                                         <Grid item>
                                             <Typography variant="body1" gutterBottom>
                                                 <b>Copay:</b> {calcCopay()}
@@ -888,8 +885,10 @@ export default function AEOBResponsePanel(props) {
                                 </Typography>
                                 {
                                     //Load columns dynamically
-                                    
+
                                 }
+
+
                                 <Box sx={{ height: 400, width: '100%' }}>
                                     <DataGrid
                                         rows={rows}
@@ -899,6 +898,8 @@ export default function AEOBResponsePanel(props) {
                                         disableSelectionOnClick
                                     />
                                 </Box>
+
+                                {/*<AEOBItemsTable title="Items" data={props} />  */}
                             </Grid>
                         </Grid>
                     </AccordionDetails>
