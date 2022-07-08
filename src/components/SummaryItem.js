@@ -1,6 +1,8 @@
 import React from 'react';
 import { Grid, Typography, CardContent, Card, makeStyles, createStyles, Box } from '@material-ui/core'
 import Divider from '@mui/material/Divider';
+import ListItem from '@mui/material/ListItem';
+import List from '@mui/material/List';
 
 
 const useStyles = makeStyles((theme) =>
@@ -12,12 +14,21 @@ const useStyles = makeStyles((theme) =>
             marginLeft: 0,
             color: theme.palette.text.secondary,
             backgroundColor: "#D3D3D3"
+        },
+        listItemProcedure: {
+            marginLeft: 0
         }
     }),
 );
 
 
+function createProcedureList(procedureList) {
+    console.log(procedureList)
 
+    return procedureList.map(el => {
+        return <ListItem disableGutters>{el.id}: {el.procedure}, {el.type}</ListItem>
+    })
+}
 
 
 
@@ -47,6 +58,8 @@ export default function SummaryItem(props) {
                         <SummaryText content={(summary.patientId)} />
                     </Grid>
                 </Grid>
+
+
                 <Grid container>
                     <Grid item xs={6} >
                         <SummaryText content="Birthdate:" class="label" />
@@ -55,6 +68,7 @@ export default function SummaryItem(props) {
                         <SummaryText content={summary.birthdate} />
                     </Grid>
                 </Grid>
+
                 <Grid container>
                     <Grid item xs={6} >
                         <SummaryText content="Gender:" class="label" />
@@ -81,6 +95,7 @@ export default function SummaryItem(props) {
                         <SummaryText content={summary.addressId} />
                     </Grid>
                 </Grid>
+
                 <Box sx={{ my: 2 }}>
                     <Divider />
                     <Divider light />
@@ -92,6 +107,7 @@ export default function SummaryItem(props) {
                     </Box>
                 </Grid>
 
+
                 {(summary.payorId !== undefined) ?
                     <Grid container>
                         <Grid item xs={6} >
@@ -102,6 +118,7 @@ export default function SummaryItem(props) {
                         </Grid>
                     </Grid> : null
                 }
+
                 <Grid container>
                     <Grid item xs={6} >
                         <SummaryText content="Subscriber ID:" class="label" />
@@ -110,6 +127,7 @@ export default function SummaryItem(props) {
                         <SummaryText content={summary.subscriberId} />
                     </Grid>
                 </Grid>
+
                 <Grid container>
                     <Grid item xs={6} >
                         <SummaryText content="Member ID:" class="label" />
@@ -118,6 +136,7 @@ export default function SummaryItem(props) {
                         <SummaryText content={summary.memberId} />
                     </Grid>
                 </Grid>
+
                 <Grid container>
                     <Grid item xs={6} >
                         <SummaryText content="Subscriber Relationship:" class="label" />
@@ -126,6 +145,7 @@ export default function SummaryItem(props) {
                         <SummaryText content={summary.subscriberRelationship} />
                     </Grid>
                 </Grid>
+
                 <Grid container>
                     <Grid item xs={6} >
                         <SummaryText content="Plan:" class="label" />
@@ -134,6 +154,7 @@ export default function SummaryItem(props) {
                         <SummaryText content={summary.coveragePlan} />
                     </Grid>
                 </Grid>
+
                 <Grid container>
                     <Grid item xs={6} >
                         <SummaryText content="Coverage Period:" class="label" />
@@ -142,6 +163,7 @@ export default function SummaryItem(props) {
                         <SummaryText content={summary.coveragePeriod} />
                     </Grid>
                 </Grid>
+
 
                 <Box sx={{ my: 2 }}>
                     <Divider />
@@ -164,6 +186,7 @@ export default function SummaryItem(props) {
                         </Grid>
                     </Grid> : null
                 }
+
                 <Grid container>
                     <Grid item xs={6} >
                         <SummaryText content="Practitioner Role:" class="label" />
@@ -194,6 +217,7 @@ export default function SummaryItem(props) {
                         </Grid>
                     </Grid> : null
                 }
+
                 <Grid container>
                     <Grid item xs={6} >
                         <SummaryText content="Date:" class="label" />
@@ -202,6 +226,7 @@ export default function SummaryItem(props) {
                         <SummaryText content={summary.startDateService + " - " + summary.endDateService} />
                     </Grid>
                 </Grid>
+
                 <Grid container>
                     <Grid item xs={6} >
                         <SummaryText content="Priority:" class="label" />
@@ -210,6 +235,7 @@ export default function SummaryItem(props) {
                         <SummaryText content={summary.priorityLevel.priority.coding[0].code} />
                     </Grid>
                 </Grid>
+
                 <Grid container>
                     <Grid item xs={6} >
                         <SummaryText content="Diagnosis:" class="label" />
@@ -218,14 +244,17 @@ export default function SummaryItem(props) {
                         <SummaryText content={summary.diagnosisList[0].diagnosis} />
                     </Grid>
                 </Grid>
+
                 <Grid container>
                     <Grid item xs={6} >
                         <SummaryText content="Procedure:" class="label" />
                     </Grid>
                     <Grid item xs={6}>
-                        <SummaryText content={summary.procedureList[0].procedure} />
+
+                        <SummaryText content={createProcedureList(summary.procedureList)} />
                     </Grid>
                 </Grid>
+
                 <Grid container>
                     <Grid item xs={6} >
                         <SummaryText content="Services:" class="label" />
@@ -236,9 +265,11 @@ export default function SummaryItem(props) {
                 </Grid>
 
 
+
             </CardContent>
         </React.Fragment >
     )
+
 
 
     return (
