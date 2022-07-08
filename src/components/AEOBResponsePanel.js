@@ -883,23 +883,9 @@ export default function AEOBResponsePanel(props) {
                                 <Typography variant="h6" gutterBottom>
                                     <b>Items:</b>
                                 </Typography>
-                                {
-                                    //Load columns dynamically
 
-                                }
+                                <AEOBItemsTable title="Items" data={props} />
 
-
-                                <Box sx={{ height: 400, width: '100%' }}>
-                                    <DataGrid
-                                        rows={rows}
-                                        columns={columns}
-                                        pageSize={5}
-                                        rowsPerPageOptions={[5]}
-                                        disableSelectionOnClick
-                                    />
-                                </Box>
-
-                                {/*<AEOBItemsTable title="Items" data={props} />  */}
                             </Grid>
                         </Grid>
                     </AccordionDetails>
