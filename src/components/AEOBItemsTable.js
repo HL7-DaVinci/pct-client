@@ -50,8 +50,8 @@ function AEOBItemsTable({ title, data }) {
             const catSelected = jp.query(data, '$..[?(@.resourceType == "ExplanationOfBenefit")].item[' + i + '].adjudication[' + j + '].category.coding[0].display')[0];
 
             if (headers.includes(catSelected)) {
-                const rowValueCurrency = jp.query(data, '$..[?(@.resourceType == "ExplanationOfBenefit")].item[' + i + '].adjudication[' + j + '].amount.currency')[0];
-                const rowValueAmount = jp.query(data, '$..[?(@.resourceType == "ExplanationOfBenefit")].item[' + i + '].adjudication[' + j + '].amount.value')[0];
+                let rowValueCurrency = jp.query(data, '$..[?(@.resourceType == "ExplanationOfBenefit")].item[' + i + '].adjudication[' + j + '].amount.currency')[0];
+                let rowValueAmount = jp.query(data, '$..[?(@.resourceType == "ExplanationOfBenefit")].item[' + i + '].adjudication[' + j + '].amount.value')[0];
 
                 if (rowValueCurrency == "USD" || rowValueCurrency == "") {
                     rowValueAmount = "$" + jp.query(data, '$..[?(@.resourceType == "ExplanationOfBenefit")].item[' + i + '].adjudication[' + j + '].amount.value')[0].toFixed(2);
