@@ -73,7 +73,7 @@ export const columns = [
 export default function ClaimItem(props) {
     return (
         <div>
-            <DataGridComponent style={{ display: 'flex', width: '75vw', flexGrow: 1 }} rows={props.rows} columns={columns} add={props.addOne} edit={props.edit} delete={props.deleteOne} />
+            <DataGridComponent style={{ display: 'flex', width: '65vw', flexGrow: 1 }} rows={props.rows} columns={columns} add={props.addOne} edit={props.edit} delete={props.deleteOne} />
         </div>
     )
 }

@@ -13,7 +13,7 @@ const useStyles = makeStyles((theme) =>
             textAlign: "left",
             marginLeft: 0,
             color: theme.palette.text.secondary,
-            backgroundColor: "#D3D3D3"
+            backgroundColor: "#DCDCDC"
         },
         listItemProcedure: {
             marginLeft: 0
@@ -26,7 +26,7 @@ function createProcedureList(procedureList) {
     console.log(procedureList)
 
     return procedureList.map(el => {
-        return <ListItem disableGutters>{el.type}: {el.procedure} </ListItem>
+        return <ListItem disableGutters>({el.id}) {el.type}: {el.procedure} </ListItem>
     })
 }
 
@@ -34,7 +34,7 @@ function createDiagnosisList(diagnosisList) {
     console.log(diagnosisList)
 
     return diagnosisList.map(el => {
-        return <ListItem disableGutters>{el.type}: {el.diagnosis}</ListItem>
+        return <ListItem disableGutters>({el.id}) {el.type}: {el.diagnosis}</ListItem>
     })
 }
 
@@ -42,7 +42,7 @@ function createServiceList(serviceList) {
     console.log(serviceList)
 
     return serviceList.map(el => {
-        return <ListItem disableGutters>{el.placeOfService}: {el.productOrService}</ListItem>
+        return <ListItem disableGutters>({el.id}) {el.placeOfService}: {el.productOrService}</ListItem>
     })
 }
 
@@ -65,6 +65,14 @@ export default function SummaryItem(props) {
     const card = (
         <React.Fragment>
             <CardContent justifyContent="left" className={classes.card}>
+
+                <Grid container>
+                    <Box sx={{ mb: 2 }}>
+                        <b>
+                            Patient Details:
+                        </b>
+                    </Box>
+                </Grid>
 
                 <Grid container>
                     <Grid item xs={6} >
@@ -119,7 +127,9 @@ export default function SummaryItem(props) {
 
                 <Grid container>
                     <Box sx={{ mb: 2 }}>
-                        <SummaryText content="Insurance:" class="label" />
+                        <b>
+                            Insurance Details:
+                        </b>
                     </Box>
                 </Grid>
 
@@ -188,7 +198,9 @@ export default function SummaryItem(props) {
 
                 <Grid container>
                     <Box sx={{ mb: 2 }}>
-                        <SummaryText content="Care Team:" class="label" />
+                        <b>
+                            Care Team Details:
+                        </b>
                     </Box>
                 </Grid>
 
@@ -198,7 +210,9 @@ export default function SummaryItem(props) {
                             <SummaryText content="Billing:" class="label" />
                         </Grid>
                         <Grid item xs={6}>
-                            <SummaryText content={summary.practitionerSelected[0].provider} />
+                            <Typography style={{ wordWrap: "break-word" }}>
+                                {summary.practitionerSelected[0].provider}
+                            </Typography>
                         </Grid>
                     </Grid> : null
                 }
@@ -219,7 +233,9 @@ export default function SummaryItem(props) {
 
                 <Grid container>
                     <Box sx={{ mb: 2 }}>
-                        <SummaryText content="Service Details:" class="label" />
+                        <b>
+                            Service Details:
+                        </b>
                     </Box>
                 </Grid>
 
@@ -239,7 +255,7 @@ export default function SummaryItem(props) {
                         <SummaryText content="Date:" class="label" />
                     </Grid>
                     <Grid item xs={6}>
-                        <SummaryText content={summary.startDateService + " - " + summary.endDateService} />
+                        <SummaryText content={summary.serviceDate} />
                     </Grid>
                 </Grid>
 
@@ -257,7 +273,9 @@ export default function SummaryItem(props) {
                         <SummaryText content="Diagnosis:" class="label" />
                     </Grid>
                     <Grid item xs={6}>
-                        <SummaryText content={createDiagnosisList(summary.diagnosisList)} />
+                        <Typography style={{ wordWrap: "break-word" }}>
+                            {createDiagnosisList(summary.diagnosisList)}
+                        </Typography>
                     </Grid>
                 </Grid>
 
@@ -266,8 +284,9 @@ export default function SummaryItem(props) {
                         <SummaryText content="Procedure:" class="label" />
                     </Grid>
                     <Grid item xs={6}>
-
-                        <SummaryText content={createProcedureList(summary.procedureList)} />
+                        <Typography style={{ wordWrap: "break-word" }}>
+                            {createProcedureList(summary.procedureList)}
+                        </Typography>
                     </Grid>
                 </Grid>
 
@@ -276,7 +295,10 @@ export default function SummaryItem(props) {
                         <SummaryText content="Services:" class="label" />
                     </Grid>
                     <Grid item xs={6}>
-                        <SummaryText content={createServiceList(summary.servicesList)} />
+                        <Typography style={{ wordWrap: "break-word" }}>
+                            {createServiceList(summary.servicesList)}
+                        </Typography>
+
                     </Grid>
                 </Grid>
 

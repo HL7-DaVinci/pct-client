@@ -9,10 +9,6 @@ import TableRow from "@material-ui/core/TableRow";
 import Typography from "@material-ui/core/Typography";
 import moment from 'moment';
 import jp from "jsonpath";
-//returns 0 when item doesn't exist
-//console.log("SHOULD RETURN NULL HERE", jp.query(data, '$..[?(@.resourceType == "ExplanationOfBenefit")].ite').length)
-
-
 
 
 function AEOBItemsTable({ title, data }) {

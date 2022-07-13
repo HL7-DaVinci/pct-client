@@ -4,7 +4,6 @@ import {
     Tab, AppBar
 } from '@material-ui/core';
 import { Dialog, DialogActions, DialogContent, DialogContentText, DialogTitle } from '@material-ui/core';
-
 import { sendAEOInquiry } from '../api';
 import ArrowBackIosNew from '@material-ui/icons/ArrowBackIos'
 import PropTypes from 'prop-types';
@@ -14,18 +13,13 @@ import AccordionDetails from '@mui/material/AccordionDetails';
 import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
 import { styled } from '@mui/material/styles';
 import Paper from '@mui/material/Paper';
-
 import Modal from '@mui/material/Modal';
 import Divider from '@mui/material/Divider';
-
 import AEOBItems, { columns as AEOBItemsColumns } from './ClaimItem';
-
 import { DataGrid } from '@mui/x-data-grid';
-//import { JSONPath } from 'jsonpath/lib';
 import jp from "jsonpath";
 import parse from "jsonpath";
 import moment from 'moment';
-
 import AEOBItemsTable from "./AEOBItemsTable";
 
 
@@ -88,7 +82,6 @@ const useStyles = makeStyles({
         border: '2px solid #000',
         boxShadow: 24,
         p: 4,
-        //objectFit: "fill"
     },
     aeobQueryButton: {
         marginTop: 20,
@@ -101,12 +94,9 @@ const useStyles = makeStyles({
         marginBottom: 20
     },
     card: {
-        //minWidth: "80%",
         minWidth: "70vw",
         textAlign: "left",
         marginLeft: 0,
-        //color: theme.palette.text.secondary,
-
         backgroundColor: "#D3D3D3"
     },
     info: {
@@ -178,24 +168,15 @@ TabContainer.propTypes = {
     children: PropTypes.node.isRequired,
 };
 
-
-
-
 export default function AEOBResponsePanel(props) {
-
     const [openAEOBContent, setOpenAEOBContent] = React.useState(false);
-
     const handleCloseAEOBContent = () => {
         setOpenAEOBContent(false);
     };
 
-
-
-
     const rows = [
         { id: 1, lastName: 'Example', firstName: 'Example', age: 35 },
     ];
-
 
     const columns = [
         {
@@ -264,7 +245,6 @@ export default function AEOBResponsePanel(props) {
         },
     ];
 
-
     const [openGFEResponse, setOpenGFEResponse] = React.useState(false);
     const handleOpenGFEResponse = () => setOpenGFEResponse(true);
     const handleCloseGFEResponse = () => setOpenGFEResponse(false);
@@ -272,7 +252,6 @@ export default function AEOBResponsePanel(props) {
     const [openAEOB, setOpenAEOB] = React.useState(false);
     const handleOpenAEOB = () => setOpenAEOB(true);
     const handleCloseAEOB = () => setOpenAEOB(false);
-
 
     const classes = useStyles();
 
@@ -378,7 +357,6 @@ export default function AEOBResponsePanel(props) {
         }
         else
             returnString = "Human Name for object of type " & typeof humanName & " is not supported.";
-        //returns string: patient1001
         return returnString;
     }
 
@@ -668,7 +646,7 @@ export default function AEOBResponsePanel(props) {
 
 
 
-                        <Grid>
+                        <Grid className={classes.info}>
                             <Divider />
                             <Divider light />
 
@@ -677,7 +655,7 @@ export default function AEOBResponsePanel(props) {
                                     <b><u>Patient Information</u></b>
                                 </Typography>
                             </Grid>
-                            <Grid container direction="row" spacing={9} className={classes.info}>
+                            <Grid container direction="row" spacing={9} >
                                 <Grid item>
                                     <Grid container direction="column" >
                                         <Grid item>
@@ -751,12 +729,11 @@ export default function AEOBResponsePanel(props) {
                             </Grid>
                         </Grid>
 
-                        <Grid>
+
+
+                        <Grid style={{ marginTop: 33 }}>
                             <Divider />
                             <Divider light />
-                        </Grid>
-
-                        <Grid>
                             <Divider />
                             <Divider light />
 
