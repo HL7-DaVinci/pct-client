@@ -227,7 +227,7 @@ export default function SummaryItem(props) {
                     </Grid>
                     <Grid item xs={6}>
                         <Typography style={{ wordWrap: "break-word" }}>
-                            {((summary.practitionerSelected[0].provider) == undefined) ? (addToMissing("Billing provider")) : (summary.practitionerSelected[0].provider)}
+                            {((summary.practitionerSelected[0].provider) == undefined) ? (addToMissing("billing provider")) : (summary.practitionerSelected[0].provider)}
                         </Typography>
                     </Grid>
                 </Grid>
@@ -295,16 +295,20 @@ export default function SummaryItem(props) {
                     </Grid>
                 </Grid>
 
-                <Grid container>
-                    <Grid item xs={6} >
-                        <SummaryText content="Procedure:" class="label" />
+                {(summary.procedureList[0].procedure !== undefined) ?
+
+                    <Grid container>
+                        <Grid item xs={6} >
+                            <SummaryText content="Procedure:" class="label" />
+                        </Grid>
+                        <Grid item xs={6}>
+                            <Typography style={{ wordWrap: "break-word" }}>
+                                {(createProcedureList(summary.procedureList))}
+                            </Typography>
+                        </Grid>
                     </Grid>
-                    <Grid item xs={6}>
-                        <Typography style={{ wordWrap: "break-word" }}>
-                            {(summary.procedureList[0].procedure == undefined) ? (addToMissing("procedure")) : (createProcedureList(summary.procedureList))}
-                        </Typography>
-                    </Grid>
-                </Grid>
+                    : null}
+
 
                 <Grid container>
                     <Grid item xs={6} >
