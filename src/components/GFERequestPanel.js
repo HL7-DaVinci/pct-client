@@ -1855,13 +1855,13 @@ class GFERequestBox extends Component {
                                                         <FormControl>
                                                             <Box sx={{ my: 2 }}>
                                                                 <Grid  >
-                                                                    <Box >
+                                                                    {/* <Box >
                                                                         <b><u>
                                                                             <Typography variant="h6" >
                                                                                 Care Team Details:
                                                                             </Typography>
                                                                         </u></b>
-                                                                    </Box>
+                                                                    </Box> */}
                                                                 </Grid>
                                                             </Box>
                                                             <Grid>
@@ -1887,7 +1887,7 @@ class GFERequestBox extends Component {
                                                                 <Box sx={{ mb: 1 }}>
                                                                     <b>
                                                                         <Typography variant="subtitle1" >
-                                                                            Billing Provider:
+                                                                            Billing Provider*:
                                                                         </Typography>
                                                                     </b>
                                                                 </Box>
@@ -1908,7 +1908,7 @@ class GFERequestBox extends Component {
                                                                 <Box sx={{ mb: 1 }}>
                                                                     <b>
                                                                         <Typography variant="subtitle1" >
-                                                                            Submitting Provider:
+                                                                            Submitting Provider*:
                                                                         </Typography>
                                                                     </b>
                                                                 </Box>
@@ -2072,7 +2072,6 @@ class GFERequestBox extends Component {
                                                         <ViewGFERequestDialog generateRequest={this.generateBundle} valid={this.isRequestValid} error={this.state.validationErrors} />
                                                     </Grid>
                                                 </Grid>
-
 
                                                 <Grid item><SummaryItem summary={summary} /></Grid>
                                             </FormControl>

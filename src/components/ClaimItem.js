@@ -18,6 +18,7 @@ export const columns = [
     {
         field: 'estimatedDateOfService', headerName: 'Estimate Date', editable: true, type: 'date', minWidth: 10,
         valueGetter: (params) => {
+
             return params.value;
         },
         renderHeader: renderRequiredHeader,

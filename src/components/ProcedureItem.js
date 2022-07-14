@@ -2,11 +2,13 @@ import DataGridComponent, { renderRequiredHeader } from './DataGridComponent';
 import { DiagnosisList, DiagnosisTypeList } from '../values/DiagnosisList';
 import { ProcedureList, ProcedureTypeList } from '../values/ProcedureList';
 
+const emptyList = [];
+
 
 export const columns = [
     {
         field: 'procedure', headerName: 'Procedure', editable: true, type: 'singleSelect', minWidth: 150,
-        valueOptions: ProcedureList.map(code => `${code.diagnosisCodeableConcept.coding[0].code} ${code.diagnosisCodeableConcept.coding[0].display}`),
+        valueOptions: ProcedureList.map(code => `${"not available"}`),
         renderHeader: renderRequiredHeader,
         required: true
     },

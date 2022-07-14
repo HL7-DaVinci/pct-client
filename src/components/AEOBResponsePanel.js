@@ -21,6 +21,8 @@ import jp from "jsonpath";
 import parse from "jsonpath";
 import moment from 'moment';
 import AEOBItemsTable from "./AEOBItemsTable";
+import MainPanel from './MainPanel';
+
 
 
 
@@ -168,11 +170,15 @@ TabContainer.propTypes = {
     children: PropTypes.node.isRequired,
 };
 
+
+
+
 export default function AEOBResponsePanel(props) {
     const [openAEOBContent, setOpenAEOBContent] = React.useState(false);
     const handleCloseAEOBContent = () => {
         setOpenAEOBContent(false);
     };
+
 
     const rows = [
         { id: 1, lastName: 'Example', firstName: 'Example', age: 35 },
@@ -261,7 +267,8 @@ export default function AEOBResponsePanel(props) {
     const [aeobInquiryError, setAeobInquiryError] = useState(false);
     const [aeobError, setAeobError] = useState(undefined)
     const [aeobInquiryOutcome, setAeobInquiryOutcome] = useState(undefined);
-    const currentTabIndex = 1;
+    const [currentTabIndex, setCurrentTabIndex] = useState(1);
+
 
     useEffect(() => {
         if (props.dataServerChanged || props.payerServerChanged || props.receivedAEOBResponse === undefined) {
@@ -494,6 +501,21 @@ export default function AEOBResponsePanel(props) {
     function getAEOBItems() {
         return jp.query(props, '$..[?(@.resourceType == "ExplanationOfBenefit")]')[0]
     }
+    const handleChange = (event) => {
+        //this.setState({ currentTabIndex: value });
+        setCurrentTabIndex(event.target.value);
+
+    };
+    function getBackToMain() {
+        console.log('BACK TO MAIN')
+        console.log('current tab index is ', currentTabIndex) //why is this undefined ? not zero
+
+        if (currentTabIndex != 1) {
+            window.location.reload(false);
+            return false;
+        }
+    }
+
 
 
     return (
@@ -501,7 +523,7 @@ export default function AEOBResponsePanel(props) {
             <AppBar position="static">
                 <Tabs
                     value={currentTabIndex}
-                    //onChange={this.handleChange}
+                    onChange={handleChange}
                     indicatorColor="secondary"
                     textColor="inherit"
                     variant="fullWidth"
@@ -511,74 +533,23 @@ export default function AEOBResponsePanel(props) {
                     <Tab label="Advanced Explanation of Benefits" {...a11yProps(1)} />
                 </Tabs>
             </AppBar>
+            <TabPanel value={currentTabIndex} index={0} className={classes.tabBackground}>
+                {getBackToMain()}
 
-            <Accordion>
-                <AccordionSummary
-                    expandIcon={<ExpandMoreIcon />}
-                    aria-controls="panel1a-content"
-                    id="panel1a-header"
-                >
-                    <Typography>AEOB- Initial Response from GFE Submission</Typography>
-                </AccordionSummary>
-                <AccordionDetails className={classes.aeobInitialResponseText}>
-                    <Grid container spacing={1}>
-                        <Grid container spacing={2}>
-                            <Grid item xs={10}>
-                                <Grid item md={4}>
-                                    <Typography variant="h5" gutterBottom>
-                                        Bundle:
-                                    </Typography>
-                                </Grid>
-                                <Grid item md={4}>
-                                    <Typography variant="body1" gutterBottom>
-                                        ID: {props.bundleId}
-                                    </Typography>
-                                </Grid>
-                                <Grid item md={4}>
-                                    <Typography variant="body1" gutterBottom>
-                                        Identifier: {props.bundleIdentifier}
-                                    </Typography>
-                                </Grid>
-                            </Grid>
+            </TabPanel>
 
-                            <Grid item alignItems="flex-end" xs={2}>
-                                <Grid item>
 
-                                    <Button loading variant="contained" color="primary" type="show-raw-gfe" onClick={handleOpenGFEResponse}>
-                                        Raw JSON
-                                    </Button>
+            <TabPanel value={currentTabIndex} index={1} className={classes.tabBackground}>
 
-                                    <Modal
-                                        open={openGFEResponse}
-                                        onClose={handleCloseGFEResponse}
-                                        aria-labelledby="modal-modal-title"
-                                        aria-describedby="modal-modal-description"
-                                    >
-                                        <Box sx={style}>
-                                            <Typography id="modal-modal-title" variant="h6" component="h2">
-                                                Raw JSON of Initial Response from GFE Submission:
-                                            </Typography>
-                                            <div>
-                                                <pre>{JSON.stringify(props.gfeResponse, undefined, 2)}</pre>
-                                            </div>
-                                        </Box>
-                                    </Modal>
-                                </Grid>
-                            </Grid>
-                        </Grid>
-                    </Grid>
-                </AccordionDetails>
-            </Accordion>
 
-            {(props.receivedAEOBResponse) ? (
+
                 <Accordion>
                     <AccordionSummary
                         expandIcon={<ExpandMoreIcon />}
                         aria-controls="panel1a-content"
                         id="panel1a-header"
                     >
-                        <Typography>AEOB- Query at {handleRequestTime()}</Typography>
-
+                        <Typography>AEOB- Initial Response from GFE Submission</Typography>
                     </AccordionSummary>
                     <AccordionDetails className={classes.aeobInitialResponseText}>
                         <Grid container spacing={1}>
@@ -586,195 +557,255 @@ export default function AEOBResponsePanel(props) {
                                 <Grid item xs={10}>
                                     <Grid item md={4}>
                                         <Typography variant="h5" gutterBottom>
-                                            <b><u>Bundle</u></b>
+                                            Bundle:
                                         </Typography>
                                     </Grid>
                                     <Grid item md={4}>
                                         <Typography variant="body1" gutterBottom>
-                                            ID: {jp.query(props, '$..[?(@.resourceType == "Bundle")].id')[0]}
+                                            ID: {props.bundleId}
                                         </Typography>
                                     </Grid>
                                     <Grid item md={4}>
                                         <Typography variant="body1" gutterBottom>
-                                            Identifier: {jp.query(props, '$..[?(@.resourceType == "Bundle")].identifier.value')[0]}
+                                            Identifier: {props.bundleIdentifier}
                                         </Typography>
                                     </Grid>
                                 </Grid>
 
                                 <Grid item alignItems="flex-end" xs={2}>
                                     <Grid item>
-                                        <Button loading variant="contained" color="primary" type="show-raw-gfe" onClick={handleOpenAEOB}>
+
+                                        <Button loading variant="contained" color="primary" type="show-raw-gfe" onClick={handleOpenGFEResponse}>
                                             Raw JSON
                                         </Button>
-                                        <Dialog
-                                            maxWidth="lg"
-                                            open={openAEOB}
-                                            onClose={handleCloseAEOB}
+
+                                        <Modal
+                                            open={openGFEResponse}
+                                            onClose={handleCloseGFEResponse}
+                                            aria-labelledby="modal-modal-title"
+                                            aria-describedby="modal-modal-description"
                                         >
-                                            <DialogTitle>Raw JSON of AEOB Response:</DialogTitle>
-                                            <DialogContent>
-                                                <Box
-                                                    noValidate
-                                                    component="form"
-                                                    sx={{
-                                                        display: 'flex',
-                                                        flexDirection: 'column',
-                                                        m: 'auto',
-                                                        width: 'fit-content',
-                                                        height: "fit-content"
-                                                    }}
-                                                >
-                                                    <div>
-                                                        <pre>{JSON.stringify(props.receivedAEOBResponse, undefined, 2)}</pre>
-                                                    </div>
-                                                </Box>
-
-                                                <DialogActions>
-                                                    <Button onClick={handleCloseAEOBContent}>Close</Button>
-                                                </DialogActions>
-                                            </DialogContent>
-                                        </Dialog>
+                                            <Box sx={style}>
+                                                <Typography id="modal-modal-title" variant="h6" component="h2">
+                                                    Raw JSON of Initial Response from GFE Submission:
+                                                </Typography>
+                                                <div>
+                                                    <pre>{JSON.stringify(props.gfeResponse, undefined, 2)}</pre>
+                                                </div>
+                                            </Box>
+                                        </Modal>
                                     </Grid>
                                 </Grid>
                             </Grid>
                         </Grid>
+                    </AccordionDetails>
+                </Accordion>
 
+                {(props.receivedAEOBResponse) ? (
+                    <Accordion>
+                        <AccordionSummary
+                            expandIcon={<ExpandMoreIcon />}
+                            aria-controls="panel1a-content"
+                            id="panel1a-header"
+                        >
+                            <Typography>AEOB- Query at {handleRequestTime()}</Typography>
 
-
-
-
-
-
-
-                        <Grid className={classes.info}>
-                            <Divider />
-                            <Divider light />
-
-                            <Grid item>
-                                <Typography variant="h5" gutterBottom>
-                                    <b><u>Patient Information</u></b>
-                                </Typography>
-                            </Grid>
-                            <Grid container direction="row" spacing={9} >
-                                <Grid item>
-                                    <Grid container direction="column" >
-                                        <Grid item>
-                                            <Typography variant="h6" gutterBottom>
-                                                <b>Demographics:</b>
+                        </AccordionSummary>
+                        <AccordionDetails className={classes.aeobInitialResponseText}>
+                            <Grid container spacing={1}>
+                                <Grid container spacing={2}>
+                                    <Grid item xs={10}>
+                                        <Grid item md={4}>
+                                            <Typography variant="h5" gutterBottom>
+                                                <b><u>Bundle</u></b>
                                             </Typography>
                                         </Grid>
-                                        <Grid item>
+                                        <Grid item md={4}>
                                             <Typography variant="body1" gutterBottom>
-                                                <b>Name:</b> {/*getHumanNameDisplay(jp.query("$..[?(@.fullUrl ==" + "'" + jp.query(props, '$..[?(@.resourceType == "ExplanationOfBenefit")].patient.reference')[0] + "'" + ")].resource.id"))*/}
-                                                {/*getHumanNameDisplay(jp.query(props, "$..[?(@.fullUrl ==" + "'" + jp.query(props, '$..[?(@.resourceType == "ExplanationOfBenefit")].patient.reference')[0] + "')].resource.name[0]")[0])*/}
-                                                {getHumanNameDisplay(getPatientResource().name[0])}
+                                                ID: {jp.query(props, '$..[?(@.resourceType == "Bundle")].id')[0]}
                                             </Typography>
                                         </Grid>
-                                        <Grid item>
+                                        <Grid item md={4}>
                                             <Typography variant="body1" gutterBottom>
-                                                <b>Birthdate:</b> {getPatientResource().birthDate}
-                                            </Typography>
-                                        </Grid>
-                                        <Grid item>
-                                            <Typography variant="body1" gutterBottom>
-                                                <b>Gender:</b> {getPatientResource().gender}
-                                            </Typography>
-                                        </Grid>
-                                        <Grid item>
-                                            <Typography variant="body1" gutterBottom>
-                                                <b>Telephone:</b> {getTelecomDisplay(getPatientResource().telecom)}
-                                            </Typography>
-                                        </Grid>
-                                        <Grid item>
-                                            <Typography variant="body1" gutterBottom>
-                                                <b>Address:</b> {getAddressDisplay(getPatientResource().address)}
+                                                Identifier: {jp.query(props, '$..[?(@.resourceType == "Bundle")].identifier.value')[0]}
                                             </Typography>
                                         </Grid>
                                     </Grid>
-                                </Grid>
-                                <Grid item>
-                                    <Grid container direction="column">
+
+                                    <Grid item alignItems="flex-end" xs={2}>
                                         <Grid item>
-                                            <Typography variant="h6" gutterBottom>
-                                                <b>Insurance:</b>{console.log(props)}
-                                            </Typography>
-                                        </Grid>
-                                        <Grid item>
-                                            <Typography variant="body1" gutterBottom>
-                                                <b>Payor:</b> {getPayorResource().name}
-                                            </Typography>
-                                        </Grid>
-                                        <Grid item>
-                                            <Typography variant="body1" gutterBottom>
-                                                <b>Subscriber:</b> {getCoverageResource().subscriberId} ({getCoverageResource().relationship.coding[0].display})
-                                            </Typography>
-                                        </Grid>
-                                        <Grid item>
-                                            <Typography variant="body1" gutterBottom>
-                                                <b>Member ID:</b> {getCoverageResource().id}
-                                            </Typography>
-                                        </Grid>
-                                        <Grid item>
-                                            <Typography variant="body1" gutterBottom>
-                                                <b>Plan:</b> {getCoverageResource().class[0].name}
-                                            </Typography>
-                                        </Grid>
-                                        <Grid item>
-                                            <Typography variant="body1" gutterBottom>
-                                                <b>Coverage Period:</b> {getCoverageResource().period.start} to {getCoverageResource().period.end}
-                                            </Typography>
+                                            <Button loading variant="contained" color="primary" type="show-raw-gfe" onClick={handleOpenAEOB}>
+                                                Raw JSON
+                                            </Button>
+                                            <Dialog
+                                                maxWidth="lg"
+                                                open={openAEOB}
+                                                onClose={handleCloseAEOB}
+                                            >
+                                                <DialogTitle>Raw JSON of AEOB Response:</DialogTitle>
+                                                <DialogContent>
+                                                    <Box
+                                                        noValidate
+                                                        component="form"
+                                                        sx={{
+                                                            display: 'flex',
+                                                            flexDirection: 'column',
+                                                            m: 'auto',
+                                                            width: 'fit-content',
+                                                            height: "fit-content"
+                                                        }}
+                                                    >
+                                                        <div>
+                                                            <pre>{JSON.stringify(props.receivedAEOBResponse, undefined, 2)}</pre>
+                                                        </div>
+                                                    </Box>
+
+                                                    <DialogActions>
+                                                        <Button onClick={handleCloseAEOBContent}>Close</Button>
+                                                    </DialogActions>
+                                                </DialogContent>
+                                            </Dialog>
                                         </Grid>
                                     </Grid>
                                 </Grid>
                             </Grid>
-                        </Grid>
 
 
 
-                        <Grid style={{ marginTop: 33 }}>
-                            <Divider />
-                            <Divider light />
-                            <Divider />
-                            <Divider light />
-
-                            <Grid item>
-                                <Typography variant="h5" gutterBottom>
-                                    <b><u>Advanced Explanation of Benefits</u></b>
-                                </Typography>
-                            </Grid>
-                            <Grid item>
-                                <Typography variant="body1" gutterBottom>
-                                    <b>ID:</b> {jp.query(props, '$..[?(@.resourceType == "ExplanationOfBenefit")].id')[0]}
-                                </Typography>
-                            </Grid>
-                            <Grid item>
-                                <Typography variant="body1" gutterBottom>
-                                    <b>Created:</b> {getDate()}
-                                </Typography>
-                            </Grid>
-                            <Grid item>
-                                <Typography variant="body1" gutterBottom className={classes.spaceBelow}>
-                                    <b>Outcome:</b> {jp.query(props, '$..[?(@.resourceType == "ExplanationOfBenefit")].outcome')[0]}
-                                </Typography>
-                            </Grid>
 
 
-                            <Grid container direction="row" spacing={9}>
+
+
+
+                            <Grid className={classes.info}>
+                                <Divider />
+                                <Divider light />
+
                                 <Grid item>
-                                    <Grid container direction="column" >
-                                        <Grid item>
-                                            <Typography variant="h6" gutterBottom>
-                                                <b>Totals:</b>
-                                            </Typography>
-                                        </Grid>
-                                        {jp.query(props, '$..[?(@.resourceType == "ExplanationOfBenefit")].total').map((value, index) => {
-                                            return <Grid item>
-                                                <Typography variant="body1" gutterBottom>
-                                                    <b>{value[0].category.coding[0].display}:</b> {value[0].amount.value} {value[0].amount.currency}
+                                    <Typography variant="h5" gutterBottom>
+                                        <b><u>Patient Information</u></b>
+                                    </Typography>
+                                </Grid>
+                                <Grid container direction="row" spacing={9} >
+                                    <Grid item>
+                                        <Grid container direction="column" >
+                                            <Grid item>
+                                                <Typography variant="h6" gutterBottom>
+                                                    <b>Demographics:</b>
                                                 </Typography>
                                             </Grid>
-                                        })}
-                                        {/* 
+                                            <Grid item>
+                                                <Typography variant="body1" gutterBottom>
+                                                    <b>Name:</b> {/*getHumanNameDisplay(jp.query("$..[?(@.fullUrl ==" + "'" + jp.query(props, '$..[?(@.resourceType == "ExplanationOfBenefit")].patient.reference')[0] + "'" + ")].resource.id"))*/}
+                                                    {/*getHumanNameDisplay(jp.query(props, "$..[?(@.fullUrl ==" + "'" + jp.query(props, '$..[?(@.resourceType == "ExplanationOfBenefit")].patient.reference')[0] + "')].resource.name[0]")[0])*/}
+                                                    {getHumanNameDisplay(getPatientResource().name[0])}
+                                                </Typography>
+                                            </Grid>
+                                            <Grid item>
+                                                <Typography variant="body1" gutterBottom>
+                                                    <b>Birthdate:</b> {getPatientResource().birthDate}
+                                                </Typography>
+                                            </Grid>
+                                            <Grid item>
+                                                <Typography variant="body1" gutterBottom>
+                                                    <b>Gender:</b> {getPatientResource().gender}
+                                                </Typography>
+                                            </Grid>
+                                            <Grid item>
+                                                <Typography variant="body1" gutterBottom>
+                                                    <b>Telephone:</b> {getTelecomDisplay(getPatientResource().telecom)}
+                                                </Typography>
+                                            </Grid>
+                                            <Grid item>
+                                                <Typography variant="body1" gutterBottom>
+                                                    <b>Address:</b> {getAddressDisplay(getPatientResource().address)}
+                                                </Typography>
+                                            </Grid>
+                                        </Grid>
+                                    </Grid>
+                                    <Grid item>
+                                        <Grid container direction="column">
+                                            <Grid item>
+                                                <Typography variant="h6" gutterBottom>
+                                                    <b>Insurance:</b>{console.log(props)}
+                                                </Typography>
+                                            </Grid>
+                                            <Grid item>
+                                                <Typography variant="body1" gutterBottom>
+                                                    <b>Payor:</b> {getPayorResource().name}
+                                                </Typography>
+                                            </Grid>
+                                            <Grid item>
+                                                <Typography variant="body1" gutterBottom>
+                                                    <b>Subscriber:</b> {getCoverageResource().subscriberId} ({getCoverageResource().relationship.coding[0].display})
+                                                </Typography>
+                                            </Grid>
+                                            <Grid item>
+                                                <Typography variant="body1" gutterBottom>
+                                                    <b>Member ID:</b> {getCoverageResource().id}
+                                                </Typography>
+                                            </Grid>
+                                            <Grid item>
+                                                <Typography variant="body1" gutterBottom>
+                                                    <b>Plan:</b> {getCoverageResource().class[0].name}
+                                                </Typography>
+                                            </Grid>
+                                            <Grid item>
+                                                <Typography variant="body1" gutterBottom>
+                                                    <b>Coverage Period:</b> {getCoverageResource().period.start} to {getCoverageResource().period.end}
+                                                </Typography>
+                                            </Grid>
+                                        </Grid>
+                                    </Grid>
+                                </Grid>
+                            </Grid>
+
+
+
+                            <Grid style={{ marginTop: 33 }}>
+                                <Divider />
+                                <Divider light />
+                                <Divider />
+                                <Divider light />
+
+                                <Grid item>
+                                    <Typography variant="h5" gutterBottom>
+                                        <b><u>Advanced Explanation of Benefits</u></b>
+                                    </Typography>
+                                </Grid>
+                                <Grid item>
+                                    <Typography variant="body1" gutterBottom>
+                                        <b>ID:</b> {jp.query(props, '$..[?(@.resourceType == "ExplanationOfBenefit")].id')[0]}
+                                    </Typography>
+                                </Grid>
+                                <Grid item>
+                                    <Typography variant="body1" gutterBottom>
+                                        <b>Created:</b> {getDate()}
+                                    </Typography>
+                                </Grid>
+                                <Grid item>
+                                    <Typography variant="body1" gutterBottom className={classes.spaceBelow}>
+                                        <b>Outcome:</b> {jp.query(props, '$..[?(@.resourceType == "ExplanationOfBenefit")].outcome')[0]}
+                                    </Typography>
+                                </Grid>
+
+
+                                <Grid container direction="row" spacing={9}>
+                                    <Grid item>
+                                        <Grid container direction="column" >
+                                            <Grid item>
+                                                <Typography variant="h6" gutterBottom>
+                                                    <b>Totals:</b>
+                                                </Typography>
+                                            </Grid>
+                                            {jp.query(props, '$..[?(@.resourceType == "ExplanationOfBenefit")].total').map((value, index) => {
+                                                return <Grid item>
+                                                    <Typography variant="body1" gutterBottom>
+                                                        <b>{value[0].category.coding[0].display}:</b> {value[0].amount.value} {value[0].amount.currency}
+                                                    </Typography>
+                                                </Grid>
+                                            })}
+                                            {/* 
                                         The Categories (labels) need to be dynamic and based on the data in the AEOB
                                         <Grid item>
                                             <Typography variant="body1" gutterBottom>
@@ -792,17 +823,17 @@ export default function AEOBResponsePanel(props) {
                                             </Typography>
                                         </Grid>
                                         */}
-                                        <Grid item>
-                                            <Typography variant="body1" gutterBottom>
-                                                <b>Copay:</b> {calcCopay()}
-                                            </Typography>
+                                            <Grid item>
+                                                <Typography variant="body1" gutterBottom>
+                                                    <b>Copay:</b> {calcCopay()}
+                                                </Typography>
+                                            </Grid>
                                         </Grid>
                                     </Grid>
-                                </Grid>
 
-                                <Grid item>
-                                    <Grid container direction="column">
-                                        {/*
+                                    <Grid item>
+                                        <Grid container direction="column">
+                                            {/*
                                         This is actually line item adjudication data that should go in the items grid.
                                         <Grid item >
                                             <Typography variant="body1" gutterBottom className={classes.spaceTop}>
@@ -825,17 +856,17 @@ export default function AEOBResponsePanel(props) {
                                             </Typography>
                                         </Grid>
                                 */}
-                                    </Grid>
-                                </Grid>
-
-                                <Grid item>
-                                    <Grid container direction="column">
-                                        <Grid item>
-                                            <Typography variant="h6" gutterBottom>
-                                                <b>Details:</b>{console.log(props)}
-                                            </Typography>
                                         </Grid>
-                                        {/* This information is header level
+                                    </Grid>
+
+                                    <Grid item>
+                                        <Grid container direction="column">
+                                            <Grid item>
+                                                <Typography variant="h6" gutterBottom>
+                                                    <b>Details:</b>{console.log(props)}
+                                                </Typography>
+                                            </Grid>
+                                            {/* This information is header level
                                         <Grid item>
                                             <Typography variant="body1" gutterBottom>
                                                 Patient: {getPatientId()}
@@ -847,45 +878,45 @@ export default function AEOBResponsePanel(props) {
                                             </Typography>
                                         </Grid>
                             */}
-                                        <Grid item>
-                                            <Typography variant="body1" gutterBottom>
-                                                <b>Submitting Provider:</b> {getNameDisplay(getSubmittingProviderResource(jp.query(props, '$..[?(@.resourceType == "ExplanationOfBenefit")]')[0]))} ({getSubmittingProviderId()})
-                                            </Typography>
+                                            <Grid item>
+                                                <Typography variant="body1" gutterBottom>
+                                                    <b>Submitting Provider:</b> {getNameDisplay(getSubmittingProviderResource(jp.query(props, '$..[?(@.resourceType == "ExplanationOfBenefit")]')[0]))} ({getSubmittingProviderId()})
+                                                </Typography>
+                                            </Grid>
                                         </Grid>
                                     </Grid>
                                 </Grid>
+
+                                <Grid item>
+                                    <Typography variant="h6" gutterBottom>
+                                        <b>Items:</b>
+                                    </Typography>
+
+                                    <AEOBItemsTable title="Items" data={props} />
+
+                                </Grid>
                             </Grid>
-
-                            <Grid item>
-                                <Typography variant="h6" gutterBottom>
-                                    <b>Items:</b>
-                                </Typography>
-
-                                <AEOBItemsTable title="Items" data={props} />
-
-                            </Grid>
-                        </Grid>
-                    </AccordionDetails>
-                </Accordion >
-            ) : null
-            }
-
-
-
-            {
-                (props.gfeRequestSuccess === true && props.gfeRequestPending) ? (
-
-                    <Grid item className={classes.aeobQueryButton}>
-                        <FormControl>
-                            <Button variant="contained" color="primary" type="submit" onClick={handleSendInquiry}>
-                                Query AEOB Bundle
-                            </Button>
-                        </FormControl>
-                    </Grid>
+                        </AccordionDetails>
+                    </Accordion >
                 ) : null
-            }
+                }
 
-            {/*
+
+
+                {
+                    (props.gfeRequestSuccess === true && props.gfeRequestPending) ? (
+
+                        <Grid item className={classes.aeobQueryButton}>
+                            <FormControl>
+                                <Button variant="contained" color="primary" type="submit" onClick={handleSendInquiry}>
+                                    Query AEOB Bundle
+                                </Button>
+                            </FormControl>
+                        </Grid>
+                    ) : null
+                }
+
+                {/*
             {
                 (props.gfeRequestSuccess === true && props.gfeRequestPending) ? (
                     <Grid item>
@@ -940,7 +971,7 @@ export default function AEOBResponsePanel(props) {
 
 
 
-            {/*
+                {/*
 
             <Grid container spacing={2} direction="column" >
                 <Grid item>
@@ -1088,6 +1119,8 @@ export default function AEOBResponsePanel(props) {
                 </Grid>
             </Grid>
                                                 */}
+
+            </TabPanel>
         </div >
 
     );

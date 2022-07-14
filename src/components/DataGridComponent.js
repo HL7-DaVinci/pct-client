@@ -4,6 +4,9 @@ import AddIcon from '@material-ui/icons/Add'
 import { IconButton } from '@material-ui/core';
 import DeleteIcon from '@material-ui/icons/Delete';
 import EditIcon from '@mui/icons-material/Edit';
+import TextField from '@mui/material/TextField';
+import moment from "moment";
+
 
 import * as React from 'react';
 import Table from '@mui/material/Table';
@@ -15,15 +18,12 @@ import Paper from '@mui/material/Paper';
 import { Multiselect } from "multiselect-react-dropdown";
 
 
-import {
-
-    Grid,
-
-} from '@material-ui/core';
+import { Grid, } from '@material-ui/core';
 import { TableContainer } from '@mui/material';
 
 export default function DataGridComponent(props) {
     const handleEditRowsModelChange = useCallback((model) => {
+        console.log('MODEL SHOWN HERE', model)
         props.edit(model);
     }, []);
 
@@ -47,6 +47,7 @@ export default function DataGridComponent(props) {
     console.log('PROPS', props);
 
     function createTableColumns(listOfColumns) {
+        //console.log('column list', listOfColumns);
         return listOfColumns.map(el => {
             return <TableCell >{el.headerName} </TableCell>
         })
@@ -58,20 +59,45 @@ export default function DataGridComponent(props) {
         for (let i = 0; i < listOfOptions.length; i++) {
             arr.push({ id: i, key: listOfOptions[i], value: listOfOptions[i] })
         }
+
         return arr;
     }
 
     function createTableRows(listOfRows) {
-        console.log(listOfRows)
+        //console.log('list of rows', listOfRows)
         return listOfRows.map(el => {
-            console.log('el', el.valueOptions)
+
+            if (el.type == "date") {
+                return <TableCell style={{ verticalAlign: 'top' }}><TextField
+                    size='small'
+                    id="date"
+                    type="date"
+                    defaultValue={moment().format("DD-MM-YYYY hh:mm:ss")}
+                    sx={{ width: 220, height: 20 }}
+                    InputLabelProps={{
+                        shrink: true,
+                    }
+                    }
+                />
+                </TableCell>
+            }
+
+            if (el.valueOptions == undefined) {
+                console.log('this is undefined:', el)
+                return <TableCell>{handleEditRowsModelChange()}</TableCell>
+
+            }
             return <TableCell>
                 < Multiselect
                     options={multiSelectOptions(el.valueOptions)}
                     displayValue="value"
                     singleSelect
-                    onSelect={handleEditRowsModelChange}
+
+
+
+                //onEditRowsModelChange={handleEditRowsModelChange}
                 />
+
             </TableCell >
         })
     }
@@ -99,6 +125,8 @@ export default function DataGridComponent(props) {
             </TableContainer>
         */}
 
+
+
             <Grid container>
                 <IconButton aria-label="Add" onClick={() => props.add()}>
                     <AddIcon />
@@ -113,6 +141,7 @@ export default function DataGridComponent(props) {
                     disableColumnReorder={true}
                 />
             </Grid>
+
         </div >
     )
 }
