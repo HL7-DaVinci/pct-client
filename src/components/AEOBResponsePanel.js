@@ -769,9 +769,17 @@ export default function AEOBResponsePanel(props) {
                                 <Divider light />
 
                                 <Grid item>
-                                    <Typography variant="h5" gutterBottom>
-                                        <b><u>Advanced Explanation of Benefits</u></b>
-                                    </Typography>
+                                    <Grid container spacing={0}>
+                                        <Grid item xs={5}>
+                                            <Typography variant="h5" gutterBottom>
+                                                <b><u>Advanced Explanation of Benefits</u></b>
+                                            </Typography>
+
+                                        </Grid>
+                                        <Grid item xs={4} >
+                                            <Typography variant="h6" align='left' style={{ color: "#d7d3d3" }}>THIS IS NOT A BILL</Typography>
+                                        </Grid>
+                                    </Grid>
                                 </Grid>
                                 <Grid item>
                                     <Typography variant="body1" gutterBottom>
