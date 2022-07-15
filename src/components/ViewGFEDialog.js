@@ -24,20 +24,20 @@ export default function ViewGFERequestDialog(props) {
     return (
         <React.Fragment>
             <Button variant="outlined" color="primary" onClick={handleClickOpen}>
-                Review GFE Request
+                Raw JSON{/*Review GFE Request*/}
             </Button>
             <Dialog
                 maxWidth="lg"
                 open={open}
                 onClose={handleClose}
             >
-                <DialogTitle>Generated Good Faith Estimate Request</DialogTitle>
+                <DialogTitle>Review Generated Good Faith Estimate Request</DialogTitle>
                 <DialogContent>
-                    {
+                    {/* {
                         error ? null : (<DialogContentText>
                             Review Generated GFE Request
                         </DialogContentText>)
-                    }
+                    } */}
                     <Box
                         noValidate
                         component="form"
@@ -46,6 +46,7 @@ export default function ViewGFERequestDialog(props) {
                             flexDirection: 'column',
                             m: 'auto',
                             width: 'fit-content',
+                            height: "fit-content"
                         }}
                     >
                         {

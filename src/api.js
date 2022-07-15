@@ -1,10 +1,16 @@
 import FHIR from 'fhirclient';
 
-export const FHIRClient = url =>  FHIR.client({
+export const FHIRClient = url => FHIR.client({
     serverUrl: url
 });
 
 export const getPatients = (url) => FHIRClient(url).request("Patient");
+
+
+
+export const getClaims = (url) => FHIRClient(url).request("Claim");
+
+
 
 export const getDeviceRequestsForPatient = (url, patientId) => {
     return FHIRClient(url)
@@ -15,9 +21,21 @@ export const getDeviceRequestsForPatient = (url, patientId) => {
         })
 };
 
+
+//gets the address of the patient to display on patient tab
+export const getPatientInfo = (url, patientId) => {
+    return FHIRClient(url).request(`Patient?_id=${patientId}`, {
+        graph: false,
+        flat: true,
+    })
+}
+
+
+
+
 export const getOrganizations = (url) => FHIRClient(url).request("Organization");
 
-export const getCoverage = (url, coverageId)=> {
+export const getCoverage = (url, coverageId) => {
     return FHIRClient(url).request(`Coverage/${coverageId}`, {
         resolveReferences: ["payor"],
         graph: false,
@@ -37,7 +55,7 @@ export const submitGFEClaim = (url, bundle) => {
     const headers = new Headers({
         "Content-Type": "application/json"
     });
-    
+
     return FHIRClient(url).request({
         url: `${url}/Claim/$gfe-submit`,
         method: "POST",

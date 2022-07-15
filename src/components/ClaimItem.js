@@ -10,14 +10,9 @@ export const columns = [
         required: true
     },
     {
-        field: 'procedureType', headerName: 'Type', editable: true, type: 'singleSelect', minWidth: 100,
-        valueOptions: ['primary', 'other'],
-        renderHeader: renderRequiredHeader,
-        required: true
-    },
-    {
-        field: 'estimatedDateOfService', headerName: 'Estimate Date', editable: true, type: 'date', minWidth: 10,
+        field: 'estimatedDateOfService', headerName: 'Estimate Date', editable: true, type: 'date', minWidth: 120,
         valueGetter: (params) => {
+
             return params.value;
         },
         renderHeader: renderRequiredHeader,
@@ -33,7 +28,7 @@ export const columns = [
                 if (productOrService.unitPrice !== undefined) {
                     params.row.unitPrice = productOrService.unitPrice;
                     return params.row.unitPrice;
-                } 
+                }
             }
         }
     },
@@ -55,11 +50,11 @@ export const columns = [
         renderHeader: renderRequiredHeader,
         valueGetter: (params) => {
             if (params.row.unitPrice) {
-                if ( params.row.quantity === undefined) {
+                if (params.row.quantity === undefined) {
                     params.row.quantity = 1;
                     return params.row.unitPrice * params.row.quantity;
                 } else {
-                return params.row.unitPrice * params.row.quantity;
+                    return params.row.unitPrice * params.row.quantity;
                 }
             }
         }
@@ -73,7 +68,7 @@ export const columns = [
 export default function ClaimItem(props) {
     return (
         <div>
-            <DataGridComponent style={{ display: 'flex', width: '90vw', flexGrow: 1 }} rows={props.rows} columns={columns} add={props.addOne} edit={props.edit} delete={props.deleteOne} />
+            <DataGridComponent style={{ display: 'flex', width: '65vw', flexGrow: 1 }} rows={props.rows} columns={columns} add={props.addOne} edit={props.edit} delete={props.deleteOne} />
         </div>
     )
 }
