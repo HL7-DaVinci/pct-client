@@ -3,7 +3,6 @@ import {
     Box, Button,
     FormLabel, FormControl, FormControlLabel,
     Grid,
-    InputLabel,
     MenuItem,
     Radio,
     Card,
@@ -16,7 +15,6 @@ import {
     Tabs,
     Tab,
     AppBar,
-    CardContent
 } from '@material-ui/core';
 
 
@@ -27,7 +25,6 @@ import {
 } from '../api'
 
 import GFERequestSummary from './GFERequestSummary'
-import GFEEncounterSummary from './GFEEncounterSummary'
 import buildGFEBundle from './BuildGFEBundle';
 import ViewGFERequestDialog from './ViewGFEDialog';
 import { PlaceOfServiceList } from '../values/PlaceOfService';
@@ -37,41 +34,11 @@ import { ProcedureCodes } from '../values/ProcedureCode';
 import DiagnosisItem, { columns as DiagnosisColumns } from './DiagnosisItem';
 import ProcedureItem, { columns as ProcedureColumns } from './ProcedureItem';
 import SummaryItem, { columns as SummaryItems } from './SummaryItem';
-import Divider from '@mui/material/Divider';
 import { SupportingInfoType } from '../values/SupportingInfo';
 import { DiagnosisList, DiagnosisTypeList } from '../values/DiagnosisList';
-import { ProcedureList, ProcedureTypeList } from '../values/ProcedureList';
 import ViewErrorDialog from './ViewErrorDialog';
-import { useTheme } from '@mui/material/styles';
 import PropTypes from 'prop-types';
-import TabContext from '@material-ui/lab/TabContext';
-import { ViewHeadline } from '@material-ui/icons';
 import moment from 'moment';
-import ListSubheader from '@mui/material/ListSubheader';
-import List from '@mui/material/List';
-import ListItemButton from '@mui/material/ListItemButton';
-import ListItemIcon from '@mui/material/ListItemIcon';
-import ListItemText from '@mui/material/ListItemText';
-import Collapse from '@mui/material/Collapse';
-import InboxIcon from '@mui/icons-material/MoveToInbox';
-import DraftsIcon from '@mui/icons-material/Drafts';
-import SendIcon from '@mui/icons-material/Send';
-import ExpandLess from '@mui/icons-material/ExpandLess';
-import ExpandMore from '@mui/icons-material/ExpandMore';
-import StarBorder from '@mui/icons-material/StarBorder';
-
-
-import Stack from '@mui/material/Stack';
-import { AdapterDateFns } from '@mui/x-date-pickers/AdapterDateFns';
-import { LocalizationProvider } from '@mui/x-date-pickers/LocalizationProvider';
-import { TimePicker } from '@mui/x-date-pickers/TimePicker';
-import { DateTimePicker } from '@mui/x-date-pickers/DateTimePicker';
-import { DesktopDatePicker } from '@mui/x-date-pickers/DesktopDatePicker';
-import { MobileDatePicker } from '@mui/x-date-pickers/MobileDatePicker';
-import { PostAdd } from "@material-ui/icons";
-import { timePickerDefaultProps } from '@material-ui/pickers/constants/prop-types';
-
-import { DatePicker } from '@mui/x-date-pickers/DatePicker';
 import { Input, TextFieldProps } from "@material-ui/core";
 
 
@@ -118,8 +85,6 @@ const styles = theme => ({
         marginLeft: 0,
         width: 150,
         textAlign: 'left',
-
-
     },
     smallerHeader: {
         marginTop: 0,
@@ -169,7 +134,6 @@ const styles = theme => ({
     patientBox: {
         marginLeft: 30,
         width: '75vw',
-
     },
     encounterBox: {
         textAlign: 'left',
@@ -198,16 +162,6 @@ const styles = theme => ({
 
 });
 
-
-
-const renderInput = (props) => (
-    <Input
-        type="text"
-        onClick={props.onClick}
-        value={props.value}
-        onChange={props.onChange}
-    />
-);
 
 
 const getPatientDisplayName = patient => {
@@ -268,7 +222,6 @@ const PrioritySelect = (priorities, selectPriority, handleOpenPriorities, handle
 
                     //check to see if priority type is already in the priorityList
                     if (priorityList.includes(getPriorityDisplayName(selectedPriority))) {
-                        //console.log('already contains that item so not adding to priority list')
                         return
                     }
                     //put the priority into the list if not there yet
@@ -1123,15 +1076,15 @@ class GFERequestBox extends Component {
                 input.supportingInfo.push({
                     sequence: supportingInfoSequence++,
                     category: categoryCodeableConcept("typeofbill").codeableConcept,
-                    code: { 
+                    code: {
                         coding: [
-                        {
-                            system: "https://www.nubc.org/CodeSystem/TypeOfBill",
-                            code: this.state.supportingInfoTypeOfBill,
-                            display: "Type of Bill"
-                        }
-                       ]
-                    }    
+                            {
+                                system: "https://www.nubc.org/CodeSystem/TypeOfBill",
+                                code: this.state.supportingInfoTypeOfBill,
+                                display: "Type of Bill"
+                            }
+                        ]
+                    }
                 })
             }
         }
@@ -1141,7 +1094,6 @@ class GFERequestBox extends Component {
             reference: submitterOrgReference,
             resource: this.state.organizationList.filter(org => org.resource.id === this.state.selectedSubmitter)[0].resource //undefined resource?
         }
-        console.log("this is the resource", this.state.organizationList.filter(org => org.resource.id === this.state.selectedSubmitter)[0].resource)
         orgReferenceList.push(submitterOrgReference);
 
         input.bundleResources.push({
@@ -1282,7 +1234,6 @@ class GFERequestBox extends Component {
     }
 
     updateValue = e => {
-        console.log("value updated", e.target);
         switch (e.target.id) {
             case "total-claim-amount":
                 this.setState({
@@ -1385,7 +1336,6 @@ class GFERequestBox extends Component {
     }
 
     addOneCareTeam = () => {
-        console.log("trying to add one to care team table");
         let valid = true, msg = undefined;
         if (this.state.careTeamList.length > 0) {
             const requiredColumns = CareTeamColumns().filter(column => column.required);
@@ -1412,33 +1362,26 @@ class GFERequestBox extends Component {
     }
 
     editCareTeam = model => {
-        console.log('this is our model', model);
         let id, fieldObject, fieldName, fieldValueObject, fieldValue;
         for (let prop in model) {
             id = prop;
             fieldObject = model[id];
-            console.log('this is our fieldObject', fieldObject) //object with provider.value = patricia
-            console.log('this is our id ', id)  // 1
 
         }
         if (fieldObject) {
             for (let name in fieldObject) {
                 fieldName = name;
-                console.log('fieldname', fieldName) //provider
             }
             fieldValueObject = fieldObject[fieldName];
-            console.log('fieldValueObject', fieldValueObject) //obje with value: "Practitioner - Christine Curie"
 
         }
         if (fieldValueObject) {
-            fieldValue = fieldValueObject.value; //obje with value: "Practitioner - Christine Curie"
+            fieldValue = fieldValueObject.value;
 
         }
         if (id && fieldName && fieldValue) {
             this.setState({
                 careTeamList: this.state.careTeamList.map(item => {
-
-                    console.log('our item', item) //item with id: 1       provider: "Practitioner - Nora Ologist"
 
                     if (item.id === parseInt(id)) {
                         item[fieldName] = fieldValue;
@@ -1449,7 +1392,6 @@ class GFERequestBox extends Component {
                     }
                 })
             });
-            console.log(this.state.careTeamList);
         }
     }
 
@@ -1486,7 +1428,6 @@ class GFERequestBox extends Component {
     }
 
     editClaimItem = model => {
-        console.log(model);
         let id, fieldObject, fieldName, fieldValueObject, fieldValue;
         for (let prop in model) {
             id = prop;
@@ -1576,7 +1517,6 @@ class GFERequestBox extends Component {
     }
 
     editDiagnosisItem = model => {
-        console.log(model);
         let id, fieldObject, fieldName, fieldValueObject, fieldValue;
         for (let prop in model) {
             id = prop;
@@ -1632,7 +1572,6 @@ class GFERequestBox extends Component {
     }
 
     editProcedureItem = model => {
-        console.log(model);
         let id, fieldObject, fieldName, fieldValueObject, fieldValue;
         for (let prop in model) {
             id = prop;

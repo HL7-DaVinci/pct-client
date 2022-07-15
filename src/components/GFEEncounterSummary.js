@@ -58,7 +58,6 @@ export default function GFEEncounterSummary(props) {
     }
 
     const editDiagnosisItem = model => {
-        console.log(model);
         let id, fieldObject, fieldName, fieldValueObject, fieldValue;
         for (let prop in model) {
             id = prop;

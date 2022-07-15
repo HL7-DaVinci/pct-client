@@ -1,29 +1,20 @@
 import React, { useEffect, useState } from 'react';
 import {
-    Box, Card, CardContent, FormLabel, Typography, makeStyles, FormControl, Grid, Button, LinearProgress, IconButton, Avatar, Tabs,
+    Box, Typography, makeStyles, FormControl, Grid, Button, Tabs,
     Tab, AppBar
 } from '@material-ui/core';
-import { Dialog, DialogActions, DialogContent, DialogContentText, DialogTitle } from '@material-ui/core';
+import { Dialog, DialogActions, DialogContent, DialogTitle } from '@material-ui/core';
 import { sendAEOInquiry } from '../api';
-import ArrowBackIosNew from '@material-ui/icons/ArrowBackIos'
 import PropTypes from 'prop-types';
 import Accordion from '@mui/material/Accordion';
 import AccordionSummary from '@mui/material/AccordionSummary';
 import AccordionDetails from '@mui/material/AccordionDetails';
 import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
-import { styled } from '@mui/material/styles';
-import Paper from '@mui/material/Paper';
 import Modal from '@mui/material/Modal';
 import Divider from '@mui/material/Divider';
-import AEOBItems, { columns as AEOBItemsColumns } from './ClaimItem';
-import { DataGrid } from '@mui/x-data-grid';
 import jp from "jsonpath";
-import parse from "jsonpath";
 import moment from 'moment';
 import AEOBItemsTable from "./AEOBItemsTable";
-import MainPanel from './MainPanel';
-
-
 
 
 
@@ -180,77 +171,6 @@ export default function AEOBResponsePanel(props) {
     };
 
 
-    const rows = [
-        { id: 1, lastName: 'Example', firstName: 'Example', age: 35 },
-    ];
-
-    const columns = [
-        {
-            field: 'service',
-            headerName: 'Service',
-            description: 'Item Service',
-            sortable: false,
-            width: 120,
-            valueGetter: (params) =>
-                `${jp.query(props, '$..[?(@.resourceType == "ExplanationOfBenefit")].item[0].productOrService.coding[0].code')[0] || ''}`,
-        },
-        {
-            field: 'description',
-            headerName: 'Description',
-            description: 'Item Description',
-            sortable: false,
-            width: 120,
-            valueGetter: (params) =>
-                `${jp.query(props, '$..[?(@.resourceType == "ExplanationOfBenefit")].item[0].productOrService.coding[0].display')[0] || ''}`,
-        },
-        {
-            field: 'serviceDate',
-            headerName: 'Service Date',
-            description: 'Service date.',
-            sortable: false,
-            width: 120,
-            valueGetter: (params) =>
-                `${moment(jp.query(props, '$..[?(@.resourceType == "ExplanationOfBenefit")].item[0].extension[0].valueDate')[0]).format('L') || ''}`,
-        },
-        {
-            field: 'quantity',
-            headerName: 'Quantity',
-            description: 'quantity.',
-            sortable: false,
-            width: 120,
-            valueGetter: (params) =>
-                `${jp.query(props, '$..[?(@.resourceType == "Claim")].item[0].quantity.value')[0] || ''}`,
-        },
-        {
-            field: 'itemCost',
-            headerName: 'Item Cost',
-            description: 'item cost.',
-            sortable: false,
-            width: 120,
-            valueGetter: (params) =>
-
-                `${jp.query(props, '$..[?(@.resourceType == "ExplanationOfBenefit")].item[0].adjudication[0].amount.value')[0] || ''} ${jp.query(props, '$..[?(@.resourceType == "ExplanationOfBenefit")].item[0].adjudication[0].amount.currency')[0]}`,
-        },
-        {
-            field: 'eligibleAmount',
-            headerName: 'Eligible Amount',
-            description: 'eligible amount.',
-            sortable: false,
-            width: 120,
-            valueGetter: (params) =>
-                `${''}`,
-        },
-        {
-            field: 'deductible',
-            headerName: 'Deductible',
-            description: 'deductible.',
-            sortable: false,
-            width: 120,
-            valueGetter: (params) =>
-                `${''}`,
-        },
-    ];
-
     const [openGFEResponse, setOpenGFEResponse] = React.useState(false);
     const handleOpenGFEResponse = () => setOpenGFEResponse(true);
     const handleCloseGFEResponse = () => setOpenGFEResponse(false);
@@ -313,26 +233,15 @@ export default function AEOBResponsePanel(props) {
         return new Date().toLocaleString();
     }
 
-    const SummaryText = props => (
-        <div>
-            <Typography variant="subtitle1" component="h3" className={classes.card}>
-                {props.content}
-            </Typography>
-        </div>
-    )
 
     function getNameDisplay(resource) {
 
-        //get the patient url from the patient ref
-        //const patientURL = jp.query(props, '$..[?(@.resourceType == "ExplanationOfBenefit")].patient.reference')[0];
         var returnString = "";
-        //get the id of the patient using that url
-        //const fullString = "$..[?(@.fullUrl ==" + "'" + patientURL + "'" + ")].resource.id"
-        //console.log(JSON.stringify(humanName));
+
         if (resource.constructor.name === 'Object' && resource !== null) {
-            if (resource.resourceType == 'Organization')
+            if (resource.resourceType === 'Organization')
                 returnString = resource.name;
-            else if (resource.resourceType == 'Patient' || resource.resourceType == 'Practitioner' || resource.resourceType == 'relatedPerson') {
+            else if (resource.resourceType === 'Patient' || resource.resourceType === 'Practitioner' || resource.resourceType === 'relatedPerson') {
                 returnString = getHumanNameDisplay(resource.name[0]);
             }
             else {
@@ -345,12 +254,8 @@ export default function AEOBResponsePanel(props) {
 
     function getHumanNameDisplay(humanName) {
 
-        //get the patient url from the patient ref
-        //const patientURL = jp.query(props, '$..[?(@.resourceType == "ExplanationOfBenefit")].patient.reference')[0];
         var returnString = "";
-        //get the id of the patient using that url
-        //const fullString = "$..[?(@.fullUrl ==" + "'" + patientURL + "'" + ")].resource.id"
-        //console.log(JSON.stringify(humanName));
+
         if (humanName.constructor.name === 'Object' && humanName !== null) {
             if ('text' in humanName)
                 returnString = humanName.text;
@@ -394,20 +299,6 @@ export default function AEOBResponsePanel(props) {
 
     function getSubmittingProviderResource(eobResource) {
         return jp.query(props, "$..[?(@.fullUrl ==" + "'" + eobResource.provider.reference + "')].resource")[0];
-    }
-
-    function getPatientId() {
-
-        //get the patient url from the patient ref
-        //const patientURL = jp.query(props, '$..[?(@.resourceType == "ExplanationOfBenefit")].patient.reference')[0];
-
-        //get the id of the patient using that url
-        //const fullString = "$..[?(@.fullUrl ==" + "'" + patientURL + "'" + ")].resource.identifier[?(@.type.coding[0].code == 'MB')].value"
-
-        //returns string: patient1001
-        //return jp.query(props, (fullString))[0];
-
-        return jp.query(getPatientResource(), '$..identifier[?(@.type.coding[0].code == "MB")].value')[0];
     }
 
     function getTelecomDisplay(telecomArray) {
@@ -455,20 +346,6 @@ export default function AEOBResponsePanel(props) {
     }
 
 
-    function getInsuranceId() {
-        //props.receivedAEOBResponse.entry[0].resource.entry[3].resource.id}
-
-        //get the insurance url from insurance ref
-        const insuranceURL = jp.query(props, '$..[?(@.resourceType == "ExplanationOfBenefit")].insurance[0].coverage.reference')[0];
-
-        //get the id of the insurance using that url
-        const fullString = "$..[?(@.fullUrl ==" + "'" + insuranceURL + "'" + ")].resource.id"
-
-        //returns string: coverage1001
-        return jp.query(props, (fullString))[0];
-
-    }
-
     function getSubmittingProviderId() {
 
         //get the insurance url from insurance ref
@@ -498,19 +375,14 @@ export default function AEOBResponsePanel(props) {
         return copayAmount + " " + currency;
     }
 
-    function getAEOBItems() {
-        return jp.query(props, '$..[?(@.resourceType == "ExplanationOfBenefit")]')[0]
-    }
+
     const handleChange = (event) => {
         //this.setState({ currentTabIndex: value });
         setCurrentTabIndex(event.target.value);
 
     };
     function getBackToMain() {
-        console.log('BACK TO MAIN')
-        console.log('current tab index is ', currentTabIndex) //why is this undefined ? not zero
-
-        if (currentTabIndex != 1) {
+        if (currentTabIndex !== 1) {
             window.location.reload(false);
             return false;
         }
@@ -671,12 +543,6 @@ export default function AEOBResponsePanel(props) {
                             </Grid>
 
 
-
-
-
-
-
-
                             <Grid className={classes.info}>
                                 <Divider />
                                 <Divider light />
@@ -727,7 +593,7 @@ export default function AEOBResponsePanel(props) {
                                         <Grid container direction="column">
                                             <Grid item>
                                                 <Typography variant="h6" gutterBottom>
-                                                    <b>Insurance:</b>{console.log(props)}
+                                                    <b>Insurance:</b>
                                                 </Typography>
                                             </Grid>
                                             <Grid item>
@@ -813,24 +679,7 @@ export default function AEOBResponsePanel(props) {
                                                     </Typography>
                                                 </Grid>
                                             })}
-                                            {/* 
-                                        The Categories (labels) need to be dynamic and based on the data in the AEOB
-                                        <Grid item>
-                                            <Typography variant="body1" gutterBottom>
-                                                Submitted Amount: {jp.query(props, '$..[?(@.resourceType == "ExplanationOfBenefit")].total[0].amount.value')[0]} {jp.query(props, '$..[?(@.resourceType == "ExplanationOfBenefit")].total[0].amount.currency')[0]}
-                                            </Typography>
-                                        </Grid>
-                                        <Grid item>
-                                            <Typography variant="body1" gutterBottom>
-                                                Eligible Amount:
-                                            </Typography>
-                                        </Grid>
-                                        <Grid item>
-                                            <Typography variant="body1" gutterBottom>
-                                                Deductible:
-                                            </Typography>
-                                        </Grid>
-                                        */}
+
                                             <Grid item>
                                                 <Typography variant="body1" gutterBottom>
                                                     <b>Copay:</b> {calcCopay()}
@@ -841,51 +690,11 @@ export default function AEOBResponsePanel(props) {
 
                                     <Grid item>
                                         <Grid container direction="column">
-                                            {/*
-                                        This is actually line item adjudication data that should go in the items grid.
-                                        <Grid item >
-                                            <Typography variant="body1" gutterBottom className={classes.spaceTop}>
-                                                Coinsurance:
-                                            </Typography>
-                                        </Grid>
-                                        <Grid item>
-                                            <Typography variant="body1" gutterBottom>
-                                                Noncovered:
-                                            </Typography>
-                                        </Grid>
-                                        <Grid item>
-                                            <Typography variant="body1" gutterBottom>
-                                                Paid to Provider: {jp.query(props, '$..[?(@.resourceType == "ExplanationOfBenefit")].item[0].adjudication[0].amount.value')[0] + " " + jp.query(props, '$..[?(@.resourceType == "ExplanationOfBenefit")].item[0].adjudication[0].amount.currency')[0]}
-                                            </Typography>
-                                        </Grid>
-                                        <Grid item>
-                                            <Typography variant="body1" gutterBottom>
-                                                Member Liability:
-                                            </Typography>
-                                        </Grid>
-                                */}
-                                        </Grid>
-                                    </Grid>
-
-                                    <Grid item>
-                                        <Grid container direction="column">
                                             <Grid item>
                                                 <Typography variant="h6" gutterBottom>
-                                                    <b>Details:</b>{console.log(props)}
+                                                    <b>Details:</b>
                                                 </Typography>
                                             </Grid>
-                                            {/* This information is header level
-                                        <Grid item>
-                                            <Typography variant="body1" gutterBottom>
-                                                Patient: {getPatientId()}
-                                            </Typography>
-                                        </Grid>
-                                        <Grid item>
-                                            <Typography variant="body1" gutterBottom>
-                                                Insurance: {getInsuranceId()}
-                                            </Typography>
-                                        </Grid>
-                            */}
                                             <Grid item>
                                                 <Typography variant="body1" gutterBottom>
                                                     <b>Submitting Provider:</b> {getNameDisplay(getSubmittingProviderResource(jp.query(props, '$..[?(@.resourceType == "ExplanationOfBenefit")]')[0]))} ({getSubmittingProviderId()})
@@ -908,9 +717,6 @@ export default function AEOBResponsePanel(props) {
                     </Accordion >
                 ) : null
                 }
-
-
-
                 {
                     (props.gfeRequestSuccess === true && props.gfeRequestPending) ? (
 
@@ -923,210 +729,6 @@ export default function AEOBResponsePanel(props) {
                         </Grid>
                     ) : null
                 }
-
-                {/*
-            {
-                (props.gfeRequestSuccess === true && props.gfeRequestPending) ? (
-                    <Grid item>
-                        <FormControl>
-                            <Button variant="contained" color="primary" type="submit" onClick={handleSendInquiry}>
-                                Send AEOB Inquiry
-                            </Button>
-                        </FormControl>
-                    </Grid>
-                ) : null
-            }
-            {
-                props.receivedAEOBResponse ? (
-                    <Grid item className={classes.content}>
-                        <CardContent className={classes.content}>
-                            <Typography className={classes.blockHeader} color="textSecondary" gutterBottom>
-                                AEOB Inquiry Response received from the payer
-                            </Typography>
-                            <Typography className={classes.title} color="textSecondary" gutterBottom>
-                                AEOB outcome is {aeobInquiryOutcome}
-                            </Typography>
-                        </CardContent>
-                        <Typography className={classes.title} color="textSecondary" gutterBottom>
-                            Received AEOB response
-                        </Typography>
-                        <Typography className={classes.response} color="textSecondary" gutterBottom>
-                            <div>
-                                <pre>{JSON.stringify(props.receivedAEOBResponse, undefined, 2)}</pre>
-                            </div>
-                        </Typography>
-                    </Grid>
-                ) : null
-            }
-            {
-                aeobInquiryError ? (<Card>
-                    <CardContent className={classes.error}>
-                        <Typography className={classes.title} gutterBottom>
-                            Error occurred
-                        </Typography>
-                    </CardContent>
-                    <CardContent className={classes.content}>
-                        <Typography className={classes.response} color="textSecondary" gutterBottom>
-                            <div>
-                                <pre>{JSON.stringify(aeobError, undefined, 2)}</pre>
-                            </div>
-                        </Typography>
-                    </CardContent></Card>) : null
-            }
-        */}
-
-
-
-
-
-                {/*
-
-            <Grid container spacing={2} direction="column" >
-                <Grid item>
-                    <FormControl>
-                        <Grid container>
-                            <Grid item>
-                                <Button loading variant="contained" color="secondary" onClick={handleNewRequest} startIcon={<ArrowBackIosNew />}>
-                                    Create New GFE Request
-                                </Button>
-                            </Grid>
-                        </Grid>
-                    </FormControl>
-                </Grid>
-                <Grid item className={classes.responseBody}>
-                    <Grid container spacing={3} direction="row" className={classes.root}>
-                        <Grid item className={classes.header} xs={12}>
-                            <Typography variant="h5" color="initial">Response</Typography>
-                        </Grid>
-                        <Grid item xs={12}>
-                            <Grid container direction="row" spacing={2} className={classes.aeobResponse}>
-                                <Grid item>
-                                    <Grid container spacing={2} direction="column">
-                                        <Grid item className={classes.header} xs={12}>
-                                            <Typography variant="h6" color="initial">GFE Response</Typography>
-                                        </Grid>
-                                        <Grid item className={classes.content}>
-                                            <div className={classes.body}>
-                                                <Card>
-                                                    {
-                                                        props.submittingStatus === true ?
-                                                            (
-                                                                <Grid item direction="row"><CardContent className={classes.content}>
-                                                                    <Typography />
-                                                                    <Typography className={classes.title} color="textSecondary" gutterBottom>
-                                                                        Sending GFE request to payer ...
-                                                                    </Typography>
-                                                                    <LinearProgress color="inherit" />
-                                                                </CardContent></Grid>) : null
-                                                    }
-                                                    {
-                                                        (props.gfeSubmitted === true && props.gfeRequestSuccess === true) ?
-                                                            (<Grid item direction="row">
-                                                                <CardContent>
-                                                                    <Typography className={classes.blockHeader} color="textSecondary" gutterBottom>
-                                                                        GFE Response received from the payer
-                                                                    </Typography>
-                                                                    <CardContent className={classes.content}>
-                                                                        <Typography className={classes.title} color="textSecondary" gutterBottom>
-                                                                            Returned bundle ID is {props.bundleId} with identifier {props.bundleIdentifier}
-                                                                        </Typography>
-                                                                        <Typography className={classes.response} color="textSecondary" gutterBottom>
-                                                                            <div>
-                                                                                <pre>{JSON.stringify(props.gfeResponse, undefined, 2)}</pre>
-                                                                            </div>
-                                                                        </Typography>
-                                                                    </CardContent>
-                                                                </CardContent></Grid>) : null
-                                                    }
-                                                    {
-                                                        (props.gfeSubmitted === true && props.gfeRequestSuccess === false) ? (<CardContent className={classes.error}>
-                                                            <Typography />
-                                                            <Typography className={classes.title} gutterBottom>
-                                                                Error occurred
-                                                            </Typography>
-                                                            <CardContent className={classes.content}>
-                                                                <Typography className={classes.title} color="textSecondary" gutterBottom>
-                                                                    <div>
-                                                                        <pre>{JSON.stringify(props.gfeResponse, undefined, 2)}</pre>
-                                                                    </div>
-                                                                </Typography>
-                                                            </CardContent>
-                                                        </CardContent>) : null
-                                                    }
-                                                </Card>
-                                            </div>
-                                        </Grid>
-                                    </Grid>
-                                </Grid>
-                                <Grid item>
-                                    <Grid container spacing={2} direction="column" justifyContent='center'>
-                                        <Grid item className={classes.header} xs={12}>
-                                            <Typography variant="h6" color="initial">AEOB Inquiry and Response</Typography>
-                                        </Grid>
-                                        <Grid item>
-                                            <div className={classes.body}>
-                                                <Card>
-                                                    {
-                                                        (props.gfeRequestSuccess === true && props.gfeRequestPending) ? (
-                                                            <Grid item>
-                                                                <FormControl>
-                                                                    <Button variant="contained" color="primary" type="submit" onClick={handleSendInquiry}>
-                                                                        Send AEOB Inquiry
-                                                                    </Button>
-                                                                </FormControl>
-                                                            </Grid>
-                                                        ) : null
-                                                    }
-                                                    {
-                                                        props.receivedAEOBResponse ? (
-                                                            <Grid item className={classes.content}>
-                                                                <CardContent className={classes.content}>
-                                                                    <Typography className={classes.blockHeader} color="textSecondary" gutterBottom>
-                                                                        AEOB Inquiry Response received from the payer
-                                                                    </Typography>
-                                                                    <Typography className={classes.title} color="textSecondary" gutterBottom>
-                                                                        AEOB outcome is {aeobInquiryOutcome}
-                                                                    </Typography>
-                                                                </CardContent>
-                                                                <Typography className={classes.title} color="textSecondary" gutterBottom>
-                                                                    Received AEOB response
-                                                                </Typography>
-                                                                <Typography className={classes.response} color="textSecondary" gutterBottom>
-                                                                    <div>
-                                                                        <pre>{JSON.stringify(props.receivedAEOBResponse, undefined, 2)}</pre>
-                                                                    </div>
-                                                                </Typography>
-                                                            </Grid>
-                                                        ) : null
-                                                    }
-                                                    {
-                                                        aeobInquiryError ? (<Card>
-                                                            <CardContent className={classes.error}>
-                                                                <Typography className={classes.title} gutterBottom>
-                                                                    Error occurred
-                                                                </Typography>
-                                                            </CardContent>
-                                                            <CardContent className={classes.content}>
-                                                                <Typography className={classes.response} color="textSecondary" gutterBottom>
-                                                                    <div>
-                                                                        <pre>{JSON.stringify(aeobError, undefined, 2)}</pre>
-                                                                    </div>
-                                                                </Typography>
-                                                            </CardContent></Card>) : null
-                                                    }
-                                                </Card>
-                                            </div>
-                                        </Grid>
-                                    </Grid>
-                                </Grid>
-
-                            </Grid>
-                        </Grid>
-
-                    </Grid >
-                </Grid>
-            </Grid>
-                                                */}
 
             </TabPanel>
         </div >

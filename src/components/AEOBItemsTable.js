@@ -6,8 +6,6 @@ import TableBody from "@material-ui/core/TableBody";
 import TableCell from "@material-ui/core/TableCell";
 import TableHead from "@material-ui/core/TableHead";
 import TableRow from "@material-ui/core/TableRow";
-import Typography from "@material-ui/core/Typography";
-import moment from 'moment';
 import jp from "jsonpath";
 
 
@@ -99,11 +97,11 @@ function AEOBItemsTable({ title, data }) {
 
 
             const catSelected = jp.query(data, '$..[?(@.resourceType == "ExplanationOfBenefit")].item[' + i + '].adjudication[' + j + '].category.coding[0].display')[0];
-            if (headers.includes(catSelected) && (catSelected == "Paid to Provider" || catSelected == "Submitted Amount" || catSelected == "Eligible Amount")) {
+            if (headers.includes(catSelected) && (catSelected === "Paid to Provider" || catSelected === "Submitted Amount" || catSelected === "Eligible Amount")) {
                 let rowValueCurrency = jp.query(data, '$..[?(@.resourceType == "ExplanationOfBenefit")].item[' + i + '].adjudication[' + j + '].amount.currency')[0];
                 let rowValueAmount = jp.query(data, '$..[?(@.resourceType == "ExplanationOfBenefit")].item[' + i + '].adjudication[' + j + '].amount.value')[0];
 
-                if (rowValueCurrency == "USD" || rowValueCurrency == "") {
+                if (rowValueCurrency === "USD" || rowValueCurrency === "") {
                     rowValueAmount = jp.query(data, '$..[?(@.resourceType == "ExplanationOfBenefit")].item[' + i + '].adjudication[' + j + '].amount.value')[0].toFixed(2);
                 }
 

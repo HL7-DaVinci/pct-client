@@ -2,7 +2,6 @@ import React from 'react';
 import { Grid, Typography, CardContent, Card, makeStyles, createStyles, Box } from '@material-ui/core'
 import Divider from '@mui/material/Divider';
 import ListItem from '@mui/material/ListItem';
-import List from '@mui/material/List';
 import Alert from '@mui/material/Alert';
 import AlertTitle from '@mui/material/AlertTitle';
 
@@ -24,24 +23,18 @@ const useStyles = makeStyles((theme) =>
 
 
 function createProcedureList(procedureList) {
-    //console.log(procedureList)
-
     return procedureList.map(el => {
         return <ListItem disableGutters>({el.id}) {el.type}: {el.procedure} </ListItem>
     })
 }
 
 function createDiagnosisList(diagnosisList) {
-    //console.log(diagnosisList)
-
     return diagnosisList.map(el => {
         return <ListItem disableGutters>({el.id}) {el.type}: {el.diagnosis}</ListItem>
     })
 }
 
 function createServiceList(serviceList) {
-    //console.log(serviceList)
-
     return serviceList.map(el => {
         return <ListItem disableGutters>({el.id}) {el.placeOfService}: {el.productOrService}</ListItem>
     })
@@ -227,7 +220,7 @@ export default function SummaryItem(props) {
                     </Grid>
                     <Grid item xs={6}>
                         <Typography style={{ wordWrap: "break-word" }}>
-                            {((summary.practitionerSelected[0].provider) == undefined) ? (addToMissing("billing provider")) : (summary.practitionerSelected[0].provider)}
+                            {((summary.practitionerSelected[0].provider) === undefined) ? (addToMissing("billing provider")) : (summary.practitionerSelected[0].provider)}
                         </Typography>
                     </Grid>
                 </Grid>
@@ -238,7 +231,7 @@ export default function SummaryItem(props) {
                         <SummaryText content="Practitioner Role:" class="label" />
                     </Grid>
                     <Grid item xs={6}>
-                        <SummaryText content={(summary.practitionerSelected[0].role == undefined) ? (addToMissing("practitioner role")) : (summary.practitionerSelected[0].role)} />
+                        <SummaryText content={(summary.practitionerSelected[0].role === undefined) ? (addToMissing("practitioner role")) : (summary.practitionerSelected[0].role)} />
                     </Grid>
                 </Grid>
 
@@ -261,7 +254,7 @@ export default function SummaryItem(props) {
                             <SummaryText content="Type:" class="label" />
                         </Grid>
                         <Grid item xs={6}>
-                            <SummaryText content={(summary.gfeType == undefined) ? (addToMissing("gfe type")) : (summary.gfeType)} />
+                            <SummaryText content={(summary.gfeType === undefined) ? (addToMissing("gfe type")) : (summary.gfeType)} />
                         </Grid>
                     </Grid> : null
                 }
@@ -271,7 +264,7 @@ export default function SummaryItem(props) {
                         <SummaryText content="Date:" class="label" />
                     </Grid>
                     <Grid item xs={6}>
-                        <SummaryText content={(summary.serviceDate == undefined) ? (addToMissing("service date")) : (summary.serviceDate)} />
+                        <SummaryText content={(summary.serviceDate === undefined) ? (addToMissing("service date")) : (summary.serviceDate)} />
                     </Grid>
                 </Grid>
 
@@ -280,7 +273,7 @@ export default function SummaryItem(props) {
                         <SummaryText content="Priority:" class="label" />
                     </Grid>
                     <Grid item xs={6}>
-                        <SummaryText content={(summary.priorityLevel == undefined) ? (addToMissing("priority level")) : (summary.priorityLevel.priority.coding[0].code)} />
+                        <SummaryText content={(summary.priorityLevel === undefined) ? (addToMissing("priority level")) : (summary.priorityLevel.priority.coding[0].code)} />
                     </Grid>
                 </Grid>
 
@@ -290,7 +283,7 @@ export default function SummaryItem(props) {
                     </Grid>
                     <Grid item xs={6}>
                         <Typography style={{ wordWrap: "break-word" }}>
-                            {(summary.diagnosisList[0].diagnosis == undefined) ? (addToMissing("diagnosis")) : createDiagnosisList(summary.diagnosisList)}
+                            {(summary.diagnosisList[0].diagnosis === undefined) ? (addToMissing("diagnosis")) : createDiagnosisList(summary.diagnosisList)}
                         </Typography>
                     </Grid>
                 </Grid>
@@ -316,7 +309,7 @@ export default function SummaryItem(props) {
                     </Grid>
                     <Grid item xs={6}>
                         <Typography style={{ wordWrap: "break-word" }}>
-                            {(summary.servicesList[0].productOrService == undefined) ? (addToMissing("services")) : (createServiceList(summary.servicesList))}
+                            {(summary.servicesList[0].productOrService === undefined) ? (addToMissing("services")) : (createServiceList(summary.servicesList))}
                         </Typography>
                     </Grid>
                 </Grid>
@@ -324,12 +317,6 @@ export default function SummaryItem(props) {
 
         </React.Fragment >
     )
-
-    //console.log(summary.priorityLevel);
-
-
-
-
 
 
     return (

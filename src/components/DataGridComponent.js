@@ -23,7 +23,6 @@ import { TableContainer } from '@mui/material';
 
 export default function DataGridComponent(props) {
     const handleEditRowsModelChange = useCallback((model) => {
-        console.log('MODEL SHOWN HERE', model)
         props.edit(model);
     }, []);
 
@@ -44,10 +43,8 @@ export default function DataGridComponent(props) {
                 onClick={handleDeleteClick(id)}
             />]
     }];
-    console.log('PROPS', props);
 
     function createTableColumns(listOfColumns) {
-        //console.log('column list', listOfColumns);
         return listOfColumns.map(el => {
             return <TableCell >{el.headerName} </TableCell>
         })
@@ -64,7 +61,6 @@ export default function DataGridComponent(props) {
     }
 
     function createTableRows(listOfRows) {
-        //console.log('list of rows', listOfRows)
         return listOfRows.map(el => {
 
             if (el.type == "date") {
@@ -83,7 +79,6 @@ export default function DataGridComponent(props) {
             }
 
             if (el.valueOptions == undefined) {
-                console.log('this is undefined:', el)
                 return <TableCell>{handleEditRowsModelChange()}</TableCell>
 
             }
