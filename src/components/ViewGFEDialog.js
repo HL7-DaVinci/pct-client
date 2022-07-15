@@ -31,13 +31,13 @@ export default function ViewGFERequestDialog(props) {
                 open={open}
                 onClose={handleClose}
             >
-                <DialogTitle>Generated Good Faith Estimate Request</DialogTitle>
+                <DialogTitle>Review Generated Good Faith Estimate Request</DialogTitle>
                 <DialogContent>
-                    {
+                    {/* {
                         error ? null : (<DialogContentText>
                             Review Generated GFE Request
                         </DialogContentText>)
-                    }
+                    } */}
                     <Box
                         noValidate
                         component="form"
