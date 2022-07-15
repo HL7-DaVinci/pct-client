@@ -1318,6 +1318,8 @@ class GFERequestBox extends Component {
     }
 
     addOneCareTeam = () => {
+
+        console.log('this is our care team', this.state.careTeamList)
         let valid = true, msg = undefined;
         if (this.state.careTeamList.length > 0) {
             const requiredColumns = CareTeamColumns().filter(column => column.required);
@@ -1344,6 +1346,9 @@ class GFERequestBox extends Component {
     }
 
     editCareTeam = model => {
+
+        console.log('edit care team', model);
+
         let id, fieldObject, fieldName, fieldValueObject, fieldValue;
         for (let prop in model) {
             id = prop;
@@ -1904,7 +1909,7 @@ class GFERequestBox extends Component {
 
                                                     <Grid item className={classes.paper}>
                                                         <FormControl>
-                                                            <FormLabel className={classes.inputBox}>Priority: </FormLabel>
+                                                            <FormLabel className={classes.inputBox}>Priority:* </FormLabel>
                                                             {PrioritySelect(this.state.priorityList, this.state.selectedPriority, this.handleOpenPriority, this.handleSelectPriority)}
                                                         </FormControl>
                                                     </Grid>
@@ -1982,7 +1987,7 @@ class GFERequestBox extends Component {
 
                                                             <Grid item>
                                                                 <FormControl>
-                                                                    <FormLabel className={classes.smallerHeader}>Services: </FormLabel>
+                                                                    <FormLabel className={classes.smallerHeader}>Services:* </FormLabel>
                                                                     <Box sx={{ width: '65vw', backgroundColor: "#FFFFFF", ml: 3 }}>
                                                                         <ClaimItem rows={this.state.claimItemList} addOne={this.addOneClaimItem} edit={this.editClaimItem} deleteOne={this.deleteOneClaimItem} />
                                                                     </Box>
