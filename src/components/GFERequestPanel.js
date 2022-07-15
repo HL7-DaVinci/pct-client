@@ -961,7 +961,6 @@ class GFERequestBox extends Component {
             input.billing.gfeAssignedServiceId = this.state.gfeServiceId
         }
 
-        input.procedure = [];
         input.billing.items = [];
         let sequenceCount = 1;
         let totalAmount = 0;
@@ -1025,23 +1024,6 @@ class GFERequestBox extends Component {
             };
             input.billing.items.push(newItem);
 
-            input.procedure.push({
-                sequence: procedureSequenceCount++,
-                type: [{
-                    coding: [
-                        {
-                            system: "http://terminology.hl7.org/CodeSystem/ex-procedure-type",
-                            code: claimItem.procedureType
-                        }
-                    ]
-
-                }],
-                procedureCodeableConcept: {
-                    coding: [
-                        procedureCoding
-                    ]
-                }
-            });
             totalAmount += claimItem.unitPrice * claimItem.quantity;
         });
         input.billing.total = totalAmount;
