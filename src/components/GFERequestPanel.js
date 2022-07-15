@@ -591,7 +591,7 @@ class GFERequestBox extends Component {
                 sequence: sequenceCount++,
                 revenue: {
                     coding: [{
-                        system: "http://hl7.org/fhir/us/davinci-pct/CodeSystem/PCTGFEItemRevenueCS",
+                        system: "https://www.nubc.org/CodeSystem/RevenueCodes",
                         code: procedureCodingOrig.revenue.code
                     }]
                 },
@@ -687,7 +687,15 @@ class GFERequestBox extends Component {
                 input.supportingInfo.push({
                     sequence: supportingInfoSequence++,
                     category: categoryCodeableConcept("typeofbill").codeableConcept,
-                    valueString: this.state.supportingInfoTypeOfBill
+                    code: { 
+                        coding: [
+                        {
+                            system: "https://www.nubc.org/CodeSystem/TypeOfBill",
+                            code: this.state.supportingInfoTypeOfBill,
+                            display: "Type of Bill"
+                        }
+                       ]
+                    }    
                 })
             }
         }

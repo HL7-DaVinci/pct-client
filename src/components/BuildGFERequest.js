@@ -83,12 +83,18 @@ const buildGFERequest = (input) => {
     if (input.careTeam) {
         GFERequest.careTeam = [];
         input.careTeam.forEach(member => {
+            let memberRoleCodeSystem = undefined;
+            if(member.role === "primary") {
+                memberRoleCodeSystem = "http://terminology.hl7.org/CodeSystem/claimcareteamrole"
+            } else {
+                memberRoleCodeSystem = "http://hl7.org/fhir/us/davinci-pct/CodeSystem/PCTCareTeamRole"
+            }
             GFERequest.careTeam.push({
                 sequence: member.sequence,
                 role: {
                     coding: [
                         {
-                            "system": "http://hl7.org/fhir/us/davinci-pct/CodeSystem/PCTCareTeamRole",
+                            "system": memberRoleCodeSystem,
                             "code": member.role
                         }
                     ]
@@ -97,9 +103,9 @@ const buildGFERequest = (input) => {
                 qualification: {
                     coding: [
                         {
-                            "system": "http://terminology.hl7.org/CodeSystem/ex-providerqualification",
-                            "code": "604215",
-                            "display": "Physician"
+                            "system": "http://nucc.org/provider-taxonomy",
+                            "code": "207T00000X",
+                            "display": "Neurological Surgery Physician"
                         }
                     ]
                 }
