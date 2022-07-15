@@ -104,7 +104,7 @@ function AEOBItemsTable({ title, data }) {
                 let rowValueAmount = jp.query(data, '$..[?(@.resourceType == "ExplanationOfBenefit")].item[' + i + '].adjudication[' + j + '].amount.value')[0];
 
                 if (rowValueCurrency == "USD" || rowValueCurrency == "") {
-                    rowValueAmount = "$" + jp.query(data, '$..[?(@.resourceType == "ExplanationOfBenefit")].item[' + i + '].adjudication[' + j + '].amount.value')[0].toFixed(2);
+                    rowValueAmount = jp.query(data, '$..[?(@.resourceType == "ExplanationOfBenefit")].item[' + i + '].adjudication[' + j + '].amount.value')[0].toFixed(2);
                 }
 
                 const rowValue = rowValueAmount + " " + rowValueCurrency;

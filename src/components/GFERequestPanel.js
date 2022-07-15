@@ -258,10 +258,22 @@ const getPriorityDisplayName = priority => {
     return priority.resource.priority.coding[0].code;
 }
 const PrioritySelect = (priorities, selectPriority, handleOpenPriorities, handleChange) => {
+
+    let priorityList = [];
+
     return (<Select required labelId="select-priority-label" id="priority" value={selectPriority} onOpen={handleOpenPriorities} onChange={handleChange}>
         {
             priorities ?
                 priorities.map((selectedPriority) => {
+
+                    //check to see if priority type is already in the priorityList
+                    if (priorityList.includes(getPriorityDisplayName(selectedPriority))) {
+                        //console.log('already contains that item so not adding to priority list')
+                        return
+                    }
+                    //put the priority into the list if not there yet
+                    priorityList.push(getPriorityDisplayName(selectedPriority));
+
                     return (<MenuItem key={selectedPriority.resource.priority} value={selectedPriority.resource}>{getPriorityDisplayName(selectedPriority)}</MenuItem>);
                 }) : (<MenuItem />)
         }

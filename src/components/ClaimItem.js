@@ -10,13 +10,7 @@ export const columns = [
         required: true
     },
     {
-        field: 'procedureType', headerName: 'Type', editable: true, type: 'singleSelect', minWidth: 100,
-        valueOptions: ['primary', 'other'],
-        renderHeader: renderRequiredHeader,
-        required: true
-    },
-    {
-        field: 'estimatedDateOfService', headerName: 'Estimate Date', editable: true, type: 'date', minWidth: 10,
+        field: 'estimatedDateOfService', headerName: 'Estimate Date', editable: true, type: 'date', minWidth: 120,
         valueGetter: (params) => {
 
             return params.value;

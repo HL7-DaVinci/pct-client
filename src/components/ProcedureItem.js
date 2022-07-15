@@ -8,7 +8,7 @@ const emptyList = [];
 export const columns = [
     {
         field: 'procedure', headerName: 'Procedure', editable: true, type: 'singleSelect', minWidth: 150,
-        valueOptions: ProcedureList.map(code => `${"not available"}`),
+        valueOptions: ProcedureList.map(code => `${""}`),
         renderHeader: renderRequiredHeader,
         required: true
     },
