@@ -20,7 +20,8 @@ const buildGFERequest = (input) => {
             "type": {
                 "coding": [
                     {
-                        "code": "subscriber"
+                        "code": "subscriber",
+                        "system": "http://terminology.hl7.org/CodeSystem/payeetype"
                     }
                 ]
             }
