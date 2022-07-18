@@ -21,26 +21,22 @@ function AEOBItemsTable({ title, data }) {
         const numAjudicationCategories = jp.query(data, '$..[?(@.resourceType == "ExplanationOfBenefit")].item[' + i + '].adjudication.length');
 
         //service
-        const service = (jp.query(data, '$..[?(@.resourceType == "ExplanationOfBenefit")].item[' + i + '].productOrService.coding[0].code')[0]);
-        if (!headers.includes(service)) {
+        if (!headers.includes("Service")) {
             headers.push("Service");
         }
 
         //service description
-        const serviceDescription = (jp.query(data, '$..[?(@.resourceType == "ExplanationOfBenefit")].item[0].productOrService.coding[0].display')[0]);
-        if (!headers.includes(serviceDescription)) {
+        if (!headers.includes("Service Description")) {
             headers.push("Service Description");
         }
 
         //service date
-        const serviceDate = (jp.query(data, '$..[?(@.resourceType == "ExplanationOfBenefit")].item[' + i + '].extension[0].valueDate')[0]);
-        if (!headers.includes(serviceDate)) {
+        if (!headers.includes("Service Date")) {
             headers.push("Service Date");
         }
 
         //quantity
-        const quantity = (jp.query(data, '$..[?(@.resourceType == "Claim")].item[' + i + '].quantity.value')[0]);
-        if (!headers.includes(quantity)) {
+        if (!headers.includes("Quantity")) {
             headers.push("Quantity");
         }
 
@@ -84,7 +80,7 @@ function AEOBItemsTable({ title, data }) {
         }
         currentRow.push(serviceDateObject);
 
-        //service date
+        //quantity
         const quantity = (jp.query(data, '$..[?(@.resourceType == "Claim")].item[' + i + '].quantity.value')[0]);
         const quantityObj = {
             ["Quantity"]: quantity,
