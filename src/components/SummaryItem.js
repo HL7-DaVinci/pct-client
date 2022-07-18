@@ -61,6 +61,57 @@ export default function SummaryItem(props) {
     const { summary } = props;
     let missingItems = [];
 
+
+    //check if submitting provider if not add to list
+    if (summary.submittingProvider === undefined) {
+        addToMissing("submitting provider")
+    }
+
+    //check (if given) then care team has required fields
+    for (let i = 0; i < summary.practitionerSelected.length; i++) {
+
+        //if the provider is there, check if role is too
+        if (((summary.practitionerSelected[i].provider) !== undefined) && (summary.practitionerSelected[i].role) === undefined) {
+            addToMissing("care team provider role");
+        }
+        //if role is there, check if provider
+        if (((summary.practitionerSelected[i].role) !== undefined) && (summary.practitionerSelected[i].provider) === undefined) {
+            addToMissing("care team provider");
+        }
+        //otherwise if both undefined don't throw error bc allowed
+    }
+
+
+    //check if given, and all required fields exist
+    for (let i = 0; i < summary.diagnosisList.length; i++) {
+
+        //if diagnosis there, but not type, throw error
+        if (((summary.diagnosisList[i].diagnosis) !== undefined) && (summary.diagnosisList[i].type) === undefined) {
+            addToMissing("encounter diagnosis type");
+        }
+        //if type there, but not diagnosis, throw error
+        if (((summary.diagnosisList[i].type) !== undefined) && (summary.diagnosisList[i].diagnosis) === undefined) {
+            addToMissing("encounter diagnosis");
+        }
+        //if both missing, throw general error
+        if (((summary.diagnosisList[i].diagnosis) === undefined) && (summary.diagnosisList[i].type) === undefined) {
+            addToMissing("diagnosis");
+        }
+    }
+
+    // //if procedure, check if procedure and type
+    // for (let i = 0; i < summary.procedureList.length; i++) {
+    //     if (((summary.procedureList[i].procedure) !== undefined) && (summary.procedureList[i].type) === undefined) {
+    //         addToMissing("encounter diagnosis type");
+    //     }
+    //     if (((summary.procedureList[i].procedure) !== undefined) && (summary.procedureList[i].type) === undefined) {
+    //         addToMissing("encounter diagnosis");
+    //     }
+    //     //if both missing, not required
+    // }
+
+
+
     const SummaryText = props => (
         <div>
             <Typography variant="subtitle1" component="h3" className={classes.card}>
@@ -213,25 +264,23 @@ export default function SummaryItem(props) {
                     </Box>
                 </Grid>
 
-                {/* {(summary.payorId !== undefined) ? */}
                 <Grid container>
                     <Grid item xs={6} >
                         <SummaryText content="Billing:" class="label" />
                     </Grid>
                     <Grid item xs={6}>
                         <Typography style={{ wordWrap: "break-word" }}>
-                            {((summary.practitionerSelected[0].provider) === undefined) ? (addToMissing("billing provider")) : (summary.practitionerSelected[0].provider)}
+                            {((summary.billingProvider) === undefined) ? (addToMissing("billing provider")) : (summary.billingProvider)}
                         </Typography>
                     </Grid>
                 </Grid>
-                {/* : null } */}
 
                 <Grid container>
                     <Grid item xs={6} >
                         <SummaryText content="Practitioner Role:" class="label" />
                     </Grid>
                     <Grid item xs={6}>
-                        <SummaryText content={(summary.practitionerSelected[0].role === undefined) ? (addToMissing("practitioner role")) : (summary.practitionerSelected[0].role)} />
+                        <SummaryText content={(summary.practitionerSelected[0].role === undefined) ? "" : (summary.practitionerSelected[0].role)} />
                     </Grid>
                 </Grid>
 
@@ -248,16 +297,16 @@ export default function SummaryItem(props) {
                     </Box>
                 </Grid>
 
-                {(summary.payorId !== undefined) ?
-                    <Grid container>
-                        <Grid item xs={6} >
-                            <SummaryText content="Type:" class="label" />
-                        </Grid>
-                        <Grid item xs={6}>
-                            <SummaryText content={(summary.gfeType === undefined) ? (addToMissing("gfe type")) : (summary.gfeType)} />
-                        </Grid>
-                    </Grid> : null
-                }
+
+                <Grid container>
+                    <Grid item xs={6} >
+                        <SummaryText content="Type:" class="label" />
+                    </Grid>
+                    <Grid item xs={6}>
+                        <SummaryText content={(summary.gfeType === undefined) ? (addToMissing("gfe type")) : (summary.gfeType)} />
+                    </Grid>
+                </Grid>
+
 
                 <Grid container>
                     <Grid item xs={6} >
@@ -283,7 +332,7 @@ export default function SummaryItem(props) {
                     </Grid>
                     <Grid item xs={6}>
                         <Typography style={{ wordWrap: "break-word" }}>
-                            {(summary.diagnosisList[0].diagnosis === undefined) ? (addToMissing("diagnosis")) : createDiagnosisList(summary.diagnosisList)}
+                            {(summary.diagnosisList[0].diagnosis === undefined) ? "" : createDiagnosisList(summary.diagnosisList)}
                         </Typography>
                     </Grid>
                 </Grid>
@@ -317,6 +366,8 @@ export default function SummaryItem(props) {
 
         </React.Fragment >
     )
+
+
 
 
     return (

@@ -1211,7 +1211,9 @@ class GFERequestBox extends Component {
             //startDateService: moment(this.state.startDate).format('L'), 
             //endDateService: moment(this.state.endDate).format('L'),
             priorityLevel: this.state.selectedPriority,
-            serviceDate: this.state.selectedDate
+            serviceDate: this.state.selectedDate,
+            submittingProvider: this.state.selectedSubmitter,
+            billingProvider: this.state.selectedBillingProvider
         };
     }
 
@@ -1347,7 +1349,6 @@ class GFERequestBox extends Component {
 
     editCareTeam = model => {
 
-        console.log('edit care team', model);
 
         let id, fieldObject, fieldName, fieldValueObject, fieldValue;
         for (let prop in model) {
