@@ -62,10 +62,6 @@ export default function SummaryItem(props) {
     let missingItems = [];
 
 
-    //check if submitting provider if not add to list
-    if (summary.submittingProvider === undefined) {
-        addToMissing("submitting provider")
-    }
 
     //check (if given) then care team has required fields
     for (let i = 0; i < summary.practitionerSelected.length; i++) {
@@ -271,6 +267,16 @@ export default function SummaryItem(props) {
                     <Grid item xs={6}>
                         <Typography style={{ wordWrap: "break-word" }}>
                             {((summary.billingProvider) === undefined) ? (addToMissing("billing provider")) : (summary.billingProvider)}
+                        </Typography>
+                    </Grid>
+                </Grid>
+                <Grid container>
+                    <Grid item xs={6} >
+                        <SummaryText content="Submitting:" class="label" />
+                    </Grid>
+                    <Grid item xs={6}>
+                        <Typography style={{ wordWrap: "break-word" }}>
+                            {((summary.submittingProvider) === undefined) ? (addToMissing("submitting provider")) : (summary.submittingProvider)}
                         </Typography>
                     </Grid>
                 </Grid>

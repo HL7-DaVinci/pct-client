@@ -1213,7 +1213,8 @@ class GFERequestBox extends Component {
             priorityLevel: this.state.selectedPriority,
             serviceDate: this.state.selectedDate,
             submittingProvider: this.state.selectedSubmitter,
-            billingProvider: this.state.selectedBillingProvider
+            billingProvider: this.state.selectedBillingProvider,
+            submittingProvider: this.state.selectedSubmitter
         };
     }
 
