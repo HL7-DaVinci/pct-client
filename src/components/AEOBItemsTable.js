@@ -67,7 +67,7 @@ function AEOBItemsTable({ title, data }) {
         currentRow.push(serviceObject);
 
         //service description
-        const serviceDescription = (jp.query(data, '$..[?(@.resourceType == "ExplanationOfBenefit")].item[0].productOrService.coding[0].display')[0]);
+        const serviceDescription = (jp.query(data, '$..[?(@.resourceType == "ExplanationOfBenefit")].item[' + i + '].productOrService.coding[0].display')[0]);
         const serviceDescObject = {
             ["Service Description"]: serviceDescription,
         }

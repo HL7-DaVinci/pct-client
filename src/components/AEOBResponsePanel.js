@@ -658,8 +658,13 @@ export default function AEOBResponsePanel(props) {
                                     </Typography>
                                 </Grid>
                                 <Grid item>
-                                    <Typography variant="body1" gutterBottom className={classes.spaceBelow}>
+                                    <Typography variant="body1" gutterBottom>
                                         <b>Outcome:</b> {jp.query(props, '$..[?(@.resourceType == "ExplanationOfBenefit")].outcome')[0]}
+                                    </Typography>
+                                </Grid>
+                                <Grid item>
+                                    <Typography variant="body1" gutterBottom className={classes.spaceBelow}>
+                                        <b>Submitting Provider:</b> {getNameDisplay(getSubmittingProviderResource(jp.query(props, '$..[?(@.resourceType == "ExplanationOfBenefit")]')[0]))} ({getSubmittingProviderId()})
                                     </Typography>
                                 </Grid>
 
@@ -681,23 +686,8 @@ export default function AEOBResponsePanel(props) {
                                             })}
 
                                             <Grid item>
-                                                <Typography variant="body1" gutterBottom>
+                                                <Typography variant="body1" gutterBottom className={classes.spaceBelow}>
                                                     <b>Copay:</b> {calcCopay()}
-                                                </Typography>
-                                            </Grid>
-                                        </Grid>
-                                    </Grid>
-
-                                    <Grid item>
-                                        <Grid container direction="column">
-                                            <Grid item>
-                                                <Typography variant="h6" gutterBottom>
-                                                    <b>Details:</b>
-                                                </Typography>
-                                            </Grid>
-                                            <Grid item>
-                                                <Typography variant="body1" gutterBottom>
-                                                    <b>Submitting Provider:</b> {getNameDisplay(getSubmittingProviderResource(jp.query(props, '$..[?(@.resourceType == "ExplanationOfBenefit")]')[0]))} ({getSubmittingProviderId()})
                                                 </Typography>
                                             </Grid>
                                         </Grid>
