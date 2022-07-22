@@ -1350,6 +1350,8 @@ class GFERequestBox extends Component {
 
     editCareTeam = model => {
 
+        console.log('this is the model in the EDITCRETEAM', model)
+
 
         let id, fieldObject, fieldName, fieldValueObject, fieldValue;
         for (let prop in model) {
@@ -1371,6 +1373,8 @@ class GFERequestBox extends Component {
         if (id && fieldName && fieldValue) {
             this.setState({
                 careTeamList: this.state.careTeamList.map(item => {
+
+                    console.log('item', item)
 
                     if (item.id === parseInt(id)) {
                         item[fieldName] = fieldValue;
