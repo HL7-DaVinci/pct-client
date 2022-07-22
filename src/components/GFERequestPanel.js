@@ -2093,15 +2093,6 @@ class GFERequestBox extends Component {
 
                                                 <Grid item><SummaryItem summary={summary} /></Grid>
                                             </FormControl>
-
-                                            {/* Submit button
-                                            <Box display="flex" justifyContent="space-evenly">
-                                                <FormControl>
-                                                    <Button loading variant="contained" color="primary" type="submit" disabled={this.props.submittingStatus === true}>
-                                                        Submit GFE
-                                                    </Button>
-                                                </FormControl>
-                                            </Box> */}
                                         </Grid>
                                         <br></br>
                                         <Grid
