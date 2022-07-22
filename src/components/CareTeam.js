@@ -12,76 +12,15 @@ import DeleteIcon from '@material-ui/icons/Delete';
 
 
 
-
-
-// function MyComponent(value) {
-//     const [chosenVal, setChosenVal] = React.useState('');
-
-//     console.log('this is the component value in component', value)
-//     // const handleClick = useCallback((model) => {
-
-//     //     //console.log(model)
-//     //     // handle the click event
-//     //     return model
-//     // });
-
-//     // return handleClick();
-//     // //return //<MyChild onClick={handleClick} />;
-
-// }
-
-// function editCareTeamVal(value, column) {
-
-//     console.log('this is the value selected', value);
-//     console.log('this is the column its under', column);
-
-//     ChangeValue(value)
-
-// }
-
-// const ChangeValue = (value) => {
-//     const [chosenVal, setChosenVal] = React.useState('');
-
-//     //setAge(event.target.value);
-//     //console.log('here is the event', event.target.value);
-//     //return event.target.value
-//     //setChosenVal(event.target.value);
-//     setChosenVal(value);
-//     console.log('heres the hook chosen val', chosenVal);
-
-// };
-
-
-
-
-
-// const handleChange = (event) => {
-//     //setAge(event.target.value);
-//     //console.log('here is the event', event.target.value);
-//     //return event.target.value
-//     //setChosenVal(event.target.value);
-//     const value = event.target.value
-//     console.log('this is before send it to component', value)
-//     //MyComponent(value);
-//     editCareTeamVal(value, '');
-
-// };
-
-
-
-
+//need function for GFERequestPanel
 export const columns = props => [
     {
-
-
         field: 'role', headerName: 'Role',
         editable: true, type: 'singleSelect',
         valueOptions: ['Rendering', 'Attending', 'Operating', 'Primary', "Other Operating"], minWidth: 185,
         renderHeader: renderRequiredHeader,
         required: true,
         renderCell: (params) => {
-            console.log(params)
-
             return (
                 <FormControl fullWidth>
 
@@ -90,9 +29,7 @@ export const columns = props => [
                         id="demo-simple-select"
                         //value={handleEditRowsModelChange}
                         label="Age"
-                    //onChange={handleChange}//props.edit(MyComponent())}
-                    //onEditRowsModelChange={props.edit(MyComponent())}
-
+                    //onChange={handleChange}
                     >
                         <MenuItem value={'Rendering'}>Rendering</MenuItem>
                         <MenuItem value={'Attending'}>Attending</MenuItem>
@@ -114,39 +51,32 @@ export const columns = props => [
 
 
 
-
-
 export default function CareTeam(props) {
 
     const [chosenVal, setChosenVal] = React.useState('');
-    const [chosen, setChosen] = React.useState(false);
-    const [editDone, setEdit] = React.useState(false);
-
 
 
     const handleChange = (event) => {
-        setChosenVal(event.target.value); //this does not
-        //updateEdit(); //this calls
+        setChosenVal(event.target.value);
     };
 
     const updateEdit = () => {
-
-        console.log('here is the chosen val', chosenVal)
-
-
         var ob = {};
         ob["1"] = {};
         ob["1"]["role"] = {}
         ob["1"]["role"]["value"] = chosenVal;
-        console.log('object before it goes to edit', ob);
         props.edit(ob);
-
-        console.log('props here', props)
-        console.log('edited value')
     };
 
     //calls updateEdit when chosenVal changes
     React.useEffect(updateEdit, [chosenVal]);
+
+    //generates options shown in menu
+    function makeMenuItem(listOfOptions) {
+        return listOfOptions.map(el => {
+            return <MenuItem value={el}>{el}</MenuItem>
+        })
+    }
 
     const ourColumns = [
         {
@@ -156,9 +86,6 @@ export default function CareTeam(props) {
             renderHeader: renderRequiredHeader,
             required: true,
             renderCell: (params) => {
-
-                console.log('here are params', params);
-
                 return (
                     <FormControl fullWidth>
                         < Select
@@ -166,13 +93,9 @@ export default function CareTeam(props) {
                             id="demo-simple-select"
                             label="Age"
                             value={params.formattedValue}
-                            onChange={handleChange}//e => setChosenVal(e.target.value)}
+                            onChange={handleChange}
                         >
-                            <MenuItem value={'Rendering'}>Rendering</MenuItem>
-                            <MenuItem value={'Attending'}>Attending</MenuItem>
-                            <MenuItem value={'Operating'}>Operating</MenuItem>
-                            <MenuItem value={'Primary'}>Primary</MenuItem>
-                            <MenuItem value={'Other Operating'}>Other Operating</MenuItem>
+                            {makeMenuItem(params.colDef.valueOptions)}
                         </Select>
                     </FormControl>
                 );
@@ -182,11 +105,25 @@ export default function CareTeam(props) {
             field: 'provider', headerName: 'Provider', editable: true, type: 'singleSelect',
             valueOptions: props.providerList, minWidth: 185,
             renderHeader: renderRequiredHeader,
-            required: true
+            required: true,
+            renderCell: (params) => {
+                console.log(params)
+                return (
+                    <FormControl fullWidth>
+                        < Select
+                            labelId="demo-simple-select-label"
+                            id="demo-simple-select"
+                            label="Age"
+                            value={params.formattedValue}
+                            onChange={handleChange}
+                        >
+                            {makeMenuItem(params.colDef.valueOptions)}
+                        </Select>
+                    </FormControl>
+                );
+            }
         }
     ];
-
-
 
 
     const actionColumns = [{
@@ -209,14 +146,11 @@ export default function CareTeam(props) {
 
     return (
         <div style={{ width: '100%' }}>
-            {/* <DataGridComponent rows={props.rows} columns={columns(props)} edit={props.edit} add={props.addOne} delete={props.deleteOne} /> */}
-
             <div style={props.style ? props.style : { width: 500 }}>
                 <Grid container>
                     <IconButton aria-label="Add" onClick={() => props.add()}>
                         <AddIcon />
                     </IconButton>
-
                     <DataGrid
                         autoHeight
                         columns={actionColumns.concat(ourColumns)}
@@ -227,10 +161,7 @@ export default function CareTeam(props) {
                         disableColumnReorder={true}
                     />
                 </Grid>
-
-
             </div >
-
         </div>
     )
 }

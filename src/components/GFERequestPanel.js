@@ -1350,9 +1350,6 @@ class GFERequestBox extends Component {
 
     editCareTeam = model => {
 
-        console.log('this is the model in the EDITCRETEAM', model)
-
-
         let id, fieldObject, fieldName, fieldValueObject, fieldValue;
         for (let prop in model) {
             id = prop;
