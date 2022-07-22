@@ -125,14 +125,9 @@ export default function CareTeam(props) {
 
 
     const handleChange = (event) => {
-        //if (!chosen) {
-        console.log(event.target.value);
-        setChosenVal(event.target.value);
-        console.log(chosenVal)
-        //updateEdit();
-
+        setChosenVal(event.target.value); //this does not
+        //updateEdit(); //this calls
     };
-
 
     const updateEdit = () => {
 
@@ -150,8 +145,8 @@ export default function CareTeam(props) {
         console.log('edited value')
     };
 
-
-
+    //calls updateEdit when chosenVal changes
+    React.useEffect(updateEdit, [chosenVal]);
 
     const ourColumns = [
         {
@@ -161,14 +156,8 @@ export default function CareTeam(props) {
             renderHeader: renderRequiredHeader,
             required: true,
             renderCell: (params) => {
-                // console.log(params)
-                // if (chosenVal != '') {
-                //     var ob = {};
-                //     ob["1"] = {};
-                //     ob["1"]["role"] = {}
-                //     ob["1"]["role"]["value"] = chosenVal;
-                //     props.edit(ob);
-                // }
+
+                console.log('here are params', params);
 
                 return (
                     <FormControl fullWidth>
@@ -176,8 +165,8 @@ export default function CareTeam(props) {
                             labelId="demo-simple-select-label"
                             id="demo-simple-select"
                             label="Age"
-                            value={chosenVal}
-                            onChange={e => setChosenVal(e.target.value)}
+                            value={params.formattedValue}
+                            onChange={handleChange}//e => setChosenVal(e.target.value)}
                         >
                             <MenuItem value={'Rendering'}>Rendering</MenuItem>
                             <MenuItem value={'Attending'}>Attending</MenuItem>
@@ -213,30 +202,11 @@ export default function CareTeam(props) {
             />]
     }];
 
-    // const handleEditRowsModelChange = useCallback((model) => {
-    //     console.log('going to props.edit', model)
-    //     props.edit(model);
-    //     console.log('here is the model', model);
-    // }, []);
-
     const handleDeleteClick = (id) => (event) => {
         event.stopPropagation();
         props.delete(id);
     };
 
-
-    updateEdit();
-
-
-
-    //console.log(chosenVal)
-
-    // if (editDone == false) { //if it hasn't been updated yet, then update it 
-    //     updateEdit();
-    //     setEdit(true);
-    // } else {
-    //     //setEdit()
-    // }
     return (
         <div style={{ width: '100%' }}>
             {/* <DataGridComponent rows={props.rows} columns={columns(props)} edit={props.edit} add={props.addOne} delete={props.deleteOne} /> */}
