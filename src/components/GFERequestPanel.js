@@ -1214,7 +1214,8 @@ class GFERequestBox extends Component {
             serviceDate: this.state.selectedDate,
             submittingProvider: this.state.selectedSubmitter,
             billingProvider: this.state.selectedBillingProvider,
-            submittingProvider: this.state.selectedSubmitter
+            submittingProvider: this.state.selectedSubmitter,
+            gfeServiceId: this.state.gfeServiceId
         };
     }
 
@@ -1969,7 +1970,7 @@ class GFERequestBox extends Component {
                                                                 <Grid container direction="column" spacing={3}>
 
                                                                     <Grid item>
-                                                                        <FormLabel>GFE assigned service identifier</FormLabel>
+                                                                        <FormLabel>GFE assigned service identifier*</FormLabel>
                                                                     </Grid>
                                                                     <Grid item>
                                                                         <Select

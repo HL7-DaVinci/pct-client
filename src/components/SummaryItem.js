@@ -62,6 +62,11 @@ export default function SummaryItem(props) {
     let missingItems = [];
 
 
+    if ((summary.gfeServiceId) === undefined) {
+        addToMissing("GFE assigned service identifier");
+    }
+
+
 
     //check (if given) then care team has required fields
     for (let i = 0; i < summary.practitionerSelected.length; i++) {
