@@ -28,6 +28,8 @@ import GFERequestSummary from './GFERequestSummary'
 import buildGFEBundle from './BuildGFEBundle';
 import ViewGFERequestDialog from './ViewGFEDialog';
 import { PlaceOfServiceList } from '../values/PlaceOfService';
+
+
 import CareTeam, { columns as CareTeamColumns } from './CareTeam';
 import ClaimItem, { columns as ClaimItemColumns } from './ClaimItem';
 import { ProcedureCodes } from '../values/ProcedureCode';
@@ -40,6 +42,8 @@ import ViewErrorDialog from './ViewErrorDialog';
 import PropTypes from 'prop-types';
 import moment from 'moment';
 import { Input, TextFieldProps } from "@material-ui/core";
+
+
 
 
 const styles = theme => ({
@@ -192,19 +196,15 @@ const getProviderDisplayName = provider => {
 }
 
 const ProviderSelect = (providers, selectProvider, handleOpenProviders, handleChange) => {
-
     return (<Select required labelId="select-provider-label" id="provider" value={selectProvider} onOpen={handleOpenProviders} onChange={handleChange}>
         {
             providers ?
                 providers.map((provider) => {
                     return (<MenuItem key={provider.resource.id} value={provider.resource.id}>{providers}</MenuItem>);
                 }) : (<MenuItem />)
-
         }
     </Select>);
 }
-
-
 
 const getPriorityDisplayName = priority => {
     if (priority === undefined) return null;
@@ -1181,7 +1181,6 @@ class GFERequestBox extends Component {
             this.setState({
                 openErrorDialog: true,
                 submissionError: error
-
             });
         }
     }
@@ -1320,9 +1319,11 @@ class GFERequestBox extends Component {
         return { valid, error: errorMessage };
     }
 
-    addOneCareTeam = () => {
+    addOneCareTeam = (props) => {
 
-        console.log('this is our care team', this.state.careTeamList)
+        //console.log('this is our care team', props)
+
+
         let valid = true, msg = undefined;
         if (this.state.careTeamList.length > 0) {
             const requiredColumns = CareTeamColumns().filter(column => column.required);
@@ -1392,6 +1393,9 @@ class GFERequestBox extends Component {
     }
 
     addOneClaimItem = () => {
+
+        console.log('adding claim item started');
+
         let valid = true, msg = undefined;
         if (this.state.claimItemList.length > 0) {
             const requiredColumns = ClaimItemColumns.filter(column => column.required);

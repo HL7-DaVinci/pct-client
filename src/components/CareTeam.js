@@ -12,6 +12,12 @@ import DeleteIcon from '@material-ui/icons/Delete';
 
 
 
+
+
+
+
+
+
 //need function for GFERequestPanel
 export const columns = props => [
     {
@@ -20,30 +26,10 @@ export const columns = props => [
         valueOptions: ['Rendering', 'Attending', 'Operating', 'Primary', "Other Operating"], minWidth: 185,
         renderHeader: renderRequiredHeader,
         required: true,
-        renderCell: (params) => {
-            return (
-                <FormControl fullWidth>
-
-                    < Select
-                        labelId="demo-simple-select-label"
-                        id="demo-simple-select"
-                        //value={handleEditRowsModelChange}
-                        label="Age"
-                    //onChange={handleChange}
-                    >
-                        <MenuItem value={'Rendering'}>Rendering</MenuItem>
-                        <MenuItem value={'Attending'}>Attending</MenuItem>
-                        <MenuItem value={'Operating'}>Operating</MenuItem>
-                        <MenuItem value={'Primary'}>Primary</MenuItem>
-                        <MenuItem value={'Other Operating'}>Other Operating</MenuItem>
-                    </Select>
-                </FormControl>
-            );
-        }
     },
     {
         field: 'provider', headerName: 'Provider', editable: true, type: 'singleSelect',
-        valueOptions: props.providerList, minWidth: 185,
+        valueOptions: ['Rendering', 'Attending', 'Operating', 'Primary', "Other Operating"], minWidth: 185, //need to put in the correct doctors here for new rows added
         renderHeader: renderRequiredHeader,
         required: true
     }
@@ -54,22 +40,38 @@ export const columns = props => [
 export default function CareTeam(props) {
 
     const [chosenVal, setChosenVal] = React.useState('');
-
+    const [chosenValProvider, setChosenValProvider] = React.useState('');
 
     const handleChange = (event) => {
         setChosenVal(event.target.value);
     };
 
+    const handleChangeProvider = (event) => {
+        setChosenValProvider(event.target.value);
+    };
+
     const updateEdit = () => {
         var ob = {};
-        ob["1"] = {};
-        ob["1"]["role"] = {}
-        ob["1"]["role"]["value"] = chosenVal;
+        var num = props.rows.length;
+        ob[num] = {};
+        ob[num]["role"] = {}
+        ob[num]["role"]["value"] = chosenVal;
+        props.edit(ob);
+    };
+
+    const updateEditProvider = () => {
+        var ob = {};
+        var num = props.rows.length;
+        ob[num] = {};
+        ob[num]["provider"] = {}
+        ob[num]["provider"]["value"] = chosenValProvider;
         props.edit(ob);
     };
 
     //calls updateEdit when chosenVal changes
     React.useEffect(updateEdit, [chosenVal]);
+    React.useEffect(updateEditProvider, [chosenValProvider]);
+
 
     //generates options shown in menu
     function makeMenuItem(listOfOptions) {
@@ -77,6 +79,7 @@ export default function CareTeam(props) {
             return <MenuItem value={el}>{el}</MenuItem>
         })
     }
+
 
     const ourColumns = [
         {
@@ -86,6 +89,8 @@ export default function CareTeam(props) {
             renderHeader: renderRequiredHeader,
             required: true,
             renderCell: (params) => {
+
+                //setType("role")
                 return (
                     <FormControl fullWidth>
                         < Select
@@ -107,7 +112,8 @@ export default function CareTeam(props) {
             renderHeader: renderRequiredHeader,
             required: true,
             renderCell: (params) => {
-                console.log(params)
+                //set the type equal to 'provider' here
+                //setType("provider")
                 return (
                     <FormControl fullWidth>
                         < Select
@@ -115,7 +121,7 @@ export default function CareTeam(props) {
                             id="demo-simple-select"
                             label="Age"
                             value={params.formattedValue}
-                            onChange={handleChange}
+                            onChange={handleChangeProvider}
                         >
                             {makeMenuItem(params.colDef.valueOptions)}
                         </Select>
@@ -144,17 +150,24 @@ export default function CareTeam(props) {
         props.delete(id);
     };
 
+    //HOLDS VALUES FROM LIST --> need to add things to the list correctly
+    // const sampleRows = [];
+    // sampleRows.push({ id: 1, provider: "Practitioner - Nora Ologist", role: "Rendering" })
+    // sampleRows.push({ id: 2, provider: "Practitioner - Nora Ologist", role: "Rendering" })
+
+    console.log(props)
+
     return (
         <div style={{ width: '100%' }}>
             <div style={props.style ? props.style : { width: 500 }}>
                 <Grid container>
-                    <IconButton aria-label="Add" onClick={() => props.add()}>
+                    <IconButton aria-label="Add" onClick={() => props.addOne(props)}>
                         <AddIcon />
                     </IconButton>
                     <DataGrid
                         autoHeight
                         columns={actionColumns.concat(ourColumns)}
-                        rows={props.rows}
+                        rows={props.rows}//sampleRows}
                         //onEditRowsModelChange={handleEditRowsModelChange}
                         //onChange={handleEditRowsModelChange}
                         disableColumnMenu={true}
