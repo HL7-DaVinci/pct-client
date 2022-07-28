@@ -147,15 +147,8 @@ export default function CareTeam(props) {
 
     const handleDeleteClick = (id) => (event) => {
         event.stopPropagation();
-        props.delete(id);
+        props.deleteOne(id);
     };
-
-    //HOLDS VALUES FROM LIST --> need to add things to the list correctly
-    // const sampleRows = [];
-    // sampleRows.push({ id: 1, provider: "Practitioner - Nora Ologist", role: "Rendering" })
-    // sampleRows.push({ id: 2, provider: "Practitioner - Nora Ologist", role: "Rendering" })
-
-    console.log(props)
 
     return (
         <div style={{ width: '100%' }}>
