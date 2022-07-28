@@ -152,6 +152,9 @@ export default function CareTeam(props) {
 
     return (
         <div style={{ width: '100%' }}>
+
+            {/* //<DataGridComponent rows={props.rows} columns={ourColumns} add={props.addOne} edit={props.edit} delete={props.deleteOne} /> */}
+
             <div style={props.style ? props.style : { width: 500 }}>
                 <Grid container>
                     <IconButton aria-label="Add" onClick={() => props.addOne(props)}>
@@ -160,9 +163,7 @@ export default function CareTeam(props) {
                     <DataGrid
                         autoHeight
                         columns={actionColumns.concat(ourColumns)}
-                        rows={props.rows}//sampleRows}
-                        //onEditRowsModelChange={handleEditRowsModelChange}
-                        //onChange={handleEditRowsModelChange}
+                        rows={props.rows}
                         disableColumnMenu={true}
                         disableColumnReorder={true}
                     />
