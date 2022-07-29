@@ -1,22 +1,12 @@
 import DataGridComponent, { renderRequiredHeader } from './DataGridComponent';
-import { DiagnosisList, DiagnosisTypeList } from '../values/DiagnosisList';
 import { ProcedureList, ProcedureTypeList } from '../values/ProcedureList';
-
 import * as React from 'react';
-
 import Select from '@mui/material/Select';
 import MenuItem from '@mui/material/MenuItem';
 import FormControl from '@mui/material/FormControl';
-import { useCallback } from 'react';
-import { DataGrid, GridActionsCellItem } from '@mui/x-data-grid';
-import AddIcon from '@material-ui/icons/Add'
-import { IconButton, Grid } from '@material-ui/core';
-import DeleteIcon from '@material-ui/icons/Delete';
 
 
-const emptyList = [];
-
-
+//keep columns for GFERequestPanel
 export const columns = [
     {
         field: 'procedure', headerName: 'Procedure', editable: true, type: 'singleSelect', minWidth: 150,
@@ -35,42 +25,28 @@ export const columns = [
 
 export default function ProcedureItem(props) {
 
-
-    const [chosenType, setChosenType] = React.useState('');
-    const [chosenValProcedure, setChosenValProcedure] = React.useState('');
+    const [chosenVal, setChosenVal] = React.useState('');
+    const [columnVal, setColumnVal] = React.useState('');
 
     const handleChange = (event) => {
-
-        console.log.apply('heres the event', event)
-        setChosenType(event.target.value);
+        setChosenVal(event.target.value);
     };
 
-    const handleChangeProvider = (event) => {
-        setChosenValProcedure(event.target.value);
+    const handleChangeType = (callType) => {
+        setColumnVal(callType);
     };
 
-    const updateEdit = () => {
+    const updateParentEdit = () => {
         var ob = {};
         var num = props.rows.length;
         ob[num] = {};
-        ob[num]["diagnosis"] = {}
-        ob[num]["diagnosis"]["value"] = chosenType;
+        ob[num][columnVal] = {}
+        ob[num][columnVal]["value"] = chosenVal;
         props.edit(ob);
     };
 
-    const updateEditProvider = () => {
-        var ob = {};
-        var num = props.rows.length;
-        ob[num] = {};
-        ob[num]["type"] = {}
-        ob[num]["type"]["value"] = chosenValProcedure;
-        props.edit(ob);
-    };
-
-    //calls updateEdit when chosenVal changes
-    React.useEffect(updateEdit, [chosenType]);
-    React.useEffect(updateEditProvider, [chosenValProcedure]);
-
+    //TODO: ensure change happens on both columnVal and chosenVal
+    React.useEffect(updateParentEdit, [columnVal]);
 
     //generates options shown in menu
     function makeMenuItem(listOfOptions) {
@@ -78,7 +54,6 @@ export default function ProcedureItem(props) {
             return <MenuItem value={el}>{el}</MenuItem>
         })
     }
-
 
     const ourColumns = [
         {
@@ -88,8 +63,6 @@ export default function ProcedureItem(props) {
             renderHeader: renderRequiredHeader,
             required: true,
             renderCell: (params) => {
-
-                //setType("role")
                 return (
                     <FormControl fullWidth>
                         < Select
@@ -97,7 +70,7 @@ export default function ProcedureItem(props) {
                             id="demo-simple-select"
                             label="Age"
                             value={params.formattedValue}
-                            onChange={handleChange}
+                            onChange={event => { handleChange(event); handleChangeType("procedure") }}
                         >
                             {makeMenuItem(params.colDef.valueOptions)}
                         </Select>
@@ -111,8 +84,6 @@ export default function ProcedureItem(props) {
             renderHeader: renderRequiredHeader,
             required: true,
             renderCell: (params) => {
-                //set the type equal to 'provider' here
-                //setType("provider")
                 return (
                     <FormControl fullWidth>
                         < Select
@@ -120,7 +91,7 @@ export default function ProcedureItem(props) {
                             id="demo-simple-select"
                             label="Age"
                             value={params.formattedValue}
-                            onChange={handleChangeProvider}
+                            onChange={event => { handleChange(event); handleChangeType("type") }}
                         >
                             {makeMenuItem(params.colDef.valueOptions)}
                         </Select>
@@ -131,40 +102,9 @@ export default function ProcedureItem(props) {
     ];
 
 
-    const actionColumns = [{
-        field: 'actions',
-        type: 'actions',
-        width: 80,
-        headerName: 'Actions',
-        getActions: ({ id }) => [
-            <GridActionsCellItem
-                icon={<DeleteIcon />}
-                label="Delete"
-                onClick={handleDeleteClick(id)}
-            />]
-    }];
-
-    const handleDeleteClick = (id) => (event) => {
-        event.stopPropagation();
-        props.deleteOne(id);
-    };
     return (
         <div>
-            <div style={props.style ? props.style : { width: 500 }}>
-                <Grid container>
-                    <IconButton aria-label="Add" onClick={() => props.addOne(props)}>
-                        <AddIcon />
-                    </IconButton>
-                    <DataGrid
-                        autoHeight
-                        columns={actionColumns.concat(ourColumns)}
-                        rows={props.rows}
-                        disableColumnMenu={true}
-                        disableColumnReorder={true}
-                    />
-                </Grid>
-            </div >
-            {/* <DataGridComponent rows={props.rows} columns={columns} add={props.addOne} edit={props.edit} delete={props.deleteOne} /> */}
+            <DataGridComponent rows={props.rows} columns={ourColumns} add={props.addOne} edit={props.edit} delete={props.deleteOne} />
         </div>
     );
 }
