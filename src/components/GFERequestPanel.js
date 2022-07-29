@@ -1326,7 +1326,6 @@ class GFERequestBox extends Component {
             const requiredColumns = CareTeamColumns().filter(column => column.required);
             const fields = this.extractFieldNames(requiredColumns);
             msg = `Complete adding existing care team member before adding a new one! ${fields} are required fields`;
-            console.log('here is the care team list', this.state.careTeamList)
             valid = this.state.careTeamList.every(item => {
                 return requiredColumns.every(column => item[column.field] !== undefined);
             })
@@ -1386,8 +1385,6 @@ class GFERequestBox extends Component {
             this.setState({
                 careTeamList: this.state.careTeamList.map(item => {
 
-                    console.log('item', item)
-
                     if (item.id === parseInt(id)) {
                         item[fieldName] = fieldValue;
 
@@ -1407,8 +1404,6 @@ class GFERequestBox extends Component {
     }
 
     addOneClaimItem = () => {
-
-        console.log('adding claim item started');
 
         let valid = true, msg = undefined;
         if (this.state.claimItemList.length > 0) {
