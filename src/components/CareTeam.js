@@ -16,7 +16,7 @@ export const columns = props => [
     },
     {
         field: 'provider', headerName: 'Provider', editable: true, type: 'singleSelect',
-        valueOptions: ['Rendering', 'Attending', 'Operating', 'Primary', "Other Operating"], minWidth: 185,
+        //valueOptions: ['Rendering', 'Attending', 'Operating', 'Primary', "Other Operating"], minWidth: 185,
         renderHeader: renderRequiredHeader,
         required: true
     }
