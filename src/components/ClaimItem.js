@@ -150,6 +150,7 @@ export default function ClaimItem(props) {
                     <LocalizationProvider dateAdapter={AdapterDateFns}>
                         <DesktopDatePicker
                             inputFormat="MM/dd/yyyy"
+                            minDate={new Date()}
                             value={params.formattedValue == undefined ? "" : params.formattedValue}
                             onChange={handleChangeDate}
                             renderInput={(params) => <TextField {...params} />}
