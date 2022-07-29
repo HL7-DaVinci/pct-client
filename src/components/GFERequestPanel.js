@@ -1326,42 +1326,41 @@ class GFERequestBox extends Component {
             const requiredColumns = CareTeamColumns().filter(column => column.required);
             const fields = this.extractFieldNames(requiredColumns);
             msg = `Complete adding existing care team member before adding a new one! ${fields} are required fields`;
+            console.log('here is the care team list', this.state.careTeamList)
             valid = this.state.careTeamList.every(item => {
                 return requiredColumns.every(column => item[column.field] !== undefined);
             })
         }
-        //if (valid) {
-        let newId = this.state.careTeamList.length + 1;
+        if (valid) {
+            let newId = this.state.careTeamList.length + 1;
 
-        //TODO: how to account for when you delete item 1 out of 2 items, how do you adjust the id's?
-        let proposedId = this.state.careTeamList.length + 1;
+            //TODO: how to account for when you delete item 1 out of 2 items, how do you adjust the id's?
+            let proposedId = this.state.careTeamList.length + 1;
 
-        //see if the id we are adding next exists within the list already (will add the next id to be the highest number in the list)
-        for (let i = 0; i < this.state.careTeamList.length; i++) {
-            let comparedId = this.state.careTeamList[i].id;
+            //see if the id we are adding next exists within the list already (will add the next id to be the highest number in the list)
+            for (let i = 0; i < this.state.careTeamList.length; i++) {
+                let comparedId = this.state.careTeamList[i].id;
 
-            //if at some point in the list we see a matching id, we add one to the proposed id and it will repeat the loop 
-            if (comparedId == proposedId) {
-                i = 0;
-                proposedId += 1;
+                //if see a matching id, we add one to the proposed id and it will repeat the loop 
+                if (comparedId == proposedId) {
+                    i = 0;
+                    proposedId += 1;
+                }
             }
+            newId = proposedId;
+
+
+            this.setState({
+                careTeamList: [...this.state.careTeamList, { id: newId }]
+            });
+        } else {
+            alert(msg);
         }
-        newId = proposedId;
-
-
-        this.setState({
-            careTeamList: [...this.state.careTeamList, { id: newId }]
-        });
-        // } else {
-        //     alert(msg);
-        // }
     }
 
     deleteOneCareTeam = id => {
-
-        //console.log('before deteleted', this.state.careTeamList)
         this.setState({
-            careTeamList: this.state.careTeamList.filter(item => item.id !== id) //problem when add 1, 2 then delete 1, and add a new one (the id=2 replaces current id=2);
+            careTeamList: this.state.careTeamList.filter(item => item.id !== id)
         })
 
     }
