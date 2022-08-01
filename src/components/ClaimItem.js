@@ -188,6 +188,7 @@ export default function ClaimItem(props) {
         {
             field: 'net', headerName: 'Net', type: 'number',
             renderHeader: renderRequiredHeader,
+            required: true,
             valueGetter: (params) => {
                 if (params.row.unitPrice) {
                     if (params.row.quantity === undefined) {
@@ -204,7 +205,6 @@ export default function ClaimItem(props) {
             editable: true, type: 'singleSelect',
             valueOptions: PlaceOfServiceList.map(pos => pos.display), minWidth: 185,
             renderHeader: renderRequiredHeader,
-            required: true,
             renderCell: (params) => {
                 return (
                     <FormControl fullWidth>

@@ -46,9 +46,10 @@ export default function DataGridComponent(props) {
 }
 
 export function renderRequiredHeader(params) {
+
     return (
         <text>
-            {params.colDef.headerName + ' *'}
+            {(params.colDef.required) ? params.colDef.headerName + ' *' : params.colDef.headerName}
         </text>
     );
 }
