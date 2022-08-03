@@ -1813,9 +1813,7 @@ class GFERequestBox extends Component {
                                             alignItems="center">
                                             <Grid item xs={4} ></Grid>
                                             <Grid item xs={4}>
-                                                <Button variant="contained" endIcon={<EastIcon />} style={{
-                                                    backgroundColor: "#6e86ff",
-                                                }} onClick={() => { this.handleForward() }}>
+                                                <Button variant="contained" endIcon={<EastIcon />} color="primary" onClick={() => { this.handleForward() }}>
                                                     Next
                                                 </Button>
                                             </Grid>
@@ -1924,16 +1922,12 @@ class GFERequestBox extends Component {
                                             justifyContent="space-between"
                                             alignItems="center">
                                             <Grid item xs={4} >
-                                                <Button variant="contained" startIcon={<WestIcon />} style={{
-                                                    backgroundColor: "#6e86ff"
-                                                }} onClick={() => { this.handleBackward() }}>
+                                                <Button variant="contained" startIcon={<WestIcon />} color="primary" onClick={() => { this.handleBackward() }}>
                                                     Previous
                                                 </Button>
                                             </Grid>
                                             <Grid item xs={4}>
-                                                <Button variant="contained" endIcon={<EastIcon />} style={{
-                                                    backgroundColor: "#6e86ff",
-                                                }} onClick={() => { this.handleForward() }}>
+                                                <Button variant="contained" endIcon={<EastIcon />} color="primary" onClick={() => { this.handleForward() }}>
                                                     Next
                                                 </Button>
                                             </Grid>
@@ -2056,16 +2050,12 @@ class GFERequestBox extends Component {
                                             justifyContent="space-between"
                                             alignItems="center">
                                             <Grid item xs={4} >
-                                                <Button variant="contained" startIcon={<WestIcon />} style={{
-                                                    backgroundColor: "#6e86ff",
-                                                }} onClick={() => { this.handleBackward() }}>
+                                                <Button variant="contained" startIcon={<WestIcon />} color="primary" onClick={() => { this.handleBackward() }}>
                                                     Previous
                                                 </Button>
                                             </Grid>
                                             <Grid item xs={4}>
-                                                <Button variant="contained" endIcon={<EastIcon />} style={{
-                                                    backgroundColor: "#6e86ff",
-                                                }} onClick={() => { this.handleForward() }}>
+                                                <Button variant="contained" endIcon={<EastIcon />} color="primary" onClick={() => { this.handleForward() }}>
                                                     Next
                                                 </Button>
                                             </Grid>
@@ -2101,9 +2091,7 @@ class GFERequestBox extends Component {
                                             justifyContent="space-between"
                                             alignItems="center">
                                             <Grid item xs={4} >
-                                                <Button variant="contained" startIcon={<WestIcon />} style={{
-                                                    backgroundColor: "#6e86ff",
-                                                }} onClick={() => { this.handleBackward() }}>
+                                                <Button variant="contained" color="primary" startIcon={<WestIcon />} onClick={() => { this.handleBackward() }}>
                                                     Previous
                                                 </Button>
                                             </Grid>
