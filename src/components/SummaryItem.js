@@ -42,7 +42,7 @@ function createServiceList(serviceList) {
 
 function alertDialog(itemsMissing) {
 
-    if (itemsMissing.length == 0) {
+    if (itemsMissing.length === 0) {
         return
     }
 
@@ -135,7 +135,7 @@ export default function SummaryItem(props) {
                         <SummaryText content="Patient:" class="label" />
                     </Grid>
                     <Grid item xs={6}>
-                        <SummaryText content={((summary.patientId) == undefined) ? addToMissing("patient details") : (summary.patientId)} />
+                        <SummaryText content={((summary.patientId) === undefined) ? addToMissing("patient details") : (summary.patientId)} />
                     </Grid>
                 </Grid>
 

@@ -94,6 +94,12 @@ export default function ClaimItem(props) {
         ob[num][columnVal] = {}
         ob[num][columnVal]["value"] = chosenVal;
         props.edit(ob);
+
+        //set the value back to "" so listeners below will be ready when choose new value
+        setChosenVal("");
+        setColumnVal("");
+
+
     };
     const updateEditChosenDate = () => {
         var ob = {};
@@ -104,10 +110,10 @@ export default function ClaimItem(props) {
         props.edit(ob);
     };
 
-    //TODO: ensure change happens on both columnVal and chosenVal
+    //listens for change in the column and chosen value
     React.useEffect(updateParentEdit, [columnVal]);
+    React.useEffect(updateParentEdit, [chosenVal]);
     React.useEffect(updateEditChosenDate, [dateValue]);
-
 
     //generates options shown in menu
     function makeMenuItem(listOfOptions) {
@@ -130,7 +136,7 @@ export default function ClaimItem(props) {
                         < Select
                             labelId="demo-simple-select-label"
                             id="demo-simple-select"
-                            label="Age"
+                            label="product or service"
                             value={params.formattedValue}
                             onChange={event => { handleChange(event); handleChangeType("productOrService") }}
                         >
@@ -141,7 +147,7 @@ export default function ClaimItem(props) {
             }
         },
         {
-            field: 'estimatedDateOfService', headerName: 'Estimate Date',
+            field: 'estimatedDateOfService', headerName: 'Estimate Date', //estimated date brings the row into focus again so can edit values/have values change appropriately
             minWidth: 185,
             renderHeader: renderRequiredHeader,
             required: true,
@@ -204,15 +210,15 @@ export default function ClaimItem(props) {
             field: 'placeOfService', headerName: 'Place Of Service',
             editable: true, type: 'singleSelect',
             valueOptions: PlaceOfServiceList.map(pos => pos.display), minWidth: 185,
-            renderHeader: renderRequiredHeader,
+            required: false,
             renderCell: (params) => {
                 return (
                     <FormControl fullWidth>
                         < Select
                             labelId="demo-simple-select-label"
                             id="demo-simple-select"
-                            label="Age"
-                            value={params.formattedValue}
+                            label="place of service"
+                            value={(params.formattedValue == undefined) ? '' : params.formattedValue}
                             onChange={event => { handleChange(event); handleChangeType("placeOfService") }}
                         >
                             {makeMenuItem(params.colDef.valueOptions)}
