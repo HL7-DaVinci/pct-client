@@ -1415,7 +1415,22 @@ class GFERequestBox extends Component {
             })
         }
         if (valid) {
-            const newId = this.state.claimItemList.length + 1;
+            let newId = this.state.claimItemList.length + 1;
+
+            //TODO: how to account for when you delete item 1 out of 2 items, how do you adjust the id's?
+            let proposedId = this.state.claimItemList.length + 1;
+
+            //see if the id we are adding next exists within the list already (will add the next id to be the highest number in the list)
+            for (let i = 0; i < this.state.claimItemList.length; i++) {
+                let comparedId = this.state.claimItemList[i].id;
+
+                //if see a matching id, we add one to the proposed id and it will repeat the loop 
+                if (comparedId == proposedId) {
+                    i = 0;
+                    proposedId += 1;
+                }
+            }
+            newId = proposedId;
             this.setState({
                 claimItemList: [...this.state.claimItemList, { id: newId }]
             });

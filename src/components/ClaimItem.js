@@ -112,7 +112,12 @@ export default function ClaimItem(props) {
     };
 
     const updateProductServiceRow = (params) => {
+        //sets in focus the item that you are editing
         if (params.hasFocus == true) {
+            setCurrentRow(params.id);
+        }
+        //if the price is undefined (case where you add one), sets focus to the new row
+        if (params.row.unitPrice == undefined) {
             setCurrentRow(params.id);
         }
     }
@@ -145,7 +150,7 @@ export default function ClaimItem(props) {
                             id="demo-simple-select"
                             label="product or service"
                             value={params.formattedValue}
-                            onChange={event => { handleChange(event); handleChangeType("productOrService"); updateProductServiceRow(params); }}
+                            onChange={event => { updateProductServiceRow(params); handleChange(event); handleChangeType("productOrService"); }}
                         >
                             {makeMenuItem(params.colDef.valueOptions)}
                         </Select>
