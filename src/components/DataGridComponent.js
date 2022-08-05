@@ -39,6 +39,7 @@ export default function DataGridComponent(props) {
                     rows={props.rows}
                     disableColumnMenu={true}
                     disableColumnReorder={true}
+                    disableMultipleSelection={true}
                 />
             </Grid>
         </div >

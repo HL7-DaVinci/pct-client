@@ -75,6 +75,7 @@ export default function ClaimItem(props) {
     const [chosenVal, setChosenVal] = React.useState("");
     const [columnVal, setColumnVal] = React.useState("");
     const [dateValue, setDateValue] = React.useState("");
+    const [currentRow, setCurrentRow] = React.useState("");
 
 
     const handleChange = (event) => {
@@ -89,7 +90,7 @@ export default function ClaimItem(props) {
 
     const updateParentEdit = () => {
         var ob = {};
-        var num = props.rows.length;
+        var num = currentRow;
         ob[num] = {};
         ob[num][columnVal] = {}
         ob[num][columnVal]["value"] = chosenVal;
@@ -103,13 +104,18 @@ export default function ClaimItem(props) {
     };
     const updateEditChosenDate = () => {
         var ob = {};
-        var num = props.rows.length;
+        var num = currentRow;
         ob[num] = {};
         ob[num]["estimatedDateOfService"] = {}
         ob[num]["estimatedDateOfService"]["value"] = dateValue;
         props.edit(ob);
     };
 
+    const updateProductServiceRow = (params) => {
+        if (params.hasFocus == true) {
+            setCurrentRow(params.id);
+        }
+    }
     //listens for change in the column and chosen value
     React.useEffect(updateParentEdit, [columnVal]);
     React.useEffect(updateParentEdit, [chosenVal]);
@@ -134,11 +140,12 @@ export default function ClaimItem(props) {
                 return (
                     <FormControl fullWidth>
                         < Select
+                            autoFocus="true"
                             labelId="demo-simple-select-label"
                             id="demo-simple-select"
                             label="product or service"
                             value={params.formattedValue}
-                            onChange={event => { handleChange(event); handleChangeType("productOrService") }}
+                            onChange={event => { handleChange(event); handleChangeType("productOrService"); updateProductServiceRow(params); }}
                         >
                             {makeMenuItem(params.colDef.valueOptions)}
                         </Select>
@@ -147,7 +154,7 @@ export default function ClaimItem(props) {
             }
         },
         {
-            field: 'estimatedDateOfService', headerName: 'Estimate Date', //estimated date brings the row into focus again so can edit values/have values change appropriately
+            field: 'estimatedDateOfService', headerName: 'Estimate Date',
             minWidth: 185,
             renderHeader: renderRequiredHeader,
             required: true,
@@ -157,7 +164,7 @@ export default function ClaimItem(props) {
                         <DesktopDatePicker
                             inputFormat="MM/dd/yyyy"
                             value={params.formattedValue == undefined ? "" : params.formattedValue}
-                            onChange={handleChangeDate}
+                            onChange={event => { handleChangeDate(event); updateProductServiceRow(params); }}
                             renderInput={(params) => <TextField {...params} />}
                         />
                     </LocalizationProvider>
@@ -219,7 +226,7 @@ export default function ClaimItem(props) {
                             id="demo-simple-select"
                             label="place of service"
                             value={(params.formattedValue == undefined) ? '' : params.formattedValue}
-                            onChange={event => { handleChange(event); handleChangeType("placeOfService") }}
+                            onChange={event => { handleChange(event); handleChangeType("placeOfService"); updateProductServiceRow(params); }}
                         >
                             {makeMenuItem(params.colDef.valueOptions)}
                         </Select>
