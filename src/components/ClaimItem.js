@@ -10,65 +10,65 @@ import TextField from '@mui/material/TextField';
 import { AdapterDateFns } from '@mui/x-date-pickers/AdapterDateFns';
 import { LocalizationProvider } from '@mui/x-date-pickers/LocalizationProvider';
 
-//keep columns for GFERequestPanel
-export const columns = [
-    {
-        field: 'productOrService', headerName: 'Product Or Service', editable: true, type: 'singleSelect', minWidth: 200,
-        valueOptions: ProcedureCodes.map(code => `${code.code}: ${code.display}`),
-        renderHeader: renderRequiredHeader,
-        required: true
-    },
-    {
-        field: 'estimatedDateOfService', headerName: 'Estimate Date', editable: true, type: 'date', minWidth: 250,
-        renderHeader: renderRequiredHeader,
-        required: true
-    },
-    {
-        field: 'unitPrice', headerName: 'Unit Price', type: 'number', minWidth: 120,
-        renderHeader: renderRequiredHeader,
-        required: true,
-        valueGetter: (params) => {
-            if (params.row.productOrService) {
-                const productOrService = ProcedureCodes.find(code => `${code.code}: ${code.display}` === params.row.productOrService);
-                if (productOrService.unitPrice !== undefined) {
-                    params.row.unitPrice = productOrService.unitPrice;
-                    return params.row.unitPrice;
-                }
-            }
-        }
-    },
-    {
-        field: 'quantity', headerName: 'Quantity', editable: true, type: 'number', minWidth: 120,
-        renderHeader: renderRequiredHeader,
-        required: true,
-        valueGetter: (params) => {
-            if (params.row.quantity === undefined) {
-                params.row.quantity = 1;
-                return params.row.quantity;
-            } else {
-                return params.row.quantity;
-            }
-        }
-    },
-    {
-        field: 'net', headerName: 'Net', type: 'number',
-        renderHeader: renderRequiredHeader,
-        valueGetter: (params) => {
-            if (params.row.unitPrice) {
-                if (params.row.quantity === undefined) {
-                    params.row.quantity = 1;
-                    return params.row.unitPrice * params.row.quantity;
-                } else {
-                    return params.row.unitPrice * params.row.quantity;
-                }
-            }
-        }
-    },
-    {
-        field: 'placeOfService', headerName: "Place of Service", editable: true, type: "singleSelect", minWidth: 200,
-        valueOptions: PlaceOfServiceList.map(pos => pos.display)
-    }
-];
+// //keep columns for GFERequestPanel
+// export const columns = [
+//     {
+//         field: 'productOrService', headerName: 'Product Or Service', editable: true, type: 'singleSelect', minWidth: 200,
+//         valueOptions: ProcedureCodes.map(code => `${code.code}: ${code.display}`),
+//         renderHeader: renderRequiredHeader,
+//         required: true
+//     },
+//     {
+//         field: 'estimatedDateOfService', headerName: 'Estimate Date', editable: true, type: 'date', minWidth: 250,
+//         renderHeader: renderRequiredHeader,
+//         required: true
+//     },
+//     {
+//         field: 'unitPrice', headerName: 'Unit Price', type: 'number', minWidth: 120,
+//         renderHeader: renderRequiredHeader,
+//         required: true,
+//         valueGetter: (params) => {
+//             if (params.row.productOrService) {
+//                 const productOrService = ProcedureCodes.find(code => `${code.code}: ${code.display}` === params.row.productOrService);
+//                 if (productOrService.unitPrice !== undefined) {
+//                     params.row.unitPrice = productOrService.unitPrice;
+//                     return params.row.unitPrice;
+//                 }
+//             }
+//         }
+//     },
+//     {
+//         field: 'quantity', headerName: 'Quantity', editable: true, type: 'number', minWidth: 120,
+//         renderHeader: renderRequiredHeader,
+//         required: true,
+//         valueGetter: (params) => {
+//             if (params.row.quantity === undefined) {
+//                 params.row.quantity = 1;
+//                 return params.row.quantity;
+//             } else {
+//                 return params.row.quantity;
+//             }
+//         }
+//     },
+//     {
+//         field: 'net', headerName: 'Net', type: 'number',
+//         renderHeader: renderRequiredHeader,
+//         valueGetter: (params) => {
+//             if (params.row.unitPrice) {
+//                 if (params.row.quantity === undefined) {
+//                     params.row.quantity = 1;
+//                     return params.row.unitPrice * params.row.quantity;
+//                 } else {
+//                     return params.row.unitPrice * params.row.quantity;
+//                 }
+//             }
+//         }
+//     },
+//     {
+//         field: 'placeOfService', headerName: "Place of Service", editable: true, type: "singleSelect", minWidth: 200,
+//         valueOptions: PlaceOfServiceList.map(pos => pos.display)
+//     }
+// ];
 
 export default function ClaimItem(props) {
 
@@ -96,11 +96,6 @@ export default function ClaimItem(props) {
         ob[num][columnVal]["value"] = chosenVal;
         props.edit(ob);
 
-        //set the value back to "" so listeners below will be ready when choose new value
-        setChosenVal("");
-        setColumnVal("");
-
-
     };
     const updateEditChosenDate = () => {
         var ob = {};
@@ -116,7 +111,7 @@ export default function ClaimItem(props) {
         if (params.hasFocus == true) {
             setCurrentRow(params.id);
         }
-        //if the price is undefined (case where you add one), sets focus to the new row
+        //if the price is undefined (case where you add one), sets focus to the new row 
         if (params.row.unitPrice == undefined) {
             setCurrentRow(params.id);
         }

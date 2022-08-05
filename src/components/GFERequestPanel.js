@@ -30,11 +30,11 @@ import ViewGFERequestDialog from './ViewGFEDialog';
 import { PlaceOfServiceList } from '../values/PlaceOfService';
 
 
-import CareTeam, { columns as CareTeamColumns } from './CareTeam';
-import ClaimItem, { columns as ClaimItemColumns } from './ClaimItem';
+import CareTeam from './CareTeam';
+import ClaimItem from './ClaimItem';
 import { ProcedureCodes } from '../values/ProcedureCode';
-import DiagnosisItem, { columns as DiagnosisColumns } from './DiagnosisItem';
-import ProcedureItem, { columns as ProcedureColumns } from './ProcedureItem';
+import DiagnosisItem from './DiagnosisItem';
+import ProcedureItem from './ProcedureItem';
 import SummaryItem, { columns as SummaryItems } from './SummaryItem';
 import { SupportingInfoType } from '../values/SupportingInfo';
 import { DiagnosisList, DiagnosisTypeList } from '../values/DiagnosisList';
@@ -1255,63 +1255,63 @@ class GFERequestBox extends Component {
     isRequestValid = () => {
         // check required 
         let errorMessage = [], valid = true;
-        if (this.state.selectedPatient === undefined) {
-            errorMessage.push("Patient is not selected.");
-            valid = false;
-        }
-        if (this.state.selectedBillingProvider === undefined) {
-            errorMessage.push("Billing provider is not selected.");
-            valid = false;
-        }
-        if (this.state.selectedSubmitter === undefined) {
-            errorMessage.push("Submitter is not selected.");
-            valid = false;
-        }
+        // if (this.state.selectedPatient === undefined) {
+        //     errorMessage.push("Patient is not selected.");
+        //     valid = false;
+        // }
+        // if (this.state.selectedBillingProvider === undefined) {
+        //     errorMessage.push("Billing provider is not selected.");
+        //     valid = false;
+        // }
+        // if (this.state.selectedSubmitter === undefined) {
+        //     errorMessage.push("Submitter is not selected.");
+        //     valid = false;
+        // }
 
         // Diagnosis
-        const diagnosisListEmpty = this.itemListIsEmpty(this.state.diagnosisList);
-        if (diagnosisListEmpty) {
-            errorMessage.push("At least one principal diagnosis is required.");
-            valid = false;
-        } else {
-            const requiredFields = DiagnosisColumns.filter(column => column.required);
-            const requiredFieldsFilled = this.state.diagnosisList.every(item => requiredFields.every(column => item[column.field]));
+        // const diagnosisListEmpty = this.itemListIsEmpty(this.state.diagnosisList);
+        // if (diagnosisListEmpty) {
+        //     errorMessage.push("At least one principal diagnosis is required.");
+        //     valid = false;
+        // } else {
+        //     const requiredFields = DiagnosisColumns.filter(column => column.required);
+        //     const requiredFieldsFilled = this.state.diagnosisList.every(item => requiredFields.every(column => item[column.field]));
 
-            if (!requiredFieldsFilled) {
-                errorMessage.push("One or many diagnosis miss(es) the required field(s).");
-                valid = false;
-            } else {
-                const createdPrincipalDiagnosis = this.state.diagnosisList.some(item => item.type === "Principal");
-                if (!createdPrincipalDiagnosis) {
-                    errorMessage.push("At least one principal diagnosis is required.");
-                    valid = false;
-                }
-            }
-        }
+        //     if (!requiredFieldsFilled) {
+        //         errorMessage.push("One or many diagnosis miss(es) the required field(s).");
+        //         valid = false;
+        //     } else {
+        //         const createdPrincipalDiagnosis = this.state.diagnosisList.some(item => item.type === "Principal");
+        //         if (!createdPrincipalDiagnosis) {
+        //             errorMessage.push("At least one principal diagnosis is required.");
+        //             valid = false;
+        //         }
+        //     }
+        // }
 
         // claim item
-        const claimItemListEmpty = this.itemListIsEmpty(this.state.claimItemList);
-        if (claimItemListEmpty) {
-            errorMessage.push("At least one claim item is required.");
-            valid = false;
-        } else {
-            const requiredFields = ClaimItemColumns.filter(column => column.required);
-            const requiredFieldsFilled = this.state.claimItemList.every(item => requiredFields.every(column => item[column.field]));
-            if (!requiredFieldsFilled) {
-                errorMessage.push("One or more claim items miss(es) the required field(s) or is(are) invalid.");
-                valid = false;
-            }
-        }
+        // const claimItemListEmpty = this.itemListIsEmpty(this.state.claimItemList);
+        // if (claimItemListEmpty) {
+        //     errorMessage.push("At least one claim item is required.");
+        //     valid = false;
+        // } else {
+        //     const requiredFields = ClaimItemColumns.filter(column => column.required);
+        //     const requiredFieldsFilled = this.state.claimItemList.every(item => requiredFields.every(column => item[column.field]));
+        //     if (!requiredFieldsFilled) {
+        //         errorMessage.push("One or more claim items miss(es) the required field(s) or is(are) invalid.");
+        //         valid = false;
+        //     }
+        // }
 
-        const careTeamEmpty = this.itemListIsEmpty(this.state.careTeamList);
-        if (!careTeamEmpty) {
-            const requiredFields = CareTeamColumns().filter(column => column.required);
-            const requiredFieldsFilled = this.state.careTeamList.every(item => requiredFields.every(column => item[column.field]));
-            if (!requiredFieldsFilled) {
-                errorMessage.push("One or more care team item miss(es) the required fields.");
-                valid = false;
-            };
-        }
+        // const careTeamEmpty = this.itemListIsEmpty(this.state.careTeamList);
+        // if (!careTeamEmpty) {
+        //     const requiredFields = CareTeamColumns().filter(column => column.required);
+        //     const requiredFieldsFilled = this.state.careTeamList.every(item => requiredFields.every(column => item[column.field]));
+        //     if (!requiredFieldsFilled) {
+        //         errorMessage.push("One or more care team item miss(es) the required fields.");
+        //         valid = false;
+        //     };
+        // }
 
         this.setState({
             validationErrors: errorMessage
@@ -1321,40 +1321,40 @@ class GFERequestBox extends Component {
 
     addOneCareTeam = (props) => {
 
-        let valid = true, msg = undefined;
-        if (this.state.careTeamList.length > 0) {
-            const requiredColumns = CareTeamColumns().filter(column => column.required);
-            const fields = this.extractFieldNames(requiredColumns);
-            msg = `Complete adding existing care team member before adding a new one! ${fields} are required fields`;
-            valid = this.state.careTeamList.every(item => {
-                return requiredColumns.every(column => item[column.field] !== undefined);
-            })
-        }
-        if (valid) {
-            let newId = this.state.careTeamList.length + 1;
+        // let valid = true, msg = undefined;
+        // if (this.state.careTeamList.length > 0) {
+        //     const requiredColumns = CareTeamColumns().filter(column => column.required);
+        //     const fields = this.extractFieldNames(requiredColumns);
+        //     msg = `Complete adding existing care team member before adding a new one! ${fields} are required fields`;
+        //     valid = this.state.careTeamList.every(item => {
+        //         return requiredColumns.every(column => item[column.field] !== undefined);
+        //     })
+        // }
+        // if (valid) {
+        let newId = this.state.careTeamList.length + 1;
 
-            //TODO: how to account for when you delete item 1 out of 2 items, how do you adjust the id's?
-            let proposedId = this.state.careTeamList.length + 1;
+        //when you delete item 1 out of 2 items, adjust the next id to the next available id vacant
+        let proposedId = this.state.careTeamList.length + 1;
 
-            //see if the id we are adding next exists within the list already (will add the next id to be the highest number in the list)
-            for (let i = 0; i < this.state.careTeamList.length; i++) {
-                let comparedId = this.state.careTeamList[i].id;
+        //checks if proposedId already exists within the list (comparedId), if so will keep incrementing until finds vacant id
+        for (let i = 0; i < this.state.careTeamList.length; i++) {
+            let comparedId = this.state.careTeamList[i].id;
 
-                //if see a matching id, we add one to the proposed id and it will repeat the loop 
-                if (comparedId == proposedId) {
-                    i = 0;
-                    proposedId += 1;
-                }
+            //if see a matching id, we inc the proposed id and it will repeat the loop 
+            if (comparedId == proposedId) {
+                i = 0;
+                proposedId += 1;
             }
-            newId = proposedId;
-
-
-            this.setState({
-                careTeamList: [...this.state.careTeamList, { id: newId }]
-            });
-        } else {
-            alert(msg);
         }
+        newId = proposedId;
+
+
+        this.setState({
+            careTeamList: [...this.state.careTeamList, { id: newId }]
+        });
+        // } else {
+        //     alert(msg);
+        // }
     }
 
     deleteOneCareTeam = id => {
@@ -1405,38 +1405,38 @@ class GFERequestBox extends Component {
 
     addOneClaimItem = () => {
 
-        let valid = true, msg = undefined;
-        if (this.state.claimItemList.length > 0) {
-            const requiredColumns = ClaimItemColumns.filter(column => column.required);
-            const fields = this.extractFieldNames(requiredColumns);
-            msg = `Complete adding existing claim item before adding a new one! ${fields} are required fields`;
-            valid = this.state.claimItemList.every(item => {
-                return requiredColumns.every(column => item[column.field] !== undefined);
-            })
-        }
-        if (valid) {
-            let newId = this.state.claimItemList.length + 1;
+        // let valid = true, msg = undefined;
+        // if (this.state.claimItemList.length > 0) {
+        //     const requiredColumns = ClaimItemColumns.filter(column => column.required);
+        //     const fields = this.extractFieldNames(requiredColumns);
+        //     msg = `Complete adding existing claim item before adding a new one! ${fields} are required fields`;
+        //     valid = this.state.claimItemList.every(item => {
+        //         return requiredColumns.every(column => item[column.field] !== undefined);
+        //     })
+        // }
+        // if (valid) {
+        let newId = this.state.claimItemList.length + 1;
 
-            //TODO: how to account for when you delete item 1 out of 2 items, how do you adjust the id's?
-            let proposedId = this.state.claimItemList.length + 1;
+        //when you delete item 1 out of 2 items, adjust the next id to the next available id vacant
+        let proposedId = this.state.claimItemList.length + 1;
 
-            //see if the id we are adding next exists within the list already (will add the next id to be the highest number in the list)
-            for (let i = 0; i < this.state.claimItemList.length; i++) {
-                let comparedId = this.state.claimItemList[i].id;
+        //see if the id we are adding next exists within the list already (will add the next id to be the highest number in the list)
+        for (let i = 0; i < this.state.claimItemList.length; i++) {
+            let comparedId = this.state.claimItemList[i].id;
 
-                //if see a matching id, we add one to the proposed id and it will repeat the loop 
-                if (comparedId == proposedId) {
-                    i = 0;
-                    proposedId += 1;
-                }
+            //if see a matching id, we add one to the proposed id and it will repeat the loop 
+            if (comparedId == proposedId) {
+                i = 0;
+                proposedId += 1;
             }
-            newId = proposedId;
-            this.setState({
-                claimItemList: [...this.state.claimItemList, { id: newId }]
-            });
-        } else {
-            alert(msg);
         }
+        newId = proposedId;
+        this.setState({
+            claimItemList: [...this.state.claimItemList, { id: newId }]
+        });
+        // } else {
+        //     alert(msg);
+        // }
     }
 
     deleteOneClaimItem = id => {
@@ -1509,23 +1509,38 @@ class GFERequestBox extends Component {
     }
 
     addOneDiagnosisItem = () => {
-        let valid = true, msg = undefined;
-        if (this.state.careTeamList.length > 0) {
-            const requiredColumns = DiagnosisColumns.filter(column => column.required);
-            const fields = this.extractFieldNames(requiredColumns);
-            msg = `Complete adding existing diagnosis before adding a new one! ${fields} are required fields.`;
-            valid = this.state.diagnosisList.every(item => {
-                return requiredColumns.every(column => item[column.field] !== undefined);
-            })
+        // let valid = true, msg = undefined;
+        // if (this.state.careTeamList.length > 0) {
+        //     const requiredColumns = DiagnosisColumns.filter(column => column.required);
+        //     const fields = this.extractFieldNames(requiredColumns);
+        //     msg = `Complete adding existing diagnosis before adding a new one! ${fields} are required fields.`;
+        //     valid = this.state.diagnosisList.every(item => {
+        //         return requiredColumns.every(column => item[column.field] !== undefined);
+        //     })
+        // }
+        //if (valid) {
+        let newId = this.state.diagnosisList.length + 1;
+
+        //when you delete item 1 out of 2 items, adjust the next id to the next available id vacant
+        let proposedId = this.state.diagnosisList.length + 1;
+
+        //checks if proposedId already exists within the list (comparedId), if so will keep incrementing until finds vacant id
+        for (let i = 0; i < this.state.diagnosisList.length; i++) {
+            let comparedId = this.state.diagnosisList[i].id;
+
+            //if see a matching id, we inc the proposed id and it will repeat the loop 
+            if (comparedId == proposedId) {
+                i = 0;
+                proposedId += 1;
+            }
         }
-        if (valid) {
-            const newId = this.state.diagnosisList.length + 1;
-            this.setState({
-                diagnosisList: [...this.state.diagnosisList, { id: newId }]
-            });
-        } else {
-            alert(msg);
-        }
+        newId = proposedId;
+        this.setState({
+            diagnosisList: [...this.state.diagnosisList, { id: newId }]
+        });
+        // } else {
+        //     alert(msg);
+        // }
     }
 
     deleteOneDiagnosisItem = id => {
@@ -1564,23 +1579,38 @@ class GFERequestBox extends Component {
     }
 
     addOneProcedureItem = () => {
-        let valid = true, msg = undefined;
-        if (this.state.careTeamList.length > 0) {
-            const requiredColumns = ProcedureColumns.filter(column => column.required);
-            const fields = this.extractFieldNames(requiredColumns);
-            msg = `Complete adding existing diagnosis before adding a new one! ${fields} are required fields.`;
-            valid = this.state.procedureList.every(item => {
-                return requiredColumns.every(column => item[column.field] !== undefined);
-            })
+        // let valid = true, msg = undefined;
+        // if (this.state.careTeamList.length > 0) {
+        //     const requiredColumns = ProcedureColumns.filter(column => column.required);
+        //     const fields = this.extractFieldNames(requiredColumns);
+        //     msg = `Complete adding existing diagnosis before adding a new one! ${fields} are required fields.`;
+        //     valid = this.state.procedureList.every(item => {
+        //         return requiredColumns.every(column => item[column.field] !== undefined);
+        //     })
+        // }
+        // if (valid) {
+        let newId = this.state.procedureList.length + 1;
+
+        //when you delete item 1 out of 2 items, adjust the next id to the next available id vacant
+        let proposedId = this.state.procedureList.length + 1;
+
+        //checks if proposedId already exists within the list (comparedId), if so will keep incrementing until finds vacant id
+        for (let i = 0; i < this.state.procedureList.length; i++) {
+            let comparedId = this.state.procedureList[i].id;
+
+            //if see a matching id, we inc the proposed id and it will repeat the loop 
+            if (comparedId == proposedId) {
+                i = 0;
+                proposedId += 1;
+            }
         }
-        if (valid) {
-            const newId = this.state.procedureList.length + 1;
-            this.setState({
-                procedureList: [...this.state.procedureList, { id: newId }]
-            });
-        } else {
-            alert(msg);
-        }
+        newId = proposedId;
+        this.setState({
+            procedureList: [...this.state.procedureList, { id: newId }]
+        });
+        // } else {
+        //     alert(msg);
+        // }
     }
 
     deleteOneProcedureItem = id => {

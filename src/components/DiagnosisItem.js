@@ -6,26 +6,27 @@ import MenuItem from '@mui/material/MenuItem';
 import FormControl from '@mui/material/FormControl';
 
 
-//keep columns for GFERequestPanel
-export const columns = [
-    {
-        field: 'diagnosis', headerName: 'Diagnosis', editable: true, type: 'singleSelect', minWidth: 150,
-        valueOptions: DiagnosisList.map(code => `${code.diagnosisCodeableConcept.coding[0].code} ${code.diagnosisCodeableConcept.coding[0].display}`),
-        renderHeader: renderRequiredHeader,
-        required: true
-    },
-    {
-        field: 'type', headerName: 'Type', editable: true, type: 'singleSelect', minWidth: 150,
-        valueOptions: DiagnosisTypeList.map(type => `${type.display}`),
-        renderHeader: renderRequiredHeader,
-        required: true
-    }
-];
+// //keep columns for GFERequestPanel
+// export const columns = [
+//     {
+//         field: 'diagnosis', headerName: 'Diagnosis', editable: true, type: 'singleSelect', minWidth: 150,
+//         valueOptions: DiagnosisList.map(code => `${code.diagnosisCodeableConcept.coding[0].code} ${code.diagnosisCodeableConcept.coding[0].display}`),
+//         renderHeader: renderRequiredHeader,
+//         required: true
+//     },
+//     {
+//         field: 'type', headerName: 'Type', editable: true, type: 'singleSelect', minWidth: 150,
+//         valueOptions: DiagnosisTypeList.map(type => `${type.display}`),
+//         renderHeader: renderRequiredHeader,
+//         required: true
+//     }
+// ];
 
 export default function DiagnosisItem(props) {
 
     const [chosenVal, setChosenVal] = React.useState('');
     const [columnVal, setColumnVal] = React.useState('');
+    const [currentRow, setCurrentRow] = React.useState("");
 
     const handleChange = (event) => {
         setChosenVal(event.target.value);
@@ -37,15 +38,23 @@ export default function DiagnosisItem(props) {
 
     const updateParentEdit = () => {
         var ob = {};
-        var num = props.rows.length;
+        var num = currentRow;
         ob[num] = {};
         ob[num][columnVal] = {}
         ob[num][columnVal]["value"] = chosenVal;
         props.edit(ob);
     };
 
-    //TODO: ensure change happens on both columnVal and chosenVal
+    //watch for change happening on both columnVal and chosenVal
     React.useEffect(updateParentEdit, [columnVal]);
+    React.useEffect(updateParentEdit, [chosenVal]);
+
+    const updateProductServiceRow = (params) => {
+        //sets in focus the item that you are editing
+        if (params.hasFocus == true) {
+            setCurrentRow(params.id);
+        }
+    }
 
     //generates options shown in menu
     function makeMenuItem(listOfOptions) {
@@ -66,11 +75,11 @@ export default function DiagnosisItem(props) {
                 return (
                     <FormControl fullWidth>
                         < Select
-                            labelId="demo-simple-select-label"
-                            id="demo-simple-select"
-                            label="Age"
+                            labelId="diagnosis-select"
+                            id="diagnosis-select"
+                            label="diagnosis"
                             value={params.formattedValue}
-                            onChange={event => { handleChange(event); handleChangeType("diagnosis") }}
+                            onChange={event => { updateProductServiceRow(params); handleChange(event); handleChangeType("diagnosis") }}
                         >
                             {makeMenuItem(params.colDef.valueOptions)}
                         </Select>
@@ -87,11 +96,11 @@ export default function DiagnosisItem(props) {
                 return (
                     <FormControl fullWidth>
                         < Select
-                            labelId="demo-simple-select-label"
-                            id="demo-simple-select"
-                            label="Age"
+                            labelId="type-select"
+                            id="type-select"
+                            label="type"
                             value={params.formattedValue}
-                            onChange={event => { handleChange(event); handleChangeType("type") }}
+                            onChange={event => { updateProductServiceRow(params); handleChange(event); handleChangeType("type") }}
                         >
                             {makeMenuItem(params.colDef.valueOptions)}
                         </Select>

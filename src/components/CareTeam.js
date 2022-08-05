@@ -6,27 +6,35 @@ import FormControl from '@mui/material/FormControl';
 
 
 //keep columns for GFERequestPanel
-export const columns = props => [
-    {
-        field: 'role', headerName: 'Role',
-        editable: true, type: 'singleSelect',
-        valueOptions: ['Rendering', 'Attending', 'Operating', 'Primary', "Other Operating"], minWidth: 185,
-        renderHeader: renderRequiredHeader,
-        required: true,
-    },
-    {
-        field: 'provider', headerName: 'Provider', editable: true, type: 'singleSelect',
-        valueOptions: props, minWidth: 185,
-        renderHeader: renderRequiredHeader,
-        required: true
-    }
-];
+// export const columns = props => [
+//     {
+//         field: 'role', headerName: 'Role',
+//         editable: true, type: 'singleSelect',
+//         valueOptions: ['Rendering', 'Attending', 'Operating', 'Primary', "Other Operating"], minWidth: 185,
+//         renderHeader: renderRequiredHeader,
+//         required: true,
+//     },
+//     {
+//         field: 'provider', headerName: 'Provider', editable: true, type: 'singleSelect',
+//         valueOptions: props, minWidth: 185,
+//         renderHeader: renderRequiredHeader,
+//         required: true
+//     }
+// ];
 
 
 export default function CareTeam(props) {
 
     const [chosenVal, setChosenVal] = React.useState('');
     const [columnVal, setColumnVal] = React.useState('');
+    const [currentRow, setCurrentRow] = React.useState("");
+
+    const updateProductServiceRow = (params) => {
+        //sets in focus the item that you are editing
+        if (params.hasFocus == true) {
+            setCurrentRow(params.id);
+        }
+    }
 
     const handleChange = (event) => {
         setChosenVal(event.target.value);
@@ -38,15 +46,16 @@ export default function CareTeam(props) {
 
     const updateParentEdit = () => {
         var ob = {};
-        var num = props.rows.length;
+        var num = currentRow;
         ob[num] = {};
         ob[num][columnVal] = {}
         ob[num][columnVal]["value"] = chosenVal;
         props.edit(ob);
     };
 
-    //TODO: ensure change happens on both typeVal and chosenVal
+    //calls edit on the parent whenever a column or chosen value is changed
     React.useEffect(updateParentEdit, [columnVal]);
+    React.useEffect(updateParentEdit, [chosenVal]);
 
     //generates options shown in menu
     function makeMenuItem(listOfOptions) {
@@ -54,7 +63,6 @@ export default function CareTeam(props) {
             return <MenuItem value={el}>{el}</MenuItem>
         })
     }
-
 
     const ourColumns = [
         {
@@ -67,11 +75,11 @@ export default function CareTeam(props) {
                 return (
                     <FormControl fullWidth>
                         < Select
-                            labelId="demo-simple-select-label"
-                            id="demo-simple-select"
-                            label="Age"
+                            labelId="role-select"
+                            id="role-select"
+                            label="Role"
                             value={params.formattedValue}
-                            onChange={event => { handleChange(event); handleChangeType("role") }}
+                            onChange={event => { updateProductServiceRow(params); handleChange(event); handleChangeType("role") }}
                         >
                             {makeMenuItem(params.colDef.valueOptions)}
                         </Select>
@@ -88,11 +96,11 @@ export default function CareTeam(props) {
                 return (
                     <FormControl fullWidth>
                         < Select
-                            labelId="demo-simple-select-label"
-                            id="demo-simple-select"
-                            label="Age"
+                            labelId="provider-select"
+                            id="provider-select"
+                            label="provider"
                             value={params.formattedValue}
-                            onChange={event => { handleChange(event); handleChangeType("provider") }}
+                            onChange={event => { updateProductServiceRow(params); handleChange(event); handleChangeType("provider") }}
                         >
                             {makeMenuItem(params.colDef.valueOptions)}
                         </Select>
