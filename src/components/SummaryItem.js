@@ -23,20 +23,27 @@ const useStyles = makeStyles((theme) =>
 
 
 function createProcedureList(procedureList) {
+    let num = 0;
     return procedureList.map(el => {
-        return <ListItem disableGutters>({el.id}) {el.type}: {el.procedure} </ListItem>
+        num += 1;
+        return <ListItem disableGutters>({num}) {el.type}: {el.procedure} </ListItem>
     })
 }
 
 function createDiagnosisList(diagnosisList) {
+    let num = 0;
     return diagnosisList.map(el => {
-        return <ListItem disableGutters>({el.id}) {el.type}: {el.diagnosis}</ListItem>
+        num += 1;
+        return <ListItem disableGutters>({num}) {el.type}: {el.diagnosis}</ListItem>
     })
 }
 
 function createServiceList(serviceList) {
+
+    let num = 0;
     return serviceList.map(el => {
-        return <ListItem disableGutters>({el.id}) {el.placeOfService}: {el.productOrService}</ListItem>
+        num += 1;
+        return <ListItem disableGutters>({num}) {el.placeOfService}: {el.productOrService}</ListItem>
     })
 }
 
