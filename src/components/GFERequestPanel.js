@@ -1143,7 +1143,9 @@ class GFERequestBox extends Component {
             openErrorDialog: false,
             validationErrors: undefined
         })
-        const { valid, error } = this.isRequestValid();
+        //const { valid, error } = this.isRequestValid();
+        const error = [];
+        const valid = true;
 
         if (valid) {
             this.props.setSubmitting(true);
@@ -1252,85 +1254,97 @@ class GFERequestBox extends Component {
         this.setState({ supportingInfoTypeOfBill: e.target.value })
     }
 
-    isRequestValid = () => {
-        // check required 
-        let errorMessage = [], valid = true;
-        // if (this.state.selectedPatient === undefined) {
-        //     errorMessage.push("Patient is not selected.");
-        //     valid = false;
-        // }
-        // if (this.state.selectedBillingProvider === undefined) {
-        //     errorMessage.push("Billing provider is not selected.");
-        //     valid = false;
-        // }
-        // if (this.state.selectedSubmitter === undefined) {
-        //     errorMessage.push("Submitter is not selected.");
-        //     valid = false;
-        // }
+    // isRequestValid = () => {
+    //     // check required 
+    //     let errorMessage = [], valid = true;
+    //     // if (this.state.selectedPatient === undefined) {
+    //     //     errorMessage.push("Patient is not selected.");
+    //     //     valid = false;
+    //     // }
+    //     // if (this.state.selectedBillingProvider === undefined) {
+    //     //     errorMessage.push("Billing provider is not selected.");
+    //     //     valid = false;
+    //     // }
+    //     // if (this.state.selectedSubmitter === undefined) {
+    //     //     errorMessage.push("Submitter is not selected.");
+    //     //     valid = false;
+    //     // }
 
-        // Diagnosis
-        // const diagnosisListEmpty = this.itemListIsEmpty(this.state.diagnosisList);
-        // if (diagnosisListEmpty) {
-        //     errorMessage.push("At least one principal diagnosis is required.");
-        //     valid = false;
-        // } else {
-        //     const requiredFields = DiagnosisColumns.filter(column => column.required);
-        //     const requiredFieldsFilled = this.state.diagnosisList.every(item => requiredFields.every(column => item[column.field]));
+    //     // Diagnosis
+    //     // const diagnosisListEmpty = this.itemListIsEmpty(this.state.diagnosisList);
+    //     // if (diagnosisListEmpty) {
+    //     //     errorMessage.push("At least one principal diagnosis is required.");
+    //     //     valid = false;
+    //     // } else {
+    //     //     const requiredFields = DiagnosisColumns.filter(column => column.required);
+    //     //     const requiredFieldsFilled = this.state.diagnosisList.every(item => requiredFields.every(column => item[column.field]));
 
-        //     if (!requiredFieldsFilled) {
-        //         errorMessage.push("One or many diagnosis miss(es) the required field(s).");
-        //         valid = false;
-        //     } else {
-        //         const createdPrincipalDiagnosis = this.state.diagnosisList.some(item => item.type === "Principal");
-        //         if (!createdPrincipalDiagnosis) {
-        //             errorMessage.push("At least one principal diagnosis is required.");
-        //             valid = false;
-        //         }
-        //     }
-        // }
+    //     //     if (!requiredFieldsFilled) {
+    //     //         errorMessage.push("One or many diagnosis miss(es) the required field(s).");
+    //     //         valid = false;
+    //     //     } else {
+    //     //         const createdPrincipalDiagnosis = this.state.diagnosisList.some(item => item.type === "Principal");
+    //     //         if (!createdPrincipalDiagnosis) {
+    //     //             errorMessage.push("At least one principal diagnosis is required.");
+    //     //             valid = false;
+    //     //         }
+    //     //     }
+    //     // }
 
-        // claim item
-        // const claimItemListEmpty = this.itemListIsEmpty(this.state.claimItemList);
-        // if (claimItemListEmpty) {
-        //     errorMessage.push("At least one claim item is required.");
-        //     valid = false;
-        // } else {
-        //     const requiredFields = ClaimItemColumns.filter(column => column.required);
-        //     const requiredFieldsFilled = this.state.claimItemList.every(item => requiredFields.every(column => item[column.field]));
-        //     if (!requiredFieldsFilled) {
-        //         errorMessage.push("One or more claim items miss(es) the required field(s) or is(are) invalid.");
-        //         valid = false;
-        //     }
-        // }
+    //     // claim item
+    //     // const claimItemListEmpty = this.itemListIsEmpty(this.state.claimItemList);
+    //     // if (claimItemListEmpty) {
+    //     //     errorMessage.push("At least one claim item is required.");
+    //     //     valid = false;
+    //     // } else {
+    //     //     const requiredFields = ClaimItemColumns.filter(column => column.required);
+    //     //     const requiredFieldsFilled = this.state.claimItemList.every(item => requiredFields.every(column => item[column.field]));
+    //     //     if (!requiredFieldsFilled) {
+    //     //         errorMessage.push("One or more claim items miss(es) the required field(s) or is(are) invalid.");
+    //     //         valid = false;
+    //     //     }
+    //     // }
 
-        // const careTeamEmpty = this.itemListIsEmpty(this.state.careTeamList);
-        // if (!careTeamEmpty) {
-        //     const requiredFields = CareTeamColumns().filter(column => column.required);
-        //     const requiredFieldsFilled = this.state.careTeamList.every(item => requiredFields.every(column => item[column.field]));
-        //     if (!requiredFieldsFilled) {
-        //         errorMessage.push("One or more care team item miss(es) the required fields.");
-        //         valid = false;
-        //     };
-        // }
+    //     // const careTeamEmpty = this.itemListIsEmpty(this.state.careTeamList);
+    //     // if (!careTeamEmpty) {
+    //     //     const requiredFields = CareTeamColumns().filter(column => column.required);
+    //     //     const requiredFieldsFilled = this.state.careTeamList.every(item => requiredFields.every(column => item[column.field]));
+    //     //     if (!requiredFieldsFilled) {
+    //     //         errorMessage.push("One or more care team item miss(es) the required fields.");
+    //     //         valid = false;
+    //     //     };
+    //     // }
 
-        this.setState({
-            validationErrors: errorMessage
-        });
-        return { valid, error: errorMessage };
-    }
+    //     this.setState({
+    //         validationErrors: errorMessage
+    //     });
+    //     return { valid, error: errorMessage };
+    // }
 
     addOneCareTeam = (props) => {
 
-        // let valid = true, msg = undefined;
-        // if (this.state.careTeamList.length > 0) {
-        //     const requiredColumns = CareTeamColumns().filter(column => column.required);
-        //     const fields = this.extractFieldNames(requiredColumns);
-        //     msg = `Complete adding existing care team member before adding a new one! ${fields} are required fields`;
-        //     valid = this.state.careTeamList.every(item => {
-        //         return requiredColumns.every(column => item[column.field] !== undefined);
-        //     })
-        // }
-        // if (valid) {
+        //checks if the required fields are not given, if not adds to missingItems list
+        let missingItems = [];
+        for (let i = 0; i < this.state.careTeamList.length; i++) {
+            let currentRow = this.state.careTeamList[i];
+            for (let j = 0; j < props.length; j++) {
+                if (props[j].required == true) {
+                    let columnName = props[j].field;
+                    if (currentRow[columnName] == undefined) {
+                        missingItems.push(columnName)
+                    }
+                }
+            }
+        }
+
+        if (missingItems.length > 0) {
+            const msg = `Complete adding existing care team member before adding a new one! ${missingItems} are required fields`;
+            alert(msg)
+            return;
+        }
+
+
+
         let newId = this.state.careTeamList.length + 1;
 
         //when you delete item 1 out of 2 items, adjust the next id to the next available id vacant
@@ -1348,13 +1362,9 @@ class GFERequestBox extends Component {
         }
         newId = proposedId;
 
-
         this.setState({
             careTeamList: [...this.state.careTeamList, { id: newId }]
         });
-        // } else {
-        //     alert(msg);
-        // }
     }
 
     deleteOneCareTeam = id => {
@@ -1397,24 +1407,28 @@ class GFERequestBox extends Component {
         }
     }
 
-    extractFieldNames = columns => {
-        return columns.reduce((prev, current, index) => {
-            return index === 0 ? current.headerName : prev.concat(', ').concat(current.headerName);
-        }, '');
-    }
+    addOneClaimItem = (props) => {
 
-    addOneClaimItem = () => {
+        //checks if the required fields are not given, if not adds to missingItems list
+        let missingItems = [];
+        for (let i = 0; i < this.state.claimItemList.length; i++) {
+            let currentRow = this.state.claimItemList[i];
+            for (let j = 0; j < props.length; j++) {
+                if (props[j].required == true) {
+                    let columnName = props[j].field;
+                    if (currentRow[columnName] == undefined) {
+                        missingItems.push(columnName)
+                    }
+                }
+            }
+        }
 
-        // let valid = true, msg = undefined;
-        // if (this.state.claimItemList.length > 0) {
-        //     const requiredColumns = ClaimItemColumns.filter(column => column.required);
-        //     const fields = this.extractFieldNames(requiredColumns);
-        //     msg = `Complete adding existing claim item before adding a new one! ${fields} are required fields`;
-        //     valid = this.state.claimItemList.every(item => {
-        //         return requiredColumns.every(column => item[column.field] !== undefined);
-        //     })
-        // }
-        // if (valid) {
+        if (missingItems.length > 0) {
+            const msg = `Complete adding existing claim item before adding a new one! ${missingItems} are required fields`;
+            alert(msg)
+            return;
+        }
+
         let newId = this.state.claimItemList.length + 1;
 
         //when you delete item 1 out of 2 items, adjust the next id to the next available id vacant
@@ -1434,9 +1448,6 @@ class GFERequestBox extends Component {
         this.setState({
             claimItemList: [...this.state.claimItemList, { id: newId }]
         });
-        // } else {
-        //     alert(msg);
-        // }
     }
 
     deleteOneClaimItem = id => {
@@ -1508,17 +1519,28 @@ class GFERequestBox extends Component {
         }
     }
 
-    addOneDiagnosisItem = () => {
-        // let valid = true, msg = undefined;
-        // if (this.state.careTeamList.length > 0) {
-        //     const requiredColumns = DiagnosisColumns.filter(column => column.required);
-        //     const fields = this.extractFieldNames(requiredColumns);
-        //     msg = `Complete adding existing diagnosis before adding a new one! ${fields} are required fields.`;
-        //     valid = this.state.diagnosisList.every(item => {
-        //         return requiredColumns.every(column => item[column.field] !== undefined);
-        //     })
-        // }
-        //if (valid) {
+    addOneDiagnosisItem = (props) => {
+
+        //checks if the required fields are not given, if not adds to missingItems list
+        let missingItems = [];
+        for (let i = 0; i < this.state.diagnosisList.length; i++) {
+            let currentRow = this.state.diagnosisList[i];
+            for (let j = 0; j < props.length; j++) {
+                if (props[j].required == true) {
+                    let columnName = props[j].field;
+                    if (currentRow[columnName] == undefined) {
+                        missingItems.push(columnName)
+                    }
+                }
+            }
+        }
+
+        if (missingItems.length > 0) {
+            const msg = `Complete adding existing diagnosis before adding a new one! ${missingItems} are required fields`;
+            alert(msg)
+            return;
+        }
+
         let newId = this.state.diagnosisList.length + 1;
 
         //when you delete item 1 out of 2 items, adjust the next id to the next available id vacant
@@ -1538,9 +1560,7 @@ class GFERequestBox extends Component {
         this.setState({
             diagnosisList: [...this.state.diagnosisList, { id: newId }]
         });
-        // } else {
-        //     alert(msg);
-        // }
+
     }
 
     deleteOneDiagnosisItem = id => {
@@ -1578,17 +1598,28 @@ class GFERequestBox extends Component {
         }
     }
 
-    addOneProcedureItem = () => {
-        // let valid = true, msg = undefined;
-        // if (this.state.careTeamList.length > 0) {
-        //     const requiredColumns = ProcedureColumns.filter(column => column.required);
-        //     const fields = this.extractFieldNames(requiredColumns);
-        //     msg = `Complete adding existing diagnosis before adding a new one! ${fields} are required fields.`;
-        //     valid = this.state.procedureList.every(item => {
-        //         return requiredColumns.every(column => item[column.field] !== undefined);
-        //     })
-        // }
-        // if (valid) {
+    addOneProcedureItem = (props) => {
+
+        //checks if the required fields are not given, if not adds to missingItems list
+        let missingItems = [];
+        for (let i = 0; i < this.state.procedureList.length; i++) {
+            let currentRow = this.state.procedureList[i];
+            for (let j = 0; j < props.length; j++) {
+                if (props[j].required == true) {
+                    let columnName = props[j].field;
+                    if (currentRow[columnName] == undefined) {
+                        missingItems.push(columnName)
+                    }
+                }
+            }
+        }
+
+        if (missingItems.length > 0) {
+            const msg = `Complete adding existing procedure before adding a new one! ${missingItems} are required fields`;
+            alert(msg)
+            return;
+        }
+
         let newId = this.state.procedureList.length + 1;
 
         //when you delete item 1 out of 2 items, adjust the next id to the next available id vacant
@@ -1608,9 +1639,6 @@ class GFERequestBox extends Component {
         this.setState({
             procedureList: [...this.state.procedureList, { id: newId }]
         });
-        // } else {
-        //     alert(msg);
-        // }
     }
 
     deleteOneProcedureItem = id => {
@@ -2076,7 +2104,7 @@ class GFERequestBox extends Component {
                                                         </b>
                                                     </Grid>
                                                     <Grid item xs={2}>
-                                                        <ViewGFERequestDialog generateRequest={this.generateBundle} valid={this.isRequestValid} error={this.state.validationErrors} />
+                                                        <ViewGFERequestDialog generateRequest={this.generateBundle} error={this.state.validationErrors} />
                                                     </Grid>
                                                 </Grid>
 

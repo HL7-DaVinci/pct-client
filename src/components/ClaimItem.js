@@ -201,7 +201,7 @@ export default function ClaimItem(props) {
         {
             field: 'net', headerName: 'Net', type: 'number',
             renderHeader: renderRequiredHeader,
-            required: true,
+            required: false, //false since always loads with productOrService
             valueGetter: (params) => {
                 if (params.row.unitPrice) {
                     if (params.row.quantity === undefined) {

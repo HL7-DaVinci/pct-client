@@ -30,7 +30,7 @@ export default function DataGridComponent(props) {
 
         <div style={props.style ? props.style : { width: 500 }}>
             <Grid container>
-                <IconButton aria-label="Add" onClick={() => props.add()}>
+                <IconButton aria-label="Add" onClick={() => props.add(props.columns)}>
                     <AddIcon />
                 </IconButton>
                 <DataGrid
