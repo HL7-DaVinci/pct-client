@@ -84,11 +84,13 @@ export default function SummaryItem(props) {
     for (let i = 0; i < summary.practitionerSelected.length; i++) {
         //if the provider is there, check if role is too
         if (((summary.practitionerSelected[i].provider) !== undefined) && (summary.practitionerSelected[i].role) === undefined) {
-            addToMissing("care team provider role");
+            let rowNum = i + 1;
+            addToMissing("care team provider role (row " + rowNum + ")");
         }
         //if role is there, check if provider
         if (((summary.practitionerSelected[i].role) !== undefined) && (summary.practitionerSelected[i].provider) === undefined) {
-            addToMissing("care team provider");
+            let rowNum = i + 1;
+            addToMissing("care team provider (row " + rowNum + ")");
         }
         //otherwise if both undefined don't throw error bc allowed
     }
@@ -104,25 +106,30 @@ export default function SummaryItem(props) {
 
         //if diagnosis there, but not type, throw error
         if (((summary.diagnosisList[i].diagnosis) !== undefined) && (summary.diagnosisList[i].type) === undefined) {
-            addToMissing("encounter diagnosis type");
+            let rowNum = i + 1;
+            addToMissing("encounter diagnosis type (row " + rowNum + ")");
         }
         //if type there, but not diagnosis, throw error
         if (((summary.diagnosisList[i].type) !== undefined) && (summary.diagnosisList[i].diagnosis) === undefined) {
-            addToMissing("encounter diagnosis");
+            let rowNum = i + 1;
+            addToMissing("encounter diagnosis (row " + rowNum + ")");
         }
         //if both missing, throw general error
         if (((summary.diagnosisList[i].diagnosis) === undefined) && (summary.diagnosisList[i].type) === undefined) {
-            addToMissing("diagnosis");
+            let rowNum = i + 1;
+            addToMissing("diagnosis (row " + rowNum + ")");
         }
     }
 
     //procedure
     for (let i = 0; i < summary.procedureList.length; i++) {
         if (((summary.procedureList[i].procedure) !== undefined) && (summary.procedureList[i].type) === undefined) {
-            addToMissing("encounter procedure type");
+            let rowNum = i + 1;
+            addToMissing("encounter procedure type (row " + rowNum + ")");
         }
         if (((summary.procedureList[i].procedure) === undefined) && (summary.procedureList[i].type) !== undefined) {
-            addToMissing("encounter procedure");
+            let rowNum = i + 1;
+            addToMissing("encounter procedure (row " + rowNum + ")");
         }
         //if both missing, not required
     }
@@ -130,17 +137,19 @@ export default function SummaryItem(props) {
     //services
     for (let i = 0; i < summary.servicesList.length; i++) {
 
-        if ((i == 0) && ((summary.servicesList[i].productOrService) === undefined) && ((summary.servicesList[i].productOrService) === undefined)) {
+        if ((i == 0) && ((summary.servicesList[i].productOrService) === undefined) && ((summary.servicesList[i].estimatedDateOfService) === undefined)) {
             addToMissing("services");
             break;
         }
         if (((summary.servicesList[i].productOrService) === undefined)) {
-            addToMissing("service (product or service)");
-            addToMissing("service (unit price)");
-            addToMissing("service (net)");
+            let rowNum = i + 1;
+            addToMissing("service (product or service - row " + rowNum + ")");
+            addToMissing("service (unit price - row " + rowNum + ")");
+            addToMissing("service (net - row " + rowNum + ")");
         }
-        if (((summary.servicesList[i].productOrService) === undefined)) {
-            addToMissing("service (estimate date)");
+        if (((summary.servicesList[i].estimatedDateOfService) === undefined)) {
+            let rowNum = i + 1;
+            addToMissing("service (estimate date - row " + rowNum + ")");
         }
     }
 
