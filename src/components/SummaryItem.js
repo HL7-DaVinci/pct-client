@@ -117,7 +117,7 @@ export default function SummaryItem(props) {
         //if both missing, throw general error
         if (((summary.diagnosisList[i].diagnosis) === undefined) && (summary.diagnosisList[i].type) === undefined) {
             let rowNum = i + 1;
-            addToMissing("diagnosis (row " + rowNum + ")");
+            addToMissing("diagnosis");
         }
     }
 
