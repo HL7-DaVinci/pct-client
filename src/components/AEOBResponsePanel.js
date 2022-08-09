@@ -15,6 +15,7 @@ import Divider from '@mui/material/Divider';
 import jp from "jsonpath";
 import moment from 'moment';
 import AEOBItemsTable from "./AEOBItemsTable";
+import DialogContentText from '@mui/material/DialogContentText';
 
 
 
@@ -377,15 +378,17 @@ export default function AEOBResponsePanel(props) {
 
 
     const handleChange = (event) => {
-        //this.setState({ currentTabIndex: value });
-        setCurrentTabIndex(event.target.value);
 
+        if (currentTabIndex == 0) {
+            setCurrentTabIndex(1);
+        }
+        if (currentTabIndex == 1) {
+            setCurrentTabIndex(0);
+        }
     };
     function getBackToMain() {
-        if (currentTabIndex !== 1) {
-            window.location.reload(false);
-            return false;
-        }
+        window.location.reload(false);
+        return false;
     }
 
 
@@ -406,7 +409,26 @@ export default function AEOBResponsePanel(props) {
                 </Tabs>
             </AppBar>
             <TabPanel value={currentTabIndex} index={0} className={classes.tabBackground}>
-                {getBackToMain()}
+                <Dialog
+                    open={true}
+                    aria-labelledby="newGFE alert"
+                    aria-describedby="newGFE alert"
+                >
+                    <DialogTitle id="newGFE alert dialog title">
+                        {"Discard current AEOB and create new GFE?"}
+                    </DialogTitle>
+                    <DialogContent>
+                        <DialogContentText id="alert-dialog-description">
+                            You are going back to make a new GFE. Do you want to proceed? To keep viewing the current AEOB, select "decline".
+                        </DialogContentText>
+                    </DialogContent>
+                    <DialogActions>
+                        <Button onClick={handleChange}>Decline</Button>
+                        <Button onClick={getBackToMain} autoFocus>
+                            Proceed
+                        </Button>
+                    </DialogActions>
+                </Dialog>
 
             </TabPanel>
 
