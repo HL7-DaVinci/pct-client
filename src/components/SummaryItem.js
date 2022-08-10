@@ -21,6 +21,11 @@ const useStyles = makeStyles((theme) =>
     }),
 );
 
+function createCareTeamList(careTeamList) {
+    return careTeamList.map(el => {
+        return <ListItem disableGutters>({el.id}) {el.role}: {el.provider}</ListItem>
+    })
+}
 
 function createProcedureList(procedureList) {
     return procedureList.map(el => {
@@ -140,7 +145,7 @@ export default function SummaryItem(props) {
                         <SummaryText content="Patient:" class="label" />
                     </Grid>
                     <Grid item xs={6}>
-                        <SummaryText content={((summary.patientId) == undefined) ? addToMissing("patient details") : (summary.patientId)} />
+                        <SummaryText content={((summary.patientId) == undefined) ? addToMissing("patient details") : (summary.patientName)} />
                     </Grid>
                 </Grid>
 
@@ -201,7 +206,7 @@ export default function SummaryItem(props) {
                             <SummaryText content="Payor" class="label" />
                         </Grid>
                         <Grid item xs={6}>
-                            <SummaryText content={summary.payorId} />
+                            <SummaryText content={summary.payorName} />
                         </Grid>
                     </Grid> : null
                 }
@@ -271,7 +276,7 @@ export default function SummaryItem(props) {
                     </Grid>
                     <Grid item xs={6}>
                         <Typography style={{ wordWrap: "break-word" }}>
-                            {((summary.billingProvider) === undefined) ? (addToMissing("billing provider")) : (summary.billingProvider)}
+                            {((summary.billingProviderName) === undefined) ? (addToMissing("billing provider")) : (summary.billingProviderName)}
                         </Typography>
                     </Grid>
                 </Grid>
@@ -281,17 +286,21 @@ export default function SummaryItem(props) {
                     </Grid>
                     <Grid item xs={6}>
                         <Typography style={{ wordWrap: "break-word" }}>
-                            {((summary.submittingProvider) === undefined) ? (addToMissing("submitting provider")) : (summary.submittingProvider)}
+                            {((summary.submittingProvider) === undefined) ? (addToMissing("submitting provider")) : (summary.submittingProviderName)}
                         </Typography>
                     </Grid>
                 </Grid>
 
                 <Grid container>
                     <Grid item xs={6} >
-                        <SummaryText content="Practitioner Role:" class="label" />
+                        <br></br>
+                        <SummaryText content="Care Team:" class="label" />
                     </Grid>
                     <Grid item xs={6}>
-                        <SummaryText content={(summary.practitionerSelected[0].role === undefined) ? "" : (summary.practitionerSelected[0].role)} />
+                        <Typography style={{ wordWrap: "break-word" }}>
+                            <br></br>
+                            {(summary.practitionerSelected[0].role === undefined) ? "" : createCareTeamList(summary.practitionerSelected)}
+                        </Typography>
                     </Grid>
                 </Grid>
 
