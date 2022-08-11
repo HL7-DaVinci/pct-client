@@ -680,7 +680,7 @@ export default function AEOBResponsePanel(props) {
                                             {jp.query(props, '$..[?(@.resourceType == "ExplanationOfBenefit")].total').map((value, index) => {
                                                 return <Grid item>
                                                     <Typography variant="body1" gutterBottom>
-                                                        <b>{value[0].category.coding[0].display}:</b> {value[0].amount.value} {value[0].amount.currency}
+                                                        <b>{value[0].category.coding[0].display}:</b> {value[0].amount.value.toFixed(2)} {value[0].amount.currency}
                                                     </Typography>
                                                 </Grid>
                                             })}
@@ -719,7 +719,6 @@ export default function AEOBResponsePanel(props) {
                         </Grid>
                     ) : null
                 }
-
             </TabPanel>
         </div >
 

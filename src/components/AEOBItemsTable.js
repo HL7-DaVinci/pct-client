@@ -88,10 +88,7 @@ function AEOBItemsTable({ title, data }) {
         currentRow.push(quantityObj);
 
 
-
         for (let j = 0; j < numAjudicationCategories; j++) {
-
-
             const catSelected = jp.query(data, '$..[?(@.resourceType == "ExplanationOfBenefit")].item[' + i + '].adjudication[' + j + '].category.coding[0].display')[0];
             if (headers.includes(catSelected) && (catSelected === "Paid to Provider" || catSelected === "Submitted Amount" || catSelected === "Eligible Amount")) {
                 let rowValueCurrency = jp.query(data, '$..[?(@.resourceType == "ExplanationOfBenefit")].item[' + i + '].adjudication[' + j + '].amount.currency')[0];
@@ -138,10 +135,7 @@ function AEOBItemsTable({ title, data }) {
                 </TableBody>
             </Table>
         </Paper>
-
-
     );
-
 }
 
 export default AEOBItemsTable;
