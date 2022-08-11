@@ -1971,7 +1971,7 @@ class GFERequestBox extends Component {
                                     </TabPanel>
 
 
-
+                                    {/* Encounter tab*/}
                                     <TabPanel value={verticalTabIndex} index={2}>
                                         <Grid item>
                                             <Grid className={classes.cardCareTeam}>

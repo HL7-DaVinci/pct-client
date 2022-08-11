@@ -23,25 +23,26 @@ const useStyles = makeStyles((theme) =>
 
 function createCareTeamList(careTeamList) {
     return careTeamList.map(el => {
-        return <ListItem disableGutters>({el.id}) {el.role}: {el.provider}</ListItem>
+        return <ListItem disableGutters>({el.id}) {el.provider} ({el.role})</ListItem>
     })
 }
 
 function createProcedureList(procedureList) {
     return procedureList.map(el => {
-        return <ListItem disableGutters>({el.id}) {el.type}: {el.procedure} </ListItem>
+        return <ListItem disableGutters>({el.id}) {el.procedure} ({el.type})</ListItem>
     })
 }
 
 function createDiagnosisList(diagnosisList) {
     return diagnosisList.map(el => {
-        return <ListItem disableGutters>({el.id}) {el.type}: {el.diagnosis}</ListItem>
+        return <ListItem disableGutters>({el.id}) {el.diagnosis} ({el.type})</ListItem>
     })
 }
 
 function createServiceList(serviceList) {
     return serviceList.map(el => {
-        return <ListItem disableGutters>({el.id}) {el.placeOfService}: {el.productOrService}</ListItem>
+        const placeOfService = (el.placeOfService == undefined) ? "" : "(" + el.placeOfService + ")";
+        return <ListItem disableGutters>({el.id}) {el.productOrService} {placeOfService}</ListItem>
     })
 }
 
@@ -293,12 +294,12 @@ export default function SummaryItem(props) {
 
                 <Grid container>
                     <Grid item xs={6} >
-                        <br></br>
+
                         <SummaryText content="Care Team:" class="label" />
                     </Grid>
                     <Grid item xs={6}>
                         <Typography style={{ wordWrap: "break-word" }}>
-                            <br></br>
+
                             {(summary.practitionerSelected[0].role === undefined) ? "" : createCareTeamList(summary.practitionerSelected)}
                         </Typography>
                     </Grid>
