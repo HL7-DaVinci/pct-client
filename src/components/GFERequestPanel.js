@@ -42,6 +42,10 @@ import ViewErrorDialog from './ViewErrorDialog';
 import PropTypes from 'prop-types';
 import moment from 'moment';
 import { Input, TextFieldProps } from "@material-ui/core";
+import WestIcon from '@mui/icons-material/West';
+import EastIcon from '@mui/icons-material/East';
+
+
 
 
 
@@ -1217,6 +1221,7 @@ class GFERequestBox extends Component {
             billingProvider: this.state.selectedBillingProvider,
             submittingProvider: this.state.selectedSubmitter,
             gfeServiceId: this.state.gfeServiceId,
+    
         };
     }
 
@@ -1680,6 +1685,15 @@ class GFERequestBox extends Component {
         this.setState({ currentTabIndex: value });
     };
 
+
+    handleForward() {
+        this.setState({ verticalTabIndex: this.state.verticalTabIndex + 1 });
+    }
+    handleBackward() {
+        this.setState({ verticalTabIndex: this.state.verticalTabIndex - 1 });
+    }
+
+
     handleVerticalChange = (event, value) => {
         this.setState({ verticalTabIndex: value });
     };
@@ -1814,6 +1828,19 @@ class GFERequestBox extends Component {
                                                 < Grid item className={classes.patientBox}><GFERequestSummary summary={summary} /></Grid>
                                             </Grid>
                                         </Grid>
+                                        <br></br>
+                                        <Grid
+                                            container
+                                            direction="row"
+                                            justifyContent="space-between"
+                                            alignItems="center">
+                                            <Grid item xs={4} ></Grid>
+                                            <Grid item xs={4}>
+                                                <Button variant="contained" endIcon={<EastIcon />} color="primary" onClick={() => { this.handleForward() }}>
+                                                    Next
+                                                </Button>
+                                            </Grid>
+                                        </Grid>
                                     </TabPanel>
 
                                     {/* Care Team tab */}
@@ -1910,6 +1937,23 @@ class GFERequestBox extends Component {
                                                     <CareTeam rows={this.state.careTeamList} providerList={providerListOptions} addOne={this.addOneCareTeam} edit={this.editCareTeam} deleteOne={this.deleteOneCareTeam} />
                                                 </Box>
                                             </Card>
+                                        </Grid>
+                                        <br></br>
+                                        <Grid
+                                            container
+                                            direction="row"
+                                            justifyContent="space-between"
+                                            alignItems="center">
+                                            <Grid item xs={4} >
+                                                <Button variant="contained" startIcon={<WestIcon />} color="primary" onClick={() => { this.handleBackward() }}>
+                                                    Previous
+                                                </Button>
+                                            </Grid>
+                                            <Grid item xs={4}>
+                                                <Button variant="contained" endIcon={<EastIcon />} color="primary" onClick={() => { this.handleForward() }}>
+                                                    Next
+                                                </Button>
+                                            </Grid>
                                         </Grid>
                                     </TabPanel>
 
@@ -2022,6 +2066,23 @@ class GFERequestBox extends Component {
                                                 </Grid>
                                             </Grid>
                                         </Grid>
+                                        <br></br>
+                                        <Grid
+                                            container
+                                            direction="row"
+                                            justifyContent="space-between"
+                                            alignItems="center">
+                                            <Grid item xs={4} >
+                                                <Button variant="contained" startIcon={<WestIcon />} color="primary" onClick={() => { this.handleBackward() }}>
+                                                    Previous
+                                                </Button>
+                                            </Grid>
+                                            <Grid item xs={4}>
+                                                <Button variant="contained" endIcon={<EastIcon />} color="primary" onClick={() => { this.handleForward() }}>
+                                                    Next
+                                                </Button>
+                                            </Grid>
+                                        </Grid>
                                     </TabPanel>
 
 
@@ -2045,15 +2106,23 @@ class GFERequestBox extends Component {
 
                                                 <Grid item><SummaryItem summary={summary} /></Grid>
                                             </FormControl>
-
-                                            {/* Submit button*/}
-                                            <Box display="flex" justifyContent="space-evenly">
-                                                <FormControl>
-                                                    <Button loading variant="contained" color="primary" type="submit" disabled={this.props.submittingStatus === true}>
-                                                        Submit GFE
-                                                    </Button>
-                                                </FormControl>
-                                            </Box>
+                                        </Grid>
+                                        <br></br>
+                                        <Grid
+                                            container
+                                            direction="row"
+                                            justifyContent="space-between"
+                                            alignItems="center">
+                                            <Grid item xs={4} >
+                                                <Button variant="contained" color="primary" startIcon={<WestIcon />} onClick={() => { this.handleBackward() }}>
+                                                    Previous
+                                                </Button>
+                                            </Grid>
+                                            <Grid item xs={4}>
+                                                <Button loading variant="contained" color="primary" type="submit" disabled={this.props.submittingStatus === true}>
+                                                    Submit GFE
+                                                </Button>
+                                            </Grid>
                                         </Grid>
                                     </TabPanel>
                                 </Box>
