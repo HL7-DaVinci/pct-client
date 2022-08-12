@@ -6,22 +6,6 @@ import MenuItem from '@mui/material/MenuItem';
 import FormControl from '@mui/material/FormControl';
 
 
-// //keep columns for GFERequestPanel
-// export const columns = [
-//     {
-//         field: 'procedure', headerName: 'Procedure', editable: true, type: 'singleSelect', minWidth: 150,
-//         valueOptions: ProcedureList.map(code => `${""}`),
-//         renderHeader: renderRequiredHeader,
-//         required: true
-//     },
-//     {
-//         field: 'type', headerName: 'Type', editable: true, type: 'singleSelect', minWidth: 150,
-//         valueOptions: ProcedureTypeList.map(type => `${type.display}`),
-//         renderHeader: renderRequiredHeader,
-//         required: true
-//     }
-// ];
-
 
 export default function ProcedureItem(props) {
 

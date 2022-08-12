@@ -79,6 +79,9 @@ export default function SummaryItem(props) {
     if ((summary.submittingProvider) === undefined) {
         addToMissing("submitting provider");
     }
+    if ((summary.gfeServiceId) === undefined) {
+        addToMissing("GFE assigned service identifier");
+    }
 
     //care team
     for (let i = 0; i < summary.practitionerSelected.length; i++) {

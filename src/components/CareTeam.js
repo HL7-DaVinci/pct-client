@@ -5,23 +5,6 @@ import MenuItem from '@mui/material/MenuItem';
 import FormControl from '@mui/material/FormControl';
 
 
-//keep columns for GFERequestPanel
-// export const columns = props => [
-//     {
-//         field: 'role', headerName: 'Role',
-//         editable: true, type: 'singleSelect',
-//         valueOptions: ['Rendering', 'Attending', 'Operating', 'Primary', "Other Operating"], minWidth: 185,
-//         renderHeader: renderRequiredHeader,
-//         required: true,
-//     },
-//     {
-//         field: 'provider', headerName: 'Provider', editable: true, type: 'singleSelect',
-//         valueOptions: props, minWidth: 185,
-//         renderHeader: renderRequiredHeader,
-//         required: true
-//     }
-// ];
-
 
 export default function CareTeam(props) {
 

@@ -1215,7 +1215,8 @@ class GFERequestBox extends Component {
             serviceDate: this.state.selectedDate,
             submittingProvider: this.state.selectedSubmitter,
             billingProvider: this.state.selectedBillingProvider,
-            submittingProvider: this.state.selectedSubmitter
+            submittingProvider: this.state.selectedSubmitter,
+            gfeServiceId: this.state.gfeServiceId,
         };
     }
 
@@ -1254,72 +1255,6 @@ class GFERequestBox extends Component {
         this.setState({ supportingInfoTypeOfBill: e.target.value })
     }
 
-    // isRequestValid = () => {
-    //     // check required 
-    //     let errorMessage = [], valid = true;
-    //     // if (this.state.selectedPatient === undefined) {
-    //     //     errorMessage.push("Patient is not selected.");
-    //     //     valid = false;
-    //     // }
-    //     // if (this.state.selectedBillingProvider === undefined) {
-    //     //     errorMessage.push("Billing provider is not selected.");
-    //     //     valid = false;
-    //     // }
-    //     // if (this.state.selectedSubmitter === undefined) {
-    //     //     errorMessage.push("Submitter is not selected.");
-    //     //     valid = false;
-    //     // }
-
-    //     // Diagnosis
-    //     // const diagnosisListEmpty = this.itemListIsEmpty(this.state.diagnosisList);
-    //     // if (diagnosisListEmpty) {
-    //     //     errorMessage.push("At least one principal diagnosis is required.");
-    //     //     valid = false;
-    //     // } else {
-    //     //     const requiredFields = DiagnosisColumns.filter(column => column.required);
-    //     //     const requiredFieldsFilled = this.state.diagnosisList.every(item => requiredFields.every(column => item[column.field]));
-
-    //     //     if (!requiredFieldsFilled) {
-    //     //         errorMessage.push("One or many diagnosis miss(es) the required field(s).");
-    //     //         valid = false;
-    //     //     } else {
-    //     //         const createdPrincipalDiagnosis = this.state.diagnosisList.some(item => item.type === "Principal");
-    //     //         if (!createdPrincipalDiagnosis) {
-    //     //             errorMessage.push("At least one principal diagnosis is required.");
-    //     //             valid = false;
-    //     //         }
-    //     //     }
-    //     // }
-
-    //     // claim item
-    //     // const claimItemListEmpty = this.itemListIsEmpty(this.state.claimItemList);
-    //     // if (claimItemListEmpty) {
-    //     //     errorMessage.push("At least one claim item is required.");
-    //     //     valid = false;
-    //     // } else {
-    //     //     const requiredFields = ClaimItemColumns.filter(column => column.required);
-    //     //     const requiredFieldsFilled = this.state.claimItemList.every(item => requiredFields.every(column => item[column.field]));
-    //     //     if (!requiredFieldsFilled) {
-    //     //         errorMessage.push("One or more claim items miss(es) the required field(s) or is(are) invalid.");
-    //     //         valid = false;
-    //     //     }
-    //     // }
-
-    //     // const careTeamEmpty = this.itemListIsEmpty(this.state.careTeamList);
-    //     // if (!careTeamEmpty) {
-    //     //     const requiredFields = CareTeamColumns().filter(column => column.required);
-    //     //     const requiredFieldsFilled = this.state.careTeamList.every(item => requiredFields.every(column => item[column.field]));
-    //     //     if (!requiredFieldsFilled) {
-    //     //         errorMessage.push("One or more care team item miss(es) the required fields.");
-    //     //         valid = false;
-    //     //     };
-    //     // }
-
-    //     this.setState({
-    //         validationErrors: errorMessage
-    //     });
-    //     return { valid, error: errorMessage };
-    // }
 
     addOneCareTeam = (props) => {
 
@@ -2056,7 +1991,7 @@ class GFERequestBox extends Component {
                                                                 <Grid container direction="column" spacing={3}>
 
                                                                     <Grid item>
-                                                                        <FormLabel>GFE assigned service identifier</FormLabel>
+                                                                        <FormLabel>GFE assigned service identifier*</FormLabel>
                                                                     </Grid>
                                                                     <Grid item>
                                                                         <Select

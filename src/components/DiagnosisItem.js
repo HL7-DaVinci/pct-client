@@ -6,21 +6,6 @@ import MenuItem from '@mui/material/MenuItem';
 import FormControl from '@mui/material/FormControl';
 
 
-// //keep columns for GFERequestPanel
-// export const columns = [
-//     {
-//         field: 'diagnosis', headerName: 'Diagnosis', editable: true, type: 'singleSelect', minWidth: 150,
-//         valueOptions: DiagnosisList.map(code => `${code.diagnosisCodeableConcept.coding[0].code} ${code.diagnosisCodeableConcept.coding[0].display}`),
-//         renderHeader: renderRequiredHeader,
-//         required: true
-//     },
-//     {
-//         field: 'type', headerName: 'Type', editable: true, type: 'singleSelect', minWidth: 150,
-//         valueOptions: DiagnosisTypeList.map(type => `${type.display}`),
-//         renderHeader: renderRequiredHeader,
-//         required: true
-//     }
-// ];
 
 export default function DiagnosisItem(props) {
 
