@@ -561,8 +561,8 @@ class GFERequestBox extends Component {
                 }));
                 console.log("");
             } catch (e) {
-                console.error("Exception", e);
-                throw Error("Promise failed");
+                console.error("Failed to retrieve the data from provider data store! Check the connections! Exception", e);
+                //throw Error("Promise failed");
             }
         };
         fetchProviders();
