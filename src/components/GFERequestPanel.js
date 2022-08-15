@@ -561,8 +561,8 @@ class GFERequestBox extends Component {
                 }));
                 console.log("");
             } catch (e) {
-                console.error("Exception", e);
-                throw Error("Promise failed");
+                console.error("Failed to retrieve the data from provider data store! Check the connections! Exception", e);
+                //throw Error("Promise failed");
             }
         };
         fetchProviders();
@@ -643,19 +643,21 @@ class GFERequestBox extends Component {
                 const addressText = result[0].address[0].text
                 const birthdateText = result[0].birthDate
                 const genderText = result[0].gender
-                const telephoneText = result[0].telecom[0].value
+                const telephoneText = result[0].telecom != undefined ? result[0].telecom[0].value : null;
 
 
                 //ensure correct id for member
-                for (var i = 0; i < result[0].identifier.length; i++) {
-                    for (var j = 0; j < result[0].identifier[i].type.coding.length; j++) {
-                        if (result[0].identifier[i].type.coding[j].code === ("MB")) {
-                            const memberNumText = result[0].identifier[0].value
-                            this.setState({
-                                memberNumber: memberNumText
+                if(result[0].identifier !== undefined && result[0].identifier.length > 0 && result[0].identifier[0].type !== undefined) {
+                    for (var i = 0; i < result[0].identifier.length; i++) {
+                        for (var j = 0; j < result[0].identifier[i].type.coding.length; j++) {
+                            if (result[0].identifier[i].type.coding[j].code === ("MB")) {
+                                const memberNumText = result[0].identifier[0].value
+                                this.setState({
+                                    memberNumber: memberNumText
 
-                            })
+                                })
 
+                            }
                         }
                     }
                 }
