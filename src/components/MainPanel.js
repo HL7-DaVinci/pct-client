@@ -39,7 +39,7 @@ export default function MainPanel() {
             "value": "https://davinci-pct-ehr.logicahealth.org/fhir"
         }
     ]);
-    const [selectedDataServer, setSelectedDataServer] = useState("http://localhost:8080/fhir");
+    const [selectedDataServer, setSelectedDataServer] = useState("https://davinci-pct-ehr.logicahealth.org/fhir");
     const [payerServers] = useState([
         {
             "value": "http://localhost:8081/fhir"
