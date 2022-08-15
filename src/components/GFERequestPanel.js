@@ -647,7 +647,7 @@ class GFERequestBox extends Component {
 
 
                 //ensure correct id for member
-                if(result[0].identifier.type !== undefined) {
+                if(result[0].identifier !== undefined && result[0].identifier.length > 0 && result[0].identifier[0].type !== undefined) {
                     for (var i = 0; i < result[0].identifier.length; i++) {
                         for (var j = 0; j < result[0].identifier[i].type.coding.length; j++) {
                             if (result[0].identifier[i].type.coding[j].code === ("MB")) {
