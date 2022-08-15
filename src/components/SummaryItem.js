@@ -23,26 +23,33 @@ const useStyles = makeStyles((theme) =>
 
 
 function createProcedureList(procedureList) {
+    let num = 0;
     return procedureList.map(el => {
-        return <ListItem disableGutters>({el.id}) {el.type}: {el.procedure} </ListItem>
+        num += 1;
+        return <ListItem disableGutters>({num}) {el.type}: {el.procedure} </ListItem>
     })
 }
 
 function createDiagnosisList(diagnosisList) {
+    let num = 0;
     return diagnosisList.map(el => {
-        return <ListItem disableGutters>({el.id}) {el.type}: {el.diagnosis}</ListItem>
+        num += 1;
+        return <ListItem disableGutters>({num}) {el.type}: {el.diagnosis}</ListItem>
     })
 }
 
 function createServiceList(serviceList) {
+
+    let num = 0;
     return serviceList.map(el => {
-        return <ListItem disableGutters>({el.id}) {el.placeOfService}: {el.productOrService}</ListItem>
+        num += 1;
+        return <ListItem disableGutters>({num}) {el.placeOfService}: {el.productOrService}</ListItem>
     })
 }
 
 function alertDialog(itemsMissing) {
 
-    if (itemsMissing.length == 0) {
+    if (itemsMissing.length === 0) {
         return
     }
 
@@ -63,48 +70,94 @@ export default function SummaryItem(props) {
 
 
 
-    //check (if given) then care team has required fields
-    for (let i = 0; i < summary.practitionerSelected.length; i++) {
+    //patient section
+    if ((summary.patientId) === undefined) {
+        addToMissing("patient details")
+    }
+    if ((summary.billingProvider) === undefined) {
+        addToMissing("billing provider");
+    }
+    if ((summary.submittingProvider) === undefined) {
+        addToMissing("submitting provider");
+    }
+    if ((summary.gfeServiceId) === undefined) {
+        addToMissing("GFE assigned service identifier");
+    }
 
+
+
+    //care team
+    for (let i = 0; i < summary.practitionerSelected.length; i++) {
         //if the provider is there, check if role is too
         if (((summary.practitionerSelected[i].provider) !== undefined) && (summary.practitionerSelected[i].role) === undefined) {
-            addToMissing("care team provider role");
+            let rowNum = i + 1;
+            addToMissing("care team provider role (row " + rowNum + ")");
         }
         //if role is there, check if provider
         if (((summary.practitionerSelected[i].role) !== undefined) && (summary.practitionerSelected[i].provider) === undefined) {
-            addToMissing("care team provider");
+            let rowNum = i + 1;
+            addToMissing("care team provider (row " + rowNum + ")");
         }
         //otherwise if both undefined don't throw error bc allowed
     }
 
+    //priority level on encounter tab
+    if (summary.priorityLevel === undefined) {
+        addToMissing("priority level")
+    }
 
+    //diagnosis
     //check if given, and all required fields exist
     for (let i = 0; i < summary.diagnosisList.length; i++) {
 
         //if diagnosis there, but not type, throw error
         if (((summary.diagnosisList[i].diagnosis) !== undefined) && (summary.diagnosisList[i].type) === undefined) {
-            addToMissing("encounter diagnosis type");
+            let rowNum = i + 1;
+            addToMissing("encounter diagnosis type (row " + rowNum + ")");
         }
         //if type there, but not diagnosis, throw error
         if (((summary.diagnosisList[i].type) !== undefined) && (summary.diagnosisList[i].diagnosis) === undefined) {
-            addToMissing("encounter diagnosis");
+            let rowNum = i + 1;
+            addToMissing("encounter diagnosis (row " + rowNum + ")");
         }
         //if both missing, throw general error
         if (((summary.diagnosisList[i].diagnosis) === undefined) && (summary.diagnosisList[i].type) === undefined) {
+            let rowNum = i + 1;
             addToMissing("diagnosis");
         }
     }
 
-    // //if procedure, check if procedure and type
-    // for (let i = 0; i < summary.procedureList.length; i++) {
-    //     if (((summary.procedureList[i].procedure) !== undefined) && (summary.procedureList[i].type) === undefined) {
-    //         addToMissing("encounter diagnosis type");
-    //     }
-    //     if (((summary.procedureList[i].procedure) !== undefined) && (summary.procedureList[i].type) === undefined) {
-    //         addToMissing("encounter diagnosis");
-    //     }
-    //     //if both missing, not required
-    // }
+    //procedure
+    for (let i = 0; i < summary.procedureList.length; i++) {
+        if (((summary.procedureList[i].procedure) !== undefined) && (summary.procedureList[i].type) === undefined) {
+            let rowNum = i + 1;
+            addToMissing("encounter procedure type (row " + rowNum + ")");
+        }
+        if (((summary.procedureList[i].procedure) === undefined) && (summary.procedureList[i].type) !== undefined) {
+            let rowNum = i + 1;
+            addToMissing("encounter procedure (row " + rowNum + ")");
+        }
+        //if both missing, not required
+    }
+
+    //services
+    for (let i = 0; i < summary.servicesList.length; i++) {
+
+        if ((i == 0) && ((summary.servicesList[i].productOrService) === undefined) && ((summary.servicesList[i].estimatedDateOfService) === undefined)) {
+            addToMissing("services");
+            break;
+        }
+        if (((summary.servicesList[i].productOrService) === undefined)) {
+            let rowNum = i + 1;
+            addToMissing("service (product or service - row " + rowNum + ")");
+            addToMissing("service (unit price - row " + rowNum + ")");
+            addToMissing("service (net - row " + rowNum + ")");
+        }
+        if (((summary.servicesList[i].estimatedDateOfService) === undefined)) {
+            let rowNum = i + 1;
+            addToMissing("service (estimate date - row " + rowNum + ")");
+        }
+    }
 
 
 
@@ -135,7 +188,7 @@ export default function SummaryItem(props) {
                         <SummaryText content="Patient:" class="label" />
                     </Grid>
                     <Grid item xs={6}>
-                        <SummaryText content={((summary.patientId) == undefined) ? addToMissing("patient details") : (summary.patientId)} />
+                        <SummaryText content={((summary.patientId) === undefined) ? "" : (summary.patientId)} />
                     </Grid>
                 </Grid>
 
@@ -266,7 +319,7 @@ export default function SummaryItem(props) {
                     </Grid>
                     <Grid item xs={6}>
                         <Typography style={{ wordWrap: "break-word" }}>
-                            {((summary.billingProvider) === undefined) ? (addToMissing("billing provider")) : (summary.billingProvider)}
+                            {((summary.billingProvider) === undefined) ? "" : (summary.billingProvider)}
                         </Typography>
                     </Grid>
                 </Grid>
@@ -276,7 +329,7 @@ export default function SummaryItem(props) {
                     </Grid>
                     <Grid item xs={6}>
                         <Typography style={{ wordWrap: "break-word" }}>
-                            {((summary.submittingProvider) === undefined) ? (addToMissing("submitting provider")) : (summary.submittingProvider)}
+                            {((summary.submittingProvider) === undefined) ? "" : (summary.submittingProvider)}
                         </Typography>
                     </Grid>
                 </Grid>
@@ -319,7 +372,7 @@ export default function SummaryItem(props) {
                         <SummaryText content="Date:" class="label" />
                     </Grid>
                     <Grid item xs={6}>
-                        <SummaryText content={(summary.serviceDate === undefined) ? (addToMissing("service date")) : (summary.serviceDate)} />
+                        <SummaryText content={(summary.serviceDate === undefined) ? "" : (summary.serviceDate)} />
                     </Grid>
                 </Grid>
 
@@ -328,7 +381,7 @@ export default function SummaryItem(props) {
                         <SummaryText content="Priority:" class="label" />
                     </Grid>
                     <Grid item xs={6}>
-                        <SummaryText content={(summary.priorityLevel === undefined) ? (addToMissing("priority level")) : (summary.priorityLevel.priority.coding[0].code)} />
+                        <SummaryText content={(summary.priorityLevel === undefined) ? "" : (summary.priorityLevel.priority.coding[0].code)} />
                     </Grid>
                 </Grid>
 
@@ -364,7 +417,7 @@ export default function SummaryItem(props) {
                     </Grid>
                     <Grid item xs={6}>
                         <Typography style={{ wordWrap: "break-word" }}>
-                            {(summary.servicesList[0].productOrService === undefined) ? (addToMissing("services")) : (createServiceList(summary.servicesList))}
+                            {(summary.servicesList[0].productOrService === undefined) ? "" : (createServiceList(summary.servicesList))}
                         </Typography>
                     </Grid>
                 </Grid>

@@ -28,11 +28,13 @@ import GFERequestSummary from './GFERequestSummary'
 import buildGFEBundle from './BuildGFEBundle';
 import ViewGFERequestDialog from './ViewGFEDialog';
 import { PlaceOfServiceList } from '../values/PlaceOfService';
-import CareTeam, { columns as CareTeamColumns } from './CareTeam';
-import ClaimItem, { columns as ClaimItemColumns } from './ClaimItem';
+
+
+import CareTeam from './CareTeam';
+import ClaimItem from './ClaimItem';
 import { ProcedureCodes } from '../values/ProcedureCode';
-import DiagnosisItem, { columns as DiagnosisColumns } from './DiagnosisItem';
-import ProcedureItem, { columns as ProcedureColumns } from './ProcedureItem';
+import DiagnosisItem from './DiagnosisItem';
+import ProcedureItem from './ProcedureItem';
 import SummaryItem, { columns as SummaryItems } from './SummaryItem';
 import { SupportingInfoType } from '../values/SupportingInfo';
 import { DiagnosisList, DiagnosisTypeList } from '../values/DiagnosisList';
@@ -40,6 +42,12 @@ import ViewErrorDialog from './ViewErrorDialog';
 import PropTypes from 'prop-types';
 import moment from 'moment';
 import { Input, TextFieldProps } from "@material-ui/core";
+import WestIcon from '@mui/icons-material/West';
+import EastIcon from '@mui/icons-material/East';
+
+
+
+
 
 
 const styles = theme => ({
@@ -192,19 +200,15 @@ const getProviderDisplayName = provider => {
 }
 
 const ProviderSelect = (providers, selectProvider, handleOpenProviders, handleChange) => {
-
     return (<Select required labelId="select-provider-label" id="provider" value={selectProvider} onOpen={handleOpenProviders} onChange={handleChange}>
         {
             providers ?
                 providers.map((provider) => {
                     return (<MenuItem key={provider.resource.id} value={provider.resource.id}>{providers}</MenuItem>);
                 }) : (<MenuItem />)
-
         }
     </Select>);
 }
-
-
 
 const getPriorityDisplayName = priority => {
     if (priority === undefined) return null;
@@ -1145,7 +1149,9 @@ class GFERequestBox extends Component {
             openErrorDialog: false,
             validationErrors: undefined
         })
-        const { valid, error } = this.isRequestValid();
+        //const { valid, error } = this.isRequestValid();
+        const error = [];
+        const valid = true;
 
         if (valid) {
             this.props.setSubmitting(true);
@@ -1183,7 +1189,6 @@ class GFERequestBox extends Component {
             this.setState({
                 openErrorDialog: true,
                 submissionError: error
-
             });
         }
     }
@@ -1216,7 +1221,9 @@ class GFERequestBox extends Component {
             serviceDate: this.state.selectedDate,
             submittingProvider: this.state.selectedSubmitter,
             billingProvider: this.state.selectedBillingProvider,
-            submittingProvider: this.state.selectedSubmitter
+            submittingProvider: this.state.selectedSubmitter,
+            gfeServiceId: this.state.gfeServiceId,
+    
         };
     }
 
@@ -1255,109 +1262,65 @@ class GFERequestBox extends Component {
         this.setState({ supportingInfoTypeOfBill: e.target.value })
     }
 
-    isRequestValid = () => {
-        // check required 
-        let errorMessage = [], valid = true;
-        if (this.state.selectedPatient === undefined) {
-            errorMessage.push("Patient is not selected.");
-            valid = false;
-        }
-        if (this.state.selectedBillingProvider === undefined) {
-            errorMessage.push("Billing provider is not selected.");
-            valid = false;
-        }
-        if (this.state.selectedSubmitter === undefined) {
-            errorMessage.push("Submitter is not selected.");
-            valid = false;
-        }
 
-        // Diagnosis
-        const diagnosisListEmpty = this.itemListIsEmpty(this.state.diagnosisList);
-        if (diagnosisListEmpty) {
-            errorMessage.push("At least one principal diagnosis is required.");
-            valid = false;
-        } else {
-            const requiredFields = DiagnosisColumns.filter(column => column.required);
-            const requiredFieldsFilled = this.state.diagnosisList.every(item => requiredFields.every(column => item[column.field]));
+    addOneCareTeam = (props) => {
 
-            if (!requiredFieldsFilled) {
-                errorMessage.push("One or many diagnosis miss(es) the required field(s).");
-                valid = false;
-            } else {
-                const createdPrincipalDiagnosis = this.state.diagnosisList.some(item => item.type === "Principal");
-                if (!createdPrincipalDiagnosis) {
-                    errorMessage.push("At least one principal diagnosis is required.");
-                    valid = false;
+        //checks if the required fields are not given, if not adds to missingItems list
+        let missingItems = [];
+        for (let i = 0; i < this.state.careTeamList.length; i++) {
+            let currentRow = this.state.careTeamList[i];
+            for (let j = 0; j < props.length; j++) {
+                if (props[j].required == true) {
+                    let columnName = props[j].field;
+                    if (currentRow[columnName] == undefined) {
+                        missingItems.push(columnName)
+                    }
                 }
             }
         }
 
-        // claim item
-        const claimItemListEmpty = this.itemListIsEmpty(this.state.claimItemList);
-        if (claimItemListEmpty) {
-            errorMessage.push("At least one claim item is required.");
-            valid = false;
-        } else {
-            const requiredFields = ClaimItemColumns.filter(column => column.required);
-            const requiredFieldsFilled = this.state.claimItemList.every(item => requiredFields.every(column => item[column.field]));
-            if (!requiredFieldsFilled) {
-                errorMessage.push("One or more claim items miss(es) the required field(s) or is(are) invalid.");
-                valid = false;
+        if (missingItems.length > 0) {
+            const msg = `Complete adding existing care team member before adding a new one! ${missingItems} are required fields`;
+            alert(msg)
+            return;
+        }
+
+
+
+        let newId = this.state.careTeamList.length + 1;
+
+        //when you delete item 1 out of 2 items, adjust the next id to the next available id vacant
+        let proposedId = this.state.careTeamList.length + 1;
+
+        //checks if proposedId already exists within the list (comparedId), if so will keep incrementing until finds vacant id
+        for (let i = 0; i < this.state.careTeamList.length; i++) {
+            let comparedId = this.state.careTeamList[i].id;
+
+            //if see a matching id, we inc the proposed id and it will repeat the loop 
+            if (comparedId == proposedId) {
+                i = 0;
+                proposedId += 1;
             }
         }
-
-        const careTeamEmpty = this.itemListIsEmpty(this.state.careTeamList);
-        if (!careTeamEmpty) {
-            const requiredFields = CareTeamColumns().filter(column => column.required);
-            const requiredFieldsFilled = this.state.careTeamList.every(item => requiredFields.every(column => item[column.field]));
-            if (!requiredFieldsFilled) {
-                errorMessage.push("One or more care team item miss(es) the required fields.");
-                valid = false;
-            };
-        }
+        newId = proposedId;
 
         this.setState({
-            validationErrors: errorMessage
+            careTeamList: [...this.state.careTeamList, { id: newId }]
         });
-        return { valid, error: errorMessage };
-    }
-
-    addOneCareTeam = () => {
-
-        console.log('this is our care team', this.state.careTeamList)
-        let valid = true, msg = undefined;
-        if (this.state.careTeamList.length > 0) {
-            const requiredColumns = CareTeamColumns().filter(column => column.required);
-            const fields = this.extractFieldNames(requiredColumns);
-            msg = `Complete adding existing care team member before adding a new one! ${fields} are required fields`;
-            valid = this.state.careTeamList.every(item => {
-                return requiredColumns.every(column => item[column.field] !== undefined);
-            })
-        }
-        if (valid) {
-            const newId = this.state.careTeamList.length + 1;
-            this.setState({
-                careTeamList: [...this.state.careTeamList, { id: newId }]
-            });
-        } else {
-            alert(msg);
-        }
     }
 
     deleteOneCareTeam = id => {
         this.setState({
             careTeamList: this.state.careTeamList.filter(item => item.id !== id)
         })
+
     }
 
     editCareTeam = model => {
-
-
         let id, fieldObject, fieldName, fieldValueObject, fieldValue;
         for (let prop in model) {
             id = prop;
             fieldObject = model[id];
-
         }
         if (fieldObject) {
             for (let name in fieldObject) {
@@ -1386,30 +1349,47 @@ class GFERequestBox extends Component {
         }
     }
 
-    extractFieldNames = columns => {
-        return columns.reduce((prev, current, index) => {
-            return index === 0 ? current.headerName : prev.concat(', ').concat(current.headerName);
-        }, '');
-    }
+    addOneClaimItem = (props) => {
 
-    addOneClaimItem = () => {
-        let valid = true, msg = undefined;
-        if (this.state.claimItemList.length > 0) {
-            const requiredColumns = ClaimItemColumns.filter(column => column.required);
-            const fields = this.extractFieldNames(requiredColumns);
-            msg = `Complete adding existing claim item before adding a new one! ${fields} are required fields`;
-            valid = this.state.claimItemList.every(item => {
-                return requiredColumns.every(column => item[column.field] !== undefined);
-            })
+        //checks if the required fields are not given, if not adds to missingItems list
+        let missingItems = [];
+        for (let i = 0; i < this.state.claimItemList.length; i++) {
+            let currentRow = this.state.claimItemList[i];
+            for (let j = 0; j < props.length; j++) {
+                if (props[j].required == true) {
+                    let columnName = props[j].field;
+                    if (currentRow[columnName] == undefined) {
+                        missingItems.push(columnName)
+                    }
+                }
+            }
         }
-        if (valid) {
-            const newId = this.state.claimItemList.length + 1;
-            this.setState({
-                claimItemList: [...this.state.claimItemList, { id: newId }]
-            });
-        } else {
-            alert(msg);
+
+        if (missingItems.length > 0) {
+            const msg = `Complete adding existing claim item before adding a new one! ${missingItems} are required fields`;
+            alert(msg)
+            return;
         }
+
+        let newId = this.state.claimItemList.length + 1;
+
+        //when you delete item 1 out of 2 items, adjust the next id to the next available id vacant
+        let proposedId = this.state.claimItemList.length + 1;
+
+        //see if the id we are adding next exists within the list already (will add the next id to be the highest number in the list)
+        for (let i = 0; i < this.state.claimItemList.length; i++) {
+            let comparedId = this.state.claimItemList[i].id;
+
+            //if see a matching id, we add one to the proposed id and it will repeat the loop 
+            if (comparedId == proposedId) {
+                i = 0;
+                proposedId += 1;
+            }
+        }
+        newId = proposedId;
+        this.setState({
+            claimItemList: [...this.state.claimItemList, { id: newId }]
+        });
     }
 
     deleteOneClaimItem = id => {
@@ -1481,24 +1461,48 @@ class GFERequestBox extends Component {
         }
     }
 
-    addOneDiagnosisItem = () => {
-        let valid = true, msg = undefined;
-        if (this.state.careTeamList.length > 0) {
-            const requiredColumns = DiagnosisColumns.filter(column => column.required);
-            const fields = this.extractFieldNames(requiredColumns);
-            msg = `Complete adding existing diagnosis before adding a new one! ${fields} are required fields.`;
-            valid = this.state.diagnosisList.every(item => {
-                return requiredColumns.every(column => item[column.field] !== undefined);
-            })
+    addOneDiagnosisItem = (props) => {
+
+        //checks if the required fields are not given, if not adds to missingItems list
+        let missingItems = [];
+        for (let i = 0; i < this.state.diagnosisList.length; i++) {
+            let currentRow = this.state.diagnosisList[i];
+            for (let j = 0; j < props.length; j++) {
+                if (props[j].required == true) {
+                    let columnName = props[j].field;
+                    if (currentRow[columnName] == undefined) {
+                        missingItems.push(columnName)
+                    }
+                }
+            }
         }
-        if (valid) {
-            const newId = this.state.diagnosisList.length + 1;
-            this.setState({
-                diagnosisList: [...this.state.diagnosisList, { id: newId }]
-            });
-        } else {
-            alert(msg);
+
+        if (missingItems.length > 0) {
+            const msg = `Complete adding existing diagnosis before adding a new one! ${missingItems} are required fields`;
+            alert(msg)
+            return;
         }
+
+        let newId = this.state.diagnosisList.length + 1;
+
+        //when you delete item 1 out of 2 items, adjust the next id to the next available id vacant
+        let proposedId = this.state.diagnosisList.length + 1;
+
+        //checks if proposedId already exists within the list (comparedId), if so will keep incrementing until finds vacant id
+        for (let i = 0; i < this.state.diagnosisList.length; i++) {
+            let comparedId = this.state.diagnosisList[i].id;
+
+            //if see a matching id, we inc the proposed id and it will repeat the loop 
+            if (comparedId == proposedId) {
+                i = 0;
+                proposedId += 1;
+            }
+        }
+        newId = proposedId;
+        this.setState({
+            diagnosisList: [...this.state.diagnosisList, { id: newId }]
+        });
+
     }
 
     deleteOneDiagnosisItem = id => {
@@ -1536,24 +1540,47 @@ class GFERequestBox extends Component {
         }
     }
 
-    addOneProcedureItem = () => {
-        let valid = true, msg = undefined;
-        if (this.state.careTeamList.length > 0) {
-            const requiredColumns = ProcedureColumns.filter(column => column.required);
-            const fields = this.extractFieldNames(requiredColumns);
-            msg = `Complete adding existing diagnosis before adding a new one! ${fields} are required fields.`;
-            valid = this.state.procedureList.every(item => {
-                return requiredColumns.every(column => item[column.field] !== undefined);
-            })
+    addOneProcedureItem = (props) => {
+
+        //checks if the required fields are not given, if not adds to missingItems list
+        let missingItems = [];
+        for (let i = 0; i < this.state.procedureList.length; i++) {
+            let currentRow = this.state.procedureList[i];
+            for (let j = 0; j < props.length; j++) {
+                if (props[j].required == true) {
+                    let columnName = props[j].field;
+                    if (currentRow[columnName] == undefined) {
+                        missingItems.push(columnName)
+                    }
+                }
+            }
         }
-        if (valid) {
-            const newId = this.state.procedureList.length + 1;
-            this.setState({
-                procedureList: [...this.state.procedureList, { id: newId }]
-            });
-        } else {
-            alert(msg);
+
+        if (missingItems.length > 0) {
+            const msg = `Complete adding existing procedure before adding a new one! ${missingItems} are required fields`;
+            alert(msg)
+            return;
         }
+
+        let newId = this.state.procedureList.length + 1;
+
+        //when you delete item 1 out of 2 items, adjust the next id to the next available id vacant
+        let proposedId = this.state.procedureList.length + 1;
+
+        //checks if proposedId already exists within the list (comparedId), if so will keep incrementing until finds vacant id
+        for (let i = 0; i < this.state.procedureList.length; i++) {
+            let comparedId = this.state.procedureList[i].id;
+
+            //if see a matching id, we inc the proposed id and it will repeat the loop 
+            if (comparedId == proposedId) {
+                i = 0;
+                proposedId += 1;
+            }
+        }
+        newId = proposedId;
+        this.setState({
+            procedureList: [...this.state.procedureList, { id: newId }]
+        });
     }
 
     deleteOneProcedureItem = id => {
@@ -1659,6 +1686,15 @@ class GFERequestBox extends Component {
     handleChange = (event, value) => {
         this.setState({ currentTabIndex: value });
     };
+
+
+    handleForward() {
+        this.setState({ verticalTabIndex: this.state.verticalTabIndex + 1 });
+    }
+    handleBackward() {
+        this.setState({ verticalTabIndex: this.state.verticalTabIndex - 1 });
+    }
+
 
     handleVerticalChange = (event, value) => {
         this.setState({ verticalTabIndex: value });
@@ -1794,6 +1830,19 @@ class GFERequestBox extends Component {
                                                 < Grid item className={classes.patientBox}><GFERequestSummary summary={summary} /></Grid>
                                             </Grid>
                                         </Grid>
+                                        <br></br>
+                                        <Grid
+                                            container
+                                            direction="row"
+                                            justifyContent="space-between"
+                                            alignItems="center">
+                                            <Grid item xs={4} ></Grid>
+                                            <Grid item xs={4}>
+                                                <Button variant="contained" endIcon={<EastIcon />} color="primary" onClick={() => { this.handleForward() }}>
+                                                    Next
+                                                </Button>
+                                            </Grid>
+                                        </Grid>
                                     </TabPanel>
 
                                     {/* Care Team tab */}
@@ -1891,6 +1940,23 @@ class GFERequestBox extends Component {
                                                 </Box>
                                             </Card>
                                         </Grid>
+                                        <br></br>
+                                        <Grid
+                                            container
+                                            direction="row"
+                                            justifyContent="space-between"
+                                            alignItems="center">
+                                            <Grid item xs={4} >
+                                                <Button variant="contained" startIcon={<WestIcon />} color="primary" onClick={() => { this.handleBackward() }}>
+                                                    Previous
+                                                </Button>
+                                            </Grid>
+                                            <Grid item xs={4}>
+                                                <Button variant="contained" endIcon={<EastIcon />} color="primary" onClick={() => { this.handleForward() }}>
+                                                    Next
+                                                </Button>
+                                            </Grid>
+                                        </Grid>
                                     </TabPanel>
 
 
@@ -1971,7 +2037,7 @@ class GFERequestBox extends Component {
                                                                 <Grid container direction="column" spacing={3}>
 
                                                                     <Grid item>
-                                                                        <FormLabel>GFE assigned service identifier</FormLabel>
+                                                                        <FormLabel>GFE assigned service identifier*</FormLabel>
                                                                     </Grid>
                                                                     <Grid item>
                                                                         <Select
@@ -2002,6 +2068,23 @@ class GFERequestBox extends Component {
                                                 </Grid>
                                             </Grid>
                                         </Grid>
+                                        <br></br>
+                                        <Grid
+                                            container
+                                            direction="row"
+                                            justifyContent="space-between"
+                                            alignItems="center">
+                                            <Grid item xs={4} >
+                                                <Button variant="contained" startIcon={<WestIcon />} color="primary" onClick={() => { this.handleBackward() }}>
+                                                    Previous
+                                                </Button>
+                                            </Grid>
+                                            <Grid item xs={4}>
+                                                <Button variant="contained" endIcon={<EastIcon />} color="primary" onClick={() => { this.handleForward() }}>
+                                                    Next
+                                                </Button>
+                                            </Grid>
+                                        </Grid>
                                     </TabPanel>
 
 
@@ -2019,21 +2102,29 @@ class GFERequestBox extends Component {
                                                         </b>
                                                     </Grid>
                                                     <Grid item xs={2}>
-                                                        <ViewGFERequestDialog generateRequest={this.generateBundle} valid={this.isRequestValid} error={this.state.validationErrors} />
+                                                        <ViewGFERequestDialog generateRequest={this.generateBundle} error={this.state.validationErrors} />
                                                     </Grid>
                                                 </Grid>
 
                                                 <Grid item><SummaryItem summary={summary} /></Grid>
                                             </FormControl>
-
-                                            {/* Submit button*/}
-                                            <Box display="flex" justifyContent="space-evenly">
-                                                <FormControl>
-                                                    <Button loading variant="contained" color="primary" type="submit" disabled={this.props.submittingStatus === true}>
-                                                        Submit GFE
-                                                    </Button>
-                                                </FormControl>
-                                            </Box>
+                                        </Grid>
+                                        <br></br>
+                                        <Grid
+                                            container
+                                            direction="row"
+                                            justifyContent="space-between"
+                                            alignItems="center">
+                                            <Grid item xs={4} >
+                                                <Button variant="contained" color="primary" startIcon={<WestIcon />} onClick={() => { this.handleBackward() }}>
+                                                    Previous
+                                                </Button>
+                                            </Grid>
+                                            <Grid item xs={4}>
+                                                <Button loading variant="contained" color="primary" type="submit" disabled={this.props.submittingStatus === true}>
+                                                    Submit GFE
+                                                </Button>
+                                            </Grid>
                                         </Grid>
                                     </TabPanel>
                                 </Box>
