@@ -8,12 +8,11 @@ export default function ViewGFERequestDialog(props) {
 
     const handleClickOpen = () => {
         setOpen(true);
-        const { valid, error } = props.valid()
-        if (valid) {
+        if (props.error === undefined) {
             setRequest(props.generateRequest());
         } else {
             setError(true);
-            setRequest(error);
+            setRequest(props.error);
         }
     };
 
