@@ -46,6 +46,9 @@ export default function MainPanel() {
         },
         {
             "value": "https://davinci-pct-payer.logicahealth.org/fhir"
+        },
+        {
+            "value": "https://fhir.collablynk.com/edifecs/fhir/R4"
         }
     ]);
     const [selectedPayerServer, setSelectedPayerServer] = useState("https://davinci-pct-payer.logicahealth.org/fhir");
