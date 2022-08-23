@@ -406,6 +406,22 @@ function a11yPropsGFE(index) {
     };
 }
 
+function formatTitleCase(str) {
+    str = str.toLowerCase();
+    let strCap = "";
+
+    for (let i = 0; i < str.length; i++) {
+        if (str.charAt(i) == " " && typeof (str.charAt(i + 1)).match(/[a-z]/i)) {
+            strCap += str.charAt(i);
+            strCap += str.charAt(i + 1).toUpperCase();
+            i += 1;
+        } else {
+            strCap += str.charAt(i);
+        }
+    }
+    return strCap
+}
+
 
 
 
@@ -594,6 +610,8 @@ class GFERequestBox extends Component {
             });
     }
 
+
+
     //when select the patient, changes fields within the form specific
     handleSelectPatient = e => {
         const patientId = e.target.value;
@@ -639,15 +657,16 @@ class GFERequestBox extends Component {
 
         getPatientInfo(this.props.ehrUrl, patientId)
             .then(result => {
+                const addressText = (result[0].address[0].text == undefined) ? (formatTitleCase(result[0].address[0].line[0] + " " + result[0].address[0].city)
+                    + " " + result[0].address[0].state.toUpperCase() + " " + result[0].address[0].postalCode) : result[0].address[0].text;
 
-                const addressText = result[0].address[0].text
                 const birthdateText = result[0].birthDate
                 const genderText = result[0].gender
                 const telephoneText = result[0].telecom != undefined ? result[0].telecom[0].value : null;
 
 
                 //ensure correct id for member
-                if(result[0].identifier !== undefined && result[0].identifier.length > 0 && result[0].identifier[0].type !== undefined) {
+                if (result[0].identifier !== undefined && result[0].identifier.length > 0 && result[0].identifier[0].type !== undefined) {
                     for (var i = 0; i < result[0].identifier.length; i++) {
                         for (var j = 0; j < result[0].identifier[i].type.coding.length; j++) {
                             if (result[0].identifier[i].type.coding[j].code === ("MB")) {
@@ -1223,7 +1242,7 @@ class GFERequestBox extends Component {
             billingProvider: this.state.selectedBillingProvider,
             submittingProvider: this.state.selectedSubmitter,
             gfeServiceId: this.state.gfeServiceId,
-    
+
         };
     }
 
