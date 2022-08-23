@@ -22,7 +22,6 @@ import {
 
 import {
   getPatients,
-  getDeviceRequestsForPatient,
   submitGFEClaim,
   getCoverage,
   getPractitionerRoles,
@@ -58,6 +57,7 @@ import {
   OrganizationSelect,
   PatientSelect,
   PrioritySelect,
+  getPatientDisplayName,
 } from "./SelectComponents";
 
 //GFE and AEOB tabs
@@ -216,6 +216,8 @@ class GFERequestBox extends Component {
       setStartDate: null,
       endDate: null,
       locationList: [],
+      subject: null,
+      GFEList: [],
     };
     this.state = this.initialState;
   }
@@ -224,16 +226,8 @@ class GFERequestBox extends Component {
     this.setState({ startDate: date });
   };
 
-  handleDateStartUpdate = (value) => {
-    return <TextField {...value} />;
-  };
-
   handleEndDateChange = (date) => {
     this.setState({ endDate: date });
-  };
-
-  handleDateEndUpdate = (value) => {
-    return <TextField {...value} />;
   };
 
   componentDidUpdate(prevProps, prevState) {
@@ -254,7 +248,6 @@ class GFERequestBox extends Component {
         // NATNOTE
         await Promise.all(
           res.map((r) => {
-            console.log(r);
             if (
               r.data &&
               r.data[0] &&
@@ -296,13 +289,11 @@ class GFERequestBox extends Component {
             }
           })
         );
-        console.log("");
       } catch (e) {
         console.error(
           "Failed to retrieve the data from provider data store! Check the connections! Exception",
           e
         );
-        //throw Error("Promise failed");
       }
     };
     fetchProviders();
@@ -421,83 +412,9 @@ class GFERequestBox extends Component {
     });
   };
 
-  handleOpenRequestList = (e) => {
-    getDeviceRequestsForPatient(this.props.ehrUrl, this.state.selectedPatient)
-      .then((result) => {
-        let newReferenceList = Object.assign(this.state.resolvedReferences);
-        for (const property in result.references) {
-          if (!(property in newReferenceList)) {
-            newReferenceList[property] = result.references[property];
-          }
-        }
-
-        let newRequestList = [];
-        result.data.forEach((item) => {
-          if (
-            this.state.patientRequestList.find(
-              (request) => request.id === item.id
-            ) === undefined
-          ) {
-            newRequestList.push(item);
-          }
-        });
-        this.setState({
-          ...this.state,
-          patientRequestList:
-            this.state.patientRequestList.concat(newRequestList),
-          resolvedReferences: newReferenceList,
-        });
-      })
-      .catch((e) => console.log(e));
-  };
-
-  handleSelectRequest = (e) => {
-    const requestId = e.target.value;
-
-    const { coverage } = this.getRequestRelatedInfo(requestId);
-
-    getCoverage(this.props.ehrUrl, coverage.id)
-      .then((result) => {
-        const reference = Object.keys(result.references)[0];
-        const resource = result.references[reference];
-
-        this.setState({
-          ...this.state,
-          selectedPayor: resource,
-          selectedRequest: requestId,
-          selectedProcedure: undefined,
-        });
-      })
-      .catch((error) => console.log(error));
-  };
-
-  handleOpenPractitionerRoleList = (e) => {
-    getPractitionerRoles(this.props.ehrUrl).then((result) => {
-      let references = Object.assign(this.state.resolvedReferences);
-      for (const property in result.references) {
-        if (!(property in references)) {
-          references[property] = result.references[property];
-        }
-      }
-      this.setState({
-        ...this.state,
-        practitionerRoleList: result.data,
-        resolvedReferences: references,
-      });
-    });
-  };
-
   handleSelectBillingProvider = (e) => {
     this.setState({
       selectedBillingProvider: e.target.value,
-    });
-  };
-
-  handleOpenPractitionerList = (e) => {
-    getPractitioners(this.props.ehrUrl).then((result) => {
-      this.setState({
-        practitionerList: result.entry,
-      });
     });
   };
 
@@ -598,6 +515,7 @@ class GFERequestBox extends Component {
     }
   };
 
+  //NATNOTE
   generateRequestInput = () => {
     let input = {
       bundleResources: [],
@@ -982,28 +900,6 @@ class GFERequestBox extends Component {
       billingProvider: this.state.selectedBillingProvider,
       gfeServiceId: this.state.gfeServiceId,
     };
-  };
-
-  updateValue = (e) => {
-    switch (e.target.id) {
-      case "total-claim-amount":
-        this.setState({
-          ...this.state,
-          totalClaim: e.target.value,
-        });
-        break;
-      case "placeOfService":
-        this.setState({
-          placeOfService: e.target.value,
-        });
-        break;
-      default:
-        break;
-    }
-  };
-
-  updateEstimatedDate = (e) => {
-    this.setState({ selectedDate: new Date(e) });
   };
 
   handleSelectInterTransId = (e) =>
@@ -1435,11 +1331,6 @@ class GFERequestBox extends Component {
     return providerMap;
   }
 
-  //sourced from: https://stackoverflow.com/questions/48031753/material-ui-tab-react-change-active-tab-onclick
-  handleChange = (event, value) => {
-    this.setState({ currentTabIndex: value });
-  };
-
   handleForward() {
     this.setState({ verticalTabIndex: this.state.verticalTabIndex + 1 });
   }
@@ -1451,42 +1342,6 @@ class GFERequestBox extends Component {
     this.setState({ verticalTabIndex: value });
   };
 
-  handleGFEChange = (event, value) => {
-    this.setState({ currentGFETabIndex: value });
-  };
-
-  handleDateStartChange = (event, value) => {
-    this.setState({ dateStart: value });
-  };
-
-  handleDateEndChange = (event, value) => {
-    this.setState({ dateEnd: value });
-  };
-
-  // Handle Add Tab Button
-  handleAddTab = () => {
-    this.setState({
-      maxTabIndex: this.state.maxTabIndex + 1,
-    });
-    this.setAddTab([
-      ...this.state.GFEtabs,
-      <Tab
-        label={`New Tab ${this.state.maxTabIndex}`}
-        key={this.state.maxTabIndex}
-      />,
-    ]);
-    this.handleTabsContent();
-  };
-
-  handleTabsContent = () => {
-    this.state.setTabsContent([
-      ...this.state.tabsContent,
-      <TabPanel currentTabIndex={this.state.currentTabIndex}>
-        New Tab Panel - {Math.random()}
-      </TabPanel>,
-    ]);
-  };
-
   render() {
     const summary = this.retrieveRequestSummary();
     const providerMap = this.getCareTeamProviderListOptions();
@@ -1495,7 +1350,6 @@ class GFERequestBox extends Component {
       this.getProfessionalBillingProviderList();
     const { classes } = this.props;
     const { currentTabIndex, verticalTabIndex } = this.state;
-
     return (
       <div>
         <Grid container space={0} justifyContent="center">
@@ -1504,7 +1358,6 @@ class GFERequestBox extends Component {
           <AppBar position="static">
             <Tabs
               value={currentTabIndex}
-              //onChange={this.handleChange} //don't want the user to click aeob button before submit gfe's
               indicatorColor="secondary"
               textColor="inherit"
               variant="fullWidth"
@@ -1544,7 +1397,7 @@ class GFERequestBox extends Component {
                     classes={{ root: classes.leftTabs }}
                   >
                     <Tab
-                      label="Subject"
+                      label={this.state.selectedPatient || "Create New Subject"}
                       {...a11yPropsVertical(0)}
                       className={classes.tabs}
                     />
