@@ -57,7 +57,6 @@ import {
   OrganizationSelect,
   PatientSelect,
   PrioritySelect,
-  getPatientDisplayName,
 } from "./SelectComponents";
 
 //GFE and AEOB tabs
@@ -152,72 +151,42 @@ class GFERequestBox extends Component {
     super(props);
     this.initialState = {
       patientList: [],
-      selectedPatient: undefined,
       patientRequestList: [],
-      patientSelected: false,
       priorityList: [],
       selectedPriority: undefined,
-      providerList: [],
-      billingProviderList: [],
       practitionerRoleList: [],
       selectedBillingProvider: undefined,
-      selectedSubmitter: undefined,
       selectedPractitioner: [],
       practitionerList: [],
-      selectedPayor: undefined,
       organizationList: [],
       selectedRequest: undefined,
       resolvedReferences: {},
-      totalClaim: 0,
-      placeOfService: undefined,
       interTransIntermediary: undefined,
       selectedDate: undefined,
       selectedProcedure: undefined,
-      selectedCoverage: undefined,
-      selectedDiagnosis: undefined,
       gfeServiceId: undefined,
       careTeamList: [{ id: 1 }],
       claimItemList: [{ id: 1 }],
       diagnosisList: [{ id: 1 }],
       procedureList: [{ id: 1 }],
-      supportingInfoType: "cmspos",
       validationErrors: undefined,
       openErrorDialog: false,
-      supportingInfoPlaceOfService: undefined,
       supportingInfoTypeOfBill: undefined,
-      currentTabIndex: 0,
-      currentGFETabIndex: 0,
-      GFEtabs: [],
-      setAddTab: [],
-      maxTabIndex: 0,
-      setTabsContent: (
-        <TabPanel currentTabIndex={this.currentTabIndex}>
-          Default Panel - {Math.random()}
-        </TabPanel>
-      ),
-      open: true,
       verticalTabIndex: 0,
       birthdate: undefined,
       gender: undefined,
       telephone: undefined,
-
-      dateStart: undefined,
-      dateEnd: new Date("2022-08-18T21:11:54"),
       selectedAddress: undefined,
-      subscriber: undefined,
       memberNumber: undefined,
-      subscriberRelationship: undefined,
-      coveragePlan: undefined,
-      coveragePeriod: undefined,
-
-      setSelectedDate: undefined,
-
-      startDate: null,
-      setStartDate: null,
-      endDate: null,
       locationList: [],
-      subject: null,
-      GFEList: [],
+      subjectInfo: {
+        selectedSubmitter: "",
+        patientList: "",
+        selectedPatient: "",
+        selectedPayor: "",
+        selectedCoverage: "",
+      },
+      gfes: {},
     };
     this.state = this.initialState;
   }
@@ -231,6 +200,7 @@ class GFERequestBox extends Component {
   };
 
   componentDidUpdate(prevProps, prevState) {
+    console.log(this.state.subjectInfo);
     if (this.props.dataServerChanged && !prevProps.dataServerChanged) {
       this.resetState();
       this.props.setDataServerChanged(false);
@@ -324,9 +294,9 @@ class GFERequestBox extends Component {
   //when select the patient, changes fields within the form specific
   handleSelectPatient = (e) => {
     const patientId = e.target.value;
-    this.setState({
-      selectedPatient: patientId,
-    });
+    // this.setState({
+    //   selectedPatient: patientId,
+    // });
 
     // retrieve coverage and payer info about patient
     //adding other patient info here too
@@ -347,14 +317,17 @@ class GFERequestBox extends Component {
             const resource = coverageResult.references[reference];
 
             this.setState({
-              selectedPayor: resource,
-              selectedCoverage: coverageResult.data,
+              subjectInfo: {
+                selectedPatient: patientId,
+                selectedPayor: resource,
+                selectedCoverage: coverageResult.data,
+                subscriber: subscriberText,
+                subscriberRelationship: relationshipText,
+                coveragePlan: planName,
+                coveragePeriod: coveragePeriod,
+              },
               selectedProcedure: undefined,
               selectedRequest: undefined,
-              subscriber: subscriberText,
-              subscriberRelationship: relationshipText,
-              coveragePlan: planName,
-              coveragePeriod: coveragePeriod,
             });
           }
         );
@@ -439,8 +412,10 @@ class GFERequestBox extends Component {
 
   handleSelectSubmitter = (e) => {
     this.setState({
-      ...this.state,
-      selectedSubmitter: e.target.value,
+      subjectInfo: {
+        ...this.state.subjectInfo,
+        selectedSubmitter: e.target.value,
+      },
     });
   };
 
@@ -505,24 +480,23 @@ class GFERequestBox extends Component {
       return {
         request: this.state.selectedProcedure,
         requestCode: code,
-        coverage: this.state.selectedCoverage,
+        coverage: this.state.subjectInfo.selectedCoverage,
         practitioner: this.state.selectedPractitioner,
       };
     } else {
       return {
-        coverage: this.state.selectedCoverage,
+        coverage: this.state.subjectInfo.selectedCoverage,
       };
     }
   };
 
-  //NATNOTE
   generateRequestInput = () => {
     let input = {
       bundleResources: [],
     };
 
     if (
-      this.state.selectedPatient === undefined &&
+      this.state.subjectInfo.selectedPatient === undefined &&
       this.state.selectedRequest === undefined
     ) {
       return input;
@@ -534,9 +508,10 @@ class GFERequestBox extends Component {
     const fhirServerBaseUrl = this.props.ehrUrl;
 
     input.patient = {
-      reference: `Patient/${this.state.selectedPatient}`,
+      reference: `Patient/${this.state.subjectInfo.selectedPatient}`,
       resource: this.state.patientList.filter(
-        (patient) => patient.resource.id === this.state.selectedPatient
+        (patient) =>
+          patient.resource.id === this.state.subjectInfo.selectedPatient
       )[0].resource,
     };
 
@@ -560,10 +535,10 @@ class GFERequestBox extends Component {
       entry: input.request.coverage.resource,
     });
 
-    let insurerOrgRef = `Organization/${this.state.selectedPayor.id}`;
+    let insurerOrgRef = `Organization/${this.state.subjectInfo.selectedPayor.id}`;
     input.insurer = {
       reference: insurerOrgRef,
-      resource: this.state.selectedPayor,
+      resource: this.state.subjectInfo.selectedPayor,
     };
 
     orgReferenceList.push(insurerOrgRef);
@@ -739,11 +714,11 @@ class GFERequestBox extends Component {
       }
     }
 
-    let submitterOrgReference = `Organization/${this.state.selectedSubmitter}`;
+    let submitterOrgReference = `Organization/${this.state.subjectInfo.selectedSubmitter}`;
     input.submitter = {
       reference: submitterOrgReference,
       resource: this.state.organizationList.filter(
-        (org) => org.resource.id === this.state.selectedSubmitter
+        (org) => org.resource.id === this.state.subjectInfo.selectedSubmitter
       )[0].resource, //undefined resource?
     };
     orgReferenceList.push(submitterOrgReference);
@@ -872,22 +847,22 @@ class GFERequestBox extends Component {
 
   retrieveRequestSummary = () => {
     return {
-      patientId: this.state.selectedPatient,
-      coverageId: this.state.selectedCoverage
-        ? this.state.selectedCoverage.id
+      patientId: this.state.subjectInfo.selectedPatient,
+      coverageId: this.state.subjectInfo.selectedCoverage
+        ? this.state.subjectInfo.selectedCoverage.id
         : undefined,
-      payorId: this.state.selectedPayor
-        ? this.state.selectedPayor.id
+      payorId: this.state.subjectInfo.selectedPayor
+        ? this.state.subjectInfo.selectedPayor.id
         : undefined,
       addressId: this.state.selectedAddress,
       birthdate: this.state.birthdate,
       gender: this.state.gender,
       telephone: this.state.telephone,
-      subscriberId: this.state.subscriber,
+      subscriberId: this.state.subjectInfo.subscriber,
       memberId: this.state.memberNumber,
-      subscriberRelationship: this.state.subscriberRelationship,
-      coveragePlan: this.state.coveragePlan,
-      coveragePeriod: this.state.coveragePeriod,
+      subscriberRelationship: this.state.subjectInfo.subscriberRelationship,
+      coveragePlan: this.state.subjectInfo.coveragePlan,
+      coveragePeriod: this.state.subjectInfo.coveragePeriod,
       practitionerSelected: this.state.careTeamList,
       practitionerRoleSelected: this.state.careTeamList,
       gfeType: this.props.gfeType,
@@ -896,7 +871,7 @@ class GFERequestBox extends Component {
       servicesList: this.state.claimItemList,
       priorityLevel: this.state.selectedPriority,
       serviceDate: this.state.selectedDate,
-      submittingProvider: this.state.selectedSubmitter,
+      submittingProvider: this.state.subjectInfo.selectedSubmitter,
       billingProvider: this.state.selectedBillingProvider,
       gfeServiceId: this.state.gfeServiceId,
     };
@@ -1397,7 +1372,10 @@ class GFERequestBox extends Component {
                     classes={{ root: classes.leftTabs }}
                   >
                     <Tab
-                      label={this.state.selectedPatient || "Create New Subject"}
+                      label={
+                        this.state.subjectInfo.selectedPatient ||
+                        "Create New Subject"
+                      }
                       {...a11yPropsVertical(0)}
                       className={classes.tabs}
                     />
@@ -1429,7 +1407,7 @@ class GFERequestBox extends Component {
                             </FormLabel>
                             {PatientSelect(
                               this.state.patientList,
-                              this.state.selectedPatient,
+                              this.state.subjectInfo.selectedPatient,
                               this.handleOpenPatients,
                               this.handleSelectPatient
                             )}
@@ -1449,12 +1427,12 @@ class GFERequestBox extends Component {
                             {this.props.gfeType === "professional"
                               ? ProfessionalBillingProviderSelect(
                                   professionalBillingProviderList,
-                                  this.state.selectedSubmitter,
+                                  this.state.subjectInfo.selectedSubmitter,
                                   this.handleSelectSubmitter
                                 )
                               : OrganizationSelect(
                                   this.state.organizationList,
-                                  this.state.selectedSubmitter,
+                                  this.state.subjectInfo.selectedSubmitter,
                                   "submitting-provider-label",
                                   "submittingProvider",
                                   this.handleOpenOrganizationList,
