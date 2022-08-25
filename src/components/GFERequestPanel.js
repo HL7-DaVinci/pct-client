@@ -178,6 +178,7 @@ class GFERequestBox extends Component {
       telephone: undefined,
       selectedAddress: undefined,
       memberNumber: undefined,
+      currentTabIndex: 0,
       locationList: [],
       subjectInfo: {},
       gfeInfo: {},
