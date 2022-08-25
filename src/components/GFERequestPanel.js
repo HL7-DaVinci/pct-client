@@ -244,6 +244,12 @@ const ProfessionalBillingProviderSelect = (providers, selectedProvider, handleSe
         {
             providers ?
                 providers.map(provider => {
+                    //filters to only receive type "provider" or providerRole
+                    if (provider.resource.type != undefined) {
+                        if (provider.resource.type[0].coding[0].code !== "prov") {
+                            return
+                        }
+                    }
                     return (<MenuItem key={provider.id} value={provider.id} >{provider.display}</MenuItem>)
                 }) : (<MenuItem />)
         }
@@ -281,6 +287,10 @@ const OrganizationSelect = (organizations, organizationSelected, label, id, hand
     <Select required labelId={label} id={id} value={organizationSelected} onOpen={handleOpen} onChange={handleSelect} style={{ backgroundColor: "#FFFFFF" }}>
         {
             organizations ? (organizations.map((org) => {
+                //filters to only receive type "provider"
+                if (org.resource.type[0].coding[0].code !== "prov") {
+                    return
+                }
                 return (<MenuItem key={org.resource.id} value={org.resource.id}>{org.resource.name}</MenuItem>)
             })) : <MenuItem />
         }
@@ -647,7 +657,7 @@ class GFERequestBox extends Component {
 
 
                 //ensure correct id for member
-                if(result[0].identifier !== undefined && result[0].identifier.length > 0 && result[0].identifier[0].type !== undefined) {
+                if (result[0].identifier !== undefined && result[0].identifier.length > 0 && result[0].identifier[0].type !== undefined) {
                     for (var i = 0; i < result[0].identifier.length; i++) {
                         for (var j = 0; j < result[0].identifier[i].type.coding.length; j++) {
                             if (result[0].identifier[i].type.coding[j].code === ("MB")) {
@@ -1223,7 +1233,7 @@ class GFERequestBox extends Component {
             billingProvider: this.state.selectedBillingProvider,
             submittingProvider: this.state.selectedSubmitter,
             gfeServiceId: this.state.gfeServiceId,
-    
+
         };
     }
 
