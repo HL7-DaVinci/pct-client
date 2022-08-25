@@ -179,14 +179,8 @@ class GFERequestBox extends Component {
       selectedAddress: undefined,
       memberNumber: undefined,
       locationList: [],
-      subjectInfo: {
-        selectedSubmitter: "",
-        patientList: "",
-        selectedPatient: "",
-        selectedPayor: "",
-        selectedCoverage: "",
-      },
-      gfes: {},
+      subjectInfo: {},
+      gfeInfo: {},
     };
     this.state = this.initialState;
   }
@@ -294,9 +288,6 @@ class GFERequestBox extends Component {
   //when select the patient, changes fields within the form specific
   handleSelectPatient = (e) => {
     const patientId = e.target.value;
-    // this.setState({
-    //   selectedPatient: patientId,
-    // });
 
     // retrieve coverage and payer info about patient
     //adding other patient info here too
