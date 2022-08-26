@@ -238,18 +238,33 @@ const PrioritySelect = (priorities, selectPriority, handleOpenPriorities, handle
 }
 
 
-const ProfessionalBillingProviderSelect = (providers, selectedProvider, handleSelect) => {
+const ProfessionalBillingProviderSelect = (providers, selectedProvider, handleSelect, id) => {
 
     return (<Select required labelId="select-billing-provider-label" id="billing-provider" value={selectedProvider} onChange={handleSelect} style={{ backgroundColor: "#FFFFFF" }}>
         {
             providers ?
                 providers.map(provider => {
-                    //filters to only receive type "provider" or providerRole
-                    if (provider.resource.type != undefined) {
-                        if (provider.resource.type[0].coding[0].code !== "prov") {
-                            return
+
+                    //for billing provider field, let only "prov" be options
+                    if (id == "billingProvider") {
+                        if (provider.resource.type != undefined) {
+                            if (provider.resource.type[0].coding[0].code !== "prov") {
+                                return
+                            }
                         }
                     }
+
+                    //for submitting provider field, let all except payers to be options
+                    if (id == "submittingProvider") {
+                        if (provider.resource.type != undefined) {
+                            if (provider.resource.type[0].coding[0].code === "pay") {
+                                return
+                            }
+                        }
+                    }
+
+
+
                     return (<MenuItem key={provider.id} value={provider.id} >{provider.display}</MenuItem>)
                 }) : (<MenuItem />)
         }
@@ -287,10 +302,21 @@ const OrganizationSelect = (organizations, organizationSelected, label, id, hand
     <Select required labelId={label} id={id} value={organizationSelected} onOpen={handleOpen} onChange={handleSelect} style={{ backgroundColor: "#FFFFFF" }}>
         {
             organizations ? (organizations.map((org) => {
-                //filters to only receive type "provider"
-                if (org.resource.type[0].coding[0].code !== "prov") {
-                    return
+
+                //for billing provider field, let only "prov" be options
+                if (id == "billingProvider") {
+                    if (org.resource.type[0].coding[0].code !== "prov") {
+                        return
+                    }
                 }
+
+                //for submitting provider field, let all except payers to be options
+                if (id == "submittingProvider") {
+                    if (org.resource.type[0].coding[0].code === "pay") {
+                        return
+                    }
+                }
+
                 return (<MenuItem key={org.resource.id} value={org.resource.id}>{org.resource.name}</MenuItem>)
             })) : <MenuItem />
         }
@@ -1903,7 +1929,7 @@ class GFERequestBox extends Component {
                                                             </Grid>
 
                                                             {this.props.gfeType === "professional" ?
-                                                                ProfessionalBillingProviderSelect(professionalBillingProviderList, this.state.selectedBillingProvider, this.handleSelectBillingProvider)
+                                                                ProfessionalBillingProviderSelect(professionalBillingProviderList, this.state.selectedBillingProvider, this.handleSelectBillingProvider, "billingProvider")
                                                                 :
                                                                 OrganizationSelect(this.state.organizationList, this.state.selectedBillingProvider, "billing-provider-label", "billingProvider", this.handleOpenOrganizationList, this.handleSelectBillingProvider)
                                                             }
@@ -1923,7 +1949,7 @@ class GFERequestBox extends Component {
                                                                 </Box>
                                                             </Grid>
                                                             {this.props.gfeType === "professional" ?
-                                                                ProfessionalBillingProviderSelect(professionalBillingProviderList, this.state.selectedSubmitter, this.handleSelectSubmitter)
+                                                                ProfessionalBillingProviderSelect(professionalBillingProviderList, this.state.selectedSubmitter, this.handleSelectSubmitter, "submittingProvider")
                                                                 :
                                                                 OrganizationSelect(this.state.organizationList, this.state.selectedSubmitter, "submitting-provider-label", "submittingProvider", this.handleOpenOrganizationList, this.handleSelectSubmitter)
                                                             }
