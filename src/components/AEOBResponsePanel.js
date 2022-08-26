@@ -189,8 +189,6 @@ export default function AEOBResponsePanel(props) {
     const [aeobInquiryOutcome, setAeobInquiryOutcome] = useState(undefined);
     const [currentTabIndex, setCurrentTabIndex] = useState(1);
 
-    let outcome = jp.query(props, '$..[?(@.resourceType == "ExplanationOfBenefit")].outcome')[0];
-
     useEffect(() => {
         if (props.dataServerChanged || props.payerServerChanged || props.receivedAEOBResponse === undefined) {
             setAeobInquirySubmitted(false);
@@ -387,19 +385,6 @@ export default function AEOBResponsePanel(props) {
             window.location.reload(false);
             return false;
         }
-    }
-
-    //sleep in js https://www.codegrepper.com/code-examples/javascript/sleep+in+react+js
-    const sleep = (milliseconds) => {
-        return new Promise(execute => setTimeout(execute, milliseconds))
-    }
-
-    function getUpdatedOutcome() {
-        while (outcome !== "complete") {
-            outcome = jp.query(props, '$..[?(@.resourceType == "ExplanationOfBenefit")].outcome')[0];
-            sleep(3000)
-        }
-        return
     }
 
 
@@ -672,8 +657,7 @@ export default function AEOBResponsePanel(props) {
                                 </Grid>
                                 <Grid item>
                                     <Typography variant="body1" gutterBottom>
-                                        <b>Outcome:</b> {outcome}
-                                        {getUpdatedOutcome()}
+                                        <b>Outcome:</b> {aeobInquiryOutcome}
                                     </Typography>
                                 </Grid>
                                 <Grid item>
