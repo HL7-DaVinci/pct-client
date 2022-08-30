@@ -19,6 +19,11 @@ import {
   Tab,
   AppBar,
 } from "@material-ui/core";
+import List from "@mui/material/List";
+import ListItem from "@mui/material/ListItem";
+import ListItemButton from "@mui/material/ListItemButton";
+import ListItemText from "@mui/material/ListItemText";
+import ListSubheader from "@mui/material/ListSubheader";
 
 import {
   getPatients,
@@ -59,6 +64,7 @@ import {
   PrioritySelect,
 } from "./SelectComponents";
 
+import { v4 } from "uuid";
 //GFE and AEOB tabs
 function TabPanel(props) {
   const { children, value, index, ...other } = props;
@@ -145,10 +151,20 @@ function a11yPropsVertical(index) {
     "aria-controls": `vertical-tabpanel-${index}`,
   };
 }
+const GFETemplate = {
+  careTeamList: [{ id: v4() }],
+  diagnosisList: [{ id: v4() }],
+  procedureList: [{ id: v4() }],
+  claimItemList: [{ id: v4() }],
+};
 
 class GFERequestBox extends Component {
   constructor(props) {
     super(props);
+    const startingGFEId = v4();
+    const initialGFEInfo = {};
+
+    initialGFEInfo[startingGFEId] = GFETemplate;
     this.initialState = {
       patientList: [],
       patientRequestList: [],
@@ -165,23 +181,16 @@ class GFERequestBox extends Component {
       selectedDate: undefined,
       selectedProcedure: undefined,
       gfeServiceId: undefined,
-      careTeamList: [{ id: 1 }],
-      claimItemList: [{ id: 1 }],
-      diagnosisList: [{ id: 1 }],
-      procedureList: [{ id: 1 }],
       validationErrors: undefined,
       openErrorDialog: false,
       supportingInfoTypeOfBill: undefined,
       verticalTabIndex: 0,
-      birthdate: undefined,
-      gender: undefined,
-      telephone: undefined,
-      selectedAddress: undefined,
       memberNumber: undefined,
       currentTabIndex: 0,
       locationList: [],
       subjectInfo: {},
-      gfeInfo: {},
+      gfeInfo: initialGFEInfo,
+      selectedGFE: startingGFEId,
     };
     this.state = this.initialState;
   }
@@ -194,8 +203,19 @@ class GFERequestBox extends Component {
     this.setState({ endDate: date });
   };
 
+  handleAddGFE = () => {
+    const gfeInfo = { ...this.state.gfeInfo };
+    gfeInfo[v4()] = GFETemplate;
+    this.setState({ gfeInfo });
+  };
+
+  handleDeleteGFE = (id) => {
+    const gfeInfo = { ...this.state.gfeInfo };
+    delete gfeInfo[id];
+    this.setState({ ...gfeInfo });
+  };
   componentDidUpdate(prevProps, prevState) {
-    console.log(this.state.subjectInfo);
+    console.log(this.state);
     if (this.props.dataServerChanged && !prevProps.dataServerChanged) {
       this.resetState();
       this.props.setDataServerChanged(false);
@@ -301,29 +321,37 @@ class GFERequestBox extends Component {
 
       const coveragePeriod =
         coveragePeriodTextStart + " to " + coveragePeriodTextEnd;
-
       if (result.data && result.data.length > 0) {
         getCoverage(this.props.ehrUrl, result.data[0].id).then(
           (coverageResult) => {
             const reference = Object.keys(coverageResult.references)[0];
             const resource = coverageResult.references[reference];
 
-            this.setState({
-              subjectInfo: {
-                selectedPatient: patientId,
-                selectedPayor: resource,
-                selectedCoverage: coverageResult.data,
-                subscriber: subscriberText,
-                subscriberRelationship: relationshipText,
-                coveragePlan: planName,
-                coveragePeriod: coveragePeriod,
-              },
-              selectedProcedure: undefined,
-              selectedRequest: undefined,
-            });
+            let subjectInfo = {
+              ...this.state.subjectInfo,
+              selectedPatient: patientId,
+              selectedPayor: resource,
+              selectedCoverage: coverageResult.data,
+              subscriber: subscriberText,
+              subscriberRelationship: relationshipText,
+              coveragePlan: planName,
+              coveragePeriod: coveragePeriod,
+            };
+            this.setState({ subjectInfo });
           }
         );
       } else {
+        let subjectInfo = {
+          ...this.state.subjectInfo,
+          selectedPatient: patientId,
+          selectedPayor: undefined,
+          selectedCoverage: undefined,
+          subscriber: undefined,
+          subscriberRelationship: undefined,
+          coveragePlan: undefined,
+          coveragePeriod: undefined,
+        };
+        this.setState({ subjectInfo });
         console.log("couldn't retrieve patient's coverage and payor info");
       }
     });
@@ -334,7 +362,7 @@ class GFERequestBox extends Component {
       const genderText = result[0].gender;
       const telephoneText =
         result[0].telecom !== undefined ? result[0].telecom[0].value : null;
-
+      let memberNumber;
       //ensure correct id for member
       if (
         result[0].identifier !== undefined &&
@@ -344,42 +372,54 @@ class GFERequestBox extends Component {
         for (var i = 0; i < result[0].identifier.length; i++) {
           for (var j = 0; j < result[0].identifier[i].type.coding.length; j++) {
             if (result[0].identifier[i].type.coding[j].code === "MB") {
-              const memberNumText = result[0].identifier[0].value;
-              this.setState({
-                memberNumber: memberNumText,
-              });
+              memberNumber = result[0].identifier[0].value;
             }
           }
         }
       }
 
       if (addressText && addressText.length > 0) {
-        this.setState({
+        let subjectInfo = {
+          ...this.state.subjectInfo,
           selectedAddress: addressText,
           birthdate: birthdateText,
           gender: genderText,
           telephone: telephoneText,
-        });
+          memberNumber,
+        };
+        this.setState({ subjectInfo });
       } else {
+        let subjectInfo = {
+          ...this.state.subjectInfo,
+          selectedAddress: undefined,
+          birthdate: undefined,
+          gender: undefined,
+          telephone: undefined,
+          memberNumber,
+        };
+        this.setState({ subjectInfo });
         console.log("couldn't retrieve patient's personal info");
       }
     });
-
     this.setState({
+      selectedProcedure: undefined,
+      selectedRequest: undefined,
       patientSelected: true,
     });
   };
 
   handleSelectPriority = (e) => {
     const prioritylevel = e.target.value;
-    this.setState({
-      selectedPriority: prioritylevel,
-    });
+    const gfeInfo = { ...this.state.gfeInfo };
+    gfeInfo[this.state.selectedGFE].priorityLevel = prioritylevel;
+    this.setState({ gfeInfo });
   };
 
   handleSelectBillingProvider = (e) => {
+    const gfeInfo = { ...this.state.gfeInfo };
+    gfeInfo[this.state.selectedGFE].selectedBillingProvider = e.target.value;
     this.setState({
-      selectedBillingProvider: e.target.value,
+      gfeInfo,
     });
   };
 
@@ -846,47 +886,60 @@ class GFERequestBox extends Component {
       payorId: this.state.subjectInfo.selectedPayor
         ? this.state.subjectInfo.selectedPayor.id
         : undefined,
-      addressId: this.state.selectedAddress,
-      birthdate: this.state.birthdate,
-      gender: this.state.gender,
-      telephone: this.state.telephone,
+      addressId: this.state.subjectInfo.selectedAddress,
+      birthdate: this.state.subjectInfo.birthdate,
+      gender: this.state.subjectInfo.gender,
+      telephone: this.state.subjectInfo.telephone,
       subscriberId: this.state.subjectInfo.subscriber,
-      memberId: this.state.memberNumber,
+      memberId: this.state.subjectInfo.memberNumber,
       subscriberRelationship: this.state.subjectInfo.subscriberRelationship,
       coveragePlan: this.state.subjectInfo.coveragePlan,
       coveragePeriod: this.state.subjectInfo.coveragePeriod,
-      practitionerSelected: this.state.careTeamList,
-      practitionerRoleSelected: this.state.careTeamList,
+      practitionerSelected:
+        this.state.gfeInfo[this.state.selectedGFE].careTeamList,
+      practitionerRoleSelected:
+        this.state.gfeInfo[this.state.selectedGFE].careTeamList,
       gfeType: this.props.gfeType,
-      diagnosisList: this.state.diagnosisList,
-      procedureList: this.state.procedureList,
-      servicesList: this.state.claimItemList,
-      priorityLevel: this.state.selectedPriority,
+      diagnosisList: this.state.gfeInfo[this.state.selectedGFE].diagnosisList,
+      procedureList: this.state.gfeInfo[this.state.selectedGFE].procedureList,
+      servicesList: this.state.gfeInfo[this.state.selectedGFE].claimItemList,
+      priorityLevel:
+        this.state.gfeInfo[this.state.selectedGFE].selectedPriority,
       serviceDate: this.state.selectedDate,
       submittingProvider: this.state.subjectInfo.selectedSubmitter,
-      billingProvider: this.state.selectedBillingProvider,
-      gfeServiceId: this.state.gfeServiceId,
+      billingProvider:
+        this.state.gfeInfo[this.state.selectedGFE].selectedBillingProvider,
+      gfeServiceId: this.state.gfeInfo[this.state.selectedGFE].gfeServiceId,
     };
   };
 
-  handleSelectInterTransId = (e) =>
+  handleSelectInterTransId = (e) => {
+    const gfeInfo = { ...this.state.gfeInfo };
+    gfeInfo[this.state.selectedGFE].interTransIntermediary = e.target.value;
     this.setState({ interTransIntermediary: e.target.value });
-
-  handleSelectGfeServiceId = (e) =>
-    this.setState({ gfeServiceId: e.target.value });
-
-  handleSelectDiagnosis = (e) =>
-    this.setState({ selectedDiagnosis: e.target.value });
+  };
+  handleSelectGfeServiceId = (e) => {
+    const gfeInfo = { ...this.state.gfeInfo };
+    gfeInfo[this.state.selectedGFE].gfeServiceId = e.target.value;
+    this.setState({ gfeInfo });
+  };
 
   handleSupportingInfoTypeOfBill = (e) => {
-    this.setState({ supportingInfoTypeOfBill: e.target.value });
+    const gfeInfo = { ...this.state.gfeInfo };
+    gfeInfo[this.state.selectedGFE].supportingInfoTypeOfBill = e.target.value;
+    this.setState({ gfeInfo });
   };
 
   addOneCareTeam = (props) => {
     //checks if the required fields are not given, if not adds to missingItems list
     let missingItems = [];
-    for (let i = 0; i < this.state.careTeamList.length; i++) {
-      let currentRow = this.state.careTeamList[i];
+    for (
+      let i = 0;
+      i < this.state.gfeInfo[this.state.selectedGFE].careTeamList.length;
+      i++
+    ) {
+      let currentRow =
+        this.state.gfeInfo[this.state.selectedGFE].careTeamList[i];
       for (let j = 0; j < props.length; j++) {
         if (props[j].required === true) {
           let columnName = props[j].field;
@@ -903,14 +956,21 @@ class GFERequestBox extends Component {
       return;
     }
 
-    let newId = this.state.careTeamList.length + 1;
+    let newId =
+      this.state.gfeInfo[this.state.selectedGFE].careTeamList.length + 1;
 
     //when you delete item 1 out of 2 items, adjust the next id to the next available id vacant
-    let proposedId = this.state.careTeamList.length + 1;
+    let proposedId =
+      this.state.gfeInfo[this.state.selectedGFE].careTeamList.length + 1;
 
     //checks if proposedId already exists within the list (comparedId), if so will keep incrementing until finds vacant id
-    for (let i = 0; i < this.state.careTeamList.length; i++) {
-      let comparedId = this.state.careTeamList[i].id;
+    for (
+      let i = 0;
+      i < this.state.gfeInfo[this.state.selectedGFE].careTeamList.length;
+      i++
+    ) {
+      let comparedId =
+        this.state.gfeInfo[this.state.selectedGFE].careTeamList[i].id;
 
       //if see a matching id, we inc the proposed id and it will repeat the loop
       if (comparedId === proposedId) {
@@ -919,20 +979,28 @@ class GFERequestBox extends Component {
       }
     }
     newId = proposedId;
-
-    this.setState({
-      careTeamList: [...this.state.careTeamList, { id: newId }],
-    });
+    const gfeInfo = { ...this.state.gfeInfo };
+    gfeInfo[this.state.selectedGFE].careTeamList = [
+      ...gfeInfo[this.state.selectedGFE].careTeamList,
+      { id: newId },
+    ];
+    this.setState({ gfeInfo });
   };
 
   deleteOneCareTeam = (id) => {
+    const gfeInfo = { ...this.state.gfeInfo };
+    const newCareTeamList = gfeInfo[this.state.selectedGFE].careTeamList.filter(
+      (item) => item.id !== id
+    );
+    gfeInfo[this.state.selectedGFE].careTeamList = newCareTeamList;
     this.setState({
-      careTeamList: this.state.careTeamList.filter((item) => item.id !== id),
+      gfeInfo,
     });
   };
 
   editCareTeam = (model) => {
     let id, fieldObject, fieldName, fieldValueObject, fieldValue;
+    console.log(model);
     for (let prop in model) {
       id = prop;
       fieldObject = model[id];
@@ -947,25 +1015,30 @@ class GFERequestBox extends Component {
       fieldValue = fieldValueObject.value;
     }
     if (id && fieldName && fieldValue) {
-      this.setState({
-        careTeamList: this.state.careTeamList.map((item) => {
-          if (item.id === parseInt(id)) {
-            item[fieldName] = fieldValue;
+      const gfeInfo = { ...this.state.gfeInfo };
+      gfeInfo[this.state.selectedGFE].careTeamList = gfeInfo[
+        this.state.selectedGFE
+      ].careTeamList.map((item) => {
+        if (item.id === parseInt(id)) {
+          item[fieldName] = fieldValue;
 
-            return item;
-          } else {
-            return item;
-          }
-        }),
+          return item;
+        } else {
+          return item;
+        }
       });
+
+      this.setState({ gfeInfo });
     }
   };
 
   addOneClaimItem = (props) => {
     //checks if the required fields are not given, if not adds to missingItems list
+    const claimItemList =
+      this.state.gfeInfo[this.state.selectedGFE].claimItemList;
     let missingItems = [];
-    for (let i = 0; i < this.state.claimItemList.length; i++) {
-      let currentRow = this.state.claimItemList[i];
+    for (let i = 0; i < claimItemList.length; i++) {
+      let currentRow = claimItemList[i];
       for (let j = 0; j < props.length; j++) {
         if (props[j].required === true) {
           let columnName = props[j].field;
@@ -982,31 +1055,21 @@ class GFERequestBox extends Component {
       return;
     }
 
-    let newId = this.state.claimItemList.length + 1;
-
-    //when you delete item 1 out of 2 items, adjust the next id to the next available id vacant
-    let proposedId = this.state.claimItemList.length + 1;
-
-    //see if the id we are adding next exists within the list already (will add the next id to be the highest number in the list)
-    for (let i = 0; i < this.state.claimItemList.length; i++) {
-      let comparedId = this.state.claimItemList[i].id;
-
-      //if see a matching id, we add one to the proposed id and it will repeat the loop
-      if (comparedId === proposedId) {
-        i = 0;
-        proposedId += 1;
-      }
-    }
-    newId = proposedId;
-    this.setState({
-      claimItemList: [...this.state.claimItemList, { id: newId }],
-    });
+    const newId = v4();
+    const gfeInfo = { ...this.state.gfeInfo };
+    gfeInfo[this.state.selectedGFE].claimItemList = [
+      ...gfeInfo[this.state.selectedGFE].claimItemList,
+      { id: newId },
+    ];
+    this.setState({ gfeInfo });
   };
 
   deleteOneClaimItem = (id) => {
-    this.setState({
-      claimItemList: this.state.claimItemList.filter((item) => item.id !== id),
-    });
+    const gfeInfo = { ...this.state.gfeInfo };
+    gfeInfo[this.state.selectedGFE].claimItemList = gfeInfo[
+      this.state.selectedGFE
+    ].claimItemList.filter((item) => item.id !== id);
+    this.setState({ gfeInfo });
   };
 
   editClaimItem = (model) => {
@@ -1042,9 +1105,6 @@ class GFERequestBox extends Component {
           break;
         case "estimatedDateOfService":
           const setDate = moment(fieldValue).format("YYYY-MM-DD");
-          this.setState({
-            selectedDate: setDate,
-          });
           const today = new Date();
           if (today > setDate) {
             valid = false;
@@ -1057,16 +1117,16 @@ class GFERequestBox extends Component {
       }
 
       if (valid) {
-        this.setState({
-          claimItemList: this.state.claimItemList.map((item) => {
-            if (item.id === parseInt(id)) {
-              item[fieldName] = fieldValue;
-              return item;
-            } else {
-              return item;
-            }
-          }),
+        const gfeInfo = { ...this.state.gfeInfo };
+        gfeInfo[this.state.selectedGFE].claimItemList.map((item) => {
+          if (item.id === id) {
+            item[fieldName] = fieldValue;
+            return item;
+          } else {
+            return item;
+          }
         });
+        this.setState({ gfeInfo });
       } else {
         alert("Error occurred. " + errorMsg);
       }
@@ -1075,9 +1135,10 @@ class GFERequestBox extends Component {
 
   addOneDiagnosisItem = (props) => {
     //checks if the required fields are not given, if not adds to missingItems list
+    const diagnosisList = this.state.gfeInfo[this.state.selectedGFE];
     let missingItems = [];
-    for (let i = 0; i < this.state.diagnosisList.length; i++) {
-      let currentRow = this.state.diagnosisList[i];
+    for (let i = 0; i < diagnosisList.length; i++) {
+      let currentRow = diagnosisList[i];
       for (let j = 0; j < props.length; j++) {
         if (props[j].required === true) {
           let columnName = props[j].field;
@@ -1094,31 +1155,21 @@ class GFERequestBox extends Component {
       return;
     }
 
-    let newId = this.state.diagnosisList.length + 1;
-
-    //when you delete item 1 out of 2 items, adjust the next id to the next available id vacant
-    let proposedId = this.state.diagnosisList.length + 1;
-
-    //checks if proposedId already exists within the list (comparedId), if so will keep incrementing until finds vacant id
-    for (let i = 0; i < this.state.diagnosisList.length; i++) {
-      let comparedId = this.state.diagnosisList[i].id;
-
-      //if see a matching id, we inc the proposed id and it will repeat the loop
-      if (comparedId === proposedId) {
-        i = 0;
-        proposedId += 1;
-      }
-    }
-    newId = proposedId;
-    this.setState({
-      diagnosisList: [...this.state.diagnosisList, { id: newId }],
-    });
+    const newId = v4();
+    const gfeInfo = { ...this.state.gfeInfo };
+    console.log(gfeInfo);
+    gfeInfo[this.state.selectedGFE].diagnosisList = [
+      ...gfeInfo[this.state.selectedGFE].diagnosisList,
+      { id: newId },
+    ];
+    this.setState({ gfeInfo });
   };
 
   deleteOneDiagnosisItem = (id) => {
-    this.setState({
-      diagnosisList: this.state.diagnosisList.filter((item) => item.id !== id),
-    });
+    const gfeInfo = { ...this.state.gfeInfo };
+    gfeInfo[this.state.selectedGFE].diagnosisList =
+      this.state.diagnosisList.filter((item) => item.id !== id);
+    this.setState({ gfeInfo });
   };
 
   editDiagnosisItem = (model) => {
@@ -1127,34 +1178,41 @@ class GFERequestBox extends Component {
       id = prop;
       fieldObject = model[id];
     }
+    console.log(model);
+    console.log(fieldObject);
     if (fieldObject) {
       for (let name in fieldObject) {
         fieldName = name;
       }
       fieldValueObject = fieldObject[fieldName];
     }
+    console.log();
     if (fieldValueObject) {
       fieldValue = fieldValueObject.value;
     }
     if (id && fieldName && fieldValue) {
-      this.setState({
-        diagnosisList: this.state.diagnosisList.map((item) => {
-          if (item.id === parseInt(id)) {
-            item[fieldName] = fieldValue;
-            return item;
-          } else {
-            return item;
-          }
-        }),
+      const gfeInfo = { ...this.state.gfeInfo };
+      gfeInfo[this.state.selectedGFE].diagnosisList = this.state.gfeInfo[
+        this.state.selectedGFE
+      ].diagnosisList.map((item) => {
+        if (item.id === id) {
+          item[fieldName] = fieldValue;
+          return item;
+        } else {
+          return item;
+        }
       });
+      this.setState({ gfeInfo });
     }
   };
 
   addOneProcedureItem = (props) => {
     //checks if the required fields are not given, if not adds to missingItems list
+    const procedureList =
+      this.state.gfeInfo[this.state.selectedGFE].procedureList;
     let missingItems = [];
-    for (let i = 0; i < this.state.procedureList.length; i++) {
-      let currentRow = this.state.procedureList[i];
+    for (let i = 0; i < procedureList.length; i++) {
+      let currentRow = procedureList[i];
       for (let j = 0; j < props.length; j++) {
         if (props[j].required === true) {
           let columnName = props[j].field;
@@ -1171,31 +1229,21 @@ class GFERequestBox extends Component {
       return;
     }
 
-    let newId = this.state.procedureList.length + 1;
-
-    //when you delete item 1 out of 2 items, adjust the next id to the next available id vacant
-    let proposedId = this.state.procedureList.length + 1;
-
-    //checks if proposedId already exists within the list (comparedId), if so will keep incrementing until finds vacant id
-    for (let i = 0; i < this.state.procedureList.length; i++) {
-      let comparedId = this.state.procedureList[i].id;
-
-      //if see a matching id, we inc the proposed id and it will repeat the loop
-      if (comparedId == proposedId) {
-        i = 0;
-        proposedId += 1;
-      }
-    }
-    newId = proposedId;
-    this.setState({
-      procedureList: [...this.state.procedureList, { id: newId }],
-    });
+    const newId = v4();
+    const gfeInfo = { ...this.state.gfeInfo };
+    gfeInfo[this.state.selectedGFE].procedureList = [
+      ...gfeInfo[this.state.selectedGFE].procedureList,
+      { id: newId },
+    ];
+    this.setState({ gfeInfo });
   };
 
   deleteOneProcedureItem = (id) => {
-    this.setState({
-      procedureList: this.state.procedureList.filter((item) => item.id !== id),
-    });
+    const gfeInfo = { ...this.state.gfeInfo };
+    gfeInfo[this.state.selectedGFE].procedureList = this.state.gfeInfo[
+      this.state.selectedGFE
+    ].procedureList.filter((item) => item.id !== id);
+    this.setState({ gfeInfo });
   };
 
   editProcedureItem = (model) => {
@@ -1214,15 +1262,19 @@ class GFERequestBox extends Component {
       fieldValue = fieldValueObject.value;
     }
     if (id && fieldName && fieldValue) {
+      const gfeInfo = { ...this.state.gfeInfo };
+      gfeInfo[this.state.selectedGFE].procedureList = this.state.gfeInfo[
+        this.state.selectedGFE
+      ].procedureList.map((item) => {
+        if (item.id === id) {
+          item[fieldName] = fieldValue;
+          return item;
+        } else {
+          return item;
+        }
+      });
       this.setState({
-        procedureList: this.state.procedureList.map((item) => {
-          if (item.id === parseInt(id)) {
-            item[fieldName] = fieldValue;
-            return item;
-          } else {
-            return item;
-          }
-        }),
+        gfeInfo,
       });
     }
   };
@@ -1351,42 +1403,66 @@ class GFERequestBox extends Component {
                     height: "100vh",
                   }}
                 >
-                  <Tabs
-                    TabIndicatorProps={{
-                      style: { backgroundColor: "#3355FF" },
+                  <Box
+                    sx={{
+                      flexDirection: "column",
+                      justifyContent: "spaceBetween",
                     }}
-                    orientation="vertical"
-                    variant="scrollable"
-                    value={verticalTabIndex}
-                    onChange={this.handleVerticalChange}
-                    aria-label="Vertical tabs example"
-                    sx={{ borderRight: 1, borderColor: "divider" }}
-                    classes={{ root: classes.leftTabs }}
                   >
-                    <Tab
-                      label={
-                        this.state.subjectInfo.selectedPatient ||
-                        "Create New Subject"
-                      }
-                      {...a11yPropsVertical(0)}
-                      className={classes.tabs}
-                    />
-                    <Tab
-                      label="Care Team"
-                      {...a11yPropsVertical(1)}
-                      className={classes.tabs}
-                    />
-                    <Tab
-                      label="Encounter"
-                      {...a11yPropsVertical(2)}
-                      className={classes.tabs}
-                    />
-                    <Tab
-                      label="Summary"
-                      {...a11yPropsVertical(3)}
-                      className={classes.tabs}
-                    />
-                  </Tabs>
+                    <List dense={true}>
+                      <ListSubheader>Subject</ListSubheader>
+                      <ListItem>
+                        <ListItemButton
+                          onClick={() => this.handleVerticalChange(null, 0)}
+                        >
+                          <ListItemText>
+                            {this.state.subjectInfo.selectedPatient ||
+                              "Create New Patient"}
+                          </ListItemText>
+                        </ListItemButton>
+                      </ListItem>
+                      <ListSubheader>GFEs</ListSubheader>
+                      {Object.keys(this.state.gfeInfo).map((id) => {
+                        return (
+                          <ListItem>
+                            <ListItemButton
+                              onClick={() => this.setState({ selectedGFE: id })}
+                            >
+                              <ListItemText>{id}</ListItemText>
+                            </ListItemButton>
+                          </ListItem>
+                        );
+                      })}
+                      <ListItem>
+                        <ListItemButton onClick={this.handleAddGFE}>
+                          <ListItemText>Create New GFE</ListItemText>
+                        </ListItemButton>
+                      </ListItem>
+                    </List>
+                    <List dense={true}>
+                      <ListItem>
+                        <ListItemButton
+                          onClick={() => this.handleVerticalChange(null, 1)}
+                        >
+                          <ListItemText>Care Team</ListItemText>
+                        </ListItemButton>
+                      </ListItem>
+                      <ListItem>
+                        <ListItemButton
+                          onClick={() => this.handleVerticalChange(null, 2)}
+                        >
+                          <ListItemText>{"Encounter"}</ListItemText>
+                        </ListItemButton>
+                      </ListItem>
+                      <ListItem>
+                        <ListItemButton
+                          onClick={() => this.handleVerticalChange(null, 3)}
+                        >
+                          <ListItemText>{"Summary"}</ListItemText>
+                        </ListItemButton>
+                      </ListItem>
+                    </List>
+                  </Box>
 
                   {/* Patient tab */}
                   <TabPanel value={verticalTabIndex} index={0}>
@@ -1403,6 +1479,41 @@ class GFERequestBox extends Component {
                               this.handleOpenPatients,
                               this.handleSelectPatient
                             )}
+                          </FormControl>
+                        </Grid>
+                        <Grid item className={classes.paper}>
+                          <FormControl>
+                            <Grid>
+                              <Box>
+                                <b>
+                                  <Typography variant="subtitle1">
+                                    GFE Type:
+                                  </Typography>
+                                </b>
+                              </Box>
+                            </Grid>
+
+                            <RadioGroup
+                              row
+                              aria-label="GFE Type"
+                              name="row-radio-buttons-group"
+                              value={this.props.gfeType}
+                              onChange={(e) =>
+                                this.props.setGfeType(e.target.value)
+                              }
+                              defaultValue={this.props.gfeType}
+                            >
+                              <FormControlLabel
+                                value="institutional"
+                                control={<Radio size="small" />}
+                                label="Institutional"
+                              />
+                              <FormControlLabel
+                                value="professional"
+                                control={<Radio size="small" />}
+                                label="Professional"
+                              />
+                            </RadioGroup>
                           </FormControl>
                         </Grid>
                         <Grid item className={classes.paper}>
@@ -1467,42 +1578,6 @@ class GFERequestBox extends Component {
                         <Grid container direction="column">
                           <Grid item className={classes.paper}>
                             <FormControl>
-                              <Grid>
-                                <Box>
-                                  <b>
-                                    <Typography variant="subtitle1">
-                                      GFE Type:
-                                    </Typography>
-                                  </b>
-                                </Box>
-                              </Grid>
-
-                              <RadioGroup
-                                row
-                                aria-label="GFE Type"
-                                name="row-radio-buttons-group"
-                                value={this.props.gfeType}
-                                onChange={(e) =>
-                                  this.props.setGfeType(e.target.value)
-                                }
-                                defaultValue={this.props.gfeType}
-                              >
-                                <FormControlLabel
-                                  value="institutional"
-                                  control={<Radio size="small" />}
-                                  label="Institutional"
-                                />
-                                <FormControlLabel
-                                  value="professional"
-                                  control={<Radio size="small" />}
-                                  label="Professional"
-                                />
-                              </RadioGroup>
-                            </FormControl>
-                          </Grid>
-
-                          <Grid item className={classes.paper}>
-                            <FormControl>
                               <Grid item>
                                 <Box sx={{ mb: 1 }}>
                                   <b>
@@ -1516,12 +1591,14 @@ class GFERequestBox extends Component {
                               {this.props.gfeType === "professional"
                                 ? ProfessionalBillingProviderSelect(
                                     professionalBillingProviderList,
-                                    this.state.selectedBillingProvider,
+                                    this.state.gfeInfo[this.state.selectedGFE]
+                                      .selectedBillingProvider,
                                     this.handleSelectBillingProvider
                                   )
                                 : OrganizationSelect(
                                     this.state.organizationList,
-                                    this.state.selectedBillingProvider,
+                                    this.state.gfeInfo[this.state.selectedGFE]
+                                      .selectedBillingProvider,
                                     "billing-provider-label",
                                     "billingProvider",
                                     this.handleOpenOrganizationList,
@@ -1553,7 +1630,10 @@ class GFERequestBox extends Component {
                           }}
                         >
                           <CareTeam
-                            rows={this.state.careTeamList}
+                            rows={
+                              this.state.gfeInfo[this.state.selectedGFE]
+                                .careTeamList
+                            }
                             providerList={providerListOptions}
                             addOne={this.addOneCareTeam}
                             edit={this.editCareTeam}
@@ -1621,7 +1701,8 @@ class GFERequestBox extends Component {
                               </FormLabel>
                               {PrioritySelect(
                                 this.state.priorityList,
-                                this.state.selectedPriority,
+                                this.state.gfeInfo[this.state.selectedGFE]
+                                  .selectedPriority,
                                 this.handleOpenPriority,
                                 this.handleSelectPriority
                               )}
@@ -1642,7 +1723,11 @@ class GFERequestBox extends Component {
                                     }}
                                   >
                                     <DiagnosisItem
-                                      rows={this.state.diagnosisList}
+                                      rows={
+                                        this.state.gfeInfo[
+                                          this.state.selectedGFE
+                                        ].diagnosisList
+                                      }
                                       addOne={this.addOneDiagnosisItem}
                                       edit={this.editDiagnosisItem}
                                       deleteOne={this.deleteOneDiagnosisItem}
@@ -1660,7 +1745,9 @@ class GFERequestBox extends Component {
                                       id="supportingInfoTypeOfBill"
                                       variant="standard"
                                       value={
-                                        this.state.supportingInfoTypeOfBill
+                                        this.state.gfeInfo[
+                                          this.state.selectedGFE
+                                        ].supportingInfoTypeOfBill
                                       }
                                       onChange={
                                         this.handleSupportingInfoTypeOfBill
@@ -1677,7 +1764,11 @@ class GFERequestBox extends Component {
                                     <Select
                                       displayEmpty
                                       id="select-inter-trans-id"
-                                      value={this.state.interTransIntermediary}
+                                      value={
+                                        this.state.gfeInfo[
+                                          this.state.selectedGFE
+                                        ].interTransIntermediary
+                                      }
                                       label="Inter Trans Identifier"
                                       onChange={this.handleSelectInterTransId}
                                       className={classes.inputBox}
@@ -1707,7 +1798,11 @@ class GFERequestBox extends Component {
                                     }}
                                   >
                                     <ProcedureItem
-                                      rows={this.state.procedureList}
+                                      rows={
+                                        this.state.gfeInfo[
+                                          this.state.selectedGFE
+                                        ].procedureList
+                                      }
                                       addOne={this.addOneProcedureItem}
                                       edit={this.editProcedureItem}
                                       deleteOne={this.deleteOneProcedureItem}
@@ -1726,7 +1821,11 @@ class GFERequestBox extends Component {
                                     <Select
                                       displayEmpty
                                       id="select-gfe-service-id"
-                                      value={this.state.gfeServiceId}
+                                      value={
+                                        this.state.gfeInfo[
+                                          this.state.selectedGFE
+                                        ].gfeServiceId
+                                      }
                                       label="GFE assigned service identifier"
                                       onChange={this.handleSelectGfeServiceId}
                                       className={classes.inputBox}
@@ -1752,7 +1851,11 @@ class GFERequestBox extends Component {
                                     }}
                                   >
                                     <ClaimItem
-                                      rows={this.state.claimItemList}
+                                      rows={
+                                        this.state.gfeInfo[
+                                          this.state.selectedGFE
+                                        ].claimItemList
+                                      }
                                       addOne={this.addOneClaimItem}
                                       edit={this.editClaimItem}
                                       deleteOne={this.deleteOneClaimItem}

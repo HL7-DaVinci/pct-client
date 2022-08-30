@@ -88,6 +88,7 @@ export const ProfessionalBillingProviderSelect = (
   selectedProvider,
   handleSelect
 ) => {
+  console.log(selectedProvider);
   return (
     <Select
       required
