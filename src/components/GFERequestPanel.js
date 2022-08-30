@@ -189,7 +189,7 @@ class GFERequestBox extends Component {
       currentTabIndex: 0,
       locationList: [],
       subjectInfo: {},
-      gfeInfo: initialGFEInfo,
+      gfeInfo: { ...initialGFEInfo },
       selectedGFE: startingGFEId,
     };
     this.state = this.initialState;
@@ -205,7 +205,7 @@ class GFERequestBox extends Component {
 
   handleAddGFE = () => {
     const gfeInfo = { ...this.state.gfeInfo };
-    gfeInfo[v4()] = GFETemplate;
+    gfeInfo[v4()] = { ...GFETemplate };
     this.setState({ gfeInfo });
   };
 
@@ -409,9 +409,9 @@ class GFERequestBox extends Component {
   };
 
   handleSelectPriority = (e) => {
-    const prioritylevel = e.target.value;
+    const priorityLevel = e.target.value;
     const gfeInfo = { ...this.state.gfeInfo };
-    gfeInfo[this.state.selectedGFE].priorityLevel = prioritylevel;
+    gfeInfo[this.state.selectedGFE].selectedPriority = priorityLevel;
     this.setState({ gfeInfo });
   };
 

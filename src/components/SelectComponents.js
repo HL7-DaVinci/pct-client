@@ -95,7 +95,10 @@ export const ProfessionalBillingProviderSelect = (
       labelId="select-billing-provider-label"
       id="billing-provider"
       value={selectedProvider}
-      onChange={handleSelect}
+      onChange={(e) => {
+        console.log(e);
+        handleSelect(e);
+      }}
       style={{ backgroundColor: "#FFFFFF" }}
     >
       {providers ? (
