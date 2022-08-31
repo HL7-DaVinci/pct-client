@@ -49,6 +49,7 @@ import { ProcedureCodes } from "../values/ProcedureCode";
 import DiagnosisItem from "./DiagnosisItem";
 import ProcedureItem from "./ProcedureItem";
 import SummaryItem from "./SummaryItem";
+import TotalSummaryGFEs from "./TotalSummaryGFEs";
 import { SupportingInfoType } from "../values/SupportingInfo";
 import { DiagnosisList, DiagnosisTypeList } from "../values/DiagnosisList";
 import ViewErrorDialog from "./ViewErrorDialog";
@@ -598,8 +599,8 @@ class GFERequestBox extends Component {
         this.props.gfeType === "professional"
           ? findProfessionalProvider.resource
           : this.state.organizationList.find(
-              (org) => org.resource.id === this.state.selectedBillingProvider
-            ).resource,
+            (org) => org.resource.id === this.state.selectedBillingProvider
+          ).resource,
     };
     if (this.props.gfeType === "institutional") {
       orgReferenceList.push(providerReference);
@@ -1462,6 +1463,12 @@ class GFERequestBox extends Component {
                         </ListItemButton>
                       </ListItem>
                     </List>
+                    <List>
+                      <ListItem
+                        onClick={() => this.handleVerticalChange(null, 4)}>
+                        <Button variant="contained">Total Summary</Button>
+                      </ListItem>
+                    </List>
                   </Box>
 
                   {/* Patient tab */}
@@ -1529,18 +1536,18 @@ class GFERequestBox extends Component {
                             </Grid>
                             {this.props.gfeType === "professional"
                               ? ProfessionalBillingProviderSelect(
-                                  professionalBillingProviderList,
-                                  this.state.subjectInfo.selectedSubmitter,
-                                  this.handleSelectSubmitter
-                                )
+                                professionalBillingProviderList,
+                                this.state.subjectInfo.selectedSubmitter,
+                                this.handleSelectSubmitter
+                              )
                               : OrganizationSelect(
-                                  this.state.organizationList,
-                                  this.state.subjectInfo.selectedSubmitter,
-                                  "submitting-provider-label",
-                                  "submittingProvider",
-                                  this.handleOpenOrganizationList,
-                                  this.handleSelectSubmitter
-                                )}
+                                this.state.organizationList,
+                                this.state.subjectInfo.selectedSubmitter,
+                                "submitting-provider-label",
+                                "submittingProvider",
+                                this.handleOpenOrganizationList,
+                                this.handleSelectSubmitter
+                              )}
                           </FormControl>
                         </Grid>
                         <Grid item className={classes.patientBox}>
@@ -1590,20 +1597,20 @@ class GFERequestBox extends Component {
 
                               {this.props.gfeType === "professional"
                                 ? ProfessionalBillingProviderSelect(
-                                    professionalBillingProviderList,
-                                    this.state.gfeInfo[this.state.selectedGFE]
-                                      .selectedBillingProvider,
-                                    this.handleSelectBillingProvider
-                                  )
+                                  professionalBillingProviderList,
+                                  this.state.gfeInfo[this.state.selectedGFE]
+                                    .selectedBillingProvider,
+                                  this.handleSelectBillingProvider
+                                )
                                 : OrganizationSelect(
-                                    this.state.organizationList,
-                                    this.state.gfeInfo[this.state.selectedGFE]
-                                      .selectedBillingProvider,
-                                    "billing-provider-label",
-                                    "billingProvider",
-                                    this.handleOpenOrganizationList,
-                                    this.handleSelectBillingProvider
-                                  )}
+                                  this.state.organizationList,
+                                  this.state.gfeInfo[this.state.selectedGFE]
+                                    .selectedBillingProvider,
+                                  "billing-provider-label",
+                                  "billingProvider",
+                                  this.handleOpenOrganizationList,
+                                  this.handleSelectBillingProvider
+                                )}
                             </FormControl>
                           </Grid>
 
@@ -1957,6 +1964,19 @@ class GFERequestBox extends Component {
                       </Grid>
                     </Grid>
                   </TabPanel>
+
+                  {/* Total Summary Tab */}
+                  <TabPanel value={verticalTabIndex} index={4}>
+                    <Grid item className={classes.paper} xs={12}>
+                      <FormControl component="fieldset">
+                        <Grid container direction="row">
+                          <Grid item>
+                            <TotalSummaryGFEs subject={this.state.subjectInfo} summaries={this.state.gfeInfo}></TotalSummaryGFEs>
+                          </Grid>
+                        </Grid>
+                      </FormControl>
+                    </Grid>
+                  </TabPanel>
                 </Box>
               </TabPanel>
 
@@ -1966,20 +1986,24 @@ class GFERequestBox extends Component {
               </TabPanel>
             </Box>
           </form>
-          {this.state.openErrorDialog ? (
-            <ViewErrorDialog
-              error={this.state.validationErrors}
-              open={this.state.openErrorDialog}
-              setOpen={(open) => this.setState({ openErrorDialog: open })}
-            />
-          ) : null}
-          {this.state.submittingStatus === true ? (
-            <Box sx={{ width: "100%" }}>
-              <LinearProgress />
-            </Box>
-          ) : null}
-        </Grid>
-      </div>
+          {
+            this.state.openErrorDialog ? (
+              <ViewErrorDialog
+                error={this.state.validationErrors}
+                open={this.state.openErrorDialog}
+                setOpen={(open) => this.setState({ openErrorDialog: open })}
+              />
+            ) : null
+          }
+          {
+            this.state.submittingStatus === true ? (
+              <Box sx={{ width: "100%" }}>
+                <LinearProgress />
+              </Box>
+            ) : null
+          }
+        </Grid >
+      </div >
     );
   }
 }
