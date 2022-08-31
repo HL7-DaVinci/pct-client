@@ -160,6 +160,8 @@ const generateGFE = () => {
     selectedPriority: null,
     selectedBillingProvider: null,
     gfeServiceId: null,
+    interTransIntermediary: null,
+    supportingInfoTypeOfBill: "",
   };
 };
 
