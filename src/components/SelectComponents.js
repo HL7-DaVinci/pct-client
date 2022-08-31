@@ -48,13 +48,13 @@ export const PrioritySelect = (
   handleChange
 ) => {
   let priorityList = [];
-
+  console.log(selectPriority);
   return (
     <Select
       required
       labelId="select-priority-label"
       id="priority"
-      value={selectPriority}
+      value={JSON.stringify(selectPriority)}
       onOpen={handleOpenPriorities}
       onChange={handleChange}
     >
@@ -66,11 +66,12 @@ export const PrioritySelect = (
           }
           //put the priority into the list if not there yet
           priorityList.push(getPriorityDisplayName(selectedPriority));
-
+          console.log(selectedPriority.resource);
+          console.log(selectedPriority.resource === selectPriority);
           return (
             <MenuItem
               key={selectedPriority.resource.priority}
-              value={selectedPriority.resource}
+              value={JSON.stringify(selectedPriority.resource)}
             >
               {getPriorityDisplayName(selectedPriority)}
             </MenuItem>
@@ -88,13 +89,12 @@ export const ProfessionalBillingProviderSelect = (
   selectedProvider,
   handleSelect
 ) => {
-  console.log(selectedProvider);
   return (
     <Select
       required
       labelId="select-billing-provider-label"
       id="billing-provider"
-      value={selectedProvider}
+      value={selectedProvider || ""}
       onChange={(e) => {
         console.log(e);
         handleSelect(e);

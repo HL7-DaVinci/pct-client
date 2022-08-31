@@ -151,11 +151,16 @@ function a11yPropsVertical(index) {
     "aria-controls": `vertical-tabpanel-${index}`,
   };
 }
-const GFETemplate = {
-  careTeamList: [{ id: v4() }],
-  diagnosisList: [{ id: v4() }],
-  procedureList: [{ id: v4() }],
-  claimItemList: [{ id: v4() }],
+const generateGFE = () => {
+  return {
+    careTeamList: [{ id: v4() }],
+    diagnosisList: [{ id: v4() }],
+    procedureList: [{ id: v4() }],
+    claimItemList: [{ id: v4() }],
+    selectedPriority: null,
+    selectedBillingProvider: null,
+    gfeServiceId: null,
+  };
 };
 
 class GFERequestBox extends Component {
@@ -164,14 +169,12 @@ class GFERequestBox extends Component {
     const startingGFEId = v4();
     const initialGFEInfo = {};
 
-    initialGFEInfo[startingGFEId] = GFETemplate;
+    initialGFEInfo[startingGFEId] = generateGFE();
     this.initialState = {
       patientList: [],
       patientRequestList: [],
       priorityList: [],
-      selectedPriority: undefined,
       practitionerRoleList: [],
-      selectedBillingProvider: undefined,
       selectedPractitioner: [],
       practitionerList: [],
       organizationList: [],
@@ -205,7 +208,7 @@ class GFERequestBox extends Component {
 
   handleAddGFE = () => {
     const gfeInfo = { ...this.state.gfeInfo };
-    gfeInfo[v4()] = { ...GFETemplate };
+    gfeInfo[v4()] = generateGFE();
     this.setState({ gfeInfo });
   };
 
@@ -411,7 +414,8 @@ class GFERequestBox extends Component {
   handleSelectPriority = (e) => {
     const priorityLevel = e.target.value;
     const gfeInfo = { ...this.state.gfeInfo };
-    gfeInfo[this.state.selectedGFE].selectedPriority = priorityLevel;
+    gfeInfo[this.state.selectedGFE].selectedPriority =
+      JSON.parse(priorityLevel);
     this.setState({ gfeInfo });
   };
 
@@ -916,7 +920,7 @@ class GFERequestBox extends Component {
   handleSelectInterTransId = (e) => {
     const gfeInfo = { ...this.state.gfeInfo };
     gfeInfo[this.state.selectedGFE].interTransIntermediary = e.target.value;
-    this.setState({ interTransIntermediary: e.target.value });
+    this.setState({ gfeInfo });
   };
   handleSelectGfeServiceId = (e) => {
     const gfeInfo = { ...this.state.gfeInfo };
@@ -999,8 +1003,8 @@ class GFERequestBox extends Component {
   };
 
   editCareTeam = (model) => {
-    let id, fieldObject, fieldName, fieldValueObject, fieldValue;
     console.log(model);
+    let id, fieldObject, fieldName, fieldValueObject, fieldValue;
     for (let prop in model) {
       id = prop;
       fieldObject = model[id];
@@ -1019,7 +1023,7 @@ class GFERequestBox extends Component {
       gfeInfo[this.state.selectedGFE].careTeamList = gfeInfo[
         this.state.selectedGFE
       ].careTeamList.map((item) => {
-        if (item.id === parseInt(id)) {
+        if (item.id === id) {
           item[fieldName] = fieldValue;
 
           return item;
@@ -1157,7 +1161,6 @@ class GFERequestBox extends Component {
 
     const newId = v4();
     const gfeInfo = { ...this.state.gfeInfo };
-    console.log(gfeInfo);
     gfeInfo[this.state.selectedGFE].diagnosisList = [
       ...gfeInfo[this.state.selectedGFE].diagnosisList,
       { id: newId },
@@ -1178,15 +1181,13 @@ class GFERequestBox extends Component {
       id = prop;
       fieldObject = model[id];
     }
-    console.log(model);
-    console.log(fieldObject);
+
     if (fieldObject) {
       for (let name in fieldObject) {
         fieldName = name;
       }
       fieldValueObject = fieldObject[fieldName];
     }
-    console.log();
     if (fieldValueObject) {
       fieldValue = fieldValueObject.value;
     }
