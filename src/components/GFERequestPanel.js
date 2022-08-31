@@ -194,7 +194,7 @@ class GFERequestBox extends Component {
       memberNumber: undefined,
       currentTabIndex: 0,
       locationList: [],
-      subjectInfo: {},
+      subjectInfo: { gfeType: "institutional" },
       gfeInfo: { ...initialGFEInfo },
       selectedGFE: startingGFEId,
     };
@@ -542,7 +542,7 @@ class GFERequestBox extends Component {
     }
 
     let orgReferenceList = [];
-    input.gfeType = this.props.gfeType;
+    input.gfeType = this.state.subjectInfo.gfeType;
 
     const fhirServerBaseUrl = this.props.ehrUrl;
 
@@ -588,7 +588,7 @@ class GFERequestBox extends Component {
 
     let providerReference = undefined,
       findProfessionalProvider = undefined;
-    if (this.props.gfeType === "professional") {
+    if (this.state.subjectInfo.gfeType === "professional") {
       const professionalProviderList =
         this.getProfessionalBillingProviderList();
       findProfessionalProvider = professionalProviderList.find(
@@ -602,13 +602,13 @@ class GFERequestBox extends Component {
     input.provider = {
       reference: providerReference,
       resource:
-        this.props.gfeType === "professional"
+        this.state.subjectInfo.gfeType === "professional"
           ? findProfessionalProvider.resource
           : this.state.organizationList.find(
-            (org) => org.resource.id === this.state.selectedBillingProvider
-          ).resource,
+              (org) => org.resource.id === this.state.selectedBillingProvider
+            ).resource,
     };
-    if (this.props.gfeType === "institutional") {
+    if (this.state.subjectInfo.gfeType === "institutional") {
       orgReferenceList.push(providerReference);
     } else if (findProfessionalProvider.type === "Organization") {
       orgReferenceList.push(providerReference);
@@ -906,7 +906,7 @@ class GFERequestBox extends Component {
         this.state.gfeInfo[this.state.selectedGFE].careTeamList,
       practitionerRoleSelected:
         this.state.gfeInfo[this.state.selectedGFE].careTeamList,
-      gfeType: this.props.gfeType,
+      gfeType: this.state.subjectInfo.gfeType,
       diagnosisList: this.state.gfeInfo[this.state.selectedGFE].diagnosisList,
       procedureList: this.state.gfeInfo[this.state.selectedGFE].procedureList,
       servicesList: this.state.gfeInfo[this.state.selectedGFE].claimItemList,
@@ -1469,7 +1469,8 @@ class GFERequestBox extends Component {
                     </List>
                     <List>
                       <ListItem
-                        onClick={() => this.handleVerticalChange(null, 4)}>
+                        onClick={() => this.handleVerticalChange(null, 4)}
+                      >
                         <Button variant="contained">Total Summary</Button>
                       </ListItem>
                     </List>
@@ -1508,11 +1509,15 @@ class GFERequestBox extends Component {
                               row
                               aria-label="GFE Type"
                               name="row-radio-buttons-group"
-                              value={this.props.gfeType}
-                              onChange={(e) =>
-                                this.props.setGfeType(e.target.value)
-                              }
-                              defaultValue={this.props.gfeType}
+                              value={this.state.subjectInfo.gfeType}
+                              onChange={(e) => {
+                                const subjectInfo = {
+                                  ...this.state.subjectInfo,
+                                };
+                                subjectInfo["gfeType"] = e.target.value;
+                                this.setState({ subjectInfo });
+                              }}
+                              defaultValue={this.state.subjectInfo.gfeType}
                             >
                               <FormControlLabel
                                 value="institutional"
@@ -1538,20 +1543,20 @@ class GFERequestBox extends Component {
                                 </b>
                               </Box>
                             </Grid>
-                            {this.props.gfeType === "professional"
+                            {this.state.subjectInfo.gfeType === "professional"
                               ? ProfessionalBillingProviderSelect(
-                                professionalBillingProviderList,
-                                this.state.subjectInfo.selectedSubmitter,
-                                this.handleSelectSubmitter
-                              )
+                                  professionalBillingProviderList,
+                                  this.state.subjectInfo.selectedSubmitter,
+                                  this.handleSelectSubmitter
+                                )
                               : OrganizationSelect(
-                                this.state.organizationList,
-                                this.state.subjectInfo.selectedSubmitter,
-                                "submitting-provider-label",
-                                "submittingProvider",
-                                this.handleOpenOrganizationList,
-                                this.handleSelectSubmitter
-                              )}
+                                  this.state.organizationList,
+                                  this.state.subjectInfo.selectedSubmitter,
+                                  "submitting-provider-label",
+                                  "submittingProvider",
+                                  this.handleOpenOrganizationList,
+                                  this.handleSelectSubmitter
+                                )}
                           </FormControl>
                         </Grid>
                         <Grid item className={classes.patientBox}>
@@ -1599,22 +1604,22 @@ class GFERequestBox extends Component {
                                 </Box>
                               </Grid>
 
-                              {this.props.gfeType === "professional"
+                              {this.state.subjectInfo.gfeType === "professional"
                                 ? ProfessionalBillingProviderSelect(
-                                  professionalBillingProviderList,
-                                  this.state.gfeInfo[this.state.selectedGFE]
-                                    .selectedBillingProvider,
-                                  this.handleSelectBillingProvider
-                                )
+                                    professionalBillingProviderList,
+                                    this.state.gfeInfo[this.state.selectedGFE]
+                                      .selectedBillingProvider,
+                                    this.handleSelectBillingProvider
+                                  )
                                 : OrganizationSelect(
-                                  this.state.organizationList,
-                                  this.state.gfeInfo[this.state.selectedGFE]
-                                    .selectedBillingProvider,
-                                  "billing-provider-label",
-                                  "billingProvider",
-                                  this.handleOpenOrganizationList,
-                                  this.handleSelectBillingProvider
-                                )}
+                                    this.state.organizationList,
+                                    this.state.gfeInfo[this.state.selectedGFE]
+                                      .selectedBillingProvider,
+                                    "billing-provider-label",
+                                    "billingProvider",
+                                    this.handleOpenOrganizationList,
+                                    this.handleSelectBillingProvider
+                                  )}
                             </FormControl>
                           </Grid>
 
@@ -1975,7 +1980,10 @@ class GFERequestBox extends Component {
                       <FormControl component="fieldset">
                         <Grid container direction="row">
                           <Grid item>
-                            <TotalSummaryGFEs subject={this.state.subjectInfo} summaries={this.state.gfeInfo}></TotalSummaryGFEs>
+                            <TotalSummaryGFEs
+                              subject={this.state.subjectInfo}
+                              summaries={this.state.gfeInfo}
+                            ></TotalSummaryGFEs>
                           </Grid>
                         </Grid>
                       </FormControl>
@@ -1990,24 +1998,20 @@ class GFERequestBox extends Component {
               </TabPanel>
             </Box>
           </form>
-          {
-            this.state.openErrorDialog ? (
-              <ViewErrorDialog
-                error={this.state.validationErrors}
-                open={this.state.openErrorDialog}
-                setOpen={(open) => this.setState({ openErrorDialog: open })}
-              />
-            ) : null
-          }
-          {
-            this.state.submittingStatus === true ? (
-              <Box sx={{ width: "100%" }}>
-                <LinearProgress />
-              </Box>
-            ) : null
-          }
-        </Grid >
-      </div >
+          {this.state.openErrorDialog ? (
+            <ViewErrorDialog
+              error={this.state.validationErrors}
+              open={this.state.openErrorDialog}
+              setOpen={(open) => this.setState({ openErrorDialog: open })}
+            />
+          ) : null}
+          {this.state.submittingStatus === true ? (
+            <Box sx={{ width: "100%" }}>
+              <LinearProgress />
+            </Box>
+          ) : null}
+        </Grid>
+      </div>
     );
   }
 }
