@@ -1428,6 +1428,7 @@ class GFERequestBox extends Component {
                           <ListItem>
                             <ListItemButton
                               onClick={() => this.setState({ selectedGFE: id })}
+                              selected={this.state.selectedGFE === id}
                             >
                               <ListItemText>{id}</ListItemText>
                             </ListItemButton>
