@@ -47,6 +47,15 @@ function createServiceList(serviceList) {
     })
 }
 
+function createDateList(serviceList) {
+
+    let num = 0;
+    return serviceList.map(el => {
+        num += 1;
+        return <ListItem disableGutters>Service #{num}: {el.estimatedDateOfService.toDateString()}</ListItem>
+    })
+}
+
 function alertDialog(itemsMissing) {
 
     if (itemsMissing.length === 0) {
@@ -372,7 +381,7 @@ export default function SummaryItem(props) {
                         <SummaryText content="Date:" class="label" />
                     </Grid>
                     <Grid item xs={6}>
-                        <SummaryText content={(summary.serviceDate === undefined) ? "" : (summary.serviceDate)} />
+                        {(summary.servicesList[0].estimatedDateOfService === undefined) ? "" : (createDateList(summary.servicesList))}
                     </Grid>
                 </Grid>
 

@@ -179,7 +179,7 @@ class GFERequestBox extends Component {
       selectedRequest: undefined,
       resolvedReferences: {},
       interTransIntermediary: undefined,
-      selectedDate: undefined,
+      //selectedDate: undefined,
       selectedProcedure: undefined,
       gfeServiceId: undefined,
       validationErrors: undefined,
@@ -906,7 +906,7 @@ class GFERequestBox extends Component {
       servicesList: this.state.gfeInfo[this.state.selectedGFE].claimItemList,
       priorityLevel:
         this.state.gfeInfo[this.state.selectedGFE].selectedPriority,
-      serviceDate: this.state.selectedDate,
+      //serviceDate: this.state.selectedDate,
       submittingProvider: this.state.subjectInfo.selectedSubmitter,
       billingProvider:
         this.state.gfeInfo[this.state.selectedGFE].selectedBillingProvider,

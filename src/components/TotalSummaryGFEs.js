@@ -71,7 +71,7 @@ function retrieveRequestSummary(subjectInfo, gfeInfo) {
         servicesList: gfeInfo.claimItemList,
         priorityLevel:
             gfeInfo.selectedPriority,
-        serviceDate: "", //this.state.selectedDate, //TODO
+        //serviceDate: "",
         submittingProvider: subjectInfo.selectedSubmitter,
         billingProvider:
             gfeInfo.selectedBillingProvider,
