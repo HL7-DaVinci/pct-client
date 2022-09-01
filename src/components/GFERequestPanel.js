@@ -145,13 +145,6 @@ VerticalTabPanel.propTypes = {
   value: PropTypes.number.isRequired,
 };
 
-//vertical panel tabs
-function a11yPropsVertical(index) {
-  return {
-    id: `vertical-tab-${index}`,
-    "aria-controls": `vertical-tabpanel-${index}`,
-  };
-}
 const generateGFE = () => {
   return {
     careTeamList: [{ id: v4() }],
@@ -183,18 +176,29 @@ class GFERequestBox extends Component {
       organizationList: [],
       selectedRequest: undefined,
       resolvedReferences: {},
-      interTransIntermediary: undefined,
       //selectedDate: undefined,
       selectedProcedure: undefined,
-      gfeServiceId: undefined,
       validationErrors: undefined,
       openErrorDialog: false,
-      supportingInfoTypeOfBill: undefined,
       verticalTabIndex: 0,
-      memberNumber: undefined,
       currentTabIndex: 0,
       locationList: [],
-      subjectInfo: { gfeType: "institutional" },
+      subjectInfo: {
+        gfeType: "institutional",
+        memberNumber: null,
+        selectedAddress: null,
+        birthdate: null,
+        gender: null,
+        telephone: null,
+        selectedPatient: null,
+        selectedPayor: null,
+        selectedCoverage: null,
+        subscriber: null,
+        subscriberRelationship: null,
+        coveragePlan: null,
+        coveragePeriod: null,
+        selectedBillingProvider: null,
+      },
       gfeInfo: { ...initialGFEInfo },
       selectedGFE: startingGFEId,
     };
@@ -458,12 +462,6 @@ class GFERequestBox extends Component {
     });
   };
 
-  handleSelectProcedure = (e) => {
-    this.setState({
-      selectedProcedure: e.target.value,
-      selectedRequest: null,
-    });
-  };
   getRequestRelatedInfo = (requestId) => {
     if (!requestId) {
       return {};
@@ -845,10 +843,7 @@ class GFERequestBox extends Component {
       this.props.setGfeResponse(undefined);
       this.props.setReceivedAEOBResponse(undefined);
 
-      submitGFEClaim(
-        this.props.payorUrl,
-        buildGFEBundle(this.generateRequestInput())
-      )
+      submitGFEClaim(this.props.payorUrl, this.generateBundle())
         .then((response) => {
           this.props.setSubmitting(false);
           console.log("Payer server returned response: ", response);
