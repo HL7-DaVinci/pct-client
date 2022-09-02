@@ -225,7 +225,6 @@ class GFERequestBox extends Component {
     this.setState({ ...gfeInfo });
   };
   componentDidUpdate(prevProps, prevState) {
-    console.log(this.state);
     if (this.props.dataServerChanged && !prevProps.dataServerChanged) {
       this.resetState();
       this.props.setDataServerChanged(false);
@@ -526,8 +525,8 @@ class GFERequestBox extends Component {
       };
     }
   };
-
-  generateRequestInput = () => {
+  generateRequestInput = (gfeId) => {
+    console.log(gfeId);
     let input = {
       bundleResources: [],
     };
@@ -590,11 +589,12 @@ class GFERequestBox extends Component {
       const professionalProviderList =
         this.getProfessionalBillingProviderList();
       findProfessionalProvider = professionalProviderList.find(
-        (provider) => provider.id === this.state.selectedBillingProvider
+        (provider) =>
+          provider.id === this.state.gfeInfo[gfeId].selectedBillingProvider
       );
       providerReference = findProfessionalProvider.reference;
     } else {
-      providerReference = `Organization/${this.state.selectedBillingProvider}`;
+      providerReference = `Organization/${this.state.gfeInfo[gfeId].selectedBillingProvider}`;
     }
 
     input.provider = {
@@ -603,7 +603,9 @@ class GFERequestBox extends Component {
         this.state.subjectInfo.gfeType === "professional"
           ? findProfessionalProvider.resource
           : this.state.organizationList.find(
-              (org) => org.resource.id === this.state.selectedBillingProvider
+              (org) =>
+                org.resource.id ===
+                this.state.gfeInfo[gfeId].selectedBillingProvider
             ).resource,
     };
     if (this.state.subjectInfo.gfeType === "institutional") {
@@ -618,19 +620,21 @@ class GFERequestBox extends Component {
     });
 
     input.billing = {};
-    if (this.state.interTransIntermediary) {
-      input.billing.interTransIntermediary = this.state.interTransIntermediary;
+    if (this.state.gfeInfo[gfeId].interTransIntermediary) {
+      input.billing.interTransIntermediary =
+        this.state.gfeInfo[gfeId].interTransIntermediary;
     }
 
-    if (this.state.gfeServiceId) {
-      input.billing.gfeAssignedServiceId = this.state.gfeServiceId;
+    if (this.state.gfeInfo[gfeId].gfeServiceId) {
+      input.billing.gfeAssignedServiceId =
+        this.state.gfeInfo[gfeId].gfeServiceId;
     }
 
     input.billing.items = [];
     let sequenceCount = 1;
     let totalAmount = 0;
 
-    this.state.claimItemList.forEach((claimItem) => {
+    this.state.gfeInfo[gfeId].claimItemList.forEach((claimItem) => {
       const procedureCodingOrig = ProcedureCodes.find((code) =>
         claimItem.productOrService.startsWith(code.code)
       );
@@ -700,7 +704,7 @@ class GFERequestBox extends Component {
 
     input.diagnosis = [];
     let diagnosisSequence = 1;
-    this.state.diagnosisList.forEach((diagnosis) => {
+    this.state.gfeInfo[gfeId].diagnosisList.forEach((diagnosis) => {
       const diagnosisCode = DiagnosisList.find((code) =>
         diagnosis.diagnosis.startsWith(
           code.diagnosisCodeableConcept.coding[0].code
@@ -727,14 +731,14 @@ class GFERequestBox extends Component {
     });
 
     // supportingInfo
-    if (this.state.supportingInfoTypeOfBill) {
+    if (this.state.gfeInfo[gfeId].supportingInfoTypeOfBill) {
       input.supportingInfo = [];
       let supportingInfoSequence = 1;
 
       const categoryCodeableConcept = (inputType) =>
         SupportingInfoType.find((type) => type.type === inputType);
 
-      if (this.state.supportingInfoTypeOfBill) {
+      if (this.state.gfeInfo[gfeId].supportingInfoTypeOfBill) {
         input.supportingInfo.push({
           sequence: supportingInfoSequence++,
           category: categoryCodeableConcept("typeofbill").codeableConcept,
@@ -742,7 +746,7 @@ class GFERequestBox extends Component {
             coding: [
               {
                 system: "https://www.nubc.org/CodeSystem/TypeOfBill",
-                code: this.state.supportingInfoTypeOfBill,
+                code: this.state.gfeInfo[gfeId].supportingInfoTypeOfBill,
                 display: "Type of Bill",
               },
             ],
@@ -778,11 +782,11 @@ class GFERequestBox extends Component {
     });
 
     // add care team
-    if (!this.itemListIsEmpty(this.state.careTeamList)) {
+    if (!this.itemListIsEmpty(this.state.gfeInfo[gfeId].careTeamList)) {
       input.careTeam = [];
       const providerMap = this.getCareTeamProviderListOptions();
       let sequenceNumber = 1;
-      this.state.careTeamList.forEach((member) => {
+      this.state.gfeInfo[gfeId].careTeamList.forEach((member) => {
         const providerResource = providerMap.find(
           (item) => item.display === member.provider
         );
@@ -877,7 +881,13 @@ class GFERequestBox extends Component {
     }
   };
 
-  generateBundle = () => buildGFEBundle(this.generateRequestInput());
+  generateBundle = () => {
+    const ri = Object.keys(this.state.gfeInfo).map((gfeId) =>
+      this.generateRequestInput(gfeId)
+    );
+    console.log(ri);
+    //buildGFEBundle(this.generateRequestInput())
+  };
 
   retrieveRequestSummary = () => {
     return {
@@ -958,29 +968,7 @@ class GFERequestBox extends Component {
       return;
     }
 
-    let newId =
-      this.state.gfeInfo[this.state.selectedGFE].careTeamList.length + 1;
-
-    //when you delete item 1 out of 2 items, adjust the next id to the next available id vacant
-    let proposedId =
-      this.state.gfeInfo[this.state.selectedGFE].careTeamList.length + 1;
-
-    //checks if proposedId already exists within the list (comparedId), if so will keep incrementing until finds vacant id
-    for (
-      let i = 0;
-      i < this.state.gfeInfo[this.state.selectedGFE].careTeamList.length;
-      i++
-    ) {
-      let comparedId =
-        this.state.gfeInfo[this.state.selectedGFE].careTeamList[i].id;
-
-      //if see a matching id, we inc the proposed id and it will repeat the loop
-      if (comparedId === proposedId) {
-        i = 0;
-        proposedId += 1;
-      }
-    }
-    newId = proposedId;
+    const newId = v4();
     const gfeInfo = { ...this.state.gfeInfo };
     gfeInfo[this.state.selectedGFE].careTeamList = [
       ...gfeInfo[this.state.selectedGFE].careTeamList,
@@ -1001,7 +989,6 @@ class GFERequestBox extends Component {
   };
 
   editCareTeam = (model) => {
-    console.log(model);
     let id, fieldObject, fieldName, fieldValueObject, fieldValue;
     for (let prop in model) {
       id = prop;
@@ -1413,6 +1400,7 @@ class GFERequestBox extends Component {
                       <ListItem>
                         <ListItemButton
                           onClick={() => this.handleVerticalChange(null, 0)}
+                          selected={this.state.verticalTabIndex === 0}
                         >
                           <ListItemText>
                             {this.state.subjectInfo.selectedPatient ||
@@ -1443,6 +1431,7 @@ class GFERequestBox extends Component {
                       <ListItem>
                         <ListItemButton
                           onClick={() => this.handleVerticalChange(null, 1)}
+                          selected={this.state.verticalTabIndex === 1}
                         >
                           <ListItemText>Care Team</ListItemText>
                         </ListItemButton>
@@ -1450,6 +1439,7 @@ class GFERequestBox extends Component {
                       <ListItem>
                         <ListItemButton
                           onClick={() => this.handleVerticalChange(null, 2)}
+                          selected={this.state.verticalTabIndex === 2}
                         >
                           <ListItemText>{"Encounter"}</ListItemText>
                         </ListItemButton>
@@ -1457,6 +1447,7 @@ class GFERequestBox extends Component {
                       <ListItem>
                         <ListItemButton
                           onClick={() => this.handleVerticalChange(null, 3)}
+                          selected={this.state.verticalTabIndex === 3}
                         >
                           <ListItemText>{"Summary"}</ListItemText>
                         </ListItemButton>
@@ -1467,6 +1458,17 @@ class GFERequestBox extends Component {
                         onClick={() => this.handleVerticalChange(null, 4)}
                       >
                         <Button variant="contained">Total Summary</Button>
+                      </ListItem>
+                      <ListItem
+                        onClick={() => {
+                          try {
+                            this.generateBundle();
+                          } catch (e) {
+                            console.log(e);
+                          }
+                        }}
+                      >
+                        <Button>Request Input</Button>
                       </ListItem>
                     </List>
                   </Box>
