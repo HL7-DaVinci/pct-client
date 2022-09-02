@@ -86,8 +86,6 @@ function createSummaryForEach(props, value) {
 
     return (
       <TabPanel value={value} index={num}>
-        {/* TODO */}
-        {el}
         <SummaryItem summary={summary} />
       </TabPanel>
     );
