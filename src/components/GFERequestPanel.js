@@ -603,8 +603,8 @@ class GFERequestBox extends Component {
         this.state.subjectInfo.gfeType === "professional"
           ? findProfessionalProvider.resource
           : this.state.organizationList.find(
-              (org) => org.resource.id === this.state.selectedBillingProvider
-            ).resource,
+            (org) => org.resource.id === this.state.selectedBillingProvider
+          ).resource,
     };
     if (this.state.subjectInfo.gfeType === "institutional") {
       orgReferenceList.push(providerReference);
@@ -1468,6 +1468,17 @@ class GFERequestBox extends Component {
                       >
                         <Button variant="contained">Total Summary</Button>
                       </ListItem>
+                      <ListItem>
+                        <Button
+                          loading
+                          variant="contained"
+                          color="primary"
+                          type="submit"
+                          disabled={this.props.submittingStatus === true}
+                        >
+                          Submit GFE's
+                        </Button>
+                      </ListItem>
                     </List>
                   </Box>
 
@@ -1540,18 +1551,18 @@ class GFERequestBox extends Component {
                             </Grid>
                             {this.state.subjectInfo.gfeType === "professional"
                               ? ProfessionalBillingProviderSelect(
-                                  professionalBillingProviderList,
-                                  this.state.subjectInfo.selectedSubmitter,
-                                  this.handleSelectSubmitter
-                                )
+                                professionalBillingProviderList,
+                                this.state.subjectInfo.selectedSubmitter,
+                                this.handleSelectSubmitter
+                              )
                               : OrganizationSelect(
-                                  this.state.organizationList,
-                                  this.state.subjectInfo.selectedSubmitter,
-                                  "submitting-provider-label",
-                                  "submittingProvider",
-                                  this.handleOpenOrganizationList,
-                                  this.handleSelectSubmitter
-                                )}
+                                this.state.organizationList,
+                                this.state.subjectInfo.selectedSubmitter,
+                                "submitting-provider-label",
+                                "submittingProvider",
+                                this.handleOpenOrganizationList,
+                                this.handleSelectSubmitter
+                              )}
                           </FormControl>
                         </Grid>
                         <Grid item className={classes.patientBox}>
@@ -1601,20 +1612,20 @@ class GFERequestBox extends Component {
 
                               {this.state.subjectInfo.gfeType === "professional"
                                 ? ProfessionalBillingProviderSelect(
-                                    professionalBillingProviderList,
-                                    this.state.gfeInfo[this.state.selectedGFE]
-                                      .selectedBillingProvider,
-                                    this.handleSelectBillingProvider
-                                  )
+                                  professionalBillingProviderList,
+                                  this.state.gfeInfo[this.state.selectedGFE]
+                                    .selectedBillingProvider,
+                                  this.handleSelectBillingProvider
+                                )
                                 : OrganizationSelect(
-                                    this.state.organizationList,
-                                    this.state.gfeInfo[this.state.selectedGFE]
-                                      .selectedBillingProvider,
-                                    "billing-provider-label",
-                                    "billingProvider",
-                                    this.handleOpenOrganizationList,
-                                    this.handleSelectBillingProvider
-                                  )}
+                                  this.state.organizationList,
+                                  this.state.gfeInfo[this.state.selectedGFE]
+                                    .selectedBillingProvider,
+                                  "billing-provider-label",
+                                  "billingProvider",
+                                  this.handleOpenOrganizationList,
+                                  this.handleSelectBillingProvider
+                                )}
                             </FormControl>
                           </Grid>
 
@@ -1953,17 +1964,6 @@ class GFERequestBox extends Component {
                           }}
                         >
                           Previous
-                        </Button>
-                      </Grid>
-                      <Grid item xs={4}>
-                        <Button
-                          loading
-                          variant="contained"
-                          color="primary"
-                          type="submit"
-                          disabled={this.props.submittingStatus === true}
-                        >
-                          Submit GFE
                         </Button>
                       </Grid>
                     </Grid>
