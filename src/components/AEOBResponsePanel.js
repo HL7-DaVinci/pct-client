@@ -189,7 +189,6 @@ export default function AEOBResponsePanel(props) {
     const [aeobInquiryOutcome, setAeobInquiryOutcome] = useState(undefined);
     const [currentTabIndex, setCurrentTabIndex] = useState(1);
 
-
     useEffect(() => {
         if (props.dataServerChanged || props.payerServerChanged || props.receivedAEOBResponse === undefined) {
             setAeobInquirySubmitted(false);
@@ -387,7 +386,6 @@ export default function AEOBResponsePanel(props) {
             return false;
         }
     }
-
 
 
     return (
@@ -659,7 +657,7 @@ export default function AEOBResponsePanel(props) {
                                 </Grid>
                                 <Grid item>
                                     <Typography variant="body1" gutterBottom>
-                                        <b>Outcome:</b> {jp.query(props, '$..[?(@.resourceType == "ExplanationOfBenefit")].outcome')[0]}
+                                        <b>Outcome:</b> {aeobInquiryOutcome}
                                     </Typography>
                                 </Grid>
                                 <Grid item>
@@ -680,7 +678,7 @@ export default function AEOBResponsePanel(props) {
                                             {jp.query(props, '$..[?(@.resourceType == "ExplanationOfBenefit")].total').map((value, index) => {
                                                 return <Grid item>
                                                     <Typography variant="body1" gutterBottom>
-                                                        <b>{value[0].category.coding[0].display}:</b> {value[0].amount.value} {value[0].amount.currency}
+                                                        <b>{value[0].category.coding[0].display}:</b> {value[0].amount.value.toFixed(2)} {value[0].amount.currency}
                                                     </Typography>
                                                 </Grid>
                                             })}
