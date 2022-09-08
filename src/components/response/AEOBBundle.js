@@ -234,13 +234,6 @@ export default function AEOBBundle(props) {
 
                 <PatientInfo props={props} classes={classes} />
                 <SubmitterInfo props={props} classes={classes} getNameDisplay={getNameDisplay} />
-                {
-                    getAEOBList().map(item => {
-                        return (
-                            <AEOBEntry key={item.id} aeob={item} classes={classes} coverage={getCoverageResource()} />
-                        )
-                    })
-                }
 
                 <Grid style={{ marginTop: 33 }}>
                     <Divider />
@@ -254,63 +247,19 @@ export default function AEOBBundle(props) {
                                 <Typography variant="h5" gutterBottom>
                                     <b><u>Advanced Explanation of Benefits</u></b>
                                 </Typography>
-
-                            </Grid>
-                            <Grid item xs={4} >
-                                <Typography variant="h6" align='left' style={{ color: "#d7d3d3" }}>THIS IS NOT A BILL</Typography>
                             </Grid>
                         </Grid>
                     </Grid>
-                    <Grid item>
-                        <Typography variant="body1" gutterBottom>
-                            <b>ID:</b> {jp.query(props, '$..[?(@.resourceType == "ExplanationOfBenefit")].id')[0]}
-                        </Typography>
-                    </Grid>
-                    <Grid item>
-                        <Typography variant="body1" gutterBottom>
-                            <b>Created:</b> {getDate()}
-                        </Typography>
-                    </Grid>
-                    <Grid item>
-                        <Typography variant="body1" gutterBottom>
-                            <b>Outcome:</b> {jp.query(props, '$..[?(@.resourceType == "ExplanationOfBenefit")].outcome')[0]}
-                        </Typography>
-                    </Grid>
-
-                    <Grid container direction="row" spacing={9}>
-                        <Grid item>
-                            <Grid container direction="column" >
-                                <Grid item>
-                                    <Typography variant="h6" gutterBottom>
-                                        <b>Totals:</b>
-                                    </Typography>
-                                </Grid>
-                                {jp.query(props, '$..[?(@.resourceType == "ExplanationOfBenefit")].total').map((value, index) => {
-                                    return <Grid item>
-                                        <Typography variant="body1" gutterBottom>
-                                            <b>{value[0].category.coding[0].display}:</b> {value[0].amount.value} {value[0].amount.currency}
-                                        </Typography>
-                                    </Grid>
-                                })}
-
-                                <Grid item>
-                                    <Typography variant="body1" gutterBottom className={classes.spaceBelow}>
-                                        <b>Copay:</b> {calcCopay()}
-                                    </Typography>
-                                </Grid>
-                            </Grid>
-                        </Grid>
-                    </Grid>
-
-                    <Grid item>
-                        <Typography variant="h6" gutterBottom>
-                            <b>Items:</b>
-                        </Typography>
-                        <AEOBItemsTable title="Items" data={props} />
-
-                    </Grid>
+                    {
+                        getAEOBList().map(item => {
+                            return (
+                                <AEOBEntry key={item.id} aeob={item} classes={classes} coverage={getCoverageResource()} />
+                            )
+                        })
+                    }
                 </Grid>
             </Grid>
+
         </React.Fragment>
     )
 }
