@@ -2,10 +2,11 @@ import React, { useState } from "react";
 
 import { Grid, makeStyles, createStyles } from "@material-ui/core";
 
-import RequestPanel from "./GFERequestPanel";
-import ResponsePanel from "./AEOBResponsePanel";
-import Settings from "./Settings";
-import MenuBar from "./MenuBar";
+import RequestPanel from './GFERequestPanel';
+import ResponsePanel from './AEOBResponsePanel';
+import Settings from './Settings';
+import MenuBar from './MenuBar';
+import { MockGfeResponse as MockResponse, /*MockSingleGFEResponse as MockResponse*/ } from '../mock/GfeResponse'
 
 const useStyles = makeStyles((theme) =>
   createStyles({
@@ -21,45 +22,53 @@ const useStyles = makeStyles((theme) =>
 );
 
 export default function MainPanel() {
-  const classes = useStyles();
-  const [submitting, setSubmitting] = useState(false);
-  const [gfeSubmitted, setGfeSubmitted] = useState(false);
-  const [gfeResponse, setGfeResponse] = useState(undefined);
-  const [gfeRequestSuccess, setGfeRequestSuccess] = useState(false);
-  const [bundleId, setBundleId] = useState(undefined);
-  const [bundleIdentifier, setBundleIdentifier] = useState(undefined);
-  const [gfeRequestPending, setGfeRequestPending] = useState(true);
-  const [showSettings, setShowSettings] = useState(false);
-  const [receivedAEOBResponse, setReceivedAEOBResponse] = useState(undefined);
-  const [dataServers] = useState([
-    {
-      value: "http://localhost:8080/fhir",
-    },
-    {
-      value: "https://davinci-pct-ehr.logicahealth.org/fhir",
-    },
-  ]);
-  const [selectedDataServer, setSelectedDataServer] = useState(
-    "https://davinci-pct-ehr.logicahealth.org/fhir"
-  );
-  const [payerServers] = useState([
-    {
-      value: "http://localhost:8081/fhir",
-    },
-    {
-      value: "https://davinci-pct-payer.logicahealth.org/fhir",
-    },
-    {
-      value: "https://fhir.collablynk.com/edifecs/fhir/R4",
-    },
-  ]);
-  const [selectedPayerServer, setSelectedPayerServer] = useState(
-    "https://davinci-pct-payer.logicahealth.org/fhir"
-  );
-  const [dataServerChanged, setDataServerChanged] = useState(false);
-  const [payerServerChanged, setPayerServerChanged] = useState(false);
-  const [showRequest, setShowRequest] = useState(true);
-  const [showResponse, setShowResponse] = useState(false);
+    const classes = useStyles();
+
+    ///////////////////// Temporty Debugging Setting /////////
+    const [gfeResponse, setGfeResponse] = useState(MockResponse);
+    const [gfeRequestSuccess, setGfeRequestSuccess] = useState(true);
+    const [bundleId, setBundleId] = useState(MockResponse.identifier.value);
+    const [bundleIdentifier, setBundleIdentifier] = useState(MockResponse.identifier.value);
+    ///////////////////////////////////////////////////////////
+   
+    /** Uncomment when merge works 
+    const [gfeResponse, setGfeResponse] = useState(undefined);
+    const [gfeRequestSuccess, setGfeRequestSuccess] = useState(false);
+    const [bundleId, setBundleId] = useState(undefined);
+    const [bundleIdentifier, setBundleIdentifier] = useState(undefined);
+    */
+
+    const [submitting, setSubmitting] = useState(false);
+    const [gfeSubmitted, setGfeSubmitted] = useState(false);
+    const [gfeRequestPending, setGfeRequestPending] = useState(true);
+    const [showSettings, setShowSettings] = useState(false);
+    const [receivedAEOBResponse, setReceivedAEOBResponse] = useState(undefined);
+    const [dataServers] = useState([
+        {
+            "value": "http://localhost:8080/fhir"
+        },
+        {
+            "value": "https://davinci-pct-ehr.logicahealth.org/fhir"
+        }
+    ]);
+    const [selectedDataServer, setSelectedDataServer] = useState("https://davinci-pct-ehr.logicahealth.org/fhir");
+    const [payerServers] = useState([
+        {
+            "value": "http://localhost:8080/fhir"
+        },
+        {
+            "value": "https://davinci-pct-payer.logicahealth.org/fhir"
+        },
+        {
+            "value": "https://fhir.collablynk.com/edifecs/fhir/R4"
+        }
+    ]);
+    const [selectedPayerServer, setSelectedPayerServer] = useState("http://localhost:8080/fhir");
+    const [dataServerChanged, setDataServerChanged] = useState(false);
+    const [payerServerChanged, setPayerServerChanged] = useState(false);
+    const [gfeType, setGfeType] = useState("institutional");
+    const [showRequest, setShowRequest] = useState(false);
+    const [showResponse, setShowResponse] = useState(true);
 
   function resetState() {
     setGfeResponse(undefined);
