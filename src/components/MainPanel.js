@@ -7,6 +7,7 @@ import ResponsePanel from './AEOBResponsePanel';
 import Settings from './Settings';
 import MenuBar from './MenuBar';
 import { MockGfeResponse as MockResponse, /*MockSingleGFEResponse as MockResponse*/ } from '../mock/GfeResponse'
+import { MockAeobResponse } from "../mock/AeobResponse";
 
 const useStyles = makeStyles((theme) =>
   createStyles({
@@ -29,6 +30,7 @@ export default function MainPanel() {
     const [gfeRequestSuccess, setGfeRequestSuccess] = useState(true);
     const [bundleId, setBundleId] = useState(MockResponse.identifier.value);
     const [bundleIdentifier, setBundleIdentifier] = useState(MockResponse.identifier.value);
+    const [receivedAEOBResponse, setReceivedAEOBResponse] = useState(MockAeobResponse);
     ///////////////////////////////////////////////////////////
    
     /** Uncomment when merge works 
@@ -36,13 +38,14 @@ export default function MainPanel() {
     const [gfeRequestSuccess, setGfeRequestSuccess] = useState(false);
     const [bundleId, setBundleId] = useState(undefined);
     const [bundleIdentifier, setBundleIdentifier] = useState(undefined);
+     const [receivedAEOBResponse, setReceivedAEOBResponse] = useState(undefined);
     */
 
     const [submitting, setSubmitting] = useState(false);
     const [gfeSubmitted, setGfeSubmitted] = useState(false);
     const [gfeRequestPending, setGfeRequestPending] = useState(true);
     const [showSettings, setShowSettings] = useState(false);
-    const [receivedAEOBResponse, setReceivedAEOBResponse] = useState(undefined);
+   
     const [dataServers] = useState([
         {
             "value": "http://localhost:8080/fhir"
