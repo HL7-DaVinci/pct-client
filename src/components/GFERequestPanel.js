@@ -1342,7 +1342,6 @@ class GFERequestBox extends Component {
             billingProviderName: this.state.selectedBillingProviderName,
             submittingProviderName: this.state.selectedSubmittingProviderName
 
-
         };
     }
 
