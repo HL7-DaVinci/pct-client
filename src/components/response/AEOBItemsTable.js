@@ -9,16 +9,18 @@ import TableRow from "@material-ui/core/TableRow";
 import jp from "jsonpath";
 
 
-function AEOBItemsTable({ title, data }) {
+function AEOBItemsTable(aeobData) {
+
+    const data = aeobData.props.aeob;
 
     //headers = [service, date, quantity...]
     let headers = [];
 
-    const numItems = jp.query(data, '$..[?(@.resourceType == "ExplanationOfBenefit")].item.length');
+    const numItems = jp.query(data, 'item.length');
 
     //get the different item adjudication categories and put into "header" list
     for (let i = 0; i < numItems; i++) {
-        const numAjudicationCategories = jp.query(data, '$..[?(@.resourceType == "ExplanationOfBenefit")].item[' + i + '].adjudication.length');
+        const numAjudicationCategories = jp.query(data, 'item[' + i + '].adjudication.length');
 
         //service
         if (!headers.includes("Service")) {
@@ -42,7 +44,7 @@ function AEOBItemsTable({ title, data }) {
 
         //goes thorugh the adjudication categories (paid to provider, submitted amount, eligible amount)
         for (let j = 0; j < numAjudicationCategories; j++) {
-            const catSelected = jp.query(data, '$..[?(@.resourceType == "ExplanationOfBenefit")].item[' + i + '].adjudication[' + j + '].category.coding[0].display')[0];
+            const catSelected = jp.query(data, 'item[' + i + '].adjudication[' + j + '].category.coding[0].display')[0];
             if (!headers.includes(catSelected)) {
                 headers.push(catSelected);
             }
@@ -55,33 +57,33 @@ function AEOBItemsTable({ title, data }) {
 
     //go through all items, and save data for each row
     for (let i = 0; i < numItems; i++) {
-        const numAjudicationCategories = jp.query(data, '$..[?(@.resourceType == "ExplanationOfBenefit")].item[' + i + '].adjudication.length');
+        const numAjudicationCategories = jp.query(data, 'item[' + i + '].adjudication.length');
 
         let currentRow = [];
 
         //service
-        const service = (jp.query(data, '$..[?(@.resourceType == "ExplanationOfBenefit")].item[' + i + '].productOrService.coding[0].code')[0]);
+        const service = (jp.query(data, 'item[' + i + '].productOrService.coding[0].code')[0]);
         const serviceObject = {
             ["Service"]: service,
         }
         currentRow.push(serviceObject);
 
         //service description
-        const serviceDescription = (jp.query(data, '$..[?(@.resourceType == "ExplanationOfBenefit")].item[' + i + '].productOrService.coding[0].display')[0]);
+        const serviceDescription = (jp.query(data, 'item[' + i + '].productOrService.coding[0].display')[0]);
         const serviceDescObject = {
             ["Service Description"]: serviceDescription,
         }
         currentRow.push(serviceDescObject);
 
         //service date
-        const serviceDate = (jp.query(data, '$..[?(@.resourceType == "ExplanationOfBenefit")].item[' + i + '].extension[0].valueDate')[0]);
+        const serviceDate = (jp.query(data, 'item[' + i + '].extension[0].valueDate')[0]);
         const serviceDateObject = {
             ["Service Date"]: serviceDate,
         }
         currentRow.push(serviceDateObject);
 
-        //quantity
-        const quantity = (jp.query(data, '$..[?(@.resourceType == "Claim")].item[' + i + '].quantity.value')[0]);
+        //quantity assumed to be 1 if not given
+        const quantity = (jp.query(data, 'item[' + i + '].quantity.value')[0] === undefined) ? "1" : jp.query(data, 'item[' + i + '].quantity.value')[0];
         const quantityObj = {
             ["Quantity"]: quantity,
         }
@@ -91,14 +93,13 @@ function AEOBItemsTable({ title, data }) {
 
         for (let j = 0; j < numAjudicationCategories; j++) {
 
-
-            const catSelected = jp.query(data, '$..[?(@.resourceType == "ExplanationOfBenefit")].item[' + i + '].adjudication[' + j + '].category.coding[0].display')[0];
-            if (headers.includes(catSelected) && (catSelected === "Paid to Provider" || catSelected === "Submitted Amount" || catSelected === "Eligible Amount")) {
-                let rowValueCurrency = jp.query(data, '$..[?(@.resourceType == "ExplanationOfBenefit")].item[' + i + '].adjudication[' + j + '].amount.currency')[0];
-                let rowValueAmount = jp.query(data, '$..[?(@.resourceType == "ExplanationOfBenefit")].item[' + i + '].adjudication[' + j + '].amount.value')[0];
+            const catSelected = jp.query(data, 'item[' + i + '].adjudication[' + j + '].category.coding[0].display')[0];
+            if (headers.includes(catSelected) && (catSelected === "Paid to Provider" || catSelected === "Submitted Amount" || catSelected === "Eligible Amount") || catSelected == "Co-insurance") {
+                let rowValueCurrency = (jp.query(data, 'item[' + i + '].adjudication[' + j + '].amount.currency')[0] === undefined) ? "USD" : jp.query(data, 'item[' + i + '].adjudication[' + j + '].amount.currency')[0];
+                let rowValueAmount = jp.query(data, 'item[' + i + '].adjudication[' + j + '].amount.value')[0];
 
                 if (rowValueCurrency === "USD" || rowValueCurrency === "") {
-                    rowValueAmount = jp.query(data, '$..[?(@.resourceType == "ExplanationOfBenefit")].item[' + i + '].adjudication[' + j + '].amount.value')[0].toFixed(2);
+                    rowValueAmount = jp.query(data, 'item[' + i + '].adjudication[' + j + '].amount.value')[0].toFixed(2);
                 }
 
                 const rowValue = rowValueAmount + " " + rowValueCurrency;
