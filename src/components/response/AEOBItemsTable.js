@@ -13,7 +13,7 @@ function AEOBItemsTable(aeobData) {
 
     const data = aeobData.props.aeob;
 
-    //headers = [service, date, quantity...]
+    //headers = [service, date, quantity...] holds adjudication categories' display titles
     let headers = [];
 
     const numItems = jp.query(data, 'item.length');
@@ -23,28 +23,28 @@ function AEOBItemsTable(aeobData) {
         const numAjudicationCategories = jp.query(data, 'item[' + i + '].adjudication.length');
 
         //service
-        if (!headers.includes("Service")) {
-            headers.push("Service");
+        if (!headers.includes("service")) {
+            headers.push("service");
         }
 
         //service description
-        if (!headers.includes("Service Description")) {
-            headers.push("Service Description");
+        if (!headers.includes("service description")) {
+            headers.push("service description");
         }
 
         //service date
-        if (!headers.includes("Service Date")) {
-            headers.push("Service Date");
+        if (!headers.includes("service date")) {
+            headers.push("service date");
         }
 
         //quantity
-        if (!headers.includes("Quantity")) {
-            headers.push("Quantity");
+        if (!headers.includes("quantity")) {
+            headers.push("quantity");
         }
 
         //goes thorugh the adjudication categories (paid to provider, submitted amount, eligible amount)
         for (let j = 0; j < numAjudicationCategories; j++) {
-            const catSelected = jp.query(data, 'item[' + i + '].adjudication[' + j + '].category.coding[0].display')[0];
+            const catSelected = jp.query(data, 'item[' + i + '].adjudication[' + j + '].category.coding[0].display')[0].toLowerCase();
             if (!headers.includes(catSelected)) {
                 headers.push(catSelected);
             }
@@ -64,37 +64,39 @@ function AEOBItemsTable(aeobData) {
         //service
         const service = (jp.query(data, 'item[' + i + '].productOrService.coding[0].code')[0]);
         const serviceObject = {
-            ["Service"]: service,
+            ["service"]: service,
         }
         currentRow.push(serviceObject);
 
         //service description
         const serviceDescription = (jp.query(data, 'item[' + i + '].productOrService.coding[0].display')[0]);
         const serviceDescObject = {
-            ["Service Description"]: serviceDescription,
+            ["service description"]: serviceDescription,
         }
         currentRow.push(serviceDescObject);
 
         //service date
         const serviceDate = (jp.query(data, 'item[' + i + '].extension[0].valueDate')[0]);
         const serviceDateObject = {
-            ["Service Date"]: serviceDate,
+            ["service date"]: serviceDate,
         }
         currentRow.push(serviceDateObject);
 
         //quantity assumed to be 1 if not given
         const quantity = (jp.query(data, 'item[' + i + '].quantity.value')[0] === undefined) ? "1" : jp.query(data, 'item[' + i + '].quantity.value')[0];
         const quantityObj = {
-            ["Quantity"]: quantity,
+            ["quantity"]: quantity,
         }
         currentRow.push(quantityObj);
 
 
-
+        //for each item, fills table according to the adjudication categories
         for (let j = 0; j < numAjudicationCategories; j++) {
 
-            const catSelected = jp.query(data, 'item[' + i + '].adjudication[' + j + '].category.coding[0].display')[0];
-            if (headers.includes(catSelected) && (catSelected === "Paid to Provider" || catSelected === "Submitted Amount" || catSelected === "Eligible Amount") || catSelected == "Co-insurance") {
+            const catSelected = jp.query(data, 'item[' + i + '].adjudication[' + j + '].category.coding[0].code')[0];
+            const catHeaderSelected = jp.query(data, 'item[' + i + '].adjudication[' + j + '].category.coding[0].display')[0].toLowerCase();
+
+            if (headers.includes(catHeaderSelected) && (catSelected === "paidtoprovider" || catSelected === "submitted" || catSelected === "eligible" || catSelected === "coinsurance" || catSelected === "copay")) {
                 let rowValueCurrency = (jp.query(data, 'item[' + i + '].adjudication[' + j + '].amount.currency')[0] === undefined) ? "USD" : jp.query(data, 'item[' + i + '].adjudication[' + j + '].amount.currency')[0];
                 let rowValueAmount = jp.query(data, 'item[' + i + '].adjudication[' + j + '].amount.value')[0];
 
@@ -104,7 +106,7 @@ function AEOBItemsTable(aeobData) {
 
                 const rowValue = rowValueAmount + " " + rowValueCurrency;
                 const object = {
-                    [catSelected]: rowValue,
+                    [catHeaderSelected]: rowValue,
                 }
                 currentRow.push(object);
             }
