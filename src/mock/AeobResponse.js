@@ -97,7 +97,7 @@ export const MockAeobResponse = {
                                     }
                                 ]
                             },
-                            "outcome": "complete",
+                            "outcome": "pending",
                             "insurance": [
                                 {
                                     "focal": true,
