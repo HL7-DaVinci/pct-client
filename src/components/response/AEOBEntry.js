@@ -59,6 +59,7 @@ export default function AEOBEntry(props) {
                                     </Grid>
                                 </Grid>
                             </Grid>
+                            <br></br>
                             <Grid item>
                                 <Typography variant="body1" gutterBottom>
                                     <b>ID:</b> {props.aeob.id}
@@ -74,6 +75,7 @@ export default function AEOBEntry(props) {
                                     <b>Outcome:</b> {props.aeob.outcome}
                                 </Typography>
                             </Grid>
+                            <br></br>
 
                             <Grid container direction="row" spacing={9}>
                                 <Grid item>
@@ -93,6 +95,7 @@ export default function AEOBEntry(props) {
                                     </Grid>
                                 </Grid>
                             </Grid>
+                            <br></br>
 
                             <Grid item>
                                 <Typography variant="h6" gutterBottom>
