@@ -219,13 +219,13 @@ export default function AEOBBundle(props) {
                                             }}
                                         >
                                             <div>
-                                                <pre>{JSON.stringify(props.receivedAEOBResponse, undefined, 2)}</pre>
+                                                <pre>{JSON.stringify(props.aeobResponse, undefined, 2)}</pre>
                                             </div>
                                         </Box>
-                                        <DialogActions>
-                                            <Button onClick={props.handleCloseAEOBContent}>Close</Button>
-                                        </DialogActions>
                                     </DialogContent>
+                                    <DialogActions>
+                                        <Button onClick={props.handleCloseAEOB}>Close</Button>
+                                    </DialogActions>
                                 </Dialog>
                             </Grid>
                         </Grid>
