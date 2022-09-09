@@ -24,6 +24,7 @@ import ListItem from "@mui/material/ListItem";
 import ListItemButton from "@mui/material/ListItemButton";
 import ListItemText from "@mui/material/ListItemText";
 import ListSubheader from "@mui/material/ListSubheader";
+import { exampleState } from "../exampleState";
 
 import {
   getPatients,
@@ -176,7 +177,6 @@ class GFERequestBox extends Component {
       organizationList: [],
       selectedRequest: undefined,
       resolvedReferences: {},
-      //selectedDate: undefined,
       selectedProcedure: undefined,
       validationErrors: undefined,
       openErrorDialog: false,
@@ -203,6 +203,7 @@ class GFERequestBox extends Component {
       selectedGFE: startingGFEId,
     };
     this.state = this.initialState;
+    //this.state = exampleState;
   }
 
   handleStartDateChange = (date) => {
@@ -239,7 +240,6 @@ class GFERequestBox extends Component {
           getPractitioners(this.props.ehrUrl),
           getOrganizations(this.props.ehrUrl),
         ]);
-        // NATNOTE
         await Promise.all(
           res.map((r) => {
             if (
@@ -502,8 +502,10 @@ class GFERequestBox extends Component {
   };
 
   getClaimDetails = () => {
+    //Currently, selectedRequest will always be undefined
     if (this.state.selectedRequest) {
       return this.getRequestRelatedInfo(this.state.selectedRequest);
+      //Currently, selectedProcedure will always be undefined
     } else if (this.state.selectedProcedure) {
       let code = {
         coding: [
@@ -519,6 +521,7 @@ class GFERequestBox extends Component {
         coverage: this.state.subjectInfo.selectedCoverage,
         practitioner: this.state.selectedPractitioner,
       };
+      //Only valid branch right now
     } else {
       return {
         coverage: this.state.subjectInfo.selectedCoverage,
@@ -526,7 +529,6 @@ class GFERequestBox extends Component {
     }
   };
   generateRequestInput = (gfeId) => {
-    console.log(gfeId);
     let input = {
       bundleResources: [],
     };
@@ -559,6 +561,7 @@ class GFERequestBox extends Component {
     const { request, coverage } = this.getClaimDetails();
 
     input.request = {
+      //request will always be undefined
       resource: request,
       coverage: {
         reference: `Coverage/${coverage.id}`,
@@ -817,9 +820,6 @@ class GFERequestBox extends Component {
     });
     input.bundleResources = bundleResourceList;
 
-    // TODO only send those needed
-    // input.resourceList = this.state.resolvedReferences;
-
     return input;
   };
 
@@ -857,9 +857,6 @@ class GFERequestBox extends Component {
           this.props.setBundleIdentifier(response.identifier.value);
           this.props.setShowResponse(true);
           this.props.setShowRequest(false);
-
-          // TODO check the response status if(response.)
-          //this.props.setGfeRequestPending(true);
         })
         .catch((error) => {
           this.props.setSubmitting(false);
@@ -885,8 +882,24 @@ class GFERequestBox extends Component {
     const ri = Object.keys(this.state.gfeInfo).map((gfeId) =>
       this.generateRequestInput(gfeId)
     );
-    console.log(ri);
-    //buildGFEBundle(this.generateRequestInput())
+    const bundles = ri.map((input) => buildGFEBundle(input));
+    const bundleEntries = bundles.reduce((acc, e) => {
+      acc.push(...e.entry);
+      return acc;
+    }, []);
+    const enteredIds = new Set();
+    const uniqueEntries = [];
+    bundleEntries.forEach((e) => {
+      if (
+        e.resource.resourceType === "Claim" ||
+        !enteredIds.has(e.resource.id)
+      ) {
+        uniqueEntries.push(e);
+        enteredIds.add(e.resource.id);
+      }
+    });
+    bundles[0].entry = uniqueEntries;
+    return bundles[0];
   };
 
   retrieveRequestSummary = () => {
@@ -917,7 +930,6 @@ class GFERequestBox extends Component {
       servicesList: this.state.gfeInfo[this.state.selectedGFE].claimItemList,
       priorityLevel:
         this.state.gfeInfo[this.state.selectedGFE].selectedPriority,
-      //serviceDate: this.state.selectedDate,
       submittingProvider: this.state.subjectInfo.selectedSubmitter,
       billingProvider:
         this.state.gfeInfo[this.state.selectedGFE].selectedBillingProvider,
@@ -1459,16 +1471,13 @@ class GFERequestBox extends Component {
                       >
                         <Button variant="contained">Total Summary</Button>
                       </ListItem>
-                      <ListItem
-                        onClick={() => {
-                          try {
-                            this.generateBundle();
-                          } catch (e) {
-                            console.log(e);
-                          }
-                        }}
-                      >
+                      <ListItem onClick={this.generateBundle}>
                         <Button>Request Input</Button>
+                      </ListItem>
+                      <ListItem>
+                        <Button onClick={this.handleOnSubmit}>
+                          Submit Request
+                        </Button>
                       </ListItem>
                     </List>
                   </Box>
