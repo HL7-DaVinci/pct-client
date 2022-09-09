@@ -6,6 +6,7 @@ import Divider from '@mui/material/Divider';
 import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
 import moment from 'moment';
 import AEOBItemsTable from "./AEOBItemsTable";
+import CircleIcon from '@mui/icons-material/Circle';
 
 export default function AEOBEntry(props) {
 
@@ -14,15 +15,9 @@ export default function AEOBEntry(props) {
         return moment(date).format('lll');
     }
 
-    // TODO - fix the copy calculation it should be available from item instead of total 
-    // Need to display the copay in the item list
-    /*function calcCopay() {
-        const copayPercentage = props.coverage.costToBeneficiary[0].valueQuantity.value[0];
-        const copayDeci = copayPercentage / 100;
-        const copayAmount = (copayDeci * jp.query(props, '$..[?(@.resourceType == "ExplanationOfBenefit")].total[0].amount.value')[0]).toFixed(2);
-
-        return copayAmount + " " + currency;
-    }*/
+    function getStatusIcon() {
+        return props.aeob.outcome === "complete" ? (<CircleIcon sx={{ color: "green" }} />) : (<CircleIcon sx={{ color: "orange" }} />)
+    }
 
     return (
         <React.Fragment>
@@ -33,7 +28,22 @@ export default function AEOBEntry(props) {
                         aria-controls="panel1a-content"
                         id="panel1a-header"
                     >
-                        <Typography><b>AEOB:</b>{props.aeob.id}</Typography>
+                        <Grid container direction='row' spacing={2}>
+                            <Grid item>
+                                <Typography><b>AEOB: </b>{props.aeob.id}</Typography>
+                            </Grid>
+
+                            <Grid item>
+                                <Grid container direction='row'>
+                                    <Grid item>
+                                        <Typography>Outcome: </Typography>
+                                    </Grid>
+                                    <Grid item>
+                                        {getStatusIcon()}
+                                    </Grid>
+                                </Grid>
+                            </Grid>
+                        </Grid>
                     </AccordionSummary>
                     <AccordionDetails >
                         <Grid style={{ marginTop: 33 }}>
@@ -80,13 +90,6 @@ export default function AEOBEntry(props) {
                                                 </Typography>
                                             </Grid>
                                         })}
-
-
-                                        <Grid item>
-                                            <Typography variant="body1" gutterBottom className={props.classes.spaceBelow}>
-                                                <b>Copay:</b> total
-                                            </Typography>
-                                        </Grid>
                                     </Grid>
                                 </Grid>
                             </Grid>
@@ -94,8 +97,8 @@ export default function AEOBEntry(props) {
                             <Grid item>
                                 <Typography variant="h6" gutterBottom>
                                     <b>Items:</b>
-                                    <AEOBItemsTable props={props} />
                                 </Typography>
+
                             </Grid>
                         </Grid>
                     </AccordionDetails>
