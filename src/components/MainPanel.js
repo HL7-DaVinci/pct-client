@@ -74,8 +74,8 @@ export default function MainPanel() {
   const [dataServerChanged, setDataServerChanged] = useState(false);
   const [payerServerChanged, setPayerServerChanged] = useState(false);
   const [gfeType, setGfeType] = useState("institutional");
-  const [showRequest, setShowRequest] = useState(false);
-  const [showResponse, setShowResponse] = useState(true);
+  const [showRequest, setShowRequest] = useState(true);
+  const [showResponse, setShowResponse] = useState(false);
 
   function resetState() {
     setGfeResponse(undefined);
