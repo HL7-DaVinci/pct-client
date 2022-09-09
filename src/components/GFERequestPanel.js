@@ -1897,12 +1897,6 @@ class GFERequestBox extends Component {
                               <Typography variant="h6">Summary</Typography>
                             </b>
                           </Grid>
-                          <Grid item xs={2}>
-                            <ViewGFERequestDialog
-                              generateRequest={this.generateBundle}
-                              error={this.state.validationErrors}
-                            />
-                          </Grid>
                         </Grid>
 
                         <Grid item>
@@ -1949,6 +1943,12 @@ class GFERequestBox extends Component {
                       <FormControl component="fieldset">
                         <Grid container direction="row">
                           <Grid item>
+                            <Grid item xs={2}>
+                              <ViewGFERequestDialog
+                                generateRequest={this.generateBundle}
+                                error={this.state.validationErrors}
+                              />
+                            </Grid>
                             <TotalSummaryGFEs
                               subject={this.state.subjectInfo}
                               summaries={this.state.gfeInfo}
