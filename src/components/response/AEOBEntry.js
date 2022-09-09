@@ -97,6 +97,7 @@ export default function AEOBEntry(props) {
                             <Grid item>
                                 <Typography variant="h6" gutterBottom>
                                     <b>Items:</b>
+                                    <AEOBItemsTable props={props} />
                                 </Typography>
 
                             </Grid>
