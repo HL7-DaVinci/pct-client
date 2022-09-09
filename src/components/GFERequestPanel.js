@@ -533,52 +533,6 @@ class GFERequestBox extends Component {
     };
 
 
-    /* ProfessionalBillingProviderSelect = (providers, selectedProvider, handleSelect, providerSelectType) => {
- 
-         //save on select to display within summary tab
-         for (let i = 0; i < providers.length; i++) {
-             if (selectedProvider == providers[i].id) {
-                 if (providerSelectType == "billing") {
-                     this.state.selectedBillingProviderName = providers[i].display;
-                 } else if (providerSelectType == "submitting") {
-                     this.state.selectedSubmittingProviderName = providers[i].display;
-                 }
-             }
-         }
- 
-         return (<Select required labelId="select-billing-provider-label" id="billing-provider" value={selectedProvider} onChange={handleSelect} style={{ backgroundColor: "#FFFFFF" }}>
-             {
-                 providers ?
-                     providers.map(provider => {
-                         return (<MenuItem key={provider.id} value={provider.id} >{provider.display}</MenuItem>)
-                     }) : (<MenuItem />)
-             }
-         </Select>);
-     }
- 
-     OrganizationSelect = (organizations, organizationSelected, label, id, handleOpen, handleSelect, providerSelectType) => {
- 
-         //save on select to display within summary tab
-         for (let i = 0; i < organizations.length; i++) {
-             if (organizationSelected == organizations[i].resource.id) {
- 
-                 if (providerSelectType == "billing") {
-                     this.state.selectedBillingProviderName = organizations[i].resource.name;
-                 } else if (providerSelectType == "submitting") {
-                     this.state.selectedSubmittingProviderName = organizations[i].resource.name;
-                 }
-             }
-         }
-         return (
-             <Select required labelId={label} id={id} value={organizationSelected} onOpen={handleOpen} onChange={handleSelect} style={{ backgroundColor: "#FFFFFF" }}>
-                 {
-                     organizations ? (organizations.map((org) => {
-                         return (<MenuItem key={org.resource.id} value={org.resource.id}>{org.resource.name}</MenuItem>)
-                     })) : <MenuItem />
-                 }
-             </Select>)
-     } */
-
     PatientSelect = (patients, selectPatient, handleOpenPatients, handleChange) => {
         //save on select to display within summary tab
         for (let i = 0; i < patients.length; i++) {
