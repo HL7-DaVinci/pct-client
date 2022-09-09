@@ -154,7 +154,6 @@ const generateGFE = () => {
     claimItemList: [{ id: v4() }],
     selectedPriority: null,
     selectedBillingProvider: null,
-    gfeServiceId: null,
     interTransIntermediary: null,
     supportingInfoTypeOfBill: "",
   };
@@ -202,8 +201,8 @@ class GFERequestBox extends Component {
       gfeInfo: { ...initialGFEInfo },
       selectedGFE: startingGFEId,
     };
-    this.state = this.initialState;
-    //this.state = exampleState;
+    //this.state = this.initialState;
+    this.state = exampleState;
   }
 
   handleStartDateChange = (date) => {
@@ -628,10 +627,7 @@ class GFERequestBox extends Component {
         this.state.gfeInfo[gfeId].interTransIntermediary;
     }
 
-    if (this.state.gfeInfo[gfeId].gfeServiceId) {
-      input.billing.gfeAssignedServiceId =
-        this.state.gfeInfo[gfeId].gfeServiceId;
-    }
+    input.billing.gfeAssignedServiceId = gfeId;
 
     input.billing.items = [];
     let sequenceCount = 1;
@@ -933,18 +929,13 @@ class GFERequestBox extends Component {
       submittingProvider: this.state.subjectInfo.selectedSubmitter,
       billingProvider:
         this.state.gfeInfo[this.state.selectedGFE].selectedBillingProvider,
-      gfeServiceId: this.state.gfeInfo[this.state.selectedGFE].gfeServiceId,
+      gfeServiceId: this.state.selectedGFE,
     };
   };
 
   handleSelectInterTransId = (e) => {
     const gfeInfo = { ...this.state.gfeInfo };
     gfeInfo[this.state.selectedGFE].interTransIntermediary = e.target.value;
-    this.setState({ gfeInfo });
-  };
-  handleSelectGfeServiceId = (e) => {
-    const gfeInfo = { ...this.state.gfeInfo };
-    gfeInfo[this.state.selectedGFE].gfeServiceId = e.target.value;
     this.setState({ gfeInfo });
   };
 
@@ -1832,34 +1823,6 @@ class GFERequestBox extends Component {
                                   </Box>
                                 </FormControl>
                               </Grid>
-                              <Grid item>
-                                <Grid container direction="column" spacing={3}>
-                                  <Grid item>
-                                    <FormLabel>
-                                      GFE assigned service identifier*
-                                    </FormLabel>
-                                  </Grid>
-                                  <Grid item>
-                                    <Select
-                                      displayEmpty
-                                      id="select-gfe-service-id"
-                                      value={
-                                        this.state.gfeInfo[
-                                          this.state.selectedGFE
-                                        ].gfeServiceId
-                                      }
-                                      label="GFE assigned service identifier"
-                                      onChange={this.handleSelectGfeServiceId}
-                                      className={classes.inputBox}
-                                    >
-                                      <MenuItem value="GFEAssignedServiceID0001">
-                                        GFEAssignedServiceID0001
-                                      </MenuItem>
-                                    </Select>
-                                  </Grid>
-                                </Grid>
-                              </Grid>
-
                               <Grid item>
                                 <FormControl>
                                   <FormLabel className={classes.smallerHeader}>
