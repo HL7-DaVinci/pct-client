@@ -352,22 +352,22 @@ export default function AEOBResponsePanel(props) {
                         >
                             <Typography>AEOB- Query at {handleRequestTime()}</Typography>
                         </AccordionSummary>
-                        <AccordionDetails className={classes.aeobInitialResponseText}>                   
+                        <AccordionDetails className={classes.aeobInitialResponseText}>
                             <Grid style={{ marginTop: 33 }}>
                                 <Divider />
                                 <Divider light />
                                 <Divider />
                                 <Divider light />
-                                <Grid item>
+                                <Grid item xs={12} style={{ marginTop: 10 }}>
                                     <AEOBBundle aeobResponse={props.receivedAEOBResponse}
-                                    handleOpenAEOB={handleOpenAEOB}
-                                    openAEOB={openAEOB}
-                                    handleCloseAEOB={handleCloseAEOB}
-                                    handleCloseAEOBContent={handleCloseAEOBContent}
+                                        handleOpenAEOB={handleOpenAEOB}
+                                        openAEOB={openAEOB}
+                                        handleCloseAEOB={handleCloseAEOB}
+                                        handleCloseAEOBContent={handleCloseAEOBContent}
                                     />
                                 </Grid>
-                            </Grid>                           
-                            
+                            </Grid>
+
                         </AccordionDetails>
                     </Accordion >
                 ) : null

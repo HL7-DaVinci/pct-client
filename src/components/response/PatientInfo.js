@@ -1,6 +1,7 @@
 import React from 'react';
 import {
-    Typography, Grid} from '@material-ui/core';
+    Typography, Grid
+} from '@material-ui/core';
 import Divider from '@mui/material/Divider';
 import jp from "jsonpath";
 
@@ -83,7 +84,7 @@ export default function PatientInfo(props) {
 
     return (
         <React.Fragment>
-            <Grid className={props.classes.info}>
+            <Grid className={props.classes.info} style={{ marginTop: 10 }}>
                 <Divider />
                 <Divider light />
                 <Grid item>
@@ -101,8 +102,7 @@ export default function PatientInfo(props) {
                             </Grid>
                             <Grid item>
                                 <Typography variant="body1" gutterBottom>
-                                    <b>Name:</b>
-                                    {getHumanNameDisplay(getPatientResource().name[0])}
+                                    <b>Name:</b> {getHumanNameDisplay(getPatientResource().name[0])}
                                 </Typography>
                             </Grid>
                             <Grid item>
@@ -162,6 +162,10 @@ export default function PatientInfo(props) {
                         </Grid>
                     </Grid>
                 </Grid>
+                <Divider />
+                <Divider light />
+                <Divider />
+                <Divider light />
             </Grid>
         </React.Fragment>
     )
