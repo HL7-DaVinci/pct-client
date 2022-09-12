@@ -56,11 +56,7 @@ export default function AEOBEntry(props) {
                         <Divider light />
 
                         <Grid item>
-                            <Grid container spacing={0}>
-                                <Grid item xs={4} >
-                                    <Typography variant="h6" align='left' style={{ color: "#b7b7b7" }}>THIS IS NOT A BILL</Typography>
-                                </Grid>
-                            </Grid>
+                            <Typography variant="h6" align='center' style={{ color: "#b7b7b7" }}>THIS IS NOT A BILL</Typography>
                         </Grid>
                         <br></br>
                         <Grid item>
