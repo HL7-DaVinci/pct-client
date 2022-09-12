@@ -27,11 +27,8 @@ export default function SubmitterInfo(props) {
     }
     return (
         <React.Fragment>
-            <Grid style={{ marginTop: 33 }}>
-                <Divider />
-                <Divider light />
-                <Divider />
-                <Divider light />
+            <Grid style={{ marginTop: 10 }}>
+
 
                 <Grid item>
                     <Grid container spacing={0}>

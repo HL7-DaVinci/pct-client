@@ -84,7 +84,7 @@ export default function PatientInfo(props) {
 
     return (
         <React.Fragment>
-            <Grid className={props.classes.info}>
+            <Grid className={props.classes.info} style={{ marginTop: 10 }}>
                 <Divider />
                 <Divider light />
                 <Grid item>
@@ -162,6 +162,10 @@ export default function PatientInfo(props) {
                         </Grid>
                     </Grid>
                 </Grid>
+                <Divider />
+                <Divider light />
+                <Divider />
+                <Divider light />
             </Grid>
         </React.Fragment>
     )

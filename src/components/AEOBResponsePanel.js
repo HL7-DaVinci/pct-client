@@ -358,7 +358,7 @@ export default function AEOBResponsePanel(props) {
                                 <Divider light />
                                 <Divider />
                                 <Divider light />
-                                <Grid item xs={12}>
+                                <Grid item xs={12} style={{ marginTop: 10 }}>
                                     <AEOBBundle aeobResponse={props.receivedAEOBResponse}
                                         handleOpenAEOB={handleOpenAEOB}
                                         openAEOB={openAEOB}

@@ -26,7 +26,7 @@ export default function AEOBEntry(props) {
                     expandIcon={<ExpandMoreIcon />}
                     aria-controls="panel1a-content"
                     id="panel1a-header"
-                    style={{ backgroundColor: "#EEF3FF" }}
+                    style={{ backgroundColor: "#EEEEEE" }}
                 >
                     <Grid container direction='row' spacing={2}>
                         <Grid item>
@@ -48,7 +48,7 @@ export default function AEOBEntry(props) {
                         </Grid>
                     </Grid>
                 </AccordionSummary>
-                <AccordionDetails style={{ backgroundColor: "#EEF3FF" }} >
+                <AccordionDetails style={{ backgroundColor: "#EEEEEE" }} >
                     <Grid style={{ marginTop: 33 }}>
                         <Divider />
                         <Divider light />
@@ -58,7 +58,7 @@ export default function AEOBEntry(props) {
                         <Grid item>
                             <Grid container spacing={0}>
                                 <Grid item xs={4} >
-                                    <Typography variant="h6" align='left' style={{ color: "#d7d3d3" }}>THIS IS NOT A BILL</Typography>
+                                    <Typography variant="h6" align='left' style={{ color: "#b7b7b7" }}>THIS IS NOT A BILL</Typography>
                                 </Grid>
                             </Grid>
                         </Grid>

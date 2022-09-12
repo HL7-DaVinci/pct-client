@@ -235,13 +235,13 @@ export default function AEOBBundle(props) {
                 <PatientInfo props={props} classes={classes} />
                 <SubmitterInfo props={props} classes={classes} getNameDisplay={getNameDisplay} />
 
-                <Grid style={{ marginTop: 33 }}>
+                <Grid style={{ marginTop: 10 }}>
                     <Divider />
                     <Divider light />
                     <Divider />
                     <Divider light />
 
-                    <Grid item>
+                    <Grid item style={{ marginTop: 33 }}>
                         <Grid container spacing={0}>
                             <Grid item xs={5}>
                                 <Typography variant="h5" gutterBottom>
