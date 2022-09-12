@@ -1407,52 +1407,64 @@ class GFERequestBox extends Component {
                         >
                           <ListItemText>
                             {this.state.subjectInfo.selectedPatient ||
-                              "Create New Patient"}
+                              "Select Patient"}
                           </ListItemText>
                         </ListItemButton>
                       </ListItem>
                       <ListSubheader>GFEs</ListSubheader>
                       {Object.keys(this.state.gfeInfo).map((id) => {
                         return (
-                          <ListItem>
-                            <ListItemButton
-                              onClick={() => this.setState({ selectedGFE: id })}
-                              selected={this.state.selectedGFE === id}
-                            >
-                              <ListItemText>{id}</ListItemText>
-                            </ListItemButton>
-                          </ListItem>
+                          <>
+                            <ListItem>
+                              <ListItemButton
+                                onClick={() =>
+                                  this.setState({ selectedGFE: id })
+                                }
+                                selected={this.state.selectedGFE === id}
+                              >
+                                <ListItemText>{id}</ListItemText>
+                              </ListItemButton>
+                            </ListItem>
+                            {this.state.selectedGFE === id && (
+                              <List dense={true}>
+                                <ListItem>
+                                  <ListItemButton
+                                    onClick={() =>
+                                      this.handleVerticalChange(null, 1)
+                                    }
+                                    selected={this.state.verticalTabIndex === 1}
+                                  >
+                                    <ListItemText>Care Team</ListItemText>
+                                  </ListItemButton>
+                                </ListItem>
+                                <ListItem>
+                                  <ListItemButton
+                                    onClick={() =>
+                                      this.handleVerticalChange(null, 2)
+                                    }
+                                    selected={this.state.verticalTabIndex === 2}
+                                  >
+                                    <ListItemText>{"Encounter"}</ListItemText>
+                                  </ListItemButton>
+                                </ListItem>
+                                <ListItem>
+                                  <ListItemButton
+                                    onClick={() =>
+                                      this.handleVerticalChange(null, 3)
+                                    }
+                                    selected={this.state.verticalTabIndex === 3}
+                                  >
+                                    <ListItemText>{"Summary"}</ListItemText>
+                                  </ListItemButton>
+                                </ListItem>
+                              </List>
+                            )}
+                          </>
                         );
                       })}
                       <ListItem>
                         <ListItemButton onClick={this.handleAddGFE}>
                           <ListItemText>Create New GFE</ListItemText>
-                        </ListItemButton>
-                      </ListItem>
-                    </List>
-                    <List dense={true}>
-                      <ListItem>
-                        <ListItemButton
-                          onClick={() => this.handleVerticalChange(null, 1)}
-                          selected={this.state.verticalTabIndex === 1}
-                        >
-                          <ListItemText>Care Team</ListItemText>
-                        </ListItemButton>
-                      </ListItem>
-                      <ListItem>
-                        <ListItemButton
-                          onClick={() => this.handleVerticalChange(null, 2)}
-                          selected={this.state.verticalTabIndex === 2}
-                        >
-                          <ListItemText>{"Encounter"}</ListItemText>
-                        </ListItemButton>
-                      </ListItem>
-                      <ListItem>
-                        <ListItemButton
-                          onClick={() => this.handleVerticalChange(null, 3)}
-                          selected={this.state.verticalTabIndex === 3}
-                        >
-                          <ListItemText>{"Summary"}</ListItemText>
                         </ListItemButton>
                       </ListItem>
                     </List>
