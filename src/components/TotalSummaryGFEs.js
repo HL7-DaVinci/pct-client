@@ -70,6 +70,8 @@ function retrieveRequestSummary(subjectInfo, gfeInfo) {
     submittingProvider: subjectInfo.selectedSubmitter,
     billingProvider: gfeInfo.selectedBillingProvider,
     gfeServiceId: gfeInfo.gfeServiceId,
+    billingProviderName: gfeInfo.selectedBillingProviderName,
+    submittingProviderName: subjectInfo.selectedSubmittingProviderName,
   };
 }
 

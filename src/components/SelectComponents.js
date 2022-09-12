@@ -87,22 +87,38 @@ export const PrioritySelect = (
 export const ProfessionalBillingProviderSelect = (
   providers,
   selectedProvider,
-  handleSelect
+  handleSelect,
+  id
 ) => {
   return (
     <Select
       required
       labelId="select-billing-provider-label"
       id="billing-provider"
-      value={selectedProvider || ""}
-      onChange={(e) => {
-        console.log(e);
-        handleSelect(e);
-      }}
+      value={selectedProvider}
+      onChange={handleSelect}
       style={{ backgroundColor: "#FFFFFF" }}
     >
       {providers ? (
         providers.map((provider) => {
+          //for billing provider field, let only "prov" be options
+          if (id === "billingProvider") {
+            if (provider.resource.type !== undefined) {
+              if (provider.resource.type[0].coding[0].code !== "prov") {
+                return undefined;
+              }
+            }
+          }
+
+          //for submitting provider field, let all except payers to be options
+          if (id === "submittingProvider") {
+            if (provider.resource.type !== undefined) {
+              if (provider.resource.type[0].coding[0].code === "pay") {
+                return undefined;
+              }
+            }
+          }
+
           return (
             <MenuItem key={provider.id} value={provider.id}>
               {provider.display}
@@ -135,6 +151,20 @@ export const OrganizationSelect = (
   >
     {organizations ? (
       organizations.map((org) => {
+        //for billing provider field, let only "prov" be options
+        if (id === "billingProvider") {
+          if (org.resource.type[0].coding[0].code !== "prov") {
+            return undefined;
+          }
+        }
+
+        //for submitting provider field, let all except payers to be options
+        if (id === "submittingProvider") {
+          if (org.resource.type[0].coding[0].code === "pay") {
+            return undefined;
+          }
+        }
+
         return (
           <MenuItem key={org.resource.id} value={org.resource.id}>
             {org.resource.name}

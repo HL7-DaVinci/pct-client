@@ -385,7 +385,12 @@ class GFERequestBox extends Component {
           }
         }
       }
-
+      let patientName = "";
+      for (let i = 0; i < this.state.patientList.length; i++) {
+        if (patientId === this.state.patientList[i].resource.id) {
+          patientName = this.state.patientsList[i].resource.name[0].text;
+        }
+      }
       if (addressText && addressText.length > 0) {
         let subjectInfo = {
           ...this.state.subjectInfo,
@@ -393,6 +398,7 @@ class GFERequestBox extends Component {
           birthdate: birthdateText,
           gender: genderText,
           telephone: telephoneText,
+          selectedPatientName: patientName,
           memberNumber,
         };
         this.setState({ subjectInfo });
@@ -403,6 +409,7 @@ class GFERequestBox extends Component {
           birthdate: undefined,
           gender: undefined,
           telephone: undefined,
+          selectedPatientName: undefined,
           memberNumber,
         };
         this.setState({ subjectInfo });
@@ -427,6 +434,16 @@ class GFERequestBox extends Component {
   handleSelectBillingProvider = (e) => {
     const gfeInfo = { ...this.state.gfeInfo };
     gfeInfo[this.state.selectedGFE].selectedBillingProvider = e.target.value;
+
+    const allBillingProviders = this.getProfessionalBillingProviderList();
+
+    //set name of provider to display name instead of code in summary tab
+    for (let i = 0; i < allBillingProviders.length; i++) {
+      if (e.target.value == allBillingProviders[i].id) {
+        gfeInfo[this.state.selectedGFE].selectedBillingProviderName =
+          allBillingProviders[i].display;
+      }
+    }
     this.setState({
       gfeInfo,
     });
@@ -452,10 +469,19 @@ class GFERequestBox extends Component {
   };
 
   handleSelectSubmitter = (e) => {
+    const allSubmittersList = this.getProfessionalBillingProviderList();
+    let selectedSubmittingProviderName = "";
+    //set name of provider to display name instead of code in summary tab
+    for (let i = 0; i < allSubmittersList.length; i++) {
+      if (e.target.value == allSubmittersList[i].resource.id) {
+        selectedSubmittingProviderName = allSubmittersList[i].display;
+      }
+    }
     this.setState({
       subjectInfo: {
         ...this.state.subjectInfo,
         selectedSubmitter: e.target.value,
+        selectedSubmittingProviderName,
       },
     });
   };
@@ -930,6 +956,10 @@ class GFERequestBox extends Component {
       billingProvider:
         this.state.gfeInfo[this.state.selectedGFE].selectedBillingProvider,
       gfeServiceId: this.state.selectedGFE,
+      billingProviderName:
+        this.state.gfeInfo[this.state.selectedGFE].selectedBillingProviderName,
+      submittingProviderName:
+        this.state.subjectInfo.selectedSubmittingProviderName,
     };
   };
 
@@ -1556,7 +1586,8 @@ class GFERequestBox extends Component {
                               ? ProfessionalBillingProviderSelect(
                                   professionalBillingProviderList,
                                   this.state.subjectInfo.selectedSubmitter,
-                                  this.handleSelectSubmitter
+                                  this.handleSelectSubmitter,
+                                  "submittingProvider"
                                 )
                               : OrganizationSelect(
                                   this.state.organizationList,
@@ -1564,7 +1595,8 @@ class GFERequestBox extends Component {
                                   "submitting-provider-label",
                                   "submittingProvider",
                                   this.handleOpenOrganizationList,
-                                  this.handleSelectSubmitter
+                                  this.handleSelectSubmitter,
+                                  "submitting"
                                 )}
                           </FormControl>
                         </Grid>
@@ -1618,7 +1650,8 @@ class GFERequestBox extends Component {
                                     professionalBillingProviderList,
                                     this.state.gfeInfo[this.state.selectedGFE]
                                       .selectedBillingProvider,
-                                    this.handleSelectBillingProvider
+                                    this.handleSelectBillingProvider,
+                                    "billingProvider"
                                   )
                                 : OrganizationSelect(
                                     this.state.organizationList,
@@ -1627,7 +1660,8 @@ class GFERequestBox extends Component {
                                     "billing-provider-label",
                                     "billingProvider",
                                     this.handleOpenOrganizationList,
-                                    this.handleSelectBillingProvider
+                                    this.handleSelectBillingProvider,
+                                    "billing"
                                   )}
                             </FormControl>
                           </Grid>

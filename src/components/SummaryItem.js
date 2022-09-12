@@ -27,38 +27,43 @@ const useStyles = makeStyles((theme) =>
     },
   })
 );
-
-function createProcedureList(procedureList) {
-  let num = 0;
-  return procedureList.map((el) => {
-    num += 1;
+function createCareTeamList(careTeamList) {
+  return careTeamList.map((el) => {
     return (
       <ListItem disableGutters>
-        ({num}) {el.type}: {el.procedure}{" "}
+        ({el.id}) {el.provider} ({el.role})
+      </ListItem>
+    );
+  });
+}
+
+function createProcedureList(procedureList) {
+  return procedureList.map((el) => {
+    return (
+      <ListItem disableGutters>
+        ({el.id}) {el.provider} ({el.type})
       </ListItem>
     );
   });
 }
 
 function createDiagnosisList(diagnosisList) {
-  let num = 0;
   return diagnosisList.map((el) => {
-    num += 1;
     return (
       <ListItem disableGutters>
-        ({num}) {el.type}: {el.diagnosis}
+        ({el.id}) {el.diagnosis} ({el.type})
       </ListItem>
     );
   });
 }
 
 function createServiceList(serviceList) {
-  let num = 0;
   return serviceList.map((el) => {
-    num += 1;
+    const placeOfService =
+      el.placeOfService == undefined ? "" : "(" + el.placeOfService + ")";
     return (
       <ListItem disableGutters>
-        ({num}) {el.placeOfService}: {el.productOrService}
+        ({el.id}) {el.productOrService} {placeOfService}
       </ListItem>
     );
   });
@@ -93,7 +98,7 @@ export default function SummaryItem(props) {
   const classes = useStyles();
   const { summary } = props;
   let missingItems = [];
-
+  console.log(props);
   //patient section
   if (!summary.patientId) {
     addToMissing("patient details");
@@ -264,13 +269,13 @@ export default function SummaryItem(props) {
           </Box>
         </Grid>
 
-        {summary.payorId ? (
+        {summary.payorName ? (
           <Grid container>
             <Grid item xs={6}>
               <SummaryText content="Payor" class="label" />
             </Grid>
             <Grid item xs={6}>
-              <SummaryText content={summary.payorId} />
+              <SummaryText content={summary.payorName} />
             </Grid>
           </Grid>
         ) : null}
@@ -337,7 +342,9 @@ export default function SummaryItem(props) {
           </Grid>
           <Grid item xs={6}>
             <Typography style={{ wordWrap: "break-word" }}>
-              {summary.billingProvider ? summary.billingProvider : ""}
+              {summary.billingProviderName
+                ? summary.billingProviderName
+                : addToMissing("billing provider")}
             </Typography>
           </Grid>
         </Grid>
@@ -347,23 +354,23 @@ export default function SummaryItem(props) {
           </Grid>
           <Grid item xs={6}>
             <Typography style={{ wordWrap: "break-word" }}>
-              {summary.submittingProvider ? summary.submittingProvider : ""}
+              {summary.submittingProviderName
+                ? summary.submittingProviderName
+                : ""}
             </Typography>
           </Grid>
         </Grid>
 
         <Grid container>
           <Grid item xs={6}>
-            <SummaryText content="Practitioner Role:" class="label" />
+            <SummaryText content="Care Team:" class="label" />
           </Grid>
           <Grid item xs={6}>
-            <SummaryText
-              content={
-                summary.practitionerSelected[0].role
-                  ? summary.practitionerSelected[0].role
-                  : ""
-              }
-            />
+            <Typography style={{ wordWrap: "break-word" }}>
+              {summary.practitionerSelected[0].role
+                ? createCareTeamList(summary.practitionerSelected)
+                : ""}
+            </Typography>
           </Grid>
         </Grid>
 
