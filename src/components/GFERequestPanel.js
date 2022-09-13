@@ -68,6 +68,9 @@ import {
 } from "./SelectComponents";
 
 import { v4 } from "uuid";
+import IconButton from '@mui/material/IconButton';
+import DeleteIcon from '@mui/icons-material/Delete';
+
 //GFE and AEOB tabs
 function TabPanel(props) {
   const { children, value, index, ...other } = props;
@@ -221,8 +224,11 @@ class GFERequestBox extends Component {
   };
 
   handleDeleteGFE = (id) => {
+    console.log('deleting this gfe', id)
     const gfeInfo = { ...this.state.gfeInfo };
+    console.log('gfe info before delete', gfeInfo)
     delete gfeInfo[id];
+    console.log('gfe info after delete', gfeInfo)
     this.setState({ ...gfeInfo });
   };
   componentDidUpdate(prevProps, prevState) {
@@ -635,10 +641,10 @@ class GFERequestBox extends Component {
         this.state.subjectInfo.gfeType === "professional"
           ? findProfessionalProvider.resource
           : this.state.organizationList.find(
-              (org) =>
-                org.resource.id ===
-                this.state.gfeInfo[gfeId].selectedBillingProvider
-            ).resource,
+            (org) =>
+              org.resource.id ===
+              this.state.gfeInfo[gfeId].selectedBillingProvider
+          ).resource,
     };
     if (this.state.subjectInfo.gfeType === "institutional") {
       orgReferenceList.push(providerReference);
@@ -1486,9 +1492,11 @@ class GFERequestBox extends Component {
                                   this.state.selectedGFE === id
                                 }
                               >
-                                <ListItemText>{`GFE ${
-                                  index + 1
-                                }`}</ListItemText>
+                                <ListItemText>{`GFE ${index + 1
+                                  }`}</ListItemText>
+                                <IconButton aria-label="delete" onClick={() => { this.handleDeleteGFE(this.state.selectedGFE) }}>
+                                  <DeleteIcon />
+                                </IconButton>
                               </ListItemButton>
                             </ListItem>
                           </>
@@ -1583,20 +1591,20 @@ class GFERequestBox extends Component {
                             </Grid>
                             {this.state.subjectInfo.gfeType === "professional"
                               ? ProfessionalBillingProviderSelect(
-                                  professionalBillingProviderList,
-                                  this.state.subjectInfo.selectedSubmitter,
-                                  this.handleSelectSubmitter,
-                                  "submittingProvider"
-                                )
+                                professionalBillingProviderList,
+                                this.state.subjectInfo.selectedSubmitter,
+                                this.handleSelectSubmitter,
+                                "submittingProvider"
+                              )
                               : OrganizationSelect(
-                                  this.state.organizationList,
-                                  this.state.subjectInfo.selectedSubmitter,
-                                  "submitting-provider-label",
-                                  "submittingProvider",
-                                  this.handleOpenOrganizationList,
-                                  this.handleSelectSubmitter,
-                                  "submitting"
-                                )}
+                                this.state.organizationList,
+                                this.state.subjectInfo.selectedSubmitter,
+                                "submitting-provider-label",
+                                "submittingProvider",
+                                this.handleOpenOrganizationList,
+                                this.handleSelectSubmitter,
+                                "submitting"
+                              )}
                           </FormControl>
                         </Grid>
                         <Grid item className={classes.patientBox}>
@@ -1646,22 +1654,22 @@ class GFERequestBox extends Component {
 
                               {this.state.subjectInfo.gfeType === "professional"
                                 ? ProfessionalBillingProviderSelect(
-                                    professionalBillingProviderList,
-                                    this.state.gfeInfo[this.state.selectedGFE]
-                                      .selectedBillingProvider,
-                                    this.handleSelectBillingProvider,
-                                    "billingProvider"
-                                  )
+                                  professionalBillingProviderList,
+                                  this.state.gfeInfo[this.state.selectedGFE]
+                                    .selectedBillingProvider,
+                                  this.handleSelectBillingProvider,
+                                  "billingProvider"
+                                )
                                 : OrganizationSelect(
-                                    this.state.organizationList,
-                                    this.state.gfeInfo[this.state.selectedGFE]
-                                      .selectedBillingProvider,
-                                    "billing-provider-label",
-                                    "billingProvider",
-                                    this.handleOpenOrganizationList,
-                                    this.handleSelectBillingProvider,
-                                    "billing"
-                                  )}
+                                  this.state.organizationList,
+                                  this.state.gfeInfo[this.state.selectedGFE]
+                                    .selectedBillingProvider,
+                                  "billing-provider-label",
+                                  "billingProvider",
+                                  this.handleOpenOrganizationList,
+                                  this.handleSelectBillingProvider,
+                                  "billing"
+                                )}
                             </FormControl>
                           </Grid>
 
