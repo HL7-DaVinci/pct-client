@@ -44,7 +44,8 @@ function AEOBItemsTable(aeobData) {
 
         //goes thorugh the adjudication categories (paid to provider, submitted amount, eligible amount)
         for (let j = 0; j < numAjudicationCategories; j++) {
-            const catSelected = jp.query(data, 'item[' + i + '].adjudication[' + j + '].category.coding[0].display')[0].toLowerCase();
+            const category = jp.query(data, 'item[' + i + '].adjudication[' + j + '].category.coding[0].display')[0];
+            const catSelected = (category ? category.toLowerCase() : "");
             if (!headers.includes(catSelected)) {
                 headers.push(catSelected);
             }
@@ -93,15 +94,16 @@ function AEOBItemsTable(aeobData) {
         //for each item, fills table according to the adjudication categories
         for (let j = 0; j < numAjudicationCategories; j++) {
 
-            const catSelected = jp.query(data, 'item[' + i + '].adjudication[' + j + '].category.coding[0].code')[0];
-            const catHeaderSelected = jp.query(data, 'item[' + i + '].adjudication[' + j + '].category.coding[0].display')[0].toLowerCase();
+            const catCodeSelected = jp.query(data, 'item[' + i + '].adjudication[' + j + '].category.coding[0].code')[0];
+            const category = jp.query(data, 'item[' + i + '].adjudication[' + j + '].category.coding[0].display')[0];
+            const catHeaderSelected = category ? category.toLowerCase() : "";
 
-            if (headers.includes(catHeaderSelected) && (catSelected === "paidtoprovider" || catSelected === "submitted" || catSelected === "eligible" || catSelected === "coinsurance" || catSelected === "copay")) {
+            if (headers.includes(catHeaderSelected) && (catCodeSelected === "paidtoprovider" || catCodeSelected === "submitted" || catCodeSelected === "eligible" || catCodeSelected === "coinsurance" || catCodeSelected === "copay")) {
                 let rowValueCurrency = (jp.query(data, 'item[' + i + '].adjudication[' + j + '].amount.currency')[0] === undefined) ? "USD" : jp.query(data, 'item[' + i + '].adjudication[' + j + '].amount.currency')[0];
                 let rowValueAmount = jp.query(data, 'item[' + i + '].adjudication[' + j + '].amount.value')[0];
 
                 if (rowValueCurrency === "USD" || rowValueCurrency === "") {
-                    rowValueAmount = jp.query(data, 'item[' + i + '].adjudication[' + j + '].amount.value')[0].toFixed(2);
+                    rowValueAmount = jp.query(data, 'item[' + i + '].adjudication[' + j + '].amount.value')[0]; //.toFixed(2);
                 }
 
                 const rowValue = rowValueAmount + " " + rowValueCurrency;
