@@ -42,7 +42,7 @@ function createTabs(tabsList) {
   });
 }
 
-function retrieveRequestSummary(subjectInfo, gfeInfo) {
+function retrieveRequestSummary(subjectInfo, gfeInfo, gfeId) {
   return {
     patientId: subjectInfo.selectedPatient,
     coverageId: subjectInfo.selectedCoverage
@@ -69,9 +69,9 @@ function retrieveRequestSummary(subjectInfo, gfeInfo) {
     priorityLevel: gfeInfo.selectedPriority,
     submittingProvider: subjectInfo.selectedSubmitter,
     billingProvider: gfeInfo.selectedBillingProvider,
-    gfeServiceId: gfeInfo.gfeServiceId,
     billingProviderName: gfeInfo.selectedBillingProviderName,
     submittingProviderName: subjectInfo.selectedSubmittingProviderName,
+    gfeServiceId: gfeId,
   };
 }
 
@@ -83,7 +83,11 @@ function createSummaryForEach(props, value) {
   return listOfGFEIds.map((el, index) => {
     num += 1;
     const currentSubjectData = props.summaries[el];
-    const summary = retrieveRequestSummary(props.subject, currentSubjectData);
+    const summary = retrieveRequestSummary(
+      props.subject,
+      currentSubjectData,
+      el
+    );
 
     return (
       <TabPanel value={value} index={num}>
