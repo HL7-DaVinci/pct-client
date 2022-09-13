@@ -69,18 +69,6 @@ function createServiceList(serviceList) {
   });
 }
 
-function createDateList(serviceList) {
-  let num = 0;
-  return serviceList.map((el) => {
-    num += 1;
-    return (
-      <ListItem disableGutters>
-        Service #{num}: {el.estimatedDateOfService.toDateString()}
-      </ListItem>
-    );
-  });
-}
-
 function alertDialog(itemsMissing) {
   if (itemsMissing.length === 0) {
     return;

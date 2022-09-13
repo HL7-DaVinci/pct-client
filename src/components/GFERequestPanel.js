@@ -25,6 +25,7 @@ import ListItemButton from "@mui/material/ListItemButton";
 import ListItemText from "@mui/material/ListItemText";
 import ListSubheader from "@mui/material/ListSubheader";
 import { exampleState } from "../exampleState";
+import { getPatientDisplayName } from "./SelectComponents";
 
 import {
   getPatients,
@@ -390,8 +391,8 @@ class GFERequestBox extends Component {
         if (patientId === this.state.patientList[i].resource.id) {
           if (this.state.patientList[i].resource.name[0].text) {
             patientName = this.state.patientList[i].resource.name[0].text;
-          }
-          else patientName = `${this.state.patientList[i].resource.name[0].given[0]} ${this.state.patientList[i].resource.name[0].family}`;
+          } else
+            patientName = `${this.state.patientList[i].resource.name[0].given[0]} ${this.state.patientList[i].resource.name[0].family}`;
         }
       }
       if (addressText && addressText.length > 0) {
@@ -442,7 +443,7 @@ class GFERequestBox extends Component {
 
     //set name of provider to display name instead of code in summary tab
     for (let i = 0; i < allBillingProviders.length; i++) {
-      if (e.target.value == allBillingProviders[i].id) {
+      if (e.target.value === allBillingProviders[i].id) {
         gfeInfo[this.state.selectedGFE].selectedBillingProviderName =
           allBillingProviders[i].display;
       }
@@ -476,7 +477,7 @@ class GFERequestBox extends Component {
     let selectedSubmittingProviderName = "";
     //set name of provider to display name instead of code in summary tab
     for (let i = 0; i < allSubmittersList.length; i++) {
-      if (e.target.value == allSubmittersList[i].resource.id) {
+      if (e.target.value === allSubmittersList[i].resource.id) {
         selectedSubmittingProviderName = allSubmittersList[i].display;
       }
     }
@@ -634,10 +635,10 @@ class GFERequestBox extends Component {
         this.state.subjectInfo.gfeType === "professional"
           ? findProfessionalProvider.resource
           : this.state.organizationList.find(
-            (org) =>
-              org.resource.id ===
-              this.state.gfeInfo[gfeId].selectedBillingProvider
-          ).resource,
+              (org) =>
+                org.resource.id ===
+                this.state.gfeInfo[gfeId].selectedBillingProvider
+            ).resource,
     };
     if (this.state.subjectInfo.gfeType === "institutional") {
       orgReferenceList.push(providerReference);
@@ -1402,11 +1403,31 @@ class GFERequestBox extends Component {
               indicatorColor="secondary"
               textColor="inherit"
               variant="fullWidth"
-              aria-label="full width tabs example"
             >
               <Tab label="Good Faith Estimate" {...a11yProps(0)} />
               <Tab label="Advanced Explanation of Benefits" {...a11yProps(1)} />
             </Tabs>
+            {this.state.verticalTabIndex > 0 && (
+              <Tabs
+                value={this.state.verticalTabIndex - 1}
+                indicatorColor="secondary"
+                textColor="inherit"
+                variant="fullWidth"
+              >
+                <Tab
+                  label="Care Team"
+                  onClick={() => this.handleVerticalChange(null, 1)}
+                />
+                <Tab
+                  label="Encounter"
+                  onClick={() => this.handleVerticalChange(null, 2)}
+                />
+                <Tab
+                  label="Summary"
+                  onClick={() => this.handleVerticalChange(null, 3)}
+                />
+              </Tabs>
+            )}
           </AppBar>
           <form onSubmit={this.handleOnSubmit}>
             <Box index={currentTabIndex}>
@@ -1439,59 +1460,37 @@ class GFERequestBox extends Component {
                           selected={this.state.verticalTabIndex === 0}
                         >
                           <ListItemText>
-                            {this.state.subjectInfo.selectedPatient ||
+                            {this.state.subjectInfo.selectedPatientName ||
                               "Select Patient"}
                           </ListItemText>
                         </ListItemButton>
                       </ListItem>
                       <ListSubheader>GFEs</ListSubheader>
-                      {Object.keys(this.state.gfeInfo).map((id) => {
+                      {Object.keys(this.state.gfeInfo).map((id, index) => {
                         return (
                           <>
                             <ListItem>
                               <ListItemButton
-                                onClick={() =>
-                                  this.setState({ selectedGFE: id })
+                                onClick={() => {
+                                  let newVti = this.state.verticalTabIndex;
+                                  if (this.state.verticalTabIndex === 0) {
+                                    newVti = 1;
+                                  }
+                                  this.setState({
+                                    selectedGFE: id,
+                                    verticalTabIndex: newVti,
+                                  });
+                                }}
+                                selected={
+                                  this.state.verticalTabIndex > 0 &&
+                                  this.state.selectedGFE === id
                                 }
-                                selected={this.state.selectedGFE === id}
                               >
-                                <ListItemText>{id}</ListItemText>
+                                <ListItemText>{`GFE ${
+                                  index + 1
+                                }`}</ListItemText>
                               </ListItemButton>
                             </ListItem>
-                            {this.state.selectedGFE === id && (
-                              <List dense={true}>
-                                <ListItem>
-                                  <ListItemButton
-                                    onClick={() =>
-                                      this.handleVerticalChange(null, 1)
-                                    }
-                                    selected={this.state.verticalTabIndex === 1}
-                                  >
-                                    <ListItemText>Care Team</ListItemText>
-                                  </ListItemButton>
-                                </ListItem>
-                                <ListItem>
-                                  <ListItemButton
-                                    onClick={() =>
-                                      this.handleVerticalChange(null, 2)
-                                    }
-                                    selected={this.state.verticalTabIndex === 2}
-                                  >
-                                    <ListItemText>{"Encounter"}</ListItemText>
-                                  </ListItemButton>
-                                </ListItem>
-                                <ListItem>
-                                  <ListItemButton
-                                    onClick={() =>
-                                      this.handleVerticalChange(null, 3)
-                                    }
-                                    selected={this.state.verticalTabIndex === 3}
-                                  >
-                                    <ListItemText>{"Summary"}</ListItemText>
-                                  </ListItemButton>
-                                </ListItem>
-                              </List>
-                            )}
                           </>
                         );
                       })}
@@ -1506,9 +1505,6 @@ class GFERequestBox extends Component {
                         onClick={() => this.handleVerticalChange(null, 4)}
                       >
                         <Button variant="contained">Total Summary</Button>
-                      </ListItem>
-                      <ListItem onClick={this.generateBundle}>
-                        <Button>Request Input</Button>
                       </ListItem>
                       <ListItem>
                         <Button onClick={this.handleOnSubmit}>
@@ -1587,20 +1583,20 @@ class GFERequestBox extends Component {
                             </Grid>
                             {this.state.subjectInfo.gfeType === "professional"
                               ? ProfessionalBillingProviderSelect(
-                                professionalBillingProviderList,
-                                this.state.subjectInfo.selectedSubmitter,
-                                this.handleSelectSubmitter,
-                                "submittingProvider"
-                              )
+                                  professionalBillingProviderList,
+                                  this.state.subjectInfo.selectedSubmitter,
+                                  this.handleSelectSubmitter,
+                                  "submittingProvider"
+                                )
                               : OrganizationSelect(
-                                this.state.organizationList,
-                                this.state.subjectInfo.selectedSubmitter,
-                                "submitting-provider-label",
-                                "submittingProvider",
-                                this.handleOpenOrganizationList,
-                                this.handleSelectSubmitter,
-                                "submitting"
-                              )}
+                                  this.state.organizationList,
+                                  this.state.subjectInfo.selectedSubmitter,
+                                  "submitting-provider-label",
+                                  "submittingProvider",
+                                  this.handleOpenOrganizationList,
+                                  this.handleSelectSubmitter,
+                                  "submitting"
+                                )}
                           </FormControl>
                         </Grid>
                         <Grid item className={classes.patientBox}>
@@ -1650,22 +1646,22 @@ class GFERequestBox extends Component {
 
                               {this.state.subjectInfo.gfeType === "professional"
                                 ? ProfessionalBillingProviderSelect(
-                                  professionalBillingProviderList,
-                                  this.state.gfeInfo[this.state.selectedGFE]
-                                    .selectedBillingProvider,
-                                  this.handleSelectBillingProvider,
-                                  "billingProvider"
-                                )
+                                    professionalBillingProviderList,
+                                    this.state.gfeInfo[this.state.selectedGFE]
+                                      .selectedBillingProvider,
+                                    this.handleSelectBillingProvider,
+                                    "billingProvider"
+                                  )
                                 : OrganizationSelect(
-                                  this.state.organizationList,
-                                  this.state.gfeInfo[this.state.selectedGFE]
-                                    .selectedBillingProvider,
-                                  "billing-provider-label",
-                                  "billingProvider",
-                                  this.handleOpenOrganizationList,
-                                  this.handleSelectBillingProvider,
-                                  "billing"
-                                )}
+                                    this.state.organizationList,
+                                    this.state.gfeInfo[this.state.selectedGFE]
+                                      .selectedBillingProvider,
+                                    "billing-provider-label",
+                                    "billingProvider",
+                                    this.handleOpenOrganizationList,
+                                    this.handleSelectBillingProvider,
+                                    "billing"
+                                  )}
                             </FormControl>
                           </Grid>
 

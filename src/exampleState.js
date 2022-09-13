@@ -780,8 +780,8 @@ export const exampleState = {
       id: "pracRole002",
       meta: {
         versionId: "1",
-        lastUpdated: "2022-09-08T02:03:02.385+00:00",
-        source: "#nr9rDJ7wcTEgO2F7",
+        lastUpdated: "2022-09-10T06:13:50.368+00:00",
+        source: "#N27qMRo8Ez0N2AlN",
         profile: [
           "http://hl7.org/fhir/us/davinci-pct/StructureDefinition/davinci-pct-practitionerrole",
         ],
@@ -842,8 +842,8 @@ export const exampleState = {
         id: "Submitter-Practitioner-1",
         meta: {
           versionId: "1",
-          lastUpdated: "2022-09-08T02:03:02.078+00:00",
-          source: "#B93dbvs6QWw6uiv1",
+          lastUpdated: "2022-09-10T06:13:49.983+00:00",
+          source: "#1uVjJVQzTmuh3Wav",
           profile: [
             "http://hl7.org/fhir/us/davinci-pct/StructureDefinition/davinci-pct-practitioner",
           ],
@@ -914,8 +914,8 @@ export const exampleState = {
         id: "prac001",
         meta: {
           versionId: "1",
-          lastUpdated: "2022-09-08T02:03:02.117+00:00",
-          source: "#thztyBfM32r6iyRF",
+          lastUpdated: "2022-09-10T06:13:50.020+00:00",
+          source: "#Yv9Z4LvvtV2IwDhE",
           profile: [
             "http://hl7.org/fhir/us/davinci-pct/StructureDefinition/davinci-pct-practitioner",
           ],
@@ -981,8 +981,8 @@ export const exampleState = {
         id: "prac002",
         meta: {
           versionId: "1",
-          lastUpdated: "2022-09-08T02:03:02.151+00:00",
-          source: "#wRQfQuYG6Qfb40D3",
+          lastUpdated: "2022-09-10T06:13:50.064+00:00",
+          source: "#pkyFGCDRbzdzDVBH",
           profile: [
             "http://hl7.org/fhir/us/davinci-pct/StructureDefinition/davinci-pct-practitioner",
           ],
@@ -1042,8 +1042,8 @@ export const exampleState = {
         id: "Submitter-Org-1",
         meta: {
           versionId: "1",
-          lastUpdated: "2022-09-08T02:03:01.186+00:00",
-          source: "#q9tujUfJlmm6s9aT",
+          lastUpdated: "2022-09-10T06:13:49.148+00:00",
+          source: "#yB3JBEMgwEx4FBhQ",
           profile: [
             "http://hl7.org/fhir/us/davinci-pct/StructureDefinition/davinci-pct-organization",
           ],
@@ -1123,8 +1123,8 @@ export const exampleState = {
         id: "org1001",
         meta: {
           versionId: "1",
-          lastUpdated: "2022-09-08T02:03:01.402+00:00",
-          source: "#HmiC9j4GjCr34ODz",
+          lastUpdated: "2022-09-10T06:13:49.326+00:00",
+          source: "#FEQ39NVJjvp46tH9",
           profile: [
             "http://hl7.org/fhir/us/davinci-pct/StructureDefinition/davinci-pct-organization",
           ],
@@ -1200,8 +1200,8 @@ export const exampleState = {
         id: "org1002",
         meta: {
           versionId: "1",
-          lastUpdated: "2022-09-08T02:03:01.424+00:00",
-          source: "#28iz3JzBmoLOjD2x",
+          lastUpdated: "2022-09-10T06:13:49.362+00:00",
+          source: "#M8Ua71RUhxV59ssr",
           profile: [
             "http://hl7.org/fhir/us/davinci-pct/StructureDefinition/davinci-pct-organization",
           ],
@@ -1291,8 +1291,8 @@ export const exampleState = {
         id: "org2723",
         meta: {
           versionId: "1",
-          lastUpdated: "2022-09-08T02:03:01.455+00:00",
-          source: "#usKSdwNA86oHlAo1",
+          lastUpdated: "2022-09-10T06:13:49.404+00:00",
+          source: "#RxpOSqrp2VyMMfKg",
           profile: [
             "http://hl7.org/fhir/us/davinci-pct/StructureDefinition/davinci-pct-organization",
           ],
@@ -1349,8 +1349,8 @@ export const exampleState = {
         id: "org2724",
         meta: {
           versionId: "1",
-          lastUpdated: "2022-09-08T02:03:01.485+00:00",
-          source: "#uGBGQEY8wIwBLsUI",
+          lastUpdated: "2022-09-10T06:13:49.441+00:00",
+          source: "#4Zz65PvAbZL96EHN",
           profile: [
             "http://hl7.org/fhir/us/davinci-pct/StructureDefinition/davinci-pct-organization",
           ],
@@ -1575,7 +1575,7 @@ export const exampleState = {
     },
   },
   openErrorDialog: false,
-  verticalTabIndex: 1,
+  verticalTabIndex: 0,
   currentTabIndex: 0,
   locationList: [
     {
@@ -1586,8 +1586,8 @@ export const exampleState = {
         id: "Provider-Org-Loc-2",
         meta: {
           versionId: "1",
-          lastUpdated: "2022-09-08T02:03:02.357+00:00",
-          source: "#5Xu8bEkFfaQsLhbp",
+          lastUpdated: "2022-09-10T06:13:50.322+00:00",
+          source: "#qZEiinyQ6Fmhlgzr",
           profile: [
             "http://hl7.org/fhir/us/davinci-pct/StructureDefinition/davinci-pct-location",
           ],
@@ -2018,10 +2018,11 @@ export const exampleState = {
           currency: "USD",
         },
       },
-      selectedBillingProvider: "Submitter-Org-1",
+      selectedBillingProvider: "org2724",
       gfeServiceId: "GFEAssignedServiceID0001",
       interTransIntermediary: "InterTransID0001",
       supportingInfoTypeOfBill: "bill",
+      selectedBillingProviderName: "Organization - Memorial Hospital West",
     },
     "e5c7cfb9-1361-4cd4-8270-743c3892f6a7": {
       careTeamList: [
@@ -2266,12 +2267,13 @@ export const exampleState = {
           currency: "USD",
         },
       },
-      selectedBillingProvider: "org1001",
+      selectedBillingProvider: "org1002",
       gfeServiceId: "GFEAssignedServiceID0001",
       interTransIntermediary: "InterTransID0001",
       supportingInfoTypeOfBill: "bill2",
+      selectedBillingProviderName: "Organization - Boston Radiology Center",
     },
   },
-  selectedGFE: "e5c7cfb9-1361-4cd4-8270-743c3892f6a7",
+  selectedGFE: "62043a78-bbe5-41cf-ada3-ccaef03a4b60",
   patientSelected: true,
 };
