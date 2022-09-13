@@ -388,7 +388,10 @@ class GFERequestBox extends Component {
       let patientName = "";
       for (let i = 0; i < this.state.patientList.length; i++) {
         if (patientId === this.state.patientList[i].resource.id) {
-          patientName = this.state.patientsList[i].resource.name[0].text;
+          if (this.state.patientList[i].resource.name[0].text) {
+            patientName = this.state.patientList[i].resource.name[0].text;
+          }
+          else patientName = `${this.state.patientList[i].resource.name[0].given[0]} ${this.state.patientList[i].resource.name[0].family}`;
         }
       }
       if (addressText && addressText.length > 0) {
@@ -631,10 +634,10 @@ class GFERequestBox extends Component {
         this.state.subjectInfo.gfeType === "professional"
           ? findProfessionalProvider.resource
           : this.state.organizationList.find(
-              (org) =>
-                org.resource.id ===
-                this.state.gfeInfo[gfeId].selectedBillingProvider
-            ).resource,
+            (org) =>
+              org.resource.id ===
+              this.state.gfeInfo[gfeId].selectedBillingProvider
+          ).resource,
     };
     if (this.state.subjectInfo.gfeType === "institutional") {
       orgReferenceList.push(providerReference);
@@ -1584,20 +1587,20 @@ class GFERequestBox extends Component {
                             </Grid>
                             {this.state.subjectInfo.gfeType === "professional"
                               ? ProfessionalBillingProviderSelect(
-                                  professionalBillingProviderList,
-                                  this.state.subjectInfo.selectedSubmitter,
-                                  this.handleSelectSubmitter,
-                                  "submittingProvider"
-                                )
+                                professionalBillingProviderList,
+                                this.state.subjectInfo.selectedSubmitter,
+                                this.handleSelectSubmitter,
+                                "submittingProvider"
+                              )
                               : OrganizationSelect(
-                                  this.state.organizationList,
-                                  this.state.subjectInfo.selectedSubmitter,
-                                  "submitting-provider-label",
-                                  "submittingProvider",
-                                  this.handleOpenOrganizationList,
-                                  this.handleSelectSubmitter,
-                                  "submitting"
-                                )}
+                                this.state.organizationList,
+                                this.state.subjectInfo.selectedSubmitter,
+                                "submitting-provider-label",
+                                "submittingProvider",
+                                this.handleOpenOrganizationList,
+                                this.handleSelectSubmitter,
+                                "submitting"
+                              )}
                           </FormControl>
                         </Grid>
                         <Grid item className={classes.patientBox}>
@@ -1647,22 +1650,22 @@ class GFERequestBox extends Component {
 
                               {this.state.subjectInfo.gfeType === "professional"
                                 ? ProfessionalBillingProviderSelect(
-                                    professionalBillingProviderList,
-                                    this.state.gfeInfo[this.state.selectedGFE]
-                                      .selectedBillingProvider,
-                                    this.handleSelectBillingProvider,
-                                    "billingProvider"
-                                  )
+                                  professionalBillingProviderList,
+                                  this.state.gfeInfo[this.state.selectedGFE]
+                                    .selectedBillingProvider,
+                                  this.handleSelectBillingProvider,
+                                  "billingProvider"
+                                )
                                 : OrganizationSelect(
-                                    this.state.organizationList,
-                                    this.state.gfeInfo[this.state.selectedGFE]
-                                      .selectedBillingProvider,
-                                    "billing-provider-label",
-                                    "billingProvider",
-                                    this.handleOpenOrganizationList,
-                                    this.handleSelectBillingProvider,
-                                    "billing"
-                                  )}
+                                  this.state.organizationList,
+                                  this.state.gfeInfo[this.state.selectedGFE]
+                                    .selectedBillingProvider,
+                                  "billing-provider-label",
+                                  "billingProvider",
+                                  this.handleOpenOrganizationList,
+                                  this.handleSelectBillingProvider,
+                                  "billing"
+                                )}
                             </FormControl>
                           </Grid>
 
