@@ -36,9 +36,9 @@ function createTabs(tabsList) {
   let num = 0;
   const listOfGFEKeys = Object.keys(tabsList);
 
-  return listOfGFEKeys.map((el) => {
+  return listOfGFEKeys.map((el, index) => {
     num += 1;
-    return <Tab label={el} key={num} />;
+    return <Tab label={`GFE ${index + 1}`} key={num} />;
   });
 }
 
@@ -80,15 +80,13 @@ function createSummaryForEach(props, value) {
   let num = -1;
   const listOfGFEIds = Object.keys(props.summaries);
 
-  return listOfGFEIds.map((el) => {
+  return listOfGFEIds.map((el, index) => {
     num += 1;
     const currentSubjectData = props.summaries[el];
     const summary = retrieveRequestSummary(props.subject, currentSubjectData);
 
     return (
       <TabPanel value={value} index={num}>
-        {/* TODO */}
-        {el}
         <SummaryItem summary={summary} />
       </TabPanel>
     );

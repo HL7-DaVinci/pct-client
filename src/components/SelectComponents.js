@@ -1,4 +1,5 @@
 import { Select, MenuItem } from "@material-ui/core";
+
 export const getPatientDisplayName = (patient) => {
   if (patient === undefined) return null;
   const name = patient.resource.name[0];
