@@ -202,8 +202,8 @@ class GFERequestBox extends Component {
       gfeInfo: { ...initialGFEInfo },
       selectedGFE: startingGFEId,
     };
-    //this.state = this.initialState;
-    this.state = exampleState;
+    this.state = this.initialState;
+    //this.state = exampleState;
   }
 
   handleStartDateChange = (date) => {
