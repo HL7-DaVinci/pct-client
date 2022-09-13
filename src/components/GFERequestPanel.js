@@ -395,7 +395,6 @@ class GFERequestBox extends Component {
             patientName = `${this.state.patientList[i].resource.name[0].given[0]} ${this.state.patientList[i].resource.name[0].family}`;
         }
       }
-      console.log(patientName);
       if (addressText && addressText.length > 0) {
         let subjectInfo = {
           ...this.state.subjectInfo,
