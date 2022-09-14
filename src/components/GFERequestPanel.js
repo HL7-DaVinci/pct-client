@@ -413,7 +413,7 @@ class GFERequestBox extends Component {
           birthdate: undefined,
           gender: undefined,
           telephone: undefined,
-          selectedPatientName: undefined,
+          selectedPatientName: patientName,
           memberNumber,
         };
         this.setState({ subjectInfo });
