@@ -98,7 +98,7 @@ function AEOBItemsTable(aeobData) {
             const category = jp.query(data, 'item[' + i + '].adjudication[' + j + '].category.coding[0].display')[0];
             const catHeaderSelected = category ? category.toLowerCase() : "";
 
-            if (headers.includes(catHeaderSelected) && (catCodeSelected === "paidtoprovider" || catCodeSelected === "submitted" || catCodeSelected === "eligible" || catCodeSelected === "coinsurance" || catCodeSelected === "copay")) {
+            if (headers.includes(catHeaderSelected) && (catCodeSelected === "paidtoprovider" || catCodeSelected === "submitted" || catCodeSelected === "eligible" || catCodeSelected === "coinsurance" || catCodeSelected === "copay" || catCodeSelected === "noncovered" || catCodeSelected === "deductible")) {
                // TODO : display other currencies for now, just assume it is USD
                // let rowValueCurrency = (jp.query(data, 'item[' + i + '].adjudication[' + j + '].amount.currency')[0] === undefined) ? "USD" : jp.query(data, 'item[' + i + '].adjudication[' + j + '].amount.currency')[0];
                 let rowValueAmount = jp.query(data, 'item[' + i + '].adjudication[' + j + '].amount.value')[0];
