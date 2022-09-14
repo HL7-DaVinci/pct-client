@@ -64,7 +64,7 @@ export default function PatientInfo(props) {
                     returnString += " " + address.text;
                 }
                 else {
-                    returnString += "TODO Address without text";
+                    returnString += "NA";
                 }
             });
         }

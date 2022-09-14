@@ -133,24 +133,6 @@ export default function AEOBBundle(props) {
         return returnString;
     }
 
-    // TODO - remove 
-    function getDate() {
-        const date = jp.query(props, '$..[?(@.resourceType == "ExplanationOfBenefit")].meta.lastUpdated')[0];
-        return moment(date).format('lll');
-
-    }
-
-    // TODO - remove 
-    function calcCopay() {
-
-        const copayPercentage = jp.query(props, '$..[?(@.resourceType == "Coverage")].costToBeneficiary[0].valueQuantity.value')[0];
-        const copayDeci = copayPercentage / 100;
-        const copayAmount = (copayDeci * jp.query(props, '$..[?(@.resourceType == "ExplanationOfBenefit")].total[0].amount.value')[0]).toFixed(2);
-        const currency = jp.query(props, '$..[?(@.resourceType == "ExplanationOfBenefit")].total[0].amount.currency')[0];
-
-        return copayAmount + " " + currency;
-    }
-
     function getCoverageResource() {
         return jp.query(props, "$..[?(@.fullUrl ==" + "'" + jp.query(props, '$..[?(@.resourceType == "ExplanationOfBenefit")].insurance[0].coverage.reference')[0] + "')].resource")[0];
     }

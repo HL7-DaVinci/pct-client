@@ -99,14 +99,11 @@ function AEOBItemsTable(aeobData) {
             const catHeaderSelected = category ? category.toLowerCase() : "";
 
             if (headers.includes(catHeaderSelected) && (catCodeSelected === "paidtoprovider" || catCodeSelected === "submitted" || catCodeSelected === "eligible" || catCodeSelected === "coinsurance" || catCodeSelected === "copay")) {
-                let rowValueCurrency = (jp.query(data, 'item[' + i + '].adjudication[' + j + '].amount.currency')[0] === undefined) ? "USD" : jp.query(data, 'item[' + i + '].adjudication[' + j + '].amount.currency')[0];
+               // TODO : display other currencies for now, just assume it is USD
+               // let rowValueCurrency = (jp.query(data, 'item[' + i + '].adjudication[' + j + '].amount.currency')[0] === undefined) ? "USD" : jp.query(data, 'item[' + i + '].adjudication[' + j + '].amount.currency')[0];
                 let rowValueAmount = jp.query(data, 'item[' + i + '].adjudication[' + j + '].amount.value')[0];
 
-                if (rowValueCurrency === "USD" || rowValueCurrency === "") {
-                    rowValueAmount = jp.query(data, 'item[' + i + '].adjudication[' + j + '].amount.value')[0]; //.toFixed(2);
-                }
-
-                const rowValue = rowValueAmount + " " + rowValueCurrency;
+                const rowValue = new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD' }).format(rowValueAmount);
                 const object = {
                     [catHeaderSelected]: rowValue,
                 }

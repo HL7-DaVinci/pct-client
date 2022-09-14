@@ -19,6 +19,10 @@ export default function AEOBEntry(props) {
         return props.aeob.outcome === "complete" ? (<CircleIcon sx={{ color: "green" }} />) : (<CircleIcon sx={{ color: "orange" }} />)
     }
 
+    function getTotalAmount(value) {
+        return new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD' }).format(value.amount.value)
+    }
+
     return (
         <React.Fragment>
             <Accordion>
@@ -82,7 +86,7 @@ export default function AEOBEntry(props) {
                                     {props.aeob.total.map((value, index) => {
                                         return <Grid item>
                                             <Typography variant="body1" gutterBottom>
-                                                <b>{value.category.coding[0].display}:</b> {new Intl.NumberFormat('en-IN', { maximumSignificantDigits: 3 }).format(value.amount.value)} {value.amount.currency ? value.amount.currency : "USD"}
+                                                <b>{value.category.coding[0].display}:</b> {getTotalAmount(value)} 
                                             </Typography>
                                         </Grid>
                                     })}
