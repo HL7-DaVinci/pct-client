@@ -254,7 +254,6 @@ class GFERequestBox extends Component {
     });
   };
   componentDidUpdate(prevProps, prevState) {
-    console.log(this.state);
     if (this.props.dataServerChanged && !prevProps.dataServerChanged) {
       this.resetState();
       this.props.setDataServerChanged(false);

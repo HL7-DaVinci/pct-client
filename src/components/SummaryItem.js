@@ -66,7 +66,6 @@ export default function SummaryItem(props) {
   const classes = useStyles();
   const { summary } = props;
   let missingItems = [];
-  console.log(props);
   //patient section
   if (!summary.patientId) {
     addToMissing("patient details");

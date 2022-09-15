@@ -17,8 +17,6 @@ export default function ClaimItem(props) {
   const [currentRow, setCurrentRow] = React.useState("");
 
   const handleChange = (event) => {
-    console.log(chosenVal);
-    console.log(event);
     setChosenVal(event.target.value);
   };
   const handleChangeType = (callType) => {
@@ -29,7 +27,6 @@ export default function ClaimItem(props) {
   };
 
   const updateParentEdit = () => {
-    console.log(chosenVal);
     var ob = {};
     var num = currentRow;
     ob[num] = {};
@@ -90,7 +87,6 @@ export default function ClaimItem(props) {
               label="product or service"
               value={params.formattedValue}
               onChange={(event) => {
-                console.log(event);
                 updateProductServiceRow(params);
                 handleChange(event);
                 handleChangeType("productOrService");

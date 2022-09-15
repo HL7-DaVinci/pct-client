@@ -49,7 +49,6 @@ export const PrioritySelect = (
   handleChange
 ) => {
   let priorityList = [];
-  console.log(selectPriority);
   return (
     <Select
       required
@@ -67,8 +66,6 @@ export const PrioritySelect = (
           }
           //put the priority into the list if not there yet
           priorityList.push(getPriorityDisplayName(selectedPriority));
-          console.log(selectedPriority.resource);
-          console.log(selectedPriority.resource === selectPriority);
           return (
             <MenuItem
               key={selectedPriority.resource.priority}
