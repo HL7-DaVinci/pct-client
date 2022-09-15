@@ -1556,7 +1556,9 @@ class GFERequestBox extends Component {
                           borderRadius: "5px",
                         }}
                       >
-                        <ListSubheader>Subject</ListSubheader>
+                        <ListSubheader sx={{ fontWeight: "bold" }}>
+                          Subject
+                        </ListSubheader>
                         <ListItem>
                           <ListItemButton
                             onClick={() => this.handleVerticalChange(null, 0)}
@@ -1575,7 +1577,9 @@ class GFERequestBox extends Component {
                           borderRadius: "5px",
                         }}
                       >
-                        <ListSubheader>GFEs</ListSubheader>
+                        <ListSubheader sx={{ fontWeight: "bold" }}>
+                          GFEs
+                        </ListSubheader>
                         {Object.keys(this.state.gfeInfo).map((id, index) => {
                           return (
                             <>
