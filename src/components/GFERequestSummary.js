@@ -24,10 +24,7 @@ const useStyles = makeStyles((theme) =>
 export default function GFERequestsummary(props) {
   const classes = useStyles();
   const { summary } = props;
-  console.log(summary);
   const SummaryText = (props) => {
-    console.log(props.content);
-
     return (
       <div>
         <Typography variant="subtitle2" component="h6" className={classes.card}>

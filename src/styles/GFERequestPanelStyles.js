@@ -57,7 +57,6 @@ export const styles = (theme) => ({
   card: {
     textAlign: "left",
     color: theme.palette.text.secondary,
-    backgroundColor: "#D3D3D3",
     minWidth: "70vw",
   },
   cardCareTeam: {
@@ -66,7 +65,7 @@ export const styles = (theme) => ({
     width: "75vw",
     textAlign: "left",
     color: theme.palette.text.secondary,
-    backgroundColor: "#DCDCDC",
+    borderWidth: 0,
   },
   spaceAroundContainer: {
     marginTop: 30,
