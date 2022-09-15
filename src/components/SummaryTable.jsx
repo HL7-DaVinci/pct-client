@@ -10,7 +10,7 @@ export function SummaryTable({ headers, data }) {
   return (
     <TableContainer
       component={Box}
-      sx={{ backgroundColor: "#DCDCDC", border: "2px solid black" }}
+      sx={{ backgroundColor: "#DCDCDC", border: "2px solid gray" }}
     >
       <Table>
         <TableHead>
