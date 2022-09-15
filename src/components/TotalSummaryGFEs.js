@@ -43,6 +43,12 @@ function createTabs(tabsList) {
 }
 
 function retrieveRequestSummary(subjectInfo, gfeInfo, gfeId) {
+  const displayableClaimItemList = gfeInfo.claimItemList.map((e) => {
+    if (e.estimatedDateOfService) {
+      e.estimatedDateOfService = e.estimatedDateOfService.toString();
+    }
+    return e;
+  });
   return {
     patientId: subjectInfo.selectedPatient,
     coverageId: subjectInfo.selectedCoverage
@@ -72,6 +78,8 @@ function retrieveRequestSummary(subjectInfo, gfeInfo, gfeId) {
     billingProviderName: gfeInfo.selectedBillingProviderName,
     submittingProviderName: subjectInfo.selectedSubmittingProviderName,
     gfeServiceId: gfeId,
+    careTeamList: gfeInfo.careTeamList,
+    claimItemList: displayableClaimItemList,
   };
 }
 

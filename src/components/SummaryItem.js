@@ -12,6 +12,7 @@ import Divider from "@mui/material/Divider";
 import ListItem from "@mui/material/ListItem";
 import Alert from "@mui/material/Alert";
 import AlertTitle from "@mui/material/AlertTitle";
+import { SummaryTable } from "./SummaryTable";
 
 const useStyles = makeStyles((theme) =>
   createStyles({
@@ -27,15 +28,6 @@ const useStyles = makeStyles((theme) =>
     },
   })
 );
-function createCareTeamList(careTeamList) {
-  return careTeamList.map((el) => {
-    return (
-      <ListItem disableGutters>
-        ({el.id}) {el.provider} ({el.role})
-      </ListItem>
-    );
-  });
-}
 
 function createProcedureList(procedureList) {
   return procedureList.map((el) => {
@@ -52,18 +44,6 @@ function createDiagnosisList(diagnosisList) {
     return (
       <ListItem disableGutters>
         ({el.id}) {el.diagnosis} ({el.type})
-      </ListItem>
-    );
-  });
-}
-
-function createServiceList(serviceList) {
-  return serviceList.map((el) => {
-    const placeOfService =
-      el.placeOfService == undefined ? "" : "(" + el.placeOfService + ")";
-    return (
-      <ListItem disableGutters>
-        ({el.id}) {el.productOrService} {placeOfService}
       </ListItem>
     );
   });
@@ -197,12 +177,12 @@ export default function SummaryItem(props) {
       <CardContent justifyContent="left" className={classes.card}>
         <Grid container>
           <Box sx={{ mb: 2 }}>
-            <b>Patient Details:</b>
+            <b>Subject Details:</b>
           </Box>
         </Grid>
 
         <Grid container>
-          <Grid item xs={6}>
+          <Grid item xs={2}>
             <SummaryText content="Patient:" class="label" />
           </Grid>
           <Grid item xs={6}>
@@ -211,7 +191,7 @@ export default function SummaryItem(props) {
         </Grid>
 
         <Grid container>
-          <Grid item xs={6}>
+          <Grid item xs={2}>
             <SummaryText content="Birthdate:" class="label" />
           </Grid>
           <Grid item xs={6}>
@@ -220,7 +200,7 @@ export default function SummaryItem(props) {
         </Grid>
 
         <Grid container>
-          <Grid item xs={6}>
+          <Grid item xs={2}>
             <SummaryText content="Gender:" class="label" />
           </Grid>
           <Grid item xs={6}>
@@ -229,7 +209,7 @@ export default function SummaryItem(props) {
         </Grid>
 
         <Grid container>
-          <Grid item xs={6}>
+          <Grid item xs={2}>
             <SummaryText content="Telephone:" class="label" />
           </Grid>
           <Grid item xs={6}>
@@ -238,11 +218,35 @@ export default function SummaryItem(props) {
         </Grid>
 
         <Grid container>
-          <Grid item xs={6}>
+          <Grid item xs={2}>
             <SummaryText content="Address:" class="label" />
           </Grid>
           <Grid item xs={6}>
             <SummaryText content={summary.addressId} />
+          </Grid>
+        </Grid>
+        <Grid container>
+          <Grid item xs={2}>
+            <SummaryText content="Submitting Provider:" class="label" />
+          </Grid>
+          <Grid item xs={6}>
+            <Typography style={{ wordWrap: "break-word" }}>
+              {summary.submittingProviderName
+                ? summary.submittingProviderName
+                : ""}
+            </Typography>
+          </Grid>
+        </Grid>
+        <Grid container>
+          <Grid item xs={2}>
+            <SummaryText content="GFE Type:" class="label" />
+          </Grid>
+          <Grid item xs={6}>
+            <SummaryText
+              content={
+                summary.gfeType ? summary.gfeType : addToMissing("gfe type")
+              }
+            />
           </Grid>
         </Grid>
 
@@ -259,7 +263,7 @@ export default function SummaryItem(props) {
 
         {summary.payorName ? (
           <Grid container>
-            <Grid item xs={6}>
+            <Grid item xs={2}>
               <SummaryText content="Payor" class="label" />
             </Grid>
             <Grid item xs={6}>
@@ -269,7 +273,7 @@ export default function SummaryItem(props) {
         ) : null}
 
         <Grid container>
-          <Grid item xs={6}>
+          <Grid item xs={2}>
             <SummaryText content="Subscriber ID:" class="label" />
           </Grid>
           <Grid item xs={6}>
@@ -278,7 +282,7 @@ export default function SummaryItem(props) {
         </Grid>
 
         <Grid container>
-          <Grid item xs={6}>
+          <Grid item xs={2}>
             <SummaryText content="Member ID:" class="label" />
           </Grid>
           <Grid item xs={6}>
@@ -287,7 +291,7 @@ export default function SummaryItem(props) {
         </Grid>
 
         <Grid container>
-          <Grid item xs={6}>
+          <Grid item xs={2}>
             <SummaryText content="Subscriber Relationship:" class="label" />
           </Grid>
           <Grid item xs={6}>
@@ -296,7 +300,7 @@ export default function SummaryItem(props) {
         </Grid>
 
         <Grid container>
-          <Grid item xs={6}>
+          <Grid item xs={2}>
             <SummaryText content="Plan:" class="label" />
           </Grid>
           <Grid item xs={6}>
@@ -305,7 +309,7 @@ export default function SummaryItem(props) {
         </Grid>
 
         <Grid container>
-          <Grid item xs={6}>
+          <Grid item xs={2}>
             <SummaryText content="Coverage Period:" class="label" />
           </Grid>
           <Grid item xs={6}>
@@ -325,41 +329,31 @@ export default function SummaryItem(props) {
         </Grid>
 
         <Grid container>
-          <Grid item xs={6}>
+          <Grid item xs={2}>
             <SummaryText content="Billing:" class="label" />
           </Grid>
           <Grid item xs={6}>
             <Typography style={{ wordWrap: "break-word" }}>
-              {summary.billingProviderName
-                ? summary.billingProviderName
-                : addToMissing("billing provider")}
-            </Typography>
-          </Grid>
-        </Grid>
-        <Grid container>
-          <Grid item xs={6}>
-            <SummaryText content="Submitting:" class="label" />
-          </Grid>
-          <Grid item xs={6}>
-            <Typography style={{ wordWrap: "break-word" }}>
-              {summary.submittingProviderName
-                ? summary.submittingProviderName
-                : ""}
+              {summary.billingProviderName ? summary.billingProviderName : ""}
             </Typography>
           </Grid>
         </Grid>
 
         <Grid container>
-          <Grid item xs={6}>
+          <Grid item xs={2}>
             <SummaryText content="Care Team:" class="label" />
           </Grid>
-          <Grid item xs={6}>
-            <Typography style={{ wordWrap: "break-word" }}>
-              {summary.practitionerSelected[0].role
-                ? createCareTeamList(summary.practitionerSelected)
-                : ""}
-            </Typography>
-          </Grid>
+          {summary.careTeamList.length > 0 && (
+            <Grid item xs={4}>
+              <SummaryTable
+                headers={[
+                  { display: "Provider", value: "provider" },
+                  { display: "Role", value: "role" },
+                ]}
+                data={summary.careTeamList}
+              />
+            </Grid>
+          )}
         </Grid>
 
         <Box sx={{ my: 2 }}>
@@ -374,31 +368,7 @@ export default function SummaryItem(props) {
         </Grid>
 
         <Grid container>
-          <Grid item xs={6}>
-            <SummaryText content="Type:" class="label" />
-          </Grid>
-          <Grid item xs={6}>
-            <SummaryText
-              content={
-                summary.gfeType ? summary.gfeType : addToMissing("gfe type")
-              }
-            />
-          </Grid>
-        </Grid>
-
-        <Grid container>
-          <Grid item xs={6}>
-            <SummaryText content="Date:" class="label" />
-          </Grid>
-          <Grid item xs={6}>
-            <SummaryText
-              content={summary.serviceDate ? summary.serviceDate : ""}
-            />
-          </Grid>
-        </Grid>
-
-        <Grid container>
-          <Grid item xs={6}>
+          <Grid item xs={2}>
             <SummaryText content="Priority:" class="label" />
           </Grid>
           <Grid item xs={6}>
@@ -413,21 +383,31 @@ export default function SummaryItem(props) {
         </Grid>
 
         <Grid container>
-          <Grid item xs={6}>
+          <Grid item xs={2}>
             <SummaryText content="Diagnosis:" class="label" />
           </Grid>
           <Grid item xs={6}>
-            <Typography style={{ wordWrap: "break-word" }}>
-              {summary.diagnosisList[0].diagnosis
-                ? createDiagnosisList(summary.diagnosisList)
-                : ""}
-            </Typography>
+            {summary.diagnosisList.length > 0 && (
+              <SummaryTable
+                headers={[
+                  {
+                    display: "Diagnosis",
+                    value: "diagnosis",
+                  },
+                  {
+                    display: "Type",
+                    value: "type",
+                  },
+                ]}
+                data={summary.diagnosisList}
+              />
+            )}
           </Grid>
         </Grid>
 
         {summary.procedureList[0].procedure ? (
           <Grid container>
-            <Grid item xs={6}>
+            <Grid item xs={2}>
               <SummaryText content="Procedure:" class="label" />
             </Grid>
             <Grid item xs={6}>
@@ -439,15 +419,29 @@ export default function SummaryItem(props) {
         ) : null}
 
         <Grid container>
-          <Grid item xs={6}>
+          <Grid item xs={2}>
             <SummaryText content="Services:" class="label" />
           </Grid>
-          <Grid item xs={6}>
-            <Typography style={{ wordWrap: "break-word" }}>
-              {!summary.servicesList[0].productOrService
-                ? ""
-                : createServiceList(summary.servicesList)}
-            </Typography>
+          <Grid item xs={10}>
+            {summary.claimItemList.length > 0 && (
+              <SummaryTable
+                headers={[
+                  {
+                    display: "Product Or Service",
+                    value: "productOrService",
+                  },
+                  {
+                    display: "Estimate Date",
+                    value: "estimatedDateOfService",
+                  },
+                  { display: "Unit Price", value: "unitPrice" },
+                  { display: "Quantity", value: "quantity" },
+                  { display: "Net", value: "net" },
+                  { display: "Place Of Service", value: "placeOfService" },
+                ]}
+                data={summary.claimItemList}
+              />
+            )}
           </Grid>
         </Grid>
       </CardContent>

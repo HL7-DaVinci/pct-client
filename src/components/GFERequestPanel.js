@@ -66,8 +66,12 @@ import {
   PatientSelect,
   PrioritySelect,
 } from "./SelectComponents";
-
 import { v4 } from "uuid";
+import DeleteIcon from "@mui/icons-material/Delete";
+import ListItemIcon from "@mui/material/ListItemIcon";
+import IconButton from "@mui/material/IconButton";
+import Modal from "@mui/material/Modal";
+
 //GFE and AEOB tabs
 function TabPanel(props) {
   const { children, value, index, ...other } = props;
@@ -201,6 +205,7 @@ class GFERequestBox extends Component {
       },
       gfeInfo: { ...initialGFEInfo },
       selectedGFE: startingGFEId,
+      showDeleteConfirmation: false,
     };
     this.state = this.initialState;
     //this.state = exampleState;
@@ -216,16 +221,40 @@ class GFERequestBox extends Component {
 
   handleAddGFE = () => {
     const gfeInfo = { ...this.state.gfeInfo };
-    gfeInfo[v4()] = generateGFE();
-    this.setState({ gfeInfo });
+    let selectedGFE = this.state.selectedGFE;
+    const newGFEId = v4();
+    gfeInfo[newGFEId] = generateGFE();
+    if (Object.keys(gfeInfo).length === 1) {
+      selectedGFE = newGFEId;
+    }
+
+    this.setState({ gfeInfo, selectedGFE });
   };
 
   handleDeleteGFE = (id) => {
     const gfeInfo = { ...this.state.gfeInfo };
+    let selectedGFE = this.state.selectedGFE;
+    let verticalTabIndex = this.state.verticalTabIndex;
     delete gfeInfo[id];
-    this.setState({ ...gfeInfo });
+    if (id === this.state.selectedGFE) {
+      if (Object.keys(gfeInfo).length > 0) {
+        selectedGFE = Object.keys(gfeInfo)[0];
+      } else {
+        selectedGFE = null;
+        verticalTabIndex = 0;
+      }
+    }
+    this.setState({
+      gfeInfo,
+      selectedGFE,
+      verticalTabIndex,
+      gfeDeletingDisplay: null,
+      gfeDeleting: null,
+      showDeleteConfirmation: false,
+    });
   };
   componentDidUpdate(prevProps, prevState) {
+    console.log(this.state);
     if (this.props.dataServerChanged && !prevProps.dataServerChanged) {
       this.resetState();
       this.props.setDataServerChanged(false);
@@ -929,6 +958,17 @@ class GFERequestBox extends Component {
   };
 
   retrieveRequestSummary = () => {
+    if (Object.keys(this.state.gfeInfo).length === 0) {
+      return {};
+    }
+    const displayableClaimItemList = this.state.gfeInfo[
+      this.state.selectedGFE
+    ].claimItemList.map((e) => {
+      if (e.estimatedDateOfService) {
+        e.estimatedDateOfService = e.estimatedDateOfService.toString();
+      }
+      return e;
+    });
     return {
       patientId: this.state.subjectInfo.selectedPatient,
       coverageId: this.state.subjectInfo.selectedCoverage
@@ -946,11 +986,11 @@ class GFERequestBox extends Component {
       subscriberRelationship: this.state.subjectInfo.subscriberRelationship,
       coveragePlan: this.state.subjectInfo.coveragePlan,
       coveragePeriod: this.state.subjectInfo.coveragePeriod,
+      gfeType: this.state.subjectInfo.gfeType,
       practitionerSelected:
         this.state.gfeInfo[this.state.selectedGFE].careTeamList,
       practitionerRoleSelected:
         this.state.gfeInfo[this.state.selectedGFE].careTeamList,
-      gfeType: this.state.subjectInfo.gfeType,
       diagnosisList: this.state.gfeInfo[this.state.selectedGFE].diagnosisList,
       procedureList: this.state.gfeInfo[this.state.selectedGFE].procedureList,
       servicesList: this.state.gfeInfo[this.state.selectedGFE].claimItemList,
@@ -964,6 +1004,8 @@ class GFERequestBox extends Component {
         this.state.gfeInfo[this.state.selectedGFE].selectedBillingProviderName,
       submittingProviderName:
         this.state.subjectInfo.selectedSubmittingProviderName,
+      careTeamList: this.state.gfeInfo[this.state.selectedGFE].careTeamList,
+      claimItemList: displayableClaimItemList,
     };
   };
 
@@ -1394,6 +1436,61 @@ class GFERequestBox extends Component {
     const { currentTabIndex, verticalTabIndex } = this.state;
     return (
       <div>
+        <Modal
+          open={this.state.showDeleteConfirmation}
+          aria-labelledby="modal-modal-title"
+          aria-describedby="modal-modal-description"
+        >
+          <Box
+            sx={{
+              position: "absolute",
+              top: "50%",
+              left: "50%",
+              transform: "translate(-50%, -50%)",
+              width: 400,
+              height: 200,
+              bgcolor: "background.paper",
+              border: "2px solid #000",
+              boxShadow: 24,
+              p: 4,
+              display: "flex",
+              justifyContent: "space-evenly",
+              flexDirection: "column",
+            }}
+          >
+            <Typography align="center">
+              {`Are you sure you want to delete ${this.state.gfeDeletingDisplay}?`}
+            </Typography>
+            <div
+              style={{
+                width: "100%",
+                display: "flex",
+                justifyContent: "space-evenly",
+              }}
+            >
+              <Button
+                style={{ backgroundColor: "red", color: "white" }}
+                variant="contained"
+                onClick={() => this.handleDeleteGFE(this.state.gfeDeleting)}
+              >
+                Delete
+              </Button>
+              <Button
+                color="primary"
+                variant="contained"
+                onClick={() =>
+                  this.setState({
+                    gfeDeletingDisplay: null,
+                    gfeDeleting: null,
+                    showDeleteConfirmation: false,
+                  })
+                }
+              >
+                Cancel
+              </Button>
+            </div>
+          </Box>
+        </Modal>
         <Grid container space={0} justifyContent="center">
           {" "}
           {/* container size is adjusted here for main screen */}
@@ -1453,61 +1550,102 @@ class GFERequestBox extends Component {
                     }}
                   >
                     <List dense={true}>
-                      <ListSubheader>Subject</ListSubheader>
-                      <ListItem>
-                        <ListItemButton
-                          onClick={() => this.handleVerticalChange(null, 0)}
-                          selected={this.state.verticalTabIndex === 0}
-                        >
-                          <ListItemText>
-                            {this.state.subjectInfo.selectedPatientName ||
-                              "Select Patient"}
-                          </ListItemText>
-                        </ListItemButton>
-                      </ListItem>
-                      <ListSubheader>GFEs</ListSubheader>
-                      {Object.keys(this.state.gfeInfo).map((id, index) => {
-                        return (
-                          <>
-                            <ListItem>
-                              <ListItemButton
-                                onClick={() => {
-                                  let newVti = this.state.verticalTabIndex;
-                                  if (this.state.verticalTabIndex === 0) {
-                                    newVti = 1;
+                      <div
+                        style={{
+                          border: "2px solid gray",
+                          borderRadius: "5px",
+                        }}
+                      >
+                        <ListSubheader>Subject</ListSubheader>
+                        <ListItem>
+                          <ListItemButton
+                            onClick={() => this.handleVerticalChange(null, 0)}
+                            selected={this.state.verticalTabIndex === 0}
+                          >
+                            <ListItemText>
+                              {this.state.subjectInfo.selectedPatientName ||
+                                "Select Patient"}
+                            </ListItemText>
+                          </ListItemButton>
+                        </ListItem>
+                      </div>
+                      <div
+                        style={{
+                          border: "2px solid gray",
+                          borderRadius: "5px",
+                        }}
+                      >
+                        <ListSubheader>GFEs</ListSubheader>
+                        {Object.keys(this.state.gfeInfo).map((id, index) => {
+                          return (
+                            <>
+                              <ListItem>
+                                <ListItemButton
+                                  onClick={() => {
+                                    let newVti = this.state.verticalTabIndex;
+                                    if (this.state.verticalTabIndex === 0) {
+                                      newVti = 1;
+                                    }
+                                    this.setState({
+                                      selectedGFE: id,
+                                      verticalTabIndex: newVti,
+                                    });
+                                  }}
+                                  selected={
+                                    this.state.verticalTabIndex > 0 &&
+                                    this.state.selectedGFE === id
                                   }
-                                  this.setState({
-                                    selectedGFE: id,
-                                    verticalTabIndex: newVti,
-                                  });
-                                }}
-                                selected={
-                                  this.state.verticalTabIndex > 0 &&
-                                  this.state.selectedGFE === id
-                                }
-                              >
-                                <ListItemText>{`GFE ${
-                                  index + 1
-                                }`}</ListItemText>
-                              </ListItemButton>
-                            </ListItem>
-                          </>
-                        );
-                      })}
-                      <ListItem>
-                        <ListItemButton onClick={this.handleAddGFE}>
-                          <ListItemText>Create New GFE</ListItemText>
-                        </ListItemButton>
-                      </ListItem>
+                                >
+                                  <ListItemText>{`GFE ${
+                                    index + 1
+                                  }`}</ListItemText>
+                                </ListItemButton>
+                                <ListItemIcon>
+                                  <IconButton
+                                    onClick={() =>
+                                      this.setState({
+                                        gfeDeletingDisplay: `GFE ${index + 1}`,
+                                        gfeDeleting: id,
+                                        showDeleteConfirmation: true,
+                                      })
+                                    }
+                                  >
+                                    <DeleteIcon />
+                                  </IconButton>
+                                </ListItemIcon>
+                              </ListItem>
+                            </>
+                          );
+                        })}
+                        <ListItem>
+                          <ListItemButton onClick={this.handleAddGFE}>
+                            <ListItemText>Create New GFE</ListItemText>
+                          </ListItemButton>
+                        </ListItem>
+                      </div>
                     </List>
                     <List>
-                      <ListItem
-                        onClick={() => this.handleVerticalChange(null, 4)}
-                      >
-                        <Button variant="contained">Total Summary</Button>
+                      <ListItem>
+                        <Button
+                          onClick={() => this.handleVerticalChange(null, 4)}
+                          variant="contained"
+                          color="primary"
+                          disabled={
+                            Object.keys(this.state.gfeInfo).length === 0
+                          }
+                        >
+                          Total Summary
+                        </Button>
                       </ListItem>
                       <ListItem>
-                        <Button onClick={this.handleOnSubmit}>
+                        <Button
+                          variant="contained"
+                          color="primary"
+                          onClick={this.handleOnSubmit}
+                          disabled={
+                            Object.keys(this.state.gfeInfo).length === 0
+                          }
+                        >
                           Submit Request
                         </Button>
                       </ListItem>
@@ -1533,7 +1671,7 @@ class GFERequestBox extends Component {
                         </Grid>
                         <Grid item className={classes.paper}>
                           <FormControl>
-                            <Grid>
+                            <Grid color="primary">
                               <Box>
                                 <b>
                                   <Typography variant="subtitle1">
@@ -1628,360 +1766,392 @@ class GFERequestBox extends Component {
                   </TabPanel>
 
                   {/* Care Team tab */}
-                  <TabPanel value={verticalTabIndex} index={1}>
-                    <Grid item>
-                      <Card variant="outlined" className={classes.cardCareTeam}>
-                        <Grid container direction="column">
-                          <Grid item className={classes.paper}>
-                            <FormControl>
-                              <Grid item>
-                                <Box sx={{ mb: 1 }}>
-                                  <b>
-                                    <Typography variant="subtitle1">
-                                      Billing Provider*:
-                                    </Typography>
-                                  </b>
-                                </Box>
-                              </Grid>
+                  {Object.keys(this.state.gfeInfo).length > 0 &&
+                    this.state.selectedGFE && (
+                      <>
+                        <TabPanel value={verticalTabIndex} index={1}>
+                          <Grid item>
+                            <Card
+                              variant="outlined"
+                              className={classes.cardCareTeam}
+                            >
+                              <Grid container direction="column">
+                                <Grid item className={classes.paper}>
+                                  <FormControl>
+                                    <Grid item>
+                                      <Box sx={{ mb: 1 }}>
+                                        <b>
+                                          <Typography variant="subtitle1">
+                                            Billing Provider*:
+                                          </Typography>
+                                        </b>
+                                      </Box>
+                                    </Grid>
 
-                              {this.state.subjectInfo.gfeType === "professional"
-                                ? ProfessionalBillingProviderSelect(
-                                    professionalBillingProviderList,
-                                    this.state.gfeInfo[this.state.selectedGFE]
-                                      .selectedBillingProvider,
-                                    this.handleSelectBillingProvider,
-                                    "billingProvider"
-                                  )
-                                : OrganizationSelect(
-                                    this.state.organizationList,
-                                    this.state.gfeInfo[this.state.selectedGFE]
-                                      .selectedBillingProvider,
-                                    "billing-provider-label",
-                                    "billingProvider",
-                                    this.handleOpenOrganizationList,
-                                    this.handleSelectBillingProvider,
-                                    "billing"
-                                  )}
-                            </FormControl>
-                          </Grid>
-
-                          <Grid item className={classes.smallerPaddingPaper}>
-                            <FormControl component="fieldset">
-                              <Box>
-                                <Grid item>
-                                  <b>
-                                    <Typography variant="subtitle1">
-                                      Care Team:
-                                    </Typography>
-                                  </b>
+                                    {this.state.subjectInfo.gfeType ===
+                                    "professional"
+                                      ? ProfessionalBillingProviderSelect(
+                                          professionalBillingProviderList,
+                                          this.state.gfeInfo[
+                                            this.state.selectedGFE
+                                          ].selectedBillingProvider,
+                                          this.handleSelectBillingProvider,
+                                          "billingProvider"
+                                        )
+                                      : OrganizationSelect(
+                                          this.state.organizationList,
+                                          this.state.gfeInfo[
+                                            this.state.selectedGFE
+                                          ].selectedBillingProvider,
+                                          "billing-provider-label",
+                                          "billingProvider",
+                                          this.handleOpenOrganizationList,
+                                          this.handleSelectBillingProvider,
+                                          "billing"
+                                        )}
+                                  </FormControl>
                                 </Grid>
-                              </Box>
-                            </FormControl>
-                          </Grid>
-                        </Grid>
-                        <Box
-                          sx={{
-                            width: 500,
-                            backgroundColor: "#FFFFFF",
-                            mb: 3,
-                            ml: 3,
-                          }}
-                        >
-                          <CareTeam
-                            rows={
-                              this.state.gfeInfo[this.state.selectedGFE]
-                                .careTeamList
-                            }
-                            providerList={providerListOptions}
-                            addOne={this.addOneCareTeam}
-                            edit={this.editCareTeam}
-                            deleteOne={this.deleteOneCareTeam}
-                          />
-                        </Box>
-                      </Card>
-                    </Grid>
-                    <br></br>
-                    <Grid
-                      container
-                      direction="row"
-                      justifyContent="space-between"
-                      alignItems="center"
-                    >
-                      <Grid item xs={4}>
-                        <Button
-                          variant="contained"
-                          startIcon={<WestIcon />}
-                          color="primary"
-                          onClick={() => {
-                            this.handleBackward();
-                          }}
-                        >
-                          Previous
-                        </Button>
-                      </Grid>
-                      <Grid item xs={4}>
-                        <Button
-                          variant="contained"
-                          endIcon={<EastIcon />}
-                          color="primary"
-                          onClick={() => {
-                            this.handleForward();
-                          }}
-                        >
-                          Next
-                        </Button>
-                      </Grid>
-                    </Grid>
-                  </TabPanel>
 
-                  <TabPanel value={verticalTabIndex} index={2}>
-                    <Grid item>
-                      <Grid className={classes.cardCareTeam}>
-                        <Grid container direction="column">
-                          <Grid item className={classes.paper}>
-                            <Grid item>
-                              <Box sx={{ mt: 3 }}>
-                                <b>
-                                  <u>
-                                    <Typography variant="h6">
-                                      Service Details:
-                                    </Typography>
-                                  </u>
-                                </b>
+                                <Grid
+                                  item
+                                  className={classes.smallerPaddingPaper}
+                                >
+                                  <FormControl component="fieldset">
+                                    <Box>
+                                      <Grid item>
+                                        <b>
+                                          <Typography variant="subtitle1">
+                                            Care Team:
+                                          </Typography>
+                                        </b>
+                                      </Grid>
+                                    </Box>
+                                  </FormControl>
+                                </Grid>
+                              </Grid>
+                              <Box
+                                sx={{
+                                  width: 500,
+                                  backgroundColor: "#FFFFFF",
+                                  mb: 3,
+                                  ml: 3,
+                                }}
+                              >
+                                <CareTeam
+                                  rows={
+                                    this.state.gfeInfo[this.state.selectedGFE]
+                                      .careTeamList
+                                  }
+                                  providerList={providerListOptions}
+                                  addOne={this.addOneCareTeam}
+                                  edit={this.editCareTeam}
+                                  deleteOne={this.deleteOneCareTeam}
+                                />
                               </Box>
+                            </Card>
+                          </Grid>
+                          <br></br>
+                          <Grid
+                            container
+                            direction="row"
+                            justifyContent="space-between"
+                            alignItems="center"
+                          >
+                            <Grid item xs={4}>
+                              <Button
+                                variant="contained"
+                                startIcon={<WestIcon />}
+                                color="primary"
+                                onClick={() => {
+                                  this.handleBackward();
+                                }}
+                              >
+                                Previous
+                              </Button>
+                            </Grid>
+                            <Grid item xs={4}>
+                              <Button
+                                variant="contained"
+                                endIcon={<EastIcon />}
+                                color="primary"
+                                onClick={() => {
+                                  this.handleForward();
+                                }}
+                              >
+                                Next
+                              </Button>
                             </Grid>
                           </Grid>
+                        </TabPanel>
 
-                          <Grid item className={classes.paper}>
-                            <FormControl>
-                              <FormLabel className={classes.inputBox}>
-                                Priority:*{" "}
-                              </FormLabel>
-                              {PrioritySelect(
-                                this.state.priorityList,
-                                this.state.gfeInfo[this.state.selectedGFE]
-                                  .selectedPriority,
-                                this.handleOpenPriority,
-                                this.handleSelectPriority
-                              )}
-                            </FormControl>
-                          </Grid>
-                          <Grid item className={classes.paper}>
-                            <Grid container direction="row" spacing={3}>
-                              <Grid item>
-                                <FormControl>
-                                  <FormLabel className={classes.smallerHeader}>
-                                    Diagnosis*:
-                                  </FormLabel>
-                                  <Box
-                                    sx={{
-                                      width: 500,
-                                      backgroundColor: "#FFFFFF",
-                                      ml: 3,
-                                    }}
-                                  >
-                                    <DiagnosisItem
-                                      rows={
-                                        this.state.gfeInfo[
-                                          this.state.selectedGFE
-                                        ].diagnosisList
-                                      }
-                                      addOne={this.addOneDiagnosisItem}
-                                      edit={this.editDiagnosisItem}
-                                      deleteOne={this.deleteOneDiagnosisItem}
-                                    />
-                                  </Box>
-                                </FormControl>
-                              </Grid>
-                              <Grid item>
-                                <Grid container direction="column" spacing={3}>
+                        <TabPanel value={verticalTabIndex} index={2}>
+                          <Grid item>
+                            <Grid className={classes.cardCareTeam}>
+                              <Grid container direction="column">
+                                <Grid item className={classes.paper}>
                                   <Grid item>
-                                    <FormLabel>Type of Bill</FormLabel>
+                                    <Box sx={{ mt: 3 }}>
+                                      <b>
+                                        <u>
+                                          <Typography variant="h6">
+                                            Service Details:
+                                          </Typography>
+                                        </u>
+                                      </b>
+                                    </Box>
                                   </Grid>
-                                  <Grid item className={classes.inputBox}>
-                                    <TextField
-                                      id="supportingInfoTypeOfBill"
-                                      variant="standard"
-                                      value={
-                                        this.state.gfeInfo[
-                                          this.state.selectedGFE
-                                        ].supportingInfoTypeOfBill
-                                      }
-                                      onChange={
-                                        this.handleSupportingInfoTypeOfBill
-                                      }
-                                    />
-                                  </Grid>
+                                </Grid>
 
-                                  <Grid item>
-                                    <FormLabel>
-                                      Inter Transaction Identifier
+                                <Grid item className={classes.paper}>
+                                  <FormControl>
+                                    <FormLabel className={classes.inputBox}>
+                                      Priority:*{" "}
                                     </FormLabel>
+                                    {PrioritySelect(
+                                      this.state.priorityList,
+                                      this.state.gfeInfo[this.state.selectedGFE]
+                                        .selectedPriority,
+                                      this.handleOpenPriority,
+                                      this.handleSelectPriority
+                                    )}
+                                  </FormControl>
+                                </Grid>
+                                <Grid item className={classes.paper}>
+                                  <Grid container direction="row" spacing={3}>
+                                    <Grid item>
+                                      <FormControl>
+                                        <FormLabel
+                                          className={classes.smallerHeader}
+                                        >
+                                          Diagnosis*:
+                                        </FormLabel>
+                                        <Box
+                                          sx={{
+                                            width: 500,
+                                            backgroundColor: "#FFFFFF",
+                                            ml: 3,
+                                          }}
+                                        >
+                                          <DiagnosisItem
+                                            rows={
+                                              this.state.gfeInfo[
+                                                this.state.selectedGFE
+                                              ].diagnosisList
+                                            }
+                                            addOne={this.addOneDiagnosisItem}
+                                            edit={this.editDiagnosisItem}
+                                            deleteOne={
+                                              this.deleteOneDiagnosisItem
+                                            }
+                                          />
+                                        </Box>
+                                      </FormControl>
+                                    </Grid>
+                                    <Grid item>
+                                      <Grid
+                                        container
+                                        direction="column"
+                                        spacing={3}
+                                      >
+                                        <Grid item>
+                                          <FormLabel>Type of Bill</FormLabel>
+                                        </Grid>
+                                        <Grid item className={classes.inputBox}>
+                                          <TextField
+                                            id="supportingInfoTypeOfBill"
+                                            variant="standard"
+                                            value={
+                                              this.state.gfeInfo[
+                                                this.state.selectedGFE
+                                              ].supportingInfoTypeOfBill
+                                            }
+                                            onChange={
+                                              this
+                                                .handleSupportingInfoTypeOfBill
+                                            }
+                                          />
+                                        </Grid>
+
+                                        <Grid item>
+                                          <FormLabel>
+                                            Inter Transaction Identifier
+                                          </FormLabel>
+                                        </Grid>
+                                        <Grid item>
+                                          <Select
+                                            displayEmpty
+                                            id="select-inter-trans-id"
+                                            value={
+                                              this.state.gfeInfo[
+                                                this.state.selectedGFE
+                                              ].interTransIntermediary
+                                            }
+                                            label="Inter Trans Identifier"
+                                            onChange={
+                                              this.handleSelectInterTransId
+                                            }
+                                            className={classes.inputBox}
+                                          >
+                                            <MenuItem value="InterTransID0001">
+                                              InterTransID0001
+                                            </MenuItem>
+                                          </Select>
+                                        </Grid>
+                                      </Grid>
+                                    </Grid>
                                   </Grid>
-                                  <Grid item>
-                                    <Select
-                                      displayEmpty
-                                      id="select-inter-trans-id"
-                                      value={
-                                        this.state.gfeInfo[
-                                          this.state.selectedGFE
-                                        ].interTransIntermediary
-                                      }
-                                      label="Inter Trans Identifier"
-                                      onChange={this.handleSelectInterTransId}
-                                      className={classes.inputBox}
-                                    >
-                                      <MenuItem value="InterTransID0001">
-                                        InterTransID0001
-                                      </MenuItem>
-                                    </Select>
+                                </Grid>
+
+                                <Grid item className={classes.paper}>
+                                  <Grid container direction="row" spacing={3}>
+                                    <Grid item>
+                                      <FormControl>
+                                        <FormLabel
+                                          className={classes.smallerHeader}
+                                        >
+                                          Procedure:{" "}
+                                        </FormLabel>
+                                        <Box
+                                          sx={{
+                                            width: 500,
+                                            backgroundColor: "#FFFFFF",
+                                            ml: 3,
+                                          }}
+                                        >
+                                          <ProcedureItem
+                                            rows={
+                                              this.state.gfeInfo[
+                                                this.state.selectedGFE
+                                              ].procedureList
+                                            }
+                                            addOne={this.addOneProcedureItem}
+                                            edit={this.editProcedureItem}
+                                            deleteOne={
+                                              this.deleteOneProcedureItem
+                                            }
+                                          />
+                                        </Box>
+                                      </FormControl>
+                                    </Grid>
+                                    <Grid item>
+                                      <FormControl>
+                                        <FormLabel
+                                          className={classes.smallerHeader}
+                                        >
+                                          Services:*{" "}
+                                        </FormLabel>
+                                        <Box
+                                          sx={{
+                                            width: "65vw",
+                                            backgroundColor: "#FFFFFF",
+                                            ml: 3,
+                                          }}
+                                        >
+                                          <ClaimItem
+                                            rows={
+                                              this.state.gfeInfo[
+                                                this.state.selectedGFE
+                                              ].claimItemList
+                                            }
+                                            addOne={this.addOneClaimItem}
+                                            edit={this.editClaimItem}
+                                            deleteOne={this.deleteOneClaimItem}
+                                          />
+                                        </Box>
+                                      </FormControl>
+                                    </Grid>
                                   </Grid>
                                 </Grid>
                               </Grid>
                             </Grid>
                           </Grid>
-
-                          <Grid item className={classes.paper}>
-                            <Grid container direction="row" spacing={3}>
-                              <Grid item>
-                                <FormControl>
-                                  <FormLabel className={classes.smallerHeader}>
-                                    Procedure:{" "}
-                                  </FormLabel>
-                                  <Box
-                                    sx={{
-                                      width: 500,
-                                      backgroundColor: "#FFFFFF",
-                                      ml: 3,
-                                    }}
-                                  >
-                                    <ProcedureItem
-                                      rows={
-                                        this.state.gfeInfo[
-                                          this.state.selectedGFE
-                                        ].procedureList
-                                      }
-                                      addOne={this.addOneProcedureItem}
-                                      edit={this.editProcedureItem}
-                                      deleteOne={this.deleteOneProcedureItem}
-                                    />
-                                  </Box>
-                                </FormControl>
-                              </Grid>
-                              <Grid item>
-                                <FormControl>
-                                  <FormLabel className={classes.smallerHeader}>
-                                    Services:*{" "}
-                                  </FormLabel>
-                                  <Box
-                                    sx={{
-                                      width: "65vw",
-                                      backgroundColor: "#FFFFFF",
-                                      ml: 3,
-                                    }}
-                                  >
-                                    <ClaimItem
-                                      rows={
-                                        this.state.gfeInfo[
-                                          this.state.selectedGFE
-                                        ].claimItemList
-                                      }
-                                      addOne={this.addOneClaimItem}
-                                      edit={this.editClaimItem}
-                                      deleteOne={this.deleteOneClaimItem}
-                                    />
-                                  </Box>
-                                </FormControl>
-                              </Grid>
+                          <br></br>
+                          <Grid
+                            container
+                            direction="row"
+                            justifyContent="space-between"
+                            alignItems="center"
+                          >
+                            <Grid item xs={4}>
+                              <Button
+                                variant="contained"
+                                startIcon={<WestIcon />}
+                                color="primary"
+                                onClick={() => {
+                                  this.handleBackward();
+                                }}
+                              >
+                                Previous
+                              </Button>
+                            </Grid>
+                            <Grid item xs={4}>
+                              <Button
+                                variant="contained"
+                                endIcon={<EastIcon />}
+                                color="primary"
+                                onClick={() => {
+                                  this.handleForward();
+                                }}
+                              >
+                                Next
+                              </Button>
                             </Grid>
                           </Grid>
-                        </Grid>
-                      </Grid>
-                    </Grid>
-                    <br></br>
-                    <Grid
-                      container
-                      direction="row"
-                      justifyContent="space-between"
-                      alignItems="center"
-                    >
-                      <Grid item xs={4}>
-                        <Button
-                          variant="contained"
-                          startIcon={<WestIcon />}
-                          color="primary"
-                          onClick={() => {
-                            this.handleBackward();
-                          }}
-                        >
-                          Previous
-                        </Button>
-                      </Grid>
-                      <Grid item xs={4}>
-                        <Button
-                          variant="contained"
-                          endIcon={<EastIcon />}
-                          color="primary"
-                          onClick={() => {
-                            this.handleForward();
-                          }}
-                        >
-                          Next
-                        </Button>
-                      </Grid>
-                    </Grid>
-                  </TabPanel>
+                        </TabPanel>
 
-                  {/* Summary tab*/}
-                  <TabPanel value={verticalTabIndex} index={3}>
-                    <Grid item className={classes.paper} xs={12}>
-                      <FormControl component="fieldset">
-                        <Grid container direction="row">
-                          <Grid item xs={10}>
-                            <b>
-                              <Typography variant="h6">Summary</Typography>
-                            </b>
+                        {/* Summary tab*/}
+                        <TabPanel value={verticalTabIndex} index={3}>
+                          <Grid item className={classes.paper} xs={12}>
+                            <FormControl component="fieldset">
+                              <Grid container direction="row">
+                                <Grid item xs={10}>
+                                  <b>
+                                    <Typography variant="h6">
+                                      Summary
+                                    </Typography>
+                                  </b>
+                                </Grid>
+                              </Grid>
+
+                              <Grid item>
+                                <SummaryItem summary={summary} />
+                              </Grid>
+                            </FormControl>
                           </Grid>
-                        </Grid>
-
-                        <Grid item>
-                          <SummaryItem summary={summary} />
-                        </Grid>
-                      </FormControl>
-                    </Grid>
-                    <br></br>
-                    <Grid
-                      container
-                      direction="row"
-                      justifyContent="space-between"
-                      alignItems="center"
-                    >
-                      <Grid item xs={4}>
-                        <Button
-                          variant="contained"
-                          color="primary"
-                          startIcon={<WestIcon />}
-                          onClick={() => {
-                            this.handleBackward();
-                          }}
-                        >
-                          Previous
-                        </Button>
-                      </Grid>
-                      <Grid item xs={4}>
-                        <Button
-                          loading
-                          variant="contained"
-                          color="primary"
-                          type="submit"
-                          disabled={this.props.submittingStatus === true}
-                        >
-                          Submit GFE
-                        </Button>
-                      </Grid>
-                    </Grid>
-                  </TabPanel>
-
+                          <br></br>
+                          <Grid
+                            container
+                            direction="row"
+                            justifyContent="space-between"
+                            alignItems="center"
+                          >
+                            <Grid item xs={4}>
+                              <Button
+                                variant="contained"
+                                color="primary"
+                                startIcon={<WestIcon />}
+                                onClick={() => {
+                                  this.handleBackward();
+                                }}
+                              >
+                                Previous
+                              </Button>
+                            </Grid>
+                            <Grid item xs={4}>
+                              <Button
+                                loading
+                                variant="contained"
+                                color="primary"
+                                type="submit"
+                                disabled={this.props.submittingStatus === true}
+                              >
+                                Submit GFE
+                              </Button>
+                            </Grid>
+                          </Grid>
+                        </TabPanel>
+                      </>
+                    )}
                   {/* Total Summary Tab */}
                   <TabPanel value={verticalTabIndex} index={4}>
                     <Grid item className={classes.paper} xs={12}>
