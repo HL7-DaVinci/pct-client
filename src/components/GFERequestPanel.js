@@ -24,6 +24,8 @@ import ListItem from "@mui/material/ListItem";
 import ListItemButton from "@mui/material/ListItemButton";
 import ListItemText from "@mui/material/ListItemText";
 import ListSubheader from "@mui/material/ListSubheader";
+import Divider from "@mui/material/Divider";
+
 import { exampleState } from "../exampleState";
 import { getPatientDisplayName } from "./SelectComponents";
 
@@ -221,14 +223,10 @@ class GFERequestBox extends Component {
 
   handleAddGFE = () => {
     const gfeInfo = { ...this.state.gfeInfo };
-    let selectedGFE = this.state.selectedGFE;
     const newGFEId = v4();
     gfeInfo[newGFEId] = generateGFE();
-    if (Object.keys(gfeInfo).length === 1) {
-      selectedGFE = newGFEId;
-    }
 
-    this.setState({ gfeInfo, selectedGFE });
+    this.setState({ gfeInfo, selectedGFE: newGFEId, verticalTabIndex: 1 });
   };
 
   handleDeleteGFE = (id) => {
@@ -1503,28 +1501,29 @@ class GFERequestBox extends Component {
               <Tab label="Good Faith Estimate" {...a11yProps(0)} />
               <Tab label="Advanced Explanation of Benefits" {...a11yProps(1)} />
             </Tabs>
-            {this.state.verticalTabIndex > 0 && (
-              <Tabs
-                value={this.state.verticalTabIndex - 1}
-                indicatorColor="secondary"
-                textColor="inherit"
-                variant="fullWidth"
-              >
-                <Tab
-                  label="Care Team"
-                  onClick={() => this.handleVerticalChange(null, 1)}
-                />
-                <Tab
-                  label="Encounter"
-                  onClick={() => this.handleVerticalChange(null, 2)}
-                />
-                <Tab
-                  label="Summary"
-                  onClick={() => this.handleVerticalChange(null, 3)}
-                />
-              </Tabs>
-            )}
           </AppBar>
+          {this.state.verticalTabIndex > 0 && (
+            <Tabs
+              value={this.state.verticalTabIndex - 1}
+              indicatorColor="secondary"
+              textColor="inherit"
+              variant="fullWidth"
+              sx={{ width: "100vw" }}
+            >
+              <Tab
+                label="Care Team"
+                onClick={() => this.handleVerticalChange(null, 1)}
+              />
+              <Tab
+                label="Encounter"
+                onClick={() => this.handleVerticalChange(null, 2)}
+              />
+              <Tab
+                label="Summary"
+                onClick={() => this.handleVerticalChange(null, 3)}
+              />
+            </Tabs>
+          )}
           <form onSubmit={this.handleOnSubmit}>
             <Box index={currentTabIndex}>
               {/* TODO: adding additional gfe screens with dynamically changing tabs */}
@@ -1546,64 +1545,56 @@ class GFERequestBox extends Component {
                     sx={{
                       flexDirection: "column",
                       justifyContent: "spaceBetween",
+                      padding: "10px",
                     }}
                   >
                     <List dense={true}>
-                      <div
-                        style={{
-                          border: "2px solid gray",
-                          borderRadius: "5px",
-                        }}
-                      >
-                        <ListSubheader sx={{ fontWeight: "bold" }}>
-                          Subject
-                        </ListSubheader>
-                        <ListItem>
-                          <ListItemButton
-                            onClick={() => this.handleVerticalChange(null, 0)}
-                            selected={this.state.verticalTabIndex === 0}
-                          >
-                            <ListItemText>
-                              {this.state.subjectInfo.selectedPatientName ||
-                                "Select Patient"}
-                            </ListItemText>
-                          </ListItemButton>
-                        </ListItem>
-                      </div>
-                      <div
-                        style={{
-                          border: "2px solid gray",
-                          borderRadius: "5px",
-                        }}
-                      >
-                        <ListSubheader sx={{ fontWeight: "bold" }}>
-                          GFEs
-                        </ListSubheader>
-                        {Object.keys(this.state.gfeInfo).map((id, index) => {
-                          return (
-                            <>
-                              <ListItem>
-                                <ListItemButton
-                                  onClick={() => {
-                                    let newVti = this.state.verticalTabIndex;
-                                    if (this.state.verticalTabIndex === 0) {
-                                      newVti = 1;
-                                    }
-                                    this.setState({
-                                      selectedGFE: id,
-                                      verticalTabIndex: newVti,
-                                    });
-                                  }}
-                                  selected={
-                                    this.state.verticalTabIndex > 0 &&
-                                    this.state.selectedGFE === id
+                      <ListSubheader sx={{ fontWeight: "bold" }}>
+                        Subject
+                      </ListSubheader>
+                      <ListItem>
+                        <ListItemButton
+                          onClick={() => this.handleVerticalChange(null, 0)}
+                          selected={this.state.verticalTabIndex === 0}
+                        >
+                          <ListItemText>
+                            {this.state.subjectInfo.selectedPatientName ||
+                              "Select Patient"}
+                          </ListItemText>
+                        </ListItemButton>
+                      </ListItem>
+                      <Divider />
+                      <ListSubheader sx={{ fontWeight: "bold" }}>
+                        GFEs
+                      </ListSubheader>
+                      {Object.keys(this.state.gfeInfo).map((id, index) => {
+                        return (
+                          <>
+                            <ListItem>
+                              <ListItemButton
+                                onClick={() => {
+                                  let newVti = this.state.verticalTabIndex;
+                                  if (this.state.verticalTabIndex === 0) {
+                                    newVti = 1;
                                   }
+                                  this.setState({
+                                    selectedGFE: id,
+                                    verticalTabIndex: newVti,
+                                  });
+                                }}
+                                selected={
+                                  this.state.verticalTabIndex > 0 &&
+                                  this.state.selectedGFE === id
+                                }
+                                sx={{ justifyContent: "space-between" }}
+                              >
+                                <ListItemText>{`GFE ${
+                                  index + 1
+                                }`}</ListItemText>
+
+                                <ListItemIcon
+                                  sx={{ justifyContent: "flex-end" }}
                                 >
-                                  <ListItemText>{`GFE ${
-                                    index + 1
-                                  }`}</ListItemText>
-                                </ListItemButton>
-                                <ListItemIcon>
                                   <IconButton
                                     onClick={() =>
                                       this.setState({
@@ -1616,16 +1607,17 @@ class GFERequestBox extends Component {
                                     <DeleteIcon />
                                   </IconButton>
                                 </ListItemIcon>
-                              </ListItem>
-                            </>
-                          );
-                        })}
-                        <ListItem>
-                          <ListItemButton onClick={this.handleAddGFE}>
-                            <ListItemText>Create New GFE</ListItemText>
-                          </ListItemButton>
-                        </ListItem>
-                      </div>
+                              </ListItemButton>
+                            </ListItem>
+                          </>
+                        );
+                      })}
+                      <ListItem>
+                        <ListItemButton onClick={this.handleAddGFE}>
+                          <ListItemText>Create New GFE</ListItemText>
+                        </ListItemButton>
+                      </ListItem>
+                      <Divider />
                     </List>
                     <List>
                       <ListItem>
@@ -1654,7 +1646,7 @@ class GFERequestBox extends Component {
                       </ListItem>
                     </List>
                   </Box>
-
+                  <Divider orientation="vertical" />
                   {/* Patient tab */}
                   <TabPanel value={verticalTabIndex} index={0}>
                     <Grid item>

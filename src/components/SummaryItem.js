@@ -39,16 +39,6 @@ function createProcedureList(procedureList) {
   });
 }
 
-function createDiagnosisList(diagnosisList) {
-  return diagnosisList.map((el) => {
-    return (
-      <ListItem disableGutters>
-        ({el.id}) {el.diagnosis} ({el.type})
-      </ListItem>
-    );
-  });
-}
-
 function alertDialog(itemsMissing) {
   if (itemsMissing.length === 0) {
     return;

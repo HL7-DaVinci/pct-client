@@ -10,13 +10,17 @@ export function SummaryTable({ headers, data }) {
   return (
     <TableContainer
       component={Box}
-      sx={{ backgroundColor: "#DCDCDC", border: "2px solid gray" }}
+      sx={{
+        backgroundColor: "#DCDCDC",
+        border: "2px solid #C0C0C0",
+        marginTop: "10px",
+      }}
     >
       <Table>
         <TableHead>
           <TableRow>
             {headers.map((header) => (
-              <TableCell sx={{ borderColor: "black", borderWidth: "1px" }}>
+              <TableCell sx={{ border: "2px solid #C0C0C0" }}>
                 {header.display}
               </TableCell>
             ))}
@@ -24,12 +28,12 @@ export function SummaryTable({ headers, data }) {
         </TableHead>
         <TableBody sx={{ borderColor: "black" }}>
           {data.map((d) => (
-            <TableRow key={d.id} sx={{ borderColor: "black" }}>
+            <TableRow key={d.id} sx={{ border: "2px solid #C0C0C0" }}>
               {headers.map((header) => (
                 <TableCell
                   component="th"
                   scope="row"
-                  sx={{ borderColor: "black", borderWidth: "1px" }}
+                  sx={{ border: "2px solid #C0C0C0" }}
                 >
                   {d[header.value]}
                 </TableCell>
