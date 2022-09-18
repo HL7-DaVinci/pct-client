@@ -54,7 +54,8 @@ export const getCoverageByPatient = (url, patientId) => {
 export const submitGFEClaim = (url, bundle) => {
     const headers = {
         "Content-Type": "application/fhir+json",
-        "Accept": "application/fhir+json"
+        "Accept": "application/fhir+json",
+        "Accept-Encoding": "identity"
     };
 
     return FHIRClient(url).request({
