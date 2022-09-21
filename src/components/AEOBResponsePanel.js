@@ -162,10 +162,10 @@ TabContainer.propTypes = {
 };
 
 export default function AEOBResponsePanel(props) {
-  const [openAEOBContent, setOpenAEOBContent] = React.useState(false);
-  const handleCloseAEOBContent = () => {
-    setOpenAEOBContent(false);
-  };
+  // const [openAEOBContent, setOpenAEOBContent] = React.useState(false);
+  // const handleCloseAEOBContent = () => {
+  //   setOpenAEOBContent(false);
+  // };
 
   const [openGFEResponse, setOpenGFEResponse] = React.useState(false);
   const handleOpenGFEResponse = () => setOpenGFEResponse(true);
@@ -177,12 +177,12 @@ export default function AEOBResponsePanel(props) {
 
   const classes = useStyles();
 
-  const [aeobInquirySubmitted, setAeobInquirySubmitted] = useState(false);
-  const [aeobInquirySuccess, setAeobInquirySuccess] = useState(false);
-  const [aeobInquiryPending, setAeobInquiryPending] = useState(false);
-  const [aeobInquiryError, setAeobInquiryError] = useState(false);
-  const [aeobError, setAeobError] = useState(undefined);
-  const [aeobInquiryOutcome, setAeobInquiryOutcome] = useState(undefined);
+  // const [aeobInquirySubmitted, setAeobInquirySubmitted] = useState(false);
+  // const [aeobInquirySuccess, setAeobInquirySuccess] = useState(false);
+  // const [aeobInquiryPending, setAeobInquiryPending] = useState(false);
+  // const [aeobInquiryError, setAeobInquiryError] = useState(false);
+  // const [aeobError, setAeobError] = useState(undefined);
+  // const [aeobInquiryOutcome, setAeobInquiryOutcome] = useState(undefined);
   const [currentTabIndex, setCurrentTabIndex] = useState(1);
 
   useEffect(() => {
@@ -191,70 +191,49 @@ export default function AEOBResponsePanel(props) {
       props.payerServerChanged ||
       props.receivedAEOBResponse === undefined
     ) {
-      setAeobInquirySubmitted(false);
-      setAeobInquirySuccess(false);
-      setAeobInquiryPending(false);
-      setAeobInquiryError(false);
-      setAeobError(undefined);
+      // setAeobInquirySubmitted(false);
+      // setAeobInquirySuccess(false);
+      // setAeobInquiryPending(false);
+      // setAeobInquiryError(false);
+      // setAeobError(undefined);
     }
   }, [props.dataServerChanged, props.payerServerChanged]);
 
   function handleSendInquiry() {
-    setAeobInquirySubmitted(true);
-    setAeobInquiryPending(true);
+    // setAeobInquirySubmitted(true);
+    // setAeobInquiryPending(true);
     sendAEOInquiry(props.payorUrl, props.bundleIdentifier)
       .then((response) => {
         console.log("received response: ", response);
         props.setReceivedAEOBResponse(response);
-        const foundAeob =
-          response.entry && response.entry.length >= 0
-            ? response.entry[0].resource.entry.find(
-                (item) => item.resource.resourceType === "ExplanationOfBenefit"
-              )
-            : undefined;
-        const outCome = foundAeob ? foundAeob.resource.outcome : "unknown";
-        setAeobInquiryOutcome(outCome);
-        setAeobInquirySuccess(true);
-        setAeobInquiryPending(false);
-        setAeobInquirySubmitted(false);
+        // const foundAeob =
+        //   response.entry && response.entry.length >= 0
+        //     ? response.entry[0].resource.entry.find(
+        //       (item) => item.resource.resourceType === "ExplanationOfBenefit"
+        //     )
+        //     : undefined;
+        //const outCome = foundAeob ? foundAeob.resource.outcome : "unknown";
+        // setAeobInquiryOutcome(outCome);
+        // setAeobInquirySuccess(true);
+        // setAeobInquiryPending(false);
+        // setAeobInquirySubmitted(false);
       })
       .catch((error) => {
         console.log("got error", error);
-        setAeobInquiryPending(false);
-        setAeobInquirySuccess(false);
-        setAeobInquirySubmitted(false);
-        setAeobInquiryError(true);
-        setAeobError(error.toJSON());
+        // setAeobInquiryPending(false);
+        // setAeobInquirySuccess(false);
+        // setAeobInquirySubmitted(false);
+        // setAeobInquiryError(true);
+        // setAeobError(error.toJSON());
       });
   }
 
-  function handleNewRequest() {
-    props.setShowResponse(false);
-    props.setShowRequest(true);
-  }
+
 
   function handleRequestTime() {
     return new Date().toLocaleString();
   }
 
-  function getHumanNameDisplay(humanName) {
-    var returnString = "";
-
-    if (humanName.constructor.name === "Object" && humanName !== null) {
-      if ("text" in humanName) returnString = humanName.text;
-      else if ("family" in humanName) {
-        returnString = humanName.family;
-        if ("given" in humanName) returnString += ", " + humanName.given[0];
-        if (humanName.given.length > 1)
-          returnString += " " + humanName.given[1];
-      }
-    } else
-      returnString =
-        "Human Name for object of type " &
-        typeof humanName &
-        " is not supported.";
-    return returnString;
-  }
 
   const handleChange = (event) => {
     //this.setState({ currentTabIndex: value });
@@ -385,7 +364,7 @@ export default function AEOBResponsePanel(props) {
                     handleOpenAEOB={handleOpenAEOB}
                     openAEOB={openAEOB}
                     handleCloseAEOB={handleCloseAEOB}
-                    handleCloseAEOBContent={handleCloseAEOBContent}
+                    handleCloseAEOBContent={false}//handleCloseAEOBContent}
                   />
                 </Grid>
               </Grid>

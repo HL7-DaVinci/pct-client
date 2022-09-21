@@ -45,11 +45,11 @@ export default function ClaimItem(props) {
 
   const updateProductServiceRow = (params) => {
     //sets in focus the item that you are editing
-    if (params.hasFocus == true) {
+    if (params.hasFocus === true) {
       setCurrentRow(params.id);
     }
     //if the price is undefined (case where you add one), sets focus to the new row
-    if (params.row.unitPrice == undefined) {
+    if (params.row.unitPrice === undefined) {
       setCurrentRow(params.id);
     }
   };
@@ -110,7 +110,7 @@ export default function ClaimItem(props) {
             <DesktopDatePicker
               inputFormat="MM/dd/yyyy"
               value={
-                params.formattedValue == undefined ? "" : params.formattedValue
+                params.formattedValue === undefined ? "" : params.formattedValue
               }
               onChange={(event) => {
                 handleChangeDate(event);
@@ -192,7 +192,7 @@ export default function ClaimItem(props) {
               id="demo-simple-select"
               label="place of service"
               value={
-                params.formattedValue == undefined ? "" : params.formattedValue
+                params.formattedValue === undefined ? "" : params.formattedValue
               }
               onChange={(event) => {
                 handleChange(event);

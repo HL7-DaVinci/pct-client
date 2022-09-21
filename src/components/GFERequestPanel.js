@@ -26,8 +26,8 @@ import ListItemText from "@mui/material/ListItemText";
 import ListSubheader from "@mui/material/ListSubheader";
 import Divider from "@mui/material/Divider";
 
-import { exampleState } from "../exampleState";
-import { getPatientDisplayName } from "./SelectComponents";
+// import { exampleState } from "../exampleState";
+// import { getPatientDisplayName } from "./SelectComponents";
 
 import {
   getPatients,
@@ -308,6 +308,7 @@ class GFERequestBox extends Component {
                 }
               }
             }
+            return '';
           })
         );
       } catch (e) {
