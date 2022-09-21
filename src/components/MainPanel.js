@@ -6,10 +6,10 @@ import RequestPanel from "./GFERequestPanel";
 import ResponsePanel from "./AEOBResponsePanel";
 import Settings from "./Settings";
 import MenuBar from "./MenuBar";
-import {
-  MockGfeResponse as MockResponse /*MockSingleGFEResponse as MockResponse*/,
-} from "../mock/GfeResponse";
-import { MockAeobResponse } from "../mock/AeobResponse";
+// import {
+//   MockGfeResponse as MockResponse /*MockSingleGFEResponse as MockResponse*/,
+// } from "../mock/GfeResponse";
+// import { MockAeobResponse } from "../mock/AeobResponse";
 
 const useStyles = makeStyles((theme) =>
   createStyles({
@@ -73,7 +73,6 @@ export default function MainPanel() {
   );
   const [dataServerChanged, setDataServerChanged] = useState(false);
   const [payerServerChanged, setPayerServerChanged] = useState(false);
-  const [gfeType, setGfeType] = useState("institutional");
   const [showRequest, setShowRequest] = useState(true);
   const [showResponse, setShowResponse] = useState(false);
 

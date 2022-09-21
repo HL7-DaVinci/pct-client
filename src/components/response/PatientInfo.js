@@ -8,7 +8,7 @@ import jp from "jsonpath";
 export default function PatientInfo(props) {
 
     function getPatientResource() {
-        return jp.query(props, "$..[?(@.fullUrl ==" + "'" + jp.query(props, '$..[?(@.resourceType == "ExplanationOfBenefit")].patient.reference')[0] + "')].resource")[0];
+        return jp.query(props, "$..[?(@.fullUrl ==".concat("'", jp.query(props, '$..[?(@.resourceType == "ExplanationOfBenefit")].patient.reference')[0] + "')].resource"))[0];
     }
 
     function getHumanNameDisplay(humanName) {
@@ -75,11 +75,11 @@ export default function PatientInfo(props) {
     }
 
     function getCoverageResource() {
-        return jp.query(props, "$..[?(@.fullUrl ==" + "'" + jp.query(props, '$..[?(@.resourceType == "ExplanationOfBenefit")].insurance[0].coverage.reference')[0] + "')].resource")[0];
+        return jp.query(props, "$..[?(@.fullUrl ==".concat("'", jp.query(props, '$..[?(@.resourceType == "ExplanationOfBenefit")].insurance[0].coverage.reference')[0] + "')].resource"))[0];
     }
 
     function getPayorResource() {
-        return jp.query(props, "$..[?(@.fullUrl ==" + "'" + jp.query(props, '$..[?(@.resourceType == "ExplanationOfBenefit")].insurer.reference')[0] + "')].resource")[0];
+        return jp.query(props, "$..[?(@.fullUrl ==".concat("'", jp.query(props, '$..[?(@.resourceType == "ExplanationOfBenefit")].insurer.reference')[0] + "')].resource"))[0];
     }
 
     return (

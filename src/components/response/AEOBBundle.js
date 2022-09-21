@@ -1,12 +1,10 @@
-import React, { useState } from 'react';
+import React from 'react';
 import {
     Box, Typography, makeStyles, Grid, Button
 } from '@material-ui/core';
 import { Dialog, DialogActions, DialogContent, DialogTitle } from '@material-ui/core';
 import Divider from '@mui/material/Divider';
 import jp from "jsonpath";
-import AEOBItemsTable from "./AEOBItemsTable";
-import moment from 'moment';
 import PatientInfo from './PatientInfo';
 import SubmitterInfo from './SubmitterInfo';
 import AEOBEntry from './AEOBEntry';
@@ -94,7 +92,6 @@ export default function AEOBBundle(props) {
 
     const classes = useStyles();
 
-    const [currentTabIndex, setCurrentTabIndex] = useState(1);
 
     function getNameDisplay(resource) {
         var returnString = "";
@@ -134,20 +131,10 @@ export default function AEOBBundle(props) {
     }
 
     function getCoverageResource() {
-        return jp.query(props, "$..[?(@.fullUrl ==" + "'" + jp.query(props, '$..[?(@.resourceType == "ExplanationOfBenefit")].insurance[0].coverage.reference')[0] + "')].resource")[0];
+        return jp.query(props, "$..[?(@.fullUrl ==".concat("'", jp.query(props, '$..[?(@.resourceType == "ExplanationOfBenefit")].insurance[0].coverage.reference')[0] + "')].resource"))[0];
     }
 
-    const handleChange = (event) => {
-        //this.setState({ currentTabIndex: value });
-        setCurrentTabIndex(event.target.value);
 
-    };
-    function getBackToMain() {
-        if (currentTabIndex !== 1) {
-            window.location.reload(false);
-            return false;
-        }
-    }
 
     function getAEOBList() {
         const list = jp.query(props, '$..[?(@.resourceType == "ExplanationOfBenefit")]');

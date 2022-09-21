@@ -35,7 +35,7 @@ export default function ProcedureItem(props) {
 
     const updateProductServiceRow = (params) => {
         //sets in focus the item that you are editing
-        if (params.hasFocus == true) {
+        if (params.hasFocus === true) {
             setCurrentRow(params.id);
         }
     }

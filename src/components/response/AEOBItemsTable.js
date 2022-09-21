@@ -65,28 +65,28 @@ function AEOBItemsTable(aeobData) {
         //service
         const service = (jp.query(data, 'item[' + i + '].productOrService.coding[0].code')[0]);
         const serviceObject = {
-            ["service"]: service,
+            "service": service,
         }
         currentRow.push(serviceObject);
 
         //service description
         const serviceDescription = (jp.query(data, 'item[' + i + '].productOrService.coding[0].display')[0]);
         const serviceDescObject = {
-            ["service description"]: serviceDescription,
+            "service description": serviceDescription,
         }
         currentRow.push(serviceDescObject);
 
         //service date
         const serviceDate = (jp.query(data, 'item[' + i + '].extension[0].valueDate')[0]);
         const serviceDateObject = {
-            ["service date"]: serviceDate,
+            "service date": serviceDate,
         }
         currentRow.push(serviceDateObject);
 
         //quantity assumed to be 1 if not given
         const quantity = (jp.query(data, 'item[' + i + '].quantity.value')[0] === undefined) ? "1" : jp.query(data, 'item[' + i + '].quantity.value')[0];
         const quantityObj = {
-            ["quantity"]: quantity,
+            "quantity": quantity,
         }
         currentRow.push(quantityObj);
 
@@ -99,8 +99,8 @@ function AEOBItemsTable(aeobData) {
             const catHeaderSelected = category ? category.toLowerCase() : "";
 
             if (headers.includes(catHeaderSelected) && (catCodeSelected === "paidtoprovider" || catCodeSelected === "submitted" || catCodeSelected === "eligible" || catCodeSelected === "coinsurance" || catCodeSelected === "copay" || catCodeSelected === "noncovered" || catCodeSelected === "deductible")) {
-               // TODO : display other currencies for now, just assume it is USD
-               // let rowValueCurrency = (jp.query(data, 'item[' + i + '].adjudication[' + j + '].amount.currency')[0] === undefined) ? "USD" : jp.query(data, 'item[' + i + '].adjudication[' + j + '].amount.currency')[0];
+                // TODO : display other currencies for now, just assume it is USD
+                // let rowValueCurrency = (jp.query(data, 'item[' + i + '].adjudication[' + j + '].amount.currency')[0] === undefined) ? "USD" : jp.query(data, 'item[' + i + '].adjudication[' + j + '].amount.currency')[0];
                 let rowValueAmount = jp.query(data, 'item[' + i + '].adjudication[' + j + '].amount.value')[0];
 
                 const rowValue = new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD' }).format(rowValueAmount);
