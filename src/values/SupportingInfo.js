@@ -27,10 +27,9 @@ export const SupportingInfoType = [
     }
 ];
 
-const categoryCodeableConcept = inputType => {
-    let result = SupportingInfoType.find(type => type.type === inputType);
-    return result;
-}
+// const categoryCodeableConcept = inputType => {
+//     let result = SupportingInfoType.find(type => type.type === inputType);
+//     return result;
+// }
 
-const result = categoryCodeableConcept("cmspos");
-//console.log(result.codeableConcept);
+// const result = categoryCodeableConcept("cmspos");

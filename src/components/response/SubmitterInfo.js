@@ -2,7 +2,6 @@ import React from 'react';
 import {
     Typography, Grid
 } from '@material-ui/core';
-import Divider from '@mui/material/Divider';
 import jp from "jsonpath";
 
 export default function SubmitterInfo(props) {
@@ -11,7 +10,7 @@ export default function SubmitterInfo(props) {
         return jp.query(props, '$..[?(@.resourceType == "ExplanationOfBenefit")]')[0];
     }
     function getSubmittingProviderResource(eobResource) {
-        return jp.query(props, "$..[?(@.fullUrl ==" + "'" + getSubmitterResource().provider.reference + "')].resource")[0];
+        return jp.query(props, "$..[?(@.fullUrl ==".concat("'", getSubmitterResource().provider.reference, "')].resource"))[0];
     }
 
     function getSubmittingProviderId() {
@@ -20,7 +19,7 @@ export default function SubmitterInfo(props) {
         const submitterProviderURL = jp.query(props, '$..[?(@.resourceType == "ExplanationOfBenefit")].provider.reference')[0];
 
         //get the id of the provider organization using that url
-        const fullString = "$..[?(@.fullUrl ==" + "'" + submitterProviderURL + "'" + ")].resource.id"
+        const fullString = "$..[?(@.fullUrl ==" + "'".concat(submitterProviderURL, "'", ")].resource.id");
 
         //returns string: submitter-org-1
         return jp.query(props, (fullString))[0];
