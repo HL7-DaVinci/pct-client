@@ -394,7 +394,7 @@ export default function SummaryItem(props) {
           </Grid>
         </Grid>
 
-        {summary.procedureList[0].procedure ? (
+        {summary.procedureList.length > 0 ? (
           <Grid container>
             <Grid item xs={2}>
               <SummaryText content="Procedure:" class="label" />
