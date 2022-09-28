@@ -111,6 +111,8 @@ export default function MainPanel() {
     newSessions[newSessionId] = generateNewSession();
     setSessions(newSessions);
     setSelectedSession(newSessionId);
+    setGfeRequestSuccess(false);
+    setMainPanelTab("1");
   };
   const updateSessionInfo = (update) => {
     const sessionInfo = _.cloneDeep(sessions);
@@ -182,6 +184,8 @@ export default function MainPanel() {
                 setSelectedSession={setSelectedSession}
                 sessions={Object.keys(sessions)}
                 addNewSession={addNewSession}
+                setGfeRequestSuccess={setGfeRequestSuccess}
+                setMainPanelTab={setMainPanelTab}
               />
             </Grid>
             <Grid item xs={12}>
@@ -226,6 +230,7 @@ export default function MainPanel() {
             >
               <Tab label="Good Faith Estimate" id={"tab1"} value="1" />
               <Tab
+                disabled={!gfeRequestSuccess}
                 label="Advanced Explanation of Benefits"
                 id={"tab2"}
                 value="2"

@@ -74,7 +74,11 @@ export default function MenuBar(props) {
                 {props.sessions.map((sesh, i) => (
                   <MenuItem
                     value={sesh}
-                    onClick={() => props.setSelectedSession(sesh)}
+                    onClick={() => {
+                      props.setGfeRequestSuccess(false);
+                      props.setSelectedSession(sesh);
+                      props.setMainPanelTab("1");
+                    }}
                   >{`session ${i + 1}`}</MenuItem>
                 ))}
                 <MenuItem onClick={props.addNewSession}>
