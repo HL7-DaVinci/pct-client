@@ -7,7 +7,6 @@ import {
   Tab,
   makeStyles,
   createStyles,
-  MenuItem,
 } from "@material-ui/core";
 import { TabPanel } from "./TabPanel";
 import RequestPanel from "./GFERequestPanel";
@@ -50,9 +49,9 @@ export default function MainPanel() {
       diagnosisList: [{ id: v4() }],
       procedureList: [{ id: v4() }],
       claimItemList: [{ id: v4() }],
-      selectedPriority: null,
-      selectedBillingProvider: null,
-      interTransIntermediary: null,
+      selectedPriority: "",
+      selectedBillingProvider: "",
+      interTransIntermediary: "",
       supportingInfoTypeOfBill: "",
     };
   };
@@ -71,19 +70,19 @@ export default function MainPanel() {
       locationList: [],
       subjectInfo: {
         gfeType: "institutional",
-        memberNumber: null,
-        selectedAddress: null,
-        birthdate: null,
-        gender: null,
-        telephone: null,
-        selectedPatient: null,
-        selectedPayor: null,
-        selectedCoverage: null,
-        subscriber: null,
-        subscriberRelationship: null,
-        coveragePlan: null,
-        coveragePeriod: null,
-        selectedBillingProvider: null,
+        memberNumber: "",
+        selectedAddress: "",
+        birthdate: "",
+        gender: "",
+        telephone: "",
+        selectedPatient: "",
+        selectedPayor: "",
+        selectedCoverage: "",
+        subscriber: "",
+        subscriberRelationship: "",
+        coveragePlan: "",
+        coveragePeriod: "",
+        selectedBillingProvider: "",
       },
       gfeInfo: { ...initialGFEInfo },
       selectedGFE: startingGFEId,
@@ -149,8 +148,6 @@ export default function MainPanel() {
   );
   const [dataServerChanged, setDataServerChanged] = useState(false);
   const [payerServerChanged, setPayerServerChanged] = useState(false);
-  const [showRequest, setShowRequest] = useState(true);
-  const [showResponse, setShowResponse] = useState(false);
   const [mainPanelTab, setMainPanelTab] = useState("1");
   function resetState() {
     setGfeResponse(undefined);
@@ -246,8 +243,6 @@ export default function MainPanel() {
                   dataServerChanged={dataServerChanged}
                   setDataServerChanged={setDataServerChanged}
                   setReceivedAEOBResponse={setReceivedAEOBResponse}
-                  setShowRequest={setShowRequest}
-                  setShowResponse={setShowResponse}
                   updateSessionGfeInfo={updateSessionGfeInfo}
                   updateSessionSubjectInfo={updateSessionSubjectInfo}
                   updateSessionInfo={updateSessionInfo}
@@ -273,8 +268,6 @@ export default function MainPanel() {
                   payerServerChanged={payerServerChanged}
                   setPayerServerChanged={setPayerServerChanged}
                   dataServerChanged={dataServerChanged}
-                  setShowRequest={setShowRequest}
-                  setShowResponse={setShowResponse}
                 />
               </Grid>
             </TabPanel>

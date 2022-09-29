@@ -30,9 +30,9 @@ const useStyles = makeStyles((theme) =>
 );
 
 function createProcedureList(procedureList) {
-  return procedureList.map((el) => {
+  return procedureList.map((el, index) => {
     return (
-      <ListItem disableGutters>
+      <ListItem key={index} disableGutters>
         ({el.id}) {el.provider} ({el.type})
       </ListItem>
     );
@@ -163,7 +163,7 @@ export default function SummaryItem(props) {
 
   const card = (
     <React.Fragment>
-      <CardContent justifyContent="left" className={classes.card}>
+      <CardContent className={classes.card}>
         <Grid container>
           <Box sx={{ mb: 2 }}>
             <b>Subject Details:</b>

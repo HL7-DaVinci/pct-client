@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React from "react";
 import {
   Box,
   Typography,
@@ -6,9 +6,6 @@ import {
   FormControl,
   Grid,
   Button,
-  Tabs,
-  Tab,
-  AppBar,
 } from "@material-ui/core";
 import { sendAEOInquiry } from "../api";
 import PropTypes from "prop-types";
@@ -138,13 +135,6 @@ TabPanel.propTypes = {
   value: PropTypes.number.isRequired,
 };
 
-function a11yProps(index) {
-  return {
-    id: `full-width-tab-${index}`,
-    "aria-controls": `full-width-tabpanel-${index}`,
-  };
-}
-
 //GFE and AEOB tabs
 //sourced from: https://stackoverflow.com/questions/48031753/material-ui-tab-react-change-active-tab-onclick
 function TabContainer(props) {
@@ -171,7 +161,6 @@ export default function AEOBResponsePanel(props) {
   const handleCloseAEOB = () => setOpenAEOB(false);
 
   const classes = useStyles();
-  const [currentTabIndex, setCurrentTabIndex] = useState(1);
 
   function handleSendInquiry() {
     sendAEOInquiry(props.payorUrl, props.bundleIdentifier)
@@ -186,16 +175,6 @@ export default function AEOBResponsePanel(props) {
 
   function handleRequestTime() {
     return new Date().toLocaleString();
-  }
-
-  const handleChange = (event) => {
-    setCurrentTabIndex(event.target.value);
-  };
-  function getBackToMain() {
-    if (currentTabIndex !== 1) {
-      window.location.reload(false);
-      return false;
-    }
   }
 
   return (

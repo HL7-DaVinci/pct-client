@@ -1303,7 +1303,7 @@ class GFERequestBox extends Component {
           </Box>
         </Modal>
         <Grid container space={0} justifyContent="center">
-          {this.state.verticalTabIndex > 0 && (
+          {this.state.verticalTabIndex > 0 && this.state.verticalTabIndex < 4 && (
             <Tabs
               value={this.state.verticalTabIndex - 1}
               indicatorColor="secondary"
@@ -1372,7 +1372,10 @@ class GFERequestBox extends Component {
                             <ListItemButton
                               onClick={() => {
                                 let newVti = this.state.verticalTabIndex;
-                                if (this.state.verticalTabIndex === 0) {
+                                if (
+                                  this.state.verticalTabIndex === 0 ||
+                                  this.state.verticalTabIndex === 4
+                                ) {
                                   newVti = 1;
                                 }
                                 this.props.updateSessionInfo({
@@ -1384,6 +1387,7 @@ class GFERequestBox extends Component {
                               }}
                               selected={
                                 this.state.verticalTabIndex > 0 &&
+                                this.state.verticalTabIndex < 4 &&
                                 this.props.session.selectedGFE === id
                               }
                               sx={{ justifyContent: "space-between" }}

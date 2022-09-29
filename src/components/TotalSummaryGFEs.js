@@ -1,35 +1,9 @@
 import React from "react";
-import { Typography, CardContent, Card, Box } from "@material-ui/core";
-import PropTypes from "prop-types";
+import { CardContent, Card, Box } from "@material-ui/core";
 import Tabs from "@mui/material/Tabs";
 import Tab from "@mui/material/Tab";
+import { TabPanel } from "./TabPanel";
 import SummaryItem from "./SummaryItem";
-
-function TabPanel(props) {
-  const { children, value, index, ...other } = props;
-
-  return (
-    <div
-      role="tabpanel"
-      hidden={value !== index}
-      id={`multiple-gfe-tabpanel-${index}`}
-      aria-labelledby={`multiple-gfe-tab-${index}`}
-      {...other}
-    >
-      {value === index && (
-        <Box sx={{ p: 3 }}>
-          <Typography>{children}</Typography>
-        </Box>
-      )}
-    </div>
-  );
-}
-
-TabPanel.propTypes = {
-  children: PropTypes.node,
-  index: PropTypes.number.isRequired,
-  value: PropTypes.number.isRequired,
-};
 
 //creates tabs based on the GFE id's
 function createTabs(tabsList) {
@@ -98,7 +72,7 @@ function createSummaryForEach(props, value) {
     );
 
     return (
-      <TabPanel value={value} index={num}>
+      <TabPanel value={value} index={num} key={index}>
         <SummaryItem summary={summary} />
       </TabPanel>
     );
@@ -113,7 +87,7 @@ export default function TotalSummaryGFEs(props) {
 
   const summaryCard = (
     <React.Fragment>
-      <CardContent justifyContent="left">
+      <CardContent>
         <Box sx={{ width: "100%" }}>
           <Box sx={{ borderBottom: 1, borderColor: "divider" }}>
             <Tabs

@@ -19,8 +19,8 @@ export function SummaryTable({ headers, data }) {
       <Table>
         <TableHead>
           <TableRow>
-            {headers.map((header) => (
-              <TableCell sx={{ border: "2px solid #C0C0C0" }}>
+            {headers.map((header, index) => (
+              <TableCell sx={{ border: "2px solid #C0C0C0" }} key={index}>
                 {header.display}
               </TableCell>
             ))}
@@ -29,11 +29,12 @@ export function SummaryTable({ headers, data }) {
         <TableBody sx={{ borderColor: "black" }}>
           {data.map((d) => (
             <TableRow key={d.id} sx={{ border: "2px solid #C0C0C0" }}>
-              {headers.map((header) => (
+              {headers.map((header, index) => (
                 <TableCell
                   component="th"
                   scope="row"
                   sx={{ border: "2px solid #C0C0C0" }}
+                  key={index}
                 >
                   {d[header.value]}
                 </TableCell>
