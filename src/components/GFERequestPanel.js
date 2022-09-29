@@ -26,9 +26,6 @@ import ListItemText from "@mui/material/ListItemText";
 import ListSubheader from "@mui/material/ListSubheader";
 import Divider from "@mui/material/Divider";
 
-// import { exampleState } from "../exampleState";
-// import { getPatientDisplayName } from "./SelectComponents";
-
 import {
   getPatients,
   submitGFEClaim,
@@ -88,7 +85,7 @@ function TabPanel(props) {
     >
       {value === index && (
         <Box sx={{ p: 2 }}>
-          <Typography>{children}</Typography>
+          <Typography component={"span"}>{children}</Typography>
         </Box>
       )}
     </div>
@@ -109,59 +106,15 @@ function a11yProps(index) {
   };
 }
 
-//GFE and AEOB tabs
-//sourced from: https://stackoverflow.com/questions/48031753/material-ui-tab-react-change-active-tab-onclick
-function TabContainer(props) {
-  return (
-    <Typography {...props} component="div" style={{ padding: 8 * 3 }}>
-      {props.children}
-    </Typography>
-  );
-}
-
-//GFE and AEOB tabs
-//sourced from: https://stackoverflow.com/questions/48031753/material-ui-tab-react-change-active-tab-onclick
-TabContainer.propTypes = {
-  children: PropTypes.node.isRequired,
-};
-
-//vertical panel tabs
-function VerticalTabPanel(props) {
-  const { children, value, index, ...other } = props;
-
-  return (
-    <div
-      role="tabpanel"
-      hidden={value !== index}
-      id={`vertical-tabpanel-${index}`}
-      aria-labelledby={`vertical-tab-${index}`}
-      {...other}
-    >
-      {value === index && (
-        <Box sx={{ p: 6 }}>
-          <Typography>{children}</Typography>
-        </Box>
-      )}
-    </div>
-  );
-}
-
-//vertical panel tabs
-VerticalTabPanel.propTypes = {
-  children: PropTypes.node,
-  index: PropTypes.number.isRequired,
-  value: PropTypes.number.isRequired,
-};
-
 const generateGFE = () => {
   return {
     careTeamList: [{ id: v4() }],
     diagnosisList: [{ id: v4() }],
     procedureList: [{ id: v4() }],
     claimItemList: [{ id: v4() }],
-    selectedPriority: null,
-    selectedBillingProvider: null,
-    interTransIntermediary: null,
+    selectedPriority: "",
+    selectedBillingProvider: "",
+    interTransIntermediary: "",
     supportingInfoTypeOfBill: "",
   };
 };
@@ -191,27 +144,26 @@ class GFERequestBox extends Component {
       locationList: [],
       subjectInfo: {
         gfeType: "institutional",
-        memberNumber: null,
-        selectedAddress: null,
-        birthdate: null,
-        gender: null,
-        telephone: null,
-        selectedPatient: '',
-        selectedPayor: null,
-        selectedCoverage: null,
-        subscriber: null,
-        subscriberRelationship: null,
-        coveragePlan: null,
-        coveragePeriod: null,
-        selectedBillingProvider: null,
-        selectedSubmitter: ''
+        memberNumber: "",
+        selectedAddress: "",
+        birthdate: "",
+        gender: "",
+        telephone: "",
+        selectedPatient: "",
+        selectedPayor: "",
+        selectedCoverage: "",
+        subscriber: "",
+        subscriberRelationship: "",
+        coveragePlan: "",
+        coveragePeriod: "",
+        selectedBillingProvider: "",
+        selectedSubmitter: "",
       },
       gfeInfo: { ...initialGFEInfo },
       selectedGFE: startingGFEId,
       showDeleteConfirmation: false,
     };
     this.state = this.initialState;
-    //this.state = exampleState;
   }
 
   handleStartDateChange = (date) => {
@@ -308,7 +260,7 @@ class GFERequestBox extends Component {
                 }
               }
             }
-            return '';
+            return "";
           })
         );
       } catch (e) {
@@ -663,10 +615,10 @@ class GFERequestBox extends Component {
         this.state.subjectInfo.gfeType === "professional"
           ? findProfessionalProvider.resource
           : this.state.organizationList.find(
-            (org) =>
-              org.resource.id ===
-              this.state.gfeInfo[gfeId].selectedBillingProvider
-          ).resource,
+              (org) =>
+                org.resource.id ===
+                this.state.gfeInfo[gfeId].selectedBillingProvider
+            ).resource,
     };
     if (this.state.subjectInfo.gfeType === "institutional") {
       orgReferenceList.push(providerReference);
@@ -1571,46 +1523,41 @@ class GFERequestBox extends Component {
                       </ListSubheader>
                       {Object.keys(this.state.gfeInfo).map((id, index) => {
                         return (
-                          <>
-                            <ListItem>
-                              <ListItemButton
-                                onClick={() => {
-                                  let newVti = this.state.verticalTabIndex;
-                                  if (this.state.verticalTabIndex === 0) {
-                                    newVti = 1;
-                                  }
-                                  this.setState({
-                                    selectedGFE: id,
-                                    verticalTabIndex: newVti,
-                                  });
-                                }}
-                                selected={
-                                  this.state.verticalTabIndex > 0 &&
-                                  this.state.selectedGFE === id
+                          <ListItem key={index}>
+                            <ListItemButton
+                              onClick={() => {
+                                let newVti = this.state.verticalTabIndex;
+                                if (this.state.verticalTabIndex === 0) {
+                                  newVti = 1;
                                 }
-                                sx={{ justifyContent: "space-between" }}
-                              >
-                                <ListItemText>{`GFE ${index + 1
-                                  }`}</ListItemText>
+                                this.setState({
+                                  selectedGFE: id,
+                                  verticalTabIndex: newVti,
+                                });
+                              }}
+                              selected={
+                                this.state.verticalTabIndex > 0 &&
+                                this.state.selectedGFE === id
+                              }
+                              sx={{ justifyContent: "space-between" }}
+                            >
+                              <ListItemText>{`GFE ${index + 1}`}</ListItemText>
 
-                                <ListItemIcon
-                                  sx={{ justifyContent: "flex-end" }}
+                              <ListItemIcon sx={{ justifyContent: "flex-end" }}>
+                                <IconButton
+                                  onClick={() =>
+                                    this.setState({
+                                      gfeDeletingDisplay: `GFE ${index + 1}`,
+                                      gfeDeleting: id,
+                                      showDeleteConfirmation: true,
+                                    })
+                                  }
                                 >
-                                  <IconButton
-                                    onClick={() =>
-                                      this.setState({
-                                        gfeDeletingDisplay: `GFE ${index + 1}`,
-                                        gfeDeleting: id,
-                                        showDeleteConfirmation: true,
-                                      })
-                                    }
-                                  >
-                                    <DeleteIcon />
-                                  </IconButton>
-                                </ListItemIcon>
-                              </ListItemButton>
-                            </ListItem>
-                          </>
+                                  <DeleteIcon />
+                                </IconButton>
+                              </ListItemIcon>
+                            </ListItemButton>
+                          </ListItem>
                         );
                       })}
                       <ListItem>
@@ -1717,20 +1664,20 @@ class GFERequestBox extends Component {
                             </Grid>
                             {this.state.subjectInfo.gfeType === "professional"
                               ? ProfessionalBillingProviderSelect(
-                                professionalBillingProviderList,
-                                this.state.subjectInfo.selectedSubmitter,
-                                this.handleSelectSubmitter,
-                                "submittingProvider"
-                              )
+                                  professionalBillingProviderList,
+                                  this.state.subjectInfo.selectedSubmitter,
+                                  this.handleSelectSubmitter,
+                                  "submittingProvider"
+                                )
                               : OrganizationSelect(
-                                this.state.organizationList,
-                                this.state.subjectInfo.selectedSubmitter,
-                                "submitting-provider-label",
-                                "submittingProvider",
-                                this.handleOpenOrganizationList,
-                                this.handleSelectSubmitter,
-                                "submitting"
-                              )}
+                                  this.state.organizationList,
+                                  this.state.subjectInfo.selectedSubmitter,
+                                  "submitting-provider-label",
+                                  "submittingProvider",
+                                  this.handleOpenOrganizationList,
+                                  this.handleSelectSubmitter,
+                                  "submitting"
+                                )}
                           </FormControl>
                         </Grid>
                         <Grid item className={classes.patientBox}>
@@ -1785,26 +1732,26 @@ class GFERequestBox extends Component {
                                     </Grid>
 
                                     {this.state.subjectInfo.gfeType ===
-                                      "professional"
+                                    "professional"
                                       ? ProfessionalBillingProviderSelect(
-                                        professionalBillingProviderList,
-                                        this.state.gfeInfo[
-                                          this.state.selectedGFE
-                                        ].selectedBillingProvider,
-                                        this.handleSelectBillingProvider,
-                                        "billingProvider"
-                                      )
+                                          professionalBillingProviderList,
+                                          this.state.gfeInfo[
+                                            this.state.selectedGFE
+                                          ].selectedBillingProvider,
+                                          this.handleSelectBillingProvider,
+                                          "billingProvider"
+                                        )
                                       : OrganizationSelect(
-                                        this.state.organizationList,
-                                        this.state.gfeInfo[
-                                          this.state.selectedGFE
-                                        ].selectedBillingProvider,
-                                        "billing-provider-label",
-                                        "billingProvider",
-                                        this.handleOpenOrganizationList,
-                                        this.handleSelectBillingProvider,
-                                        "billing"
-                                      )}
+                                          this.state.organizationList,
+                                          this.state.gfeInfo[
+                                            this.state.selectedGFE
+                                          ].selectedBillingProvider,
+                                          "billing-provider-label",
+                                          "billingProvider",
+                                          this.handleOpenOrganizationList,
+                                          this.handleSelectBillingProvider,
+                                          "billing"
+                                        )}
                                   </FormControl>
                                 </Grid>
 

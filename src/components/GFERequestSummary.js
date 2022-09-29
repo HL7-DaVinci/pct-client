@@ -43,7 +43,7 @@ export default function GFERequestsummary(props) {
 
   const card = (
     <React.Fragment>
-      <CardContent justifyContent="left" className={classes.card}>
+      <CardContent className={classes.card}>
         <Grid container>
           <Grid item xs={6}>
             <Box sx={{ mb: 2 }}>

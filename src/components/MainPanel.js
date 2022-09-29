@@ -6,10 +6,6 @@ import RequestPanel from "./GFERequestPanel";
 import ResponsePanel from "./AEOBResponsePanel";
 import Settings from "./Settings";
 import MenuBar from "./MenuBar";
-// import {
-//   MockGfeResponse as MockResponse /*MockSingleGFEResponse as MockResponse*/,
-// } from "../mock/GfeResponse";
-// import { MockAeobResponse } from "../mock/AeobResponse";
 
 const useStyles = makeStyles((theme) =>
   createStyles({
@@ -26,14 +22,6 @@ const useStyles = makeStyles((theme) =>
 
 export default function MainPanel() {
   const classes = useStyles();
-
-  // ///////////////////// Temporty Debugging Setting /////////
-  // const [gfeResponse, setGfeResponse] = useState(MockResponse);
-  // const [gfeRequestSuccess, setGfeRequestSuccess] = useState(true);
-  // const [bundleId, setBundleId] = useState(MockResponse.identifier.value);
-  // const [bundleIdentifier, setBundleIdentifier] = useState(MockResponse.identifier.value);
-  // const [receivedAEOBResponse, setReceivedAEOBResponse] = useState(MockAeobResponse);
-  // ///////////////////////////////////////////////////////////
 
   const [gfeResponse, setGfeResponse] = useState(undefined);
   const [gfeRequestSuccess, setGfeRequestSuccess] = useState(false);

@@ -4,7 +4,13 @@ import Select from "@mui/material/Select";
 import MenuItem from "@mui/material/MenuItem";
 import FormControl from "@mui/material/FormControl";
 
-export default function CareTeam(props) {
+export default function CareTeam({
+  edit,
+  providerList,
+  rows,
+  addOne,
+  deleteOne,
+}) {
   const [chosenVal, setChosenVal] = React.useState("");
   const [columnVal, setColumnVal] = React.useState("");
   const [currentRow, setCurrentRow] = React.useState("");
@@ -30,16 +36,20 @@ export default function CareTeam(props) {
     ob[num] = {};
     ob[num][columnVal] = {};
     ob[num][columnVal]["value"] = chosenVal;
-    props.edit(ob);
+    edit(ob);
   };
 
   //calls edit on the parent whenever a column or chosen value is changed
-  React.useEffect(updateParentEdit, [columnVal, chosenVal]);
+  React.useEffect(updateParentEdit, [columnVal, chosenVal, edit, currentRow]);
 
   //generates options shown in menu
   function makeMenuItem(listOfOptions) {
-    return listOfOptions.map((el) => {
-      return <MenuItem value={el}>{el}</MenuItem>;
+    return listOfOptions.map((el, index) => {
+      return (
+        <MenuItem value={el} key={index}>
+          {el}
+        </MenuItem>
+      );
     });
   }
 
@@ -66,7 +76,7 @@ export default function CareTeam(props) {
               labelId="role-select"
               id="role-select"
               label="Role"
-              value={params.value || null}
+              value={params.value || ""}
               onChange={(event) => {
                 updateProductServiceRow(params);
                 handleChange(event);
@@ -84,7 +94,7 @@ export default function CareTeam(props) {
       headerName: "Provider",
       editable: true,
       type: "singleSelect",
-      valueOptions: props.providerList,
+      valueOptions: providerList,
       minWidth: 185,
       renderHeader: renderRequiredHeader,
       required: true,
@@ -95,7 +105,7 @@ export default function CareTeam(props) {
               labelId="provider-select"
               id="provider-select"
               label="provider"
-              value={params.formattedValue || null}
+              value={params.formattedValue || ""}
               onChange={(event) => {
                 updateProductServiceRow(params);
                 handleChange(event);
@@ -113,11 +123,11 @@ export default function CareTeam(props) {
   return (
     <div style={{ width: "100%" }}>
       <DataGridComponent
-        rows={props.rows}
+        rows={rows}
         columns={ourColumns}
-        add={props.addOne}
-        edit={props.edit}
-        delete={props.deleteOne}
+        add={addOne}
+        edit={edit}
+        delete={deleteOne}
       />
     </div>
   );

@@ -10,7 +10,7 @@ import TextField from "@mui/material/TextField";
 import { AdapterDateFns } from "@mui/x-date-pickers/AdapterDateFns";
 import { LocalizationProvider } from "@mui/x-date-pickers/LocalizationProvider";
 
-export default function ClaimItem(props) {
+export default function ClaimItem({ edit, rows, addOne, deleteOne }) {
   const [chosenVal, setChosenVal] = React.useState("");
   const [columnVal, setColumnVal] = React.useState("");
   const [dateValue, setDateValue] = React.useState("");
@@ -32,7 +32,7 @@ export default function ClaimItem(props) {
     ob[num] = {};
     ob[num][columnVal] = {};
     ob[num][columnVal]["value"] = chosenVal;
-    props.edit(ob);
+    edit(ob);
   };
   const updateEditChosenDate = () => {
     var ob = {};
@@ -40,7 +40,7 @@ export default function ClaimItem(props) {
     ob[num] = {};
     ob[num]["estimatedDateOfService"] = {};
     ob[num]["estimatedDateOfService"]["value"] = dateValue;
-    props.edit(ob);
+    edit(ob);
   };
 
   const updateProductServiceRow = (params) => {
@@ -54,14 +54,17 @@ export default function ClaimItem(props) {
     }
   };
   //listens for change in the column and chosen value
-  React.useEffect(updateParentEdit, [columnVal]);
-  React.useEffect(updateParentEdit, [chosenVal]);
-  React.useEffect(updateEditChosenDate, [dateValue]);
+  React.useEffect(updateParentEdit, [columnVal, chosenVal, currentRow, edit]);
+  React.useEffect(updateEditChosenDate, [dateValue, currentRow, edit]);
 
   //generates options shown in menu
   function makeMenuItem(listOfOptions) {
-    return listOfOptions.map((el) => {
-      return <MenuItem value={el}>{el}</MenuItem>;
+    return listOfOptions.map((el, index) => {
+      return (
+        <MenuItem value={el} key={index}>
+          {el}
+        </MenuItem>
+      );
     });
   }
 
@@ -81,7 +84,7 @@ export default function ClaimItem(props) {
         return (
           <FormControl fullWidth>
             <Select
-              autoFocus="true"
+              autoFocus={true}
               labelId="demo-simple-select-label"
               id="demo-simple-select"
               label="product or service"
@@ -212,11 +215,11 @@ export default function ClaimItem(props) {
     <div>
       <DataGridComponent
         style={{ display: "flex", width: "65vw", flexGrow: 1 }}
-        rows={props.rows}
+        rows={rows}
         columns={ourColumns}
-        add={props.addOne}
-        edit={props.edit}
-        delete={props.deleteOne}
+        add={addOne}
+        edit={edit}
+        delete={deleteOne}
       />
     </div>
   );

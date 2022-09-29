@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useState } from "react";
 import {
   Box,
   Typography,
@@ -162,11 +162,6 @@ TabContainer.propTypes = {
 };
 
 export default function AEOBResponsePanel(props) {
-  // const [openAEOBContent, setOpenAEOBContent] = React.useState(false);
-  // const handleCloseAEOBContent = () => {
-  //   setOpenAEOBContent(false);
-  // };
-
   const [openGFEResponse, setOpenGFEResponse] = React.useState(false);
   const handleOpenGFEResponse = () => setOpenGFEResponse(true);
   const handleCloseGFEResponse = () => setOpenGFEResponse(false);
@@ -176,67 +171,24 @@ export default function AEOBResponsePanel(props) {
   const handleCloseAEOB = () => setOpenAEOB(false);
 
   const classes = useStyles();
-
-  // const [aeobInquirySubmitted, setAeobInquirySubmitted] = useState(false);
-  // const [aeobInquirySuccess, setAeobInquirySuccess] = useState(false);
-  // const [aeobInquiryPending, setAeobInquiryPending] = useState(false);
-  // const [aeobInquiryError, setAeobInquiryError] = useState(false);
-  // const [aeobError, setAeobError] = useState(undefined);
-  // const [aeobInquiryOutcome, setAeobInquiryOutcome] = useState(undefined);
   const [currentTabIndex, setCurrentTabIndex] = useState(1);
 
-  useEffect(() => {
-    if (
-      props.dataServerChanged ||
-      props.payerServerChanged ||
-      props.receivedAEOBResponse === undefined
-    ) {
-      // setAeobInquirySubmitted(false);
-      // setAeobInquirySuccess(false);
-      // setAeobInquiryPending(false);
-      // setAeobInquiryError(false);
-      // setAeobError(undefined);
-    }
-  }, [props.dataServerChanged, props.payerServerChanged]);
-
   function handleSendInquiry() {
-    // setAeobInquirySubmitted(true);
-    // setAeobInquiryPending(true);
     sendAEOInquiry(props.payorUrl, props.bundleIdentifier)
       .then((response) => {
         console.log("received response: ", response);
         props.setReceivedAEOBResponse(response);
-        // const foundAeob =
-        //   response.entry && response.entry.length >= 0
-        //     ? response.entry[0].resource.entry.find(
-        //       (item) => item.resource.resourceType === "ExplanationOfBenefit"
-        //     )
-        //     : undefined;
-        //const outCome = foundAeob ? foundAeob.resource.outcome : "unknown";
-        // setAeobInquiryOutcome(outCome);
-        // setAeobInquirySuccess(true);
-        // setAeobInquiryPending(false);
-        // setAeobInquirySubmitted(false);
       })
       .catch((error) => {
         console.log("got error", error);
-        // setAeobInquiryPending(false);
-        // setAeobInquirySuccess(false);
-        // setAeobInquirySubmitted(false);
-        // setAeobInquiryError(true);
-        // setAeobError(error.toJSON());
       });
   }
-
-
 
   function handleRequestTime() {
     return new Date().toLocaleString();
   }
 
-
   const handleChange = (event) => {
-    //this.setState({ currentTabIndex: value });
     setCurrentTabIndex(event.target.value);
   };
   function getBackToMain() {
@@ -364,7 +316,6 @@ export default function AEOBResponsePanel(props) {
                     handleOpenAEOB={handleOpenAEOB}
                     openAEOB={openAEOB}
                     handleCloseAEOB={handleCloseAEOB}
-                    handleCloseAEOBContent={false}//handleCloseAEOBContent}
                   />
                 </Grid>
               </Grid>
