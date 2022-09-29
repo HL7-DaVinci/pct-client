@@ -25,7 +25,8 @@ const useStyles = makeStyles((theme) =>
     },
     select: {
       color: "white",
-      padding: 10,
+      paddingRight: 10,
+      paddingLeft: 10,
       "&:before": {
         borderColor: "white",
       },
@@ -57,7 +58,7 @@ export default function MenuBar(props) {
             </Typography>
             <div
               style={{
-                width: 175,
+                width: 216,
                 display: "flex",
                 flexDirection: "row",
               }}
@@ -79,10 +80,10 @@ export default function MenuBar(props) {
                       props.setSelectedSession(sesh);
                       props.setMainPanelTab("1");
                     }}
-                  >{`session ${i + 1}`}</MenuItem>
+                  >{`GFE Bundle ${i + 1}`}</MenuItem>
                 ))}
                 <MenuItem onClick={props.addNewSession}>
-                  Create New Session
+                  Create New GFE Bundle
                 </MenuItem>
               </Select>
               <div className={classes.button}>
