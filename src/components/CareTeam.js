@@ -60,7 +60,6 @@ export default function CareTeam(props) {
       renderHeader: renderRequiredHeader,
       required: true,
       renderCell: (params) => {
-        console.log(params);
         return (
           <FormControl fullWidth>
             <Select

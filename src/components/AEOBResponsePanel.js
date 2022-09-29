@@ -269,144 +269,117 @@ export default function AEOBResponsePanel(props) {
 
   return (
     <div>
-      <AppBar position="static">
-        <Tabs
-          value={currentTabIndex}
-          onChange={handleChange}
-          indicatorColor="secondary"
-          textColor="inherit"
-          variant="fullWidth"
-          aria-label="full width tabs example"
+      <Accordion>
+        <AccordionSummary
+          expandIcon={<ExpandMoreIcon />}
+          aria-controls="panel1a-content"
+          id="panel1a-header"
         >
-          <Tab label="Good Faith Estimate" {...a11yProps(0)} />
-          <Tab label="Advanced Explanation of Benefits" {...a11yProps(1)} />
-        </Tabs>
-      </AppBar>
-      <TabPanel
-        value={currentTabIndex}
-        index={0}
-        className={classes.tabBackground}
-      >
-        {getBackToMain()}
-      </TabPanel>
+          <Typography>AEOB- Initial Response from GFE Submission</Typography>
+        </AccordionSummary>
+        <AccordionDetails className={classes.aeobInitialResponseText}>
+          <Grid container spacing={1}>
+            <Grid container spacing={2}>
+              <Grid item xs={10}>
+                <Grid item md={4}>
+                  <Typography variant="h5" gutterBottom>
+                    Bundle:
+                  </Typography>
+                </Grid>
+                <Grid item md={4}>
+                  <Typography variant="body1" gutterBottom>
+                    ID: {props.bundleId}
+                  </Typography>
+                </Grid>
+                <Grid item md={4}>
+                  <Typography variant="body1" gutterBottom>
+                    Identifier: {props.bundleIdentifier}
+                  </Typography>
+                </Grid>
+              </Grid>
 
-      <TabPanel
-        value={currentTabIndex}
-        index={1}
-        className={classes.tabBackground}
-      >
+              <Grid item alignItems="flex-end" xs={2}>
+                <Grid item>
+                  <Button
+                    loading
+                    variant="contained"
+                    color="primary"
+                    type="show-raw-gfe"
+                    onClick={handleOpenGFEResponse}
+                  >
+                    Raw JSON
+                  </Button>
+
+                  <Modal
+                    open={openGFEResponse}
+                    onClose={handleCloseGFEResponse}
+                    aria-labelledby="modal-modal-title"
+                    aria-describedby="modal-modal-description"
+                  >
+                    <Box sx={style}>
+                      <Typography
+                        id="modal-modal-title"
+                        variant="h6"
+                        component="h2"
+                      >
+                        Raw JSON of Initial Response from GFE Submission:
+                      </Typography>
+                      <div>
+                        <pre>
+                          {JSON.stringify(props.gfeResponse, undefined, 2)}
+                        </pre>
+                      </div>
+                    </Box>
+                  </Modal>
+                </Grid>
+              </Grid>
+            </Grid>
+          </Grid>
+        </AccordionDetails>
+      </Accordion>
+
+      {props.receivedAEOBResponse ? (
         <Accordion>
           <AccordionSummary
             expandIcon={<ExpandMoreIcon />}
             aria-controls="panel1a-content"
             id="panel1a-header"
           >
-            <Typography>AEOB- Initial Response from GFE Submission</Typography>
+            <Typography>AEOB- Query at {handleRequestTime()}</Typography>
           </AccordionSummary>
           <AccordionDetails className={classes.aeobInitialResponseText}>
-            <Grid container spacing={1}>
-              <Grid container spacing={2}>
-                <Grid item xs={10}>
-                  <Grid item md={4}>
-                    <Typography variant="h5" gutterBottom>
-                      Bundle:
-                    </Typography>
-                  </Grid>
-                  <Grid item md={4}>
-                    <Typography variant="body1" gutterBottom>
-                      ID: {props.bundleId}
-                    </Typography>
-                  </Grid>
-                  <Grid item md={4}>
-                    <Typography variant="body1" gutterBottom>
-                      Identifier: {props.bundleIdentifier}
-                    </Typography>
-                  </Grid>
-                </Grid>
-
-                <Grid item alignItems="flex-end" xs={2}>
-                  <Grid item>
-                    <Button
-                      loading
-                      variant="contained"
-                      color="primary"
-                      type="show-raw-gfe"
-                      onClick={handleOpenGFEResponse}
-                    >
-                      Raw JSON
-                    </Button>
-
-                    <Modal
-                      open={openGFEResponse}
-                      onClose={handleCloseGFEResponse}
-                      aria-labelledby="modal-modal-title"
-                      aria-describedby="modal-modal-description"
-                    >
-                      <Box sx={style}>
-                        <Typography
-                          id="modal-modal-title"
-                          variant="h6"
-                          component="h2"
-                        >
-                          Raw JSON of Initial Response from GFE Submission:
-                        </Typography>
-                        <div>
-                          <pre>
-                            {JSON.stringify(props.gfeResponse, undefined, 2)}
-                          </pre>
-                        </div>
-                      </Box>
-                    </Modal>
-                  </Grid>
-                </Grid>
+            <Grid style={{ marginTop: 33 }}>
+              <Divider />
+              <Divider light />
+              <Divider />
+              <Divider light />
+              <Grid item xs={12} style={{ marginTop: 10 }}>
+                <AEOBBundle
+                  aeobResponse={props.receivedAEOBResponse}
+                  handleOpenAEOB={handleOpenAEOB}
+                  openAEOB={openAEOB}
+                  handleCloseAEOB={handleCloseAEOB}
+                  handleCloseAEOBContent={handleCloseAEOBContent}
+                />
               </Grid>
             </Grid>
           </AccordionDetails>
         </Accordion>
-
-        {props.receivedAEOBResponse ? (
-          <Accordion>
-            <AccordionSummary
-              expandIcon={<ExpandMoreIcon />}
-              aria-controls="panel1a-content"
-              id="panel1a-header"
+      ) : null}
+      {props.gfeRequestSuccess === true && props.gfeRequestPending ? (
+        <Grid item className={classes.aeobQueryButton}>
+          <FormControl>
+            <Button
+              variant="contained"
+              color="primary"
+              type="submit"
+              onClick={handleSendInquiry}
             >
-              <Typography>AEOB- Query at {handleRequestTime()}</Typography>
-            </AccordionSummary>
-            <AccordionDetails className={classes.aeobInitialResponseText}>
-              <Grid style={{ marginTop: 33 }}>
-                <Divider />
-                <Divider light />
-                <Divider />
-                <Divider light />
-                <Grid item xs={12} style={{ marginTop: 10 }}>
-                  <AEOBBundle
-                    aeobResponse={props.receivedAEOBResponse}
-                    handleOpenAEOB={handleOpenAEOB}
-                    openAEOB={openAEOB}
-                    handleCloseAEOB={handleCloseAEOB}
-                    handleCloseAEOBContent={handleCloseAEOBContent}
-                  />
-                </Grid>
-              </Grid>
-            </AccordionDetails>
-          </Accordion>
-        ) : null}
-        {props.gfeRequestSuccess === true && props.gfeRequestPending ? (
-          <Grid item className={classes.aeobQueryButton}>
-            <FormControl>
-              <Button
-                variant="contained"
-                color="primary"
-                type="submit"
-                onClick={handleSendInquiry}
-              >
-                Query AEOB Bundle
-              </Button>
-            </FormControl>
-          </Grid>
-        ) : null}
-      </TabPanel>
+              Query AEOB Bundle
+            </Button>
+          </FormControl>
+        </Grid>
+      ) : null}
     </div>
   );
 }
