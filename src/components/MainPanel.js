@@ -131,7 +131,7 @@ export default function MainPanel() {
     },
   ]);
   const [selectedDataServer, setSelectedDataServer] = useState(
-    dataServers[0].value
+    "https://pct-ehr.davinci.hl7.org/fhir"
   );
   const [payerServers] = useState([
     {
@@ -142,7 +142,7 @@ export default function MainPanel() {
     },
   ]);
   const [selectedPayerServer, setSelectedPayerServer] = useState(
-    payerServers[0].value
+    "https://pct-payer.davinci.hl7.org/fhir"
   );
   const [dataServerChanged, setDataServerChanged] = useState(false);
   const [payerServerChanged, setPayerServerChanged] = useState(false);

@@ -24,5 +24,9 @@ This project provides a web application that is capable of generating GFE reques
 4. The web application is running on http://localhost
 
 ## Testing pointing to different servers
-By default, the client is pointing to the provider's data server and the payer's GFE server hosted on Logica server. 
+By default, the client is pointing to the following servers:
+
+* Provider data server: https://pct-ehr.davinci.hl7.org
+* Payer's GFE server: https://pct-payer.davinci.hl7.org
+
 To point the client to different servers, go to "Settings" and update the settings. 
