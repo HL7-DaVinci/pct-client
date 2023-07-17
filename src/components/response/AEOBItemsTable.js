@@ -1,11 +1,5 @@
 import React from "react";
-
-import Paper from "@material-ui/core/Paper";
-import Table from "@material-ui/core/Table";
-import TableBody from "@material-ui/core/TableBody";
-import TableCell from "@material-ui/core/TableCell";
-import TableHead from "@material-ui/core/TableHead";
-import TableRow from "@material-ui/core/TableRow";
+import { Paper, Table, TableBody, TableCell, TableHead, TableRow } from "@mui/material"
 import jp from "jsonpath";
 
 
@@ -124,16 +118,16 @@ function AEOBItemsTable(aeobData) {
             <Table>
                 <TableHead>
                     <TableRow>
-                        {headers.map(header => (
-                            <TableCell align="left">{header.toUpperCase()}</TableCell>
+                        {headers.map((header, index) => (
+                            <TableCell key={index} align="left">{header.toUpperCase()}</TableCell>
                         ))}
                     </TableRow>
                 </TableHead>
                 <TableBody>
-                    {dataRows.map((emp, index) => (
-                        <TableRow key={index}>
-                            {headers.map(header => (
-                                <TableCell align="left">{emp[header]}</TableCell>
+                    {dataRows.map((emp, rIndex) => (
+                        <TableRow key={rIndex}>
+                            {headers.map((header, hIndex) => (
+                                <TableCell key={hIndex} align="left">{emp[header]}</TableCell>
                             ))}
                         </TableRow>
                     ))}

@@ -1,7 +1,8 @@
 import React from 'react';
 
-import { Grid, Typography, makeStyles, createStyles, FormControl, Accordion, AccordionSummary, AccordionDetails } from '@material-ui/core';
-import ExpandMoreIcon from '@material-ui/icons/ExpandMore';
+import { Grid, Typography, FormControl, Accordion, AccordionSummary, AccordionDetails } from '@mui/material';
+import { createStyles, makeStyles } from "@mui/styles";
+import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
 
 const useStyles = makeStyles((theme) =>
     createStyles({

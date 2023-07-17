@@ -1,12 +1,11 @@
 import React from 'react';
 import {
-    Typography, Grid, Accordion, AccordionDetails, AccordionSummary
-} from '@material-ui/core';
-import Divider from '@mui/material/Divider';
+    Accordion, AccordionDetails, AccordionSummary, Divider, Grid, Typography
+} from '@mui/material';
+import CircleIcon from '@mui/icons-material/Circle';
 import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
 import moment from 'moment';
 import AEOBItemsTable from "./AEOBItemsTable";
-import CircleIcon from '@mui/icons-material/Circle';
 
 export default function AEOBEntry(props) {
 
@@ -84,7 +83,7 @@ export default function AEOBEntry(props) {
                                         </Typography>
                                     </Grid>
                                     {props.aeob.total.map((value, index) => {
-                                        return <Grid item>
+                                        return <Grid item key={index}>
                                             <Typography variant="body1" gutterBottom>
                                                 <b>{value.category.coding[0].display}:</b> {getTotalAmount(value)} 
                                             </Typography>

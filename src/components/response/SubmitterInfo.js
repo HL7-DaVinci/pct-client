@@ -1,7 +1,5 @@
 import React from 'react';
-import {
-    Typography, Grid
-} from '@material-ui/core';
+import { Grid, Typography } from '@mui/material';
 import jp from "jsonpath";
 
 export default function SubmitterInfo(props) {

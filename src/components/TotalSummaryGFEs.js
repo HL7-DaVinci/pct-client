@@ -1,7 +1,5 @@
 import React from "react";
-import { CardContent, Card, Box } from "@material-ui/core";
-import Tabs from "@mui/material/Tabs";
-import Tab from "@mui/material/Tab";
+import { Box, Card, CardContent, Tab, Tabs } from "@mui/material";
 import { TabPanel } from "./TabPanel";
 import SummaryItem from "./SummaryItem";
 

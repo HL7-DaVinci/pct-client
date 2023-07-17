@@ -1,4 +1,4 @@
-import { Select, MenuItem } from "@material-ui/core";
+import { Select, MenuItem } from "@mui/material";
 
 export const getPatientDisplayName = (patient) => {
   if (patient === undefined) return null;

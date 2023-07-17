@@ -4,10 +4,9 @@ import {
   AppBar,
   Grid,
   Tabs,
-  Tab,
-  makeStyles,
-  createStyles,
-} from "@material-ui/core";
+  Tab
+} from "@mui/material";
+import { createStyles, makeStyles } from "@mui/styles";
 import { TabPanel } from "./TabPanel";
 import RequestPanel from "./GFERequestPanel";
 import ResponsePanel from "./AEOBResponsePanel";
@@ -40,7 +39,6 @@ export default function MainPanel() {
 
   const [submitting, setSubmitting] = useState(false);
   const [gfeSubmitted, setGfeSubmitted] = useState(false);
-  const [gfeRequestPending, setGfeRequestPending] = useState(true);
   const [showSettings, setShowSettings] = useState(false);
 
   const generateGFE = () => {
@@ -93,6 +91,12 @@ export default function MainPanel() {
   const initialSession = {};
   initialSession[initialSessionId] = generateNewSession();
 
+  // const exampleSessions = require('../exampleState').exampleSessions;
+  // const initialSessionId = Object.keys(exampleSessions)[0];
+  // const [selectedSession, setSelectedSession] = useState(initialSessionId);
+  // const initialSession = {};
+  // initialSession[initialSessionId] = exampleSessions[initialSessionId];
+
   const [sessions, setSessions] = useState(initialSession);
   const addNewSession = () => {
     const newSessionId = v4();
@@ -123,32 +127,31 @@ export default function MainPanel() {
   };
   const [dataServers] = useState([
     {
-      value: "http://localhost:8080/fhir",
+      value: "http://localhost:8081/fhir",
     },
     {
-      value: "https://davinci-pct-ehr.logicahealth.org/fhir",
+      value: "https://pct-ehr.davinci.hl7.org/fhir",
     },
   ]);
   const [selectedDataServer, setSelectedDataServer] = useState(
-    "https://davinci-pct-ehr.logicahealth.org/fhir"
+    "https://pct-ehr.davinci.hl7.org/fhir"
   );
   const [payerServers] = useState([
     {
       value: "http://localhost:8080/fhir",
     },
     {
-      value: "https://davinci-pct-payer.logicahealth.org/fhir",
-    },
-    {
-      value: "https://fhir.collablynk.com/edifecs/fhir/R4",
-    },
+      value: "https://pct-payer.davinci.hl7.org/fhir",
+    }
   ]);
   const [selectedPayerServer, setSelectedPayerServer] = useState(
-    "https://davinci-pct-payer.logicahealth.org/fhir"
+    "https://pct-payer.davinci.hl7.org/fhir"
   );
   const [dataServerChanged, setDataServerChanged] = useState(false);
   const [payerServerChanged, setPayerServerChanged] = useState(false);
   const [mainPanelTab, setMainPanelTab] = useState("1");
+  const [pollUrl, setPollUrl] = useState(undefined);
+
   function resetState() {
     setGfeResponse(undefined);
     setReceivedAEOBResponse(undefined);
@@ -157,6 +160,11 @@ export default function MainPanel() {
     setGfeSubmitted(false);
     setGfeRequestSuccess(false);
   }
+
+  function addToLog(message, object) {
+    console.log(message, object);
+  }
+
   return (
     <React.Fragment>
       <Grid container direction="column">
@@ -235,9 +243,10 @@ export default function MainPanel() {
                   setGfeResponse={setGfeResponse}
                   setGfeRequestSuccess={setGfeRequestSuccess}
                   setGfeSubmitted={setGfeSubmitted}
-                  setGfeRequestPending={setGfeRequestPending}
                   setBundleId={setBundleId}
                   setBundleIdentifier={setBundleIdentifier}
+                  pollUrl={pollUrl}
+                  setPollUrl={setPollUrl}
                   ehrUrl={selectedDataServer}
                   payorUrl={selectedPayerServer}
                   dataServerChanged={dataServerChanged}
@@ -249,6 +258,7 @@ export default function MainPanel() {
                   session={sessions[selectedSession]}
                   generateGFE={generateGFE}
                   setMainPanelTab={setMainPanelTab}
+                  addToLog={addToLog}
                 />
               </Grid>
             </TabPanel>
@@ -261,13 +271,15 @@ export default function MainPanel() {
                   gfeSubmitted={gfeSubmitted}
                   bundleId={bundleId}
                   bundleIdentifier={bundleIdentifier}
-                  gfeRequestPending={gfeRequestPending}
                   payorUrl={selectedPayerServer}
+                  pollUrl={pollUrl}
+                  setPollUrl={setPollUrl}
                   receivedAEOBResponse={receivedAEOBResponse}
                   setReceivedAEOBResponse={setReceivedAEOBResponse}
                   payerServerChanged={payerServerChanged}
                   setPayerServerChanged={setPayerServerChanged}
                   dataServerChanged={dataServerChanged}
+                  addToLog={addToLog}
                 />
               </Grid>
             </TabPanel>

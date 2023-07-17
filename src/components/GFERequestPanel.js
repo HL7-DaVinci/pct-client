@@ -2,28 +2,28 @@ import React, { Component } from "react";
 import {
   Box,
   Button,
+  Card,
+  Divider,
   FormLabel,
   FormControl,
   FormControlLabel,
   Grid,
+  LinearProgress,
+  List,
+  ListItem,
+  ListItemButton,
+  ListItemText,
+  ListSubheader,
   MenuItem,
   Radio,
-  Card,
   RadioGroup,
   Select,
-  Typography,
-  withStyles,
-  LinearProgress,
-  TextField,
-  Tabs,
   Tab,
-} from "@material-ui/core";
-import List from "@mui/material/List";
-import ListItem from "@mui/material/ListItem";
-import ListItemButton from "@mui/material/ListItemButton";
-import ListItemText from "@mui/material/ListItemText";
-import ListSubheader from "@mui/material/ListSubheader";
-import Divider from "@mui/material/Divider";
+  Tabs,
+  TextField,
+  Typography
+} from "@mui/material";
+import { withStyles } from "@mui/styles";
 import * as _ from "lodash";
 
 import {
@@ -696,16 +696,34 @@ class GFERequestBox extends Component {
       this.props.setReceivedAEOBResponse(undefined);
 
       submitGFEClaim(this.props.payorUrl, this.generateBundle())
-        .then((response) => {
+        .then(async (response) => {
           this.props.setSubmitting(false);
           console.log("Payer server returned response: ", response);
-          this.props.setGfeResponse(response);
-          this.props.setGfeRequestSuccess(true);
-          this.props.setBundleId(response.id);
-          this.props.setBundleIdentifier(response.identifier.value);
+
+          // async bundling response (202)
+          if (response.status === 202) {
+            this.props.setGfeRequestSuccess(true);
+
+            const pollUrl = new URL(response.headers.get("content-location"));
+            this.props.setBundleId(pollUrl.searchParams.get('_bundleId'));
+            this.props.setPollUrl(pollUrl.href);
+          }
+          // sync response (200)
+          else if (response.status === 200) {
+            this.props.setGfeResponse(await response.json());
+            this.props.setGfeRequestSuccess(true);
+            this.props.setBundleId(response.id);
+            this.props.setBundleIdentifier(response.identifier.value);
+          }
+          // unexpected response
+          else {
+            throw new Error(`Received unexpected response with status of ${response.status}`);
+          }
+          
           this.props.setMainPanelTab("2");
         })
         .catch((error) => {
+          console.log('submitGFEClaim error:', error);
           this.props.setSubmitting(false);
           this.props.setGfeRequestSuccess(false);
           if ("toJSON" in error) {
@@ -1326,6 +1344,14 @@ class GFERequestBox extends Component {
             </Tabs>
           )}
           <form onSubmit={this.handleOnSubmit}>
+            <Button
+              variant="contained"
+              color="primary"
+              type="submit"
+              disabled={this.props.submittingStatus === true}
+            >
+              Submit GFE
+            </Button>
             <Box>
               <Box
                 sx={{

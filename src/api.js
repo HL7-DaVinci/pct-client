@@ -57,9 +57,8 @@ export const submitGFEClaim = (url, bundle) => {
         "Accept": "application/fhir+json",
         "Accept-Encoding": "identity"
     };
-
-    return FHIRClient(url).request({
-        url: `${url}/Claim/$gfe-submit`,
+    
+    return fetch(`${url}/Claim/$gfe-submit`, {
         method: "POST",
         headers: headers,
         body: JSON.stringify(bundle)
@@ -80,6 +79,18 @@ export const getPractitioners = (url) => {
 
 export const sendAEOInquiry = (url, bundleIdentifier) => {
     return FHIRClient(url).request(`Bundle?identifier=${bundleIdentifier}`)
+}
+
+export const pollAEOBStatus = (url) => {
+    return fetch(url, {
+        method: "GET",
+        headers: {
+            "Content-Type": "application/json",
+            "Accept": "*/*",
+            "Access-Control-Request-Headers": "Retry-After",
+            "Origin": "*"
+        }
+    });
 }
 
 export const getLocations = (url) => {

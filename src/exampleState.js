@@ -3,7 +3,7 @@ export const exampleSessions = {
     patientList: [
       {
         fullUrl:
-          "http://davinci-pct-ehr.logicahealth.org/fhir/Patient/patient1001",
+          "http://pct-ehr.davinci.hl7.org/fhir/Patient/patient1001",
         resource: {
           resourceType: "Patient",
           id: "patient1001",
@@ -99,7 +99,7 @@ export const exampleSessions = {
       },
       {
         fullUrl:
-          "http://davinci-pct-ehr.logicahealth.org/fhir/Patient/patient2930",
+          "http://pct-ehr.davinci.hl7.org/fhir/Patient/patient2930",
         resource: {
           resourceType: "Patient",
           id: "patient2930",
@@ -154,7 +154,7 @@ export const exampleSessions = {
     priorityList: [
       {
         fullUrl:
-          "http://davinci-pct-ehr.logicahealth.org/fhir/Claim/PCT-GFE-Institutional-1",
+          "http://pct-ehr.davinci.hl7.org/fhir/Claim/PCT-GFE-Institutional-1",
         resource: {
           resourceType: "Claim",
           id: "PCT-GFE-Institutional-1",
@@ -373,7 +373,7 @@ export const exampleSessions = {
       },
       {
         fullUrl:
-          "http://davinci-pct-ehr.logicahealth.org/fhir/Claim/PCT-GFE-Professional-1",
+          "http://pct-ehr.davinci.hl7.org/fhir/Claim/PCT-GFE-Professional-1",
         resource: {
           resourceType: "Claim",
           id: "PCT-GFE-Professional-1",
@@ -587,7 +587,7 @@ export const exampleSessions = {
       },
       {
         fullUrl:
-          "http://davinci-pct-ehr.logicahealth.org/fhir/Claim/PCT-GFE-Institutional-MRI",
+          "http://pct-ehr.davinci.hl7.org/fhir/Claim/PCT-GFE-Institutional-MRI",
         resource: {
           resourceType: "Claim",
           id: "PCT-GFE-Institutional-MRI",
@@ -837,7 +837,7 @@ export const exampleSessions = {
     practitionerList: [
       {
         fullUrl:
-          "http://davinci-pct-ehr.logicahealth.org/fhir/Practitioner/Submitter-Practitioner-1",
+          "http://pct-ehr.davinci.hl7.org/fhir/Practitioner/Submitter-Practitioner-1",
         resource: {
           resourceType: "Practitioner",
           id: "Submitter-Practitioner-1",
@@ -909,7 +909,7 @@ export const exampleSessions = {
       },
       {
         fullUrl:
-          "http://davinci-pct-ehr.logicahealth.org/fhir/Practitioner/prac001",
+          "http://pct-ehr.davinci.hl7.org/fhir/Practitioner/prac001",
         resource: {
           resourceType: "Practitioner",
           id: "prac001",
@@ -976,7 +976,7 @@ export const exampleSessions = {
       },
       {
         fullUrl:
-          "http://davinci-pct-ehr.logicahealth.org/fhir/Practitioner/prac002",
+          "http://pct-ehr.davinci.hl7.org/fhir/Practitioner/prac002",
         resource: {
           resourceType: "Practitioner",
           id: "prac002",
@@ -1037,7 +1037,7 @@ export const exampleSessions = {
     organizationList: [
       {
         fullUrl:
-          "http://davinci-pct-ehr.logicahealth.org/fhir/Organization/Submitter-Org-1",
+          "http://pct-ehr.davinci.hl7.org/fhir/Organization/Submitter-Org-1",
         resource: {
           resourceType: "Organization",
           id: "Submitter-Org-1",
@@ -1118,7 +1118,7 @@ export const exampleSessions = {
       },
       {
         fullUrl:
-          "http://davinci-pct-ehr.logicahealth.org/fhir/Organization/org1001",
+          "http://pct-ehr.davinci.hl7.org/fhir/Organization/org1001",
         resource: {
           resourceType: "Organization",
           id: "org1001",
@@ -1195,7 +1195,7 @@ export const exampleSessions = {
       },
       {
         fullUrl:
-          "http://davinci-pct-ehr.logicahealth.org/fhir/Organization/org1002",
+          "http://pct-ehr.davinci.hl7.org/fhir/Organization/org1002",
         resource: {
           resourceType: "Organization",
           id: "org1002",
@@ -1286,7 +1286,7 @@ export const exampleSessions = {
       },
       {
         fullUrl:
-          "http://davinci-pct-ehr.logicahealth.org/fhir/Organization/org2723",
+          "http://pct-ehr.davinci.hl7.org/fhir/Organization/org2723",
         resource: {
           resourceType: "Organization",
           id: "org2723",
@@ -1344,7 +1344,7 @@ export const exampleSessions = {
       },
       {
         fullUrl:
-          "http://davinci-pct-ehr.logicahealth.org/fhir/Organization/org2724",
+          "http://pct-ehr.davinci.hl7.org/fhir/Organization/org2724",
         resource: {
           resourceType: "Organization",
           id: "org2724",
@@ -1579,7 +1579,7 @@ export const exampleSessions = {
     locationList: [
       {
         fullUrl:
-          "http://davinci-pct-ehr.logicahealth.org/fhir/Location/Provider-Org-Loc-2",
+          "http://pct-ehr.davinci.hl7.org/fhir/Location/Provider-Org-Loc-2",
         resource: {
           resourceType: "Location",
           id: "Provider-Org-Loc-2",

@@ -80,14 +80,14 @@ export const MockAeobResponse = {
                             },
                             "use": "predetermination",
                             "patient": {
-                                "reference": "https://davinci-pct-ehr.logicahealth.org/fhir/Patient/patient1001"
+                                "reference": "https://pct-ehr.davinci.hl7.org/fhir/Patient/patient1001"
                             },
                             "created": "2022-09-06T17:06:46-04:00",
                             "insurer": {
-                                "reference": "https://davinci-pct-ehr.logicahealth.org/fhir/Organization/org1001"
+                                "reference": "https://pct-ehr.davinci.hl7.org/fhir/Organization/org1001"
                             },
                             "provider": {
-                                "reference": "https://davinci-pct-ehr.logicahealth.org/fhir/Organization/org1002"
+                                "reference": "https://pct-ehr.davinci.hl7.org/fhir/Organization/org1002"
                             },
                             "priority": {
                                 "coding": [
@@ -102,7 +102,7 @@ export const MockAeobResponse = {
                                 {
                                     "focal": true,
                                     "coverage": {
-                                        "reference": "https://davinci-pct-ehr.logicahealth.org/fhir/Coverage/coverage1001"
+                                        "reference": "https://pct-ehr.davinci.hl7.org/fhir/Coverage/coverage1001"
                                     }
                                 }
                             ],
@@ -307,7 +307,7 @@ export const MockAeobResponse = {
                                 {
                                     "sequence": 1,
                                     "provider": {
-                                        "reference": "http://davinci-pct-ehr.logicahealth.org/fhir/Practitioner/Submitter-Practitioner-1"
+                                        "reference": "http://pct-ehr.davinci.hl7.org/fhir/Practitioner/Submitter-Practitioner-1"
                                     },
                                     "role": {
                                         "coding": [
@@ -488,14 +488,14 @@ export const MockAeobResponse = {
                             },
                             "use": "predetermination",
                             "patient": {
-                                "reference": "https://davinci-pct-ehr.logicahealth.org/fhir/Patient/patient1001"
+                                "reference": "https://pct-ehr.davinci.hl7.org/fhir/Patient/patient1001"
                             },
                             "created": "2022-09-06T17:06:46-04:00",
                             "insurer": {
-                                "reference": "https://davinci-pct-ehr.logicahealth.org/fhir/Organization/org1001"
+                                "reference": "https://pct-ehr.davinci.hl7.org/fhir/Organization/org1001"
                             },
                             "provider": {
-                                "reference": "https://davinci-pct-ehr.logicahealth.org/fhir/Organization/org1002"
+                                "reference": "https://pct-ehr.davinci.hl7.org/fhir/Organization/org1002"
                             },
                             "priority": {
                                 "coding": [
@@ -510,7 +510,7 @@ export const MockAeobResponse = {
                                 {
                                     "focal": true,
                                     "coverage": {
-                                        "reference": "https://davinci-pct-ehr.logicahealth.org/fhir/Coverage/coverage1001"
+                                        "reference": "https://pct-ehr.davinci.hl7.org/fhir/Coverage/coverage1001"
                                     }
                                 }
                             ],
@@ -701,7 +701,7 @@ export const MockAeobResponse = {
                                 {
                                     "sequence": 1,
                                     "provider": {
-                                        "reference": "http://davinci-pct-ehr.logicahealth.org/fhir/Practitioner/Submitter-Practitioner-1"
+                                        "reference": "http://pct-ehr.davinci.hl7.org/fhir/Practitioner/Submitter-Practitioner-1"
                                     },
                                     "role": {
                                         "coding": [
@@ -833,7 +833,7 @@ export const MockAeobResponse = {
                         }
                     },
                     {
-                        "fullUrl": "https://davinci-pct-ehr.logicahealth.org/fhir/Patient/patient1001",
+                        "fullUrl": "https://pct-ehr.davinci.hl7.org/fhir/Patient/patient1001",
                         "resource": {
                             "resourceType": "Patient",
                             "id": "patient1001",
@@ -926,7 +926,7 @@ export const MockAeobResponse = {
                         }
                     },
                     {
-                        "fullUrl": "https://davinci-pct-ehr.logicahealth.org/fhir/Coverage/coverage1001",
+                        "fullUrl": "https://pct-ehr.davinci.hl7.org/fhir/Coverage/coverage1001",
                         "resource": {
                             "resourceType": "Coverage",
                             "id": "coverage1001",
@@ -1007,7 +1007,7 @@ export const MockAeobResponse = {
                         }
                     },
                     {
-                        "fullUrl": "https://davinci-pct-ehr.logicahealth.org/fhir/Organization/org1001",
+                        "fullUrl": "https://pct-ehr.davinci.hl7.org/fhir/Organization/org1001",
                         "resource": {
                             "resourceType": "Organization",
                             "id": "org1001",
@@ -1081,7 +1081,7 @@ export const MockAeobResponse = {
                         }
                     },
                     {
-                        "fullUrl": "https://davinci-pct-ehr.logicahealth.org/fhir/Organization/org1002",
+                        "fullUrl": "https://pct-ehr.davinci.hl7.org/fhir/Organization/org1002",
                         "resource": {
                             "resourceType": "Organization",
                             "id": "org1002",
@@ -1169,7 +1169,7 @@ export const MockAeobResponse = {
                         }
                     },
                     {
-                        "fullUrl": "https://davinci-pct-ehr.logicahealth.org/fhir/Organization/Submitter-Org-1",
+                        "fullUrl": "https://pct-ehr.davinci.hl7.org/fhir/Organization/Submitter-Org-1",
                         "resource": {
                             "resourceType": "Organization",
                             "id": "Submitter-Org-1",
@@ -1244,7 +1244,7 @@ export const MockAeobResponse = {
                         }
                     },
                     {
-                        "fullUrl": "http://davinci-pct-ehr.logicahealth.org/fhir/Practitioner/Submitter-Practitioner-1",
+                        "fullUrl": "http://pct-ehr.davinci.hl7.org/fhir/Practitioner/Submitter-Practitioner-1",
                         "resource": {
                             "resourceType": "Practitioner",
                             "id": "Submitter-Practitioner-1",

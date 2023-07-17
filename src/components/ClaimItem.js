@@ -5,7 +5,7 @@ import * as React from "react";
 import Select from "@mui/material/Select";
 import MenuItem from "@mui/material/MenuItem";
 import FormControl from "@mui/material/FormControl";
-import { DesktopDatePicker } from "@mui/x-date-pickers/DesktopDatePicker";
+import { DatePicker } from '@mui/x-date-pickers/DatePicker';
 import TextField from "@mui/material/TextField";
 import { AdapterDateFns } from "@mui/x-date-pickers/AdapterDateFns";
 import { LocalizationProvider } from "@mui/x-date-pickers/LocalizationProvider";
@@ -110,11 +110,8 @@ export default function ClaimItem({ edit, rows, addOne, deleteOne }) {
       renderCell: (params) => {
         return (
           <LocalizationProvider dateAdapter={AdapterDateFns}>
-            <DesktopDatePicker
+            <DatePicker
               inputFormat="MM/dd/yyyy"
-              value={
-                params.formattedValue === undefined ? "" : params.formattedValue
-              }
               onChange={(event) => {
                 handleChangeDate(event);
                 updateProductServiceRow(params);

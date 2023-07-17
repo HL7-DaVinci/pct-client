@@ -1,8 +1,5 @@
 import React from 'react';
-import {
-    Typography, Grid
-} from '@material-ui/core';
-import Divider from '@mui/material/Divider';
+import { Divider, Grid, Typography } from '@mui/material';
 import jp from "jsonpath";
 
 export default function PatientInfo(props) {

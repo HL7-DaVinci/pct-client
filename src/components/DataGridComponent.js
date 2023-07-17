@@ -1,9 +1,10 @@
 import { DataGrid, GridActionsCellItem } from "@mui/x-data-grid";
-import AddIcon from "@material-ui/icons/Add";
-import { IconButton } from "@material-ui/core";
-import DeleteIcon from "@material-ui/icons/Delete";
+import { IconButton } from "@mui/material"
+import AddIcon from '@mui/icons-material/Add';
+import DeleteIcon from '@mui/icons-material/Delete';
+
 import * as React from "react";
-import { Grid, Typography } from "@material-ui/core";
+import { Grid, Typography } from "@mui/material";
 
 export default function DataGridComponent(props) {
   const handleDeleteClick = (id) => (event) => {

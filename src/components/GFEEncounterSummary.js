@@ -1,6 +1,6 @@
 import React from 'react';
-import { FormLabel, FormControl, Grid, Typography, CardContent, Card, makeStyles, createStyles, Box } from '@material-ui/core'
-import Divider from '@mui/material/Divider';
+import { FormLabel, FormControl, Grid, Typography, CardContent, Card, Box } from '@mui/material'
+import { createStyles, makeStyles } from "@mui/styles";
 import DiagnosisItem, { columns as DiagnosisColumns } from './DiagnosisItem';
 
 

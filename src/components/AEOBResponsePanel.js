@@ -1,20 +1,22 @@
-import React from "react";
+import React, { useCallback, useEffect, useRef, useState } from "react";
 import {
+  Accordion,
+  AccordionDetails,
+  AccordionSummary,
   Box,
-  Typography,
-  makeStyles,
-  FormControl,
-  Grid,
   Button,
-} from "@material-ui/core";
-import { sendAEOInquiry } from "../api";
+  Card,
+  CardActions,
+  CardContent,
+  Divider,
+  Grid,
+  Link,
+  Typography
+} from "@mui/material";
+import { makeStyles } from "@mui/styles";
+import { pollAEOBStatus } from "../api";
 import PropTypes from "prop-types";
-import Accordion from "@mui/material/Accordion";
-import AccordionSummary from "@mui/material/AccordionSummary";
-import AccordionDetails from "@mui/material/AccordionDetails";
-import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
-import Modal from "@mui/material/Modal";
-import Divider from "@mui/material/Divider";
+import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
 import AEOBBundle from "./response/AEOBBundle";
 
 const useStyles = makeStyles({
@@ -96,17 +98,17 @@ const useStyles = makeStyles({
   },
 });
 
-const style = {
-  position: "absolute",
-  top: "50%",
-  left: "50%",
-  transform: "translate(-50%, -50%)",
-  width: 800,
-  bgcolor: "background.paper",
-  border: "2px solid #000",
-  boxShadow: 24,
-  p: 4,
-};
+// const style = {
+//   position: "absolute",
+//   top: "50%",
+//   left: "50%",
+//   transform: "translate(-50%, -50%)",
+//   width: 800,
+//   bgcolor: "background.paper",
+//   border: "2px solid #000",
+//   boxShadow: 24,
+//   p: 4,
+// };
 
 //GFE and AEOB tabs
 function TabPanel(props) {
@@ -152,40 +154,99 @@ TabContainer.propTypes = {
 };
 
 export default function AEOBResponsePanel(props) {
-  const [openGFEResponse, setOpenGFEResponse] = React.useState(false);
-  const handleOpenGFEResponse = () => setOpenGFEResponse(true);
-  const handleCloseGFEResponse = () => setOpenGFEResponse(false);
+  // const [openGFEResponse, setOpenGFEResponse] = React.useState(false);
+  // const handleOpenGFEResponse = () => setOpenGFEResponse(true);
+  // const handleCloseGFEResponse = () => setOpenGFEResponse(false);
+  const [timerSeconds, setTimerSeconds] = useState(undefined);
+  let timerRef = useRef();
 
-  const [openAEOB, setOpenAEOB] = React.useState(false);
+  const [openAEOB, setOpenAEOB] = useState(false);
   const handleOpenAEOB = () => setOpenAEOB(true);
   const handleCloseAEOB = () => setOpenAEOB(false);
 
   const classes = useStyles();
 
-  function handleSendInquiry() {
-    sendAEOInquiry(props.payorUrl, props.bundleIdentifier)
-      .then((response) => {
-        console.log("received response: ", response);
-        props.setReceivedAEOBResponse(response);
-      })
-      .catch((error) => {
-        console.log("got error", error);
-      });
-  }
 
   function handleRequestTime() {
     return new Date().toLocaleString();
   }
 
+  
+  const stopTimer = useCallback(() => {
+    if (timerRef.current) {
+      clearInterval(timerRef.current);
+    }
+  }, [timerRef]);
+
+  const startTimer = useCallback((seconds) => {
+    stopTimer();
+    setTimerSeconds(seconds);
+    timerRef.current = setInterval(() => setTimerSeconds((t) => t-1), 1000);
+  }, [stopTimer, setTimerSeconds, timerRef]);
+
+  
+  const handleAEOBPoll = useCallback(() => {
+
+    stopTimer();
+    
+    props.addToLog(`Polling AEOB status at ${props.pollUrl}`);
+    pollAEOBStatus(props.pollUrl)
+      .then(async (response) => {
+
+        // still waiting
+        if (response.status === 202) {
+          const retryAfter = response.headers.get("retry-after") || 30;
+          props.addToLog(`Received 202 response. Retry after ${retryAfter} seconds.`);
+          startTimer(retryAfter);
+        }
+        // AEOB response received
+        else if (response.status === 200) {
+          props.addToLog("Received 200 response.");
+          const aeobResponse = await response.json();
+          props.setReceivedAEOBResponse(aeobResponse);
+        }
+        // unexpected response
+        else {
+          throw new Error(`Received unexpected response with status of ${response.status}`);
+        }
+      })
+      .catch((error) => {
+        props.addToLog(`Error while polling AEOB status: ${error}`, error);
+      });
+  }, [stopTimer, startTimer, props]);
+  
+
+  const timerIsVisible = useCallback(() => {
+    return props.gfeRequestSuccess === true && !props.receivedAEOBResponse;
+  }, [props]);
+
+
+  
+  // if we don't have a bundle from the initial response then do the first AEOB poll
+  useEffect(() => {
+    if (timerIsVisible()) {
+      handleAEOBPoll();
+    }
+  }, [timerIsVisible, handleAEOBPoll]);
+
+
+  // monitor timer to send another poll when timer reaches 0
+  useEffect(() => {
+    if (timerIsVisible() && timerSeconds < 1) {
+      handleAEOBPoll();
+    }
+  }, [timerSeconds, timerIsVisible, handleAEOBPoll]);
+
+
   return (
     <div>
-      <Accordion>
+      {/* <Accordion>
         <AccordionSummary
           expandIcon={<ExpandMoreIcon />}
           aria-controls="panel1a-content"
           id="panel1a-header"
         >
-          <Typography>AEOB- Initial Response from GFE Submission</Typography>
+          <Typography>AEOB - Initial Response from GFE Submission</Typography>
         </AccordionSummary>
         <AccordionDetails className={classes.aeobInitialResponseText}>
           <Grid container spacing={1}>
@@ -208,10 +269,9 @@ export default function AEOBResponsePanel(props) {
                 </Grid>
               </Grid>
 
-              <Grid item alignItems="flex-end" xs={2}>
-                <Grid item>
+              <Grid container alignItems="flex-end">
+                <Grid item xs={2}>
                   <Button
-                    loading
                     variant="contained"
                     color="primary"
                     type="show-raw-gfe"
@@ -246,7 +306,7 @@ export default function AEOBResponsePanel(props) {
             </Grid>
           </Grid>
         </AccordionDetails>
-      </Accordion>
+      </Accordion> */}
 
       {props.receivedAEOBResponse ? (
         <Accordion>
@@ -255,7 +315,7 @@ export default function AEOBResponsePanel(props) {
             aria-controls="panel1a-content"
             id="panel1a-header"
           >
-            <Typography>AEOB- Query at {handleRequestTime()}</Typography>
+            <Typography>AEOB - Query at {handleRequestTime()}</Typography>
           </AccordionSummary>
           <AccordionDetails className={classes.aeobInitialResponseText}>
             <Grid style={{ marginTop: 33 }}>
@@ -275,19 +335,36 @@ export default function AEOBResponsePanel(props) {
           </AccordionDetails>
         </Accordion>
       ) : null}
-      {props.gfeRequestSuccess === true && props.gfeRequestPending ? (
-        <Grid item className={classes.aeobQueryButton}>
-          <FormControl>
+
+      
+      {timerIsVisible() ? (
+        <Card className={classes.card}>
+          <CardContent>
+            <Typography>
+              Time until next poll: {timerSeconds}
+            </Typography>
+            <Typography>
+              Poll AEOB Status URL:
+              <Link href={props.pollUrl}>{props.pollUrl}</Link>
+            </Typography>
+          </CardContent>
+          <CardActions>
             <Button
               variant="contained"
               color="primary"
               type="submit"
-              onClick={handleSendInquiry}
+              onClick={handleAEOBPoll}
             >
               Query AEOB Bundle
             </Button>
-          </FormControl>
-        </Grid>
+            <Button
+              variant="outlined"
+              onClick={stopTimer}
+            >
+              Cancel Timer
+            </Button>
+          </CardActions>
+        </Card>
       ) : null}
     </div>
   );

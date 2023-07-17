@@ -1,14 +1,13 @@
 import React from "react";
 import {
+  Divider,
   Grid,
   Typography,
   CardContent,
   Card,
-  makeStyles,
-  createStyles,
-  Box,
-} from "@material-ui/core";
-import Divider from "@mui/material/Divider";
+  Box
+} from "@mui/material";
+import { createStyles, makeStyles } from "@mui/styles";
 
 const useStyles = makeStyles((theme) =>
   createStyles({

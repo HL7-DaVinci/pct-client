@@ -4,13 +4,12 @@ import {
   Box,
   Toolbar,
   Typography,
-  makeStyles,
-  createStyles,
   IconButton,
   Select,
   MenuItem,
-} from "@material-ui/core";
-import SettingsIcon from "@material-ui/icons/Settings";
+} from "@mui/material";
+import { createStyles, makeStyles } from "@mui/styles";
+import SettingsIcon from '@mui/icons-material/Settings';
 
 const useStyles = makeStyles((theme) =>
   createStyles({
@@ -53,7 +52,7 @@ export default function MenuBar(props) {
               alignItems: "center",
             }}
           >
-            <Typography variant="h6" component="div" sx={{ flexGrow: 1 }}>
+            <Typography variant="h6" component="div">
               Patient Cost Transparency Client
             </Typography>
             <div
