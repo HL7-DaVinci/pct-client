@@ -10,6 +10,7 @@ import {
 } from "@mui/material";
 import { createStyles, makeStyles } from "@mui/styles";
 import SettingsIcon from '@mui/icons-material/Settings';
+import StatusLog from "./StatusLog";
 
 const useStyles = makeStyles((theme) =>
   createStyles({
@@ -57,15 +58,19 @@ export default function MenuBar(props) {
             </Typography>
             <div
               style={{
-                width: 216,
+                
                 display: "flex",
                 flexDirection: "row",
               }}
             >
+
+              <StatusLog logs={props.statusLogs} setLogs={props.setStatusLogs} />
+
               <Select
                 value={props.selectedSession}
                 variant="standard"
                 className={classes.select}
+                sx={{ mr: 2 }}
                 inputProps={{
                   className: classes.select,
                   classes: { icon: classes.icon },
@@ -95,7 +100,7 @@ export default function MenuBar(props) {
                   sx={{ mr: 2 }}
                   onClick={(e) => props.toggleSettings(!props.showSettings)}
                 >
-                  <SettingsIcon />
+                  <SettingsIcon titleAccess="Server Settings" />
                 </IconButton>
               </div>
             </div>

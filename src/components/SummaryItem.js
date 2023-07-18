@@ -54,100 +54,6 @@ function alertDialog(itemsMissing) {
 export default function SummaryItem(props) {
   const classes = useStyles();
   const { summary } = props;
-  let missingItems = [];
-  //patient section
-  if (!summary.patientId) {
-    addToMissing("patient details");
-  }
-  if (!summary.billingProvider) {
-    addToMissing("billing provider");
-  }
-  if (!summary.submittingProvider) {
-    addToMissing("submitting provider");
-  }
-  if (!summary.gfeServiceId) {
-    addToMissing("GFE assigned service identifier");
-  }
-
-  //care team
-  for (let i = 0; i < summary.practitionerSelected.length; i++) {
-    //if the provider is there, check if role is too
-    if (
-      summary.practitionerSelected[i].provider &&
-      !summary.practitionerSelected[i].role
-    ) {
-      let rowNum = i + 1;
-      addToMissing("care team provider role (row " + rowNum + ")");
-    }
-    //if role is there, check if provider
-    if (
-      summary.practitionerSelected[i].role &&
-      !summary.practitionerSelected[i].provider
-    ) {
-      let rowNum = i + 1;
-      addToMissing("care team provider (row " + rowNum + ")");
-    }
-    //otherwise if both undefined don't throw error bc allowed
-  }
-
-  //priority level on encounter tab
-  if (!summary.priorityLevel) {
-    addToMissing("priority level");
-  }
-
-  //diagnosis
-  //check if given, and all required fields exist
-  for (let i = 0; i < summary.diagnosisList.length; i++) {
-    //if diagnosis there, but not type, throw error
-    if (summary.diagnosisList[i].diagnosis && !summary.diagnosisList[i].type) {
-      let rowNum = i + 1;
-      addToMissing("encounter diagnosis type (row " + rowNum + ")");
-    }
-    //if type there, but not diagnosis, throw error
-    if (summary.diagnosisList[i].type && !summary.diagnosisList[i].diagnosis) {
-      let rowNum = i + 1;
-      addToMissing("encounter diagnosis (row " + rowNum + ")");
-    }
-    //if both missing, throw general error
-    if (!summary.diagnosisList[i].diagnosis && !summary.diagnosisList[i].type) {
-      addToMissing("diagnosis");
-    }
-  }
-
-  //procedure
-  for (let i = 0; i < summary.procedureList.length; i++) {
-    if (summary.procedureList[i].procedure && !summary.procedureList[i].type) {
-      let rowNum = i + 1;
-      addToMissing("encounter procedure type (row " + rowNum + ")");
-    }
-    if (!summary.procedureList[i].procedure && summary.procedureList[i].type) {
-      let rowNum = i + 1;
-      addToMissing("encounter procedure (row " + rowNum + ")");
-    }
-    //if both missing, not required
-  }
-
-  //services
-  for (let i = 0; i < summary.servicesList.length; i++) {
-    if (
-      i === 0 &&
-      !summary.servicesList[i].productOrService &&
-      !summary.servicesList[i].estimatedDateOfService
-    ) {
-      addToMissing("services");
-      break;
-    }
-    if (!summary.servicesList[i].productOrService) {
-      let rowNum = i + 1;
-      addToMissing("service (product or service - row " + rowNum + ")");
-      addToMissing("service (unit price - row " + rowNum + ")");
-      addToMissing("service (net - row " + rowNum + ")");
-    }
-    if (!summary.servicesList[i].estimatedDateOfService) {
-      let rowNum = i + 1;
-      addToMissing("service (estimate date - row " + rowNum + ")");
-    }
-  }
 
   const SummaryText = (props) => (
     <div>
@@ -156,9 +62,6 @@ export default function SummaryItem(props) {
       </Typography>
     </div>
   );
-  function addToMissing(item) {
-    missingItems.push(item);
-  }
 
   const card = (
     <React.Fragment>
@@ -232,7 +135,7 @@ export default function SummaryItem(props) {
           <Grid item xs={6}>
             <SummaryText
               content={
-                summary.gfeType ? summary.gfeType : addToMissing("gfe type")
+                summary.gfeType ? summary.gfeType : props.missingItems.push("gfe type")
               }
             />
           </Grid>
@@ -438,7 +341,7 @@ export default function SummaryItem(props) {
 
   return (
     <div>
-      {alertDialog(missingItems)}
+      {alertDialog(props.missingItems)}
 
       <Card variant="outlined">{card}</Card>
     </div>

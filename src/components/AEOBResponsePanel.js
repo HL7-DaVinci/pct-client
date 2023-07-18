@@ -173,6 +173,7 @@ export default function AEOBResponsePanel(props) {
 
   
   const stopTimer = useCallback(() => {
+    setTimerSeconds(undefined);
     if (timerRef.current) {
       clearInterval(timerRef.current);
     }
@@ -196,39 +197,31 @@ export default function AEOBResponsePanel(props) {
         // still waiting
         if (response.status === 202) {
           const retryAfter = response.headers.get("retry-after") || 30;
-          props.addToLog(`Received 202 response. Retry after ${retryAfter} seconds.`);
+          props.addToLog(`Received 202 response. Retry after ${retryAfter} seconds.`, 'network');
           startTimer(retryAfter);
         }
         // AEOB response received
         else if (response.status === 200) {
-          props.addToLog("Received 200 response.");
+          props.addToLog("Received 200 response.", "network");
           const aeobResponse = await response.json();
           props.setReceivedAEOBResponse(aeobResponse);
+          props.addToLog("Consumed AEOB response.", "info", aeobResponse);
         }
         // unexpected response
         else {
-          throw new Error(`Received unexpected response with status of ${response.status}`);
+          throw new Error(`Received unexpected response with status of ${response.status}`, 'error', response);
         }
       })
       .catch((error) => {
-        props.addToLog(`Error while polling AEOB status: ${error}`, error);
+        props.addToLog(`Error while polling AEOB status: ${error}`, 'error', error);
       });
-  }, [stopTimer, startTimer, props]);
+  }, [props, startTimer, stopTimer]);
   
 
   const timerIsVisible = useCallback(() => {
     return props.gfeRequestSuccess === true && !props.receivedAEOBResponse;
-  }, [props]);
-
-
+  }, [props.gfeRequestSuccess, props.receivedAEOBResponse]);
   
-  // if we don't have a bundle from the initial response then do the first AEOB poll
-  useEffect(() => {
-    if (timerIsVisible()) {
-      handleAEOBPoll();
-    }
-  }, [timerIsVisible, handleAEOBPoll]);
-
 
   // monitor timer to send another poll when timer reaches 0
   useEffect(() => {
@@ -236,6 +229,12 @@ export default function AEOBResponsePanel(props) {
       handleAEOBPoll();
     }
   }, [timerSeconds, timerIsVisible, handleAEOBPoll]);
+
+  
+  // if we don't have a bundle from the initial response then do the first AEOB poll
+  useEffect(() => {
+    setTimerSeconds(0);
+  },[]);
 
 
   return (

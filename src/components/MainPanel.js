@@ -1,11 +1,6 @@
 import React, { useState } from "react";
 
-import {
-  AppBar,
-  Grid,
-  Tabs,
-  Tab
-} from "@mui/material";
+import { AppBar, Grid, Tabs, Tab } from "@mui/material";
 import { createStyles, makeStyles } from "@mui/styles";
 import { TabPanel } from "./TabPanel";
 import RequestPanel from "./GFERequestPanel";
@@ -40,6 +35,7 @@ export default function MainPanel() {
   const [submitting, setSubmitting] = useState(false);
   const [gfeSubmitted, setGfeSubmitted] = useState(false);
   const [showSettings, setShowSettings] = useState(false);
+  const [showLogs, setShowLogs] = useState(false);
 
   const generateGFE = () => {
     return {
@@ -86,12 +82,13 @@ export default function MainPanel() {
       selectedGFE: startingGFEId,
     };
   };
+
   const initialSessionId = v4();
   const [selectedSession, setSelectedSession] = useState(initialSessionId);
   const initialSession = {};
   initialSession[initialSessionId] = generateNewSession();
 
-  // const exampleSessions = require('../exampleState').exampleSessions;
+  // const exampleSessions = require("../exampleState").exampleSessions;
   // const initialSessionId = Object.keys(exampleSessions)[0];
   // const [selectedSession, setSelectedSession] = useState(initialSessionId);
   // const initialSession = {};
@@ -134,7 +131,7 @@ export default function MainPanel() {
     },
   ]);
   const [selectedDataServer, setSelectedDataServer] = useState(
-    "https://pct-ehr.davinci.hl7.org/fhir"
+    dataServers[0].value
   );
   const [payerServers] = useState([
     {
@@ -142,15 +139,16 @@ export default function MainPanel() {
     },
     {
       value: "https://pct-payer.davinci.hl7.org/fhir",
-    }
+    },
   ]);
   const [selectedPayerServer, setSelectedPayerServer] = useState(
-    "https://pct-payer.davinci.hl7.org/fhir"
+    payerServers[0].value
   );
   const [dataServerChanged, setDataServerChanged] = useState(false);
   const [payerServerChanged, setPayerServerChanged] = useState(false);
   const [mainPanelTab, setMainPanelTab] = useState("1");
   const [pollUrl, setPollUrl] = useState(undefined);
+  const [statusLogs, setStatusLogs] = useState([]);
 
   function resetState() {
     setGfeResponse(undefined);
@@ -161,8 +159,23 @@ export default function MainPanel() {
     setGfeRequestSuccess(false);
   }
 
-  function addToLog(message, object) {
-    console.log(message, object);
+  function addToLog(message, type, object) {
+    const consoleOuput = type === "error" ? console.error : console.log;
+    consoleOuput(
+      `${new Date().toLocaleString()} :: ${
+        !!type ? type : "info"
+      } :: ${message}`,
+      object
+    );
+
+    const newLog = {
+      message: message,
+      type: type,
+      object: object,
+      time: new Date(),
+    };
+
+    setStatusLogs([newLog, ...statusLogs]);
   }
 
   return (
@@ -175,12 +188,16 @@ export default function MainPanel() {
               <MenuBar
                 toggleSettings={setShowSettings}
                 showSettings={showSettings}
+                toggleLogs={setShowLogs}
+                showLogs={showLogs}
                 selectedSession={selectedSession}
                 setSelectedSession={setSelectedSession}
                 sessions={Object.keys(sessions)}
                 addNewSession={addNewSession}
                 setGfeRequestSuccess={setGfeRequestSuccess}
                 setMainPanelTab={setMainPanelTab}
+                statusLogs={statusLogs}
+                setStatusLogs={setStatusLogs}
               />
             </Grid>
             <Grid item xs={12}>

@@ -21,7 +21,7 @@ import {
   Tab,
   Tabs,
   TextField,
-  Typography
+  Typography,
 } from "@mui/material";
 import { withStyles } from "@mui/styles";
 import * as _ from "lodash";
@@ -82,6 +82,7 @@ class GFERequestBox extends Component {
       showDeleteConfirmation: false,
     };
     this.state = this.initialState;
+    this.missingItems = [];
   }
 
   handleAddGFE = () => {
@@ -148,7 +149,11 @@ class GFERequestBox extends Component {
                 practitionerRoleList: r.data,
                 resolvedReferences: references,
               });
-              console.log("----- Finished getting practitionerRole.");
+              this.props.addToLog(
+                "Finished getting practitionerRole.",
+                "network",
+                r.data
+              );
             } else if (r.resourceType && r.resourceType === "Bundle") {
               // handle practitioner and organization
               if (r.link && r.link[0] && r.link[0].relation === "self") {
@@ -159,13 +164,21 @@ class GFERequestBox extends Component {
                     this.props.updateSessionInfo({
                       practitionerList: r.entry,
                     });
-                    console.log("----- Finished getting practitioner.");
+                    this.props.addToLog(
+                      "Finished getting practitioner.",
+                      "network",
+                      r.entry
+                    );
                     break;
                   case "Organization":
                     this.props.updateSessionInfo({
                       organizationList: r.entry,
                     });
-                    console.log("----- Finished getting organization.");
+                    this.props.addToLog(
+                      "Finished getting organization.",
+                      "network",
+                      r.entry
+                    );
                     break;
                   default:
                     break;
@@ -176,14 +189,14 @@ class GFERequestBox extends Component {
           })
         );
       } catch (e) {
-        console.error(
-          "Failed to retrieve the data from provider data store! Check the connections! Exception",
+        this.props.addToLog(
+          "Failed to retrieve the data from provider data store! Check the connections!",
+          "error",
           e
         );
       }
     };
     fetchProviders();
-    console.log("--- after fetching provider ");
   }
 
   resetState = () => {
@@ -253,7 +266,10 @@ class GFERequestBox extends Component {
           coveragePeriod: undefined,
         };
         this.props.updateSessionInfo({ subjectInfo });
-        console.log("couldn't retrieve patient's coverage and payor info");
+        this.props.addToLog(
+          "Couldn't retrieve patient's coverage and payor info",
+          "error"
+        );
       }
     });
 
@@ -310,7 +326,10 @@ class GFERequestBox extends Component {
           memberNumber,
         };
         this.props.updateSessionInfo({ subjectInfo });
-        console.log("couldn't retrieve patient's personal info");
+        this.props.addToLog(
+          "Couldn't retrieve patient's personal info",
+          "error"
+        );
       }
     });
     this.props.updateSessionInfo({
@@ -695,17 +714,27 @@ class GFERequestBox extends Component {
       this.props.setGfeResponse(undefined);
       this.props.setReceivedAEOBResponse(undefined);
 
-      submitGFEClaim(this.props.payorUrl, this.generateBundle())
+      const submissionBundle = this.generateBundle();
+      this.props.addToLog(
+        `Submitting GFE to ${this.props.payorUrl}/Claim/$gfe-submit`,
+        "network",
+        submissionBundle
+      );
+
+      submitGFEClaim(this.props.payorUrl, submissionBundle)
         .then(async (response) => {
           this.props.setSubmitting(false);
-          console.log("Payer server returned response: ", response);
+          this.props.addToLog(
+            `GFE claim submission received response with status ${response.status}`,
+            "network"
+          );
 
           // async bundling response (202)
           if (response.status === 202) {
             this.props.setGfeRequestSuccess(true);
 
             const pollUrl = new URL(response.headers.get("content-location"));
-            this.props.setBundleId(pollUrl.searchParams.get('_bundleId'));
+            this.props.setBundleId(pollUrl.searchParams.get("_bundleId"));
             this.props.setPollUrl(pollUrl.href);
           }
           // sync response (200)
@@ -717,17 +746,18 @@ class GFERequestBox extends Component {
           }
           // unexpected response
           else {
-            throw new Error(`Received unexpected response with status of ${response.status}`);
+            throw new Error(
+              `Received unexpected response with status of ${response.status}`
+            );
           }
-          
+
           this.props.setMainPanelTab("2");
         })
         .catch((error) => {
-          console.log('submitGFEClaim error:', error);
+          this.props.addToLog("Error submitting GFE claim", "error", error);
           this.props.setSubmitting(false);
           this.props.setGfeRequestSuccess(false);
           if ("toJSON" in error) {
-            console.log(error.toJSON());
             this.props.setGfeResponse(error.toJSON());
           } else {
             this.props.setGfeResponse(error.toString());
@@ -778,6 +808,7 @@ class GFERequestBox extends Component {
       }
       return e;
     });
+
     return {
       patientId: this.props.session.subjectInfo.selectedPatient,
       coverageId: this.props.session.subjectInfo.selectedCoverage
@@ -827,6 +858,120 @@ class GFERequestBox extends Component {
         this.props.session.gfeInfo[this.props.session.selectedGFE].careTeamList,
       claimItemList: displayableClaimItemList,
     };
+  };
+
+  checkMissingItems = (summary) => {
+    this.missingItems = [];
+    //patient section
+    if (!summary.patientId) {
+      this.missingItems.push("patient details");
+    }
+    if (!summary.billingProvider) {
+      this.missingItems.push("billing provider");
+    }
+    if (!summary.submittingProvider) {
+      this.missingItems.push("submitting provider");
+    }
+    if (!summary.gfeServiceId) {
+      this.missingItems.push("GFE assigned service identifier");
+    }
+
+    //care team
+    for (let i = 0; i < summary.practitionerSelected.length; i++) {
+      //if the provider is there, check if role is too
+      if (
+        summary.practitionerSelected[i].provider &&
+        !summary.practitionerSelected[i].role
+      ) {
+        let rowNum = i + 1;
+        this.missingItems.push("care team provider role (row " + rowNum + ")");
+      }
+      //if role is there, check if provider
+      if (
+        summary.practitionerSelected[i].role &&
+        !summary.practitionerSelected[i].provider
+      ) {
+        let rowNum = i + 1;
+        this.missingItems.push("care team provider (row " + rowNum + ")");
+      }
+      //otherwise if both undefined don't throw error bc allowed
+    }
+
+    //priority level on encounter tab
+    if (!summary.priorityLevel) {
+      this.missingItems.push("priority level");
+    }
+
+    //diagnosis
+    //check if given, and all required fields exist
+    for (let i = 0; i < summary.diagnosisList.length; i++) {
+      //if diagnosis there, but not type, throw error
+      if (
+        summary.diagnosisList[i].diagnosis &&
+        !summary.diagnosisList[i].type
+      ) {
+        let rowNum = i + 1;
+        this.missingItems.push("encounter diagnosis type (row " + rowNum + ")");
+      }
+      //if type there, but not diagnosis, throw error
+      if (
+        summary.diagnosisList[i].type &&
+        !summary.diagnosisList[i].diagnosis
+      ) {
+        let rowNum = i + 1;
+        this.missingItems.push("encounter diagnosis (row " + rowNum + ")");
+      }
+      //if both missing, throw general error
+      if (
+        !summary.diagnosisList[i].diagnosis &&
+        !summary.diagnosisList[i].type
+      ) {
+        this.missingItems.push("diagnosis");
+      }
+    }
+
+    //procedure
+    for (let i = 0; i < summary.procedureList.length; i++) {
+      if (
+        summary.procedureList[i].procedure &&
+        !summary.procedureList[i].type
+      ) {
+        let rowNum = i + 1;
+        this.missingItems.push("encounter procedure type (row " + rowNum + ")");
+      }
+      if (
+        !summary.procedureList[i].procedure &&
+        summary.procedureList[i].type
+      ) {
+        let rowNum = i + 1;
+        this.missingItems.push("encounter procedure (row " + rowNum + ")");
+      }
+      //if both missing, not required
+    }
+
+    //services
+    for (let i = 0; i < summary.servicesList.length; i++) {
+      if (
+        i === 0 &&
+        !summary.servicesList[i].productOrService &&
+        !summary.servicesList[i].estimatedDateOfService
+      ) {
+        this.missingItems.push("services");
+        break;
+      }
+      if (!summary.servicesList[i].productOrService) {
+        let rowNum = i + 1;
+        this.missingItems.push(
+          "service (product or service - row " + rowNum + ")"
+        );
+        this.missingItems.push("service (unit price - row " + rowNum + ")");
+        this.missingItems.push("service (net - row " + rowNum + ")");
+      }
+      if (!summary.servicesList[i].estimatedDateOfService) {
+        let rowNum = i + 1;
+        this.missingItems.push("service (estimate date - row " + rowNum + ")");
+      }
+    }
   };
 
   handleSelectInterTransId = (e) => {
@@ -1263,6 +1408,9 @@ class GFERequestBox extends Component {
     const professionalBillingProviderList =
       this.getProfessionalBillingProviderList();
     const { classes } = this.props;
+
+    this.checkMissingItems(summary);
+
     return (
       <div>
         <Modal
@@ -1321,37 +1469,30 @@ class GFERequestBox extends Component {
           </Box>
         </Modal>
         <Grid container space={0} justifyContent="center">
-          {this.state.verticalTabIndex > 0 && this.state.verticalTabIndex < 4 && (
-            <Tabs
-              value={this.state.verticalTabIndex - 1}
-              indicatorColor="secondary"
-              textColor="inherit"
-              variant="fullWidth"
-              sx={{ width: "100vw" }}
-            >
-              <Tab
-                label="Care Team"
-                onClick={() => this.handleVerticalChange(null, 1)}
-              />
-              <Tab
-                label="Encounter"
-                onClick={() => this.handleVerticalChange(null, 2)}
-              />
-              <Tab
-                label="Summary"
-                onClick={() => this.handleVerticalChange(null, 3)}
-              />
-            </Tabs>
-          )}
+          {this.state.verticalTabIndex > 0 &&
+            this.state.verticalTabIndex < 4 && (
+              <Tabs
+                value={this.state.verticalTabIndex - 1}
+                indicatorColor="secondary"
+                textColor="inherit"
+                variant="fullWidth"
+                sx={{ width: "100vw" }}
+              >
+                <Tab
+                  label="Care Team"
+                  onClick={() => this.handleVerticalChange(null, 1)}
+                />
+                <Tab
+                  label="Encounter"
+                  onClick={() => this.handleVerticalChange(null, 2)}
+                />
+                <Tab
+                  label="Summary"
+                  onClick={() => this.handleVerticalChange(null, 3)}
+                />
+              </Tabs>
+            )}
           <form onSubmit={this.handleOnSubmit}>
-            <Button
-              variant="contained"
-              color="primary"
-              type="submit"
-              disabled={this.props.submittingStatus === true}
-            >
-              Submit GFE
-            </Button>
             <Box>
               <Box
                 sx={{
@@ -1942,7 +2083,7 @@ class GFERequestBox extends Component {
                             </Grid>
 
                             <Grid item>
-                              <SummaryItem summary={summary} />
+                              <SummaryItem summary={summary} missingItems={this.missingItems} />
                             </Grid>
                           </FormControl>
                         </Grid>
@@ -1971,7 +2112,7 @@ class GFERequestBox extends Component {
                               variant="contained"
                               color="primary"
                               type="submit"
-                              disabled={this.props.submittingStatus === true}
+                              disabled={this.props.submittingStatus === true || (!!this.missingItems && this.missingItems.length > 0)}
                             >
                               Submit GFE
                             </Button>
