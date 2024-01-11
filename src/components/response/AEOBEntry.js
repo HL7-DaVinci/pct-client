@@ -10,8 +10,12 @@ import AEOBItemsTable from "./AEOBItemsTable";
 export default function AEOBEntry(props) {
 
     function getDate() {
-        const date = props.aeob.meta.lastUpdated;
-        return moment(date).format('lll');
+        try {
+            const date = props.aeob.meta.lastUpdated;
+            return moment(date).format('lll');
+        }catch(error){
+            return "";
+        }
     }
 
     function getStatusIcon() {
@@ -93,7 +97,7 @@ export default function AEOBEntry(props) {
                             </Grid>
                         </Grid>
                         <br></br>
-
+                        {props.aeob.item ?
                         <Grid item>
                             <Typography variant="h6" gutterBottom>
                                 <b>Items:</b>
@@ -101,6 +105,7 @@ export default function AEOBEntry(props) {
                             </Typography>
 
                         </Grid>
+                        : null}
                     </Grid>
                 </AccordionDetails>
             </Accordion>

@@ -101,22 +101,27 @@ export default function AEOBBundle(props) {
   function getNameDisplay(resource) {
     var returnString = "";
 
-    if (resource.constructor.name === "Object" && resource !== null) {
-      if (resource.resourceType === "Organization")
-        returnString = resource.name;
-      else if (
-        resource.resourceType === "Patient" ||
-        resource.resourceType === "Practitioner" ||
-        resource.resourceType === "relatedPerson"
-      ) {
-        returnString = getHumanNameDisplay(resource.name[0]);
-      } else {
-        returnString =
-          "Name for resource of type " &
-          resource.resourceType &
-          " is not supported.";
+    try
+    {
+      if (resource.constructor.name === "Object" && resource !== null) {
+        if (resource.resourceType === "Organization")
+          returnString = resource.name;
+        else if (
+          resource.resourceType === "Patient" ||
+          resource.resourceType === "Practitioner" ||
+          resource.resourceType === "relatedPerson"
+        ) {
+          returnString = getHumanNameDisplay(resource.name[0]);
+        } else {
+          returnString =
+            "Name for resource of type " &
+            resource.resourceType &
+            " is not supported.";
+        }
       }
     }
+    catch(error)
+    {}
 
     return returnString;
   }
