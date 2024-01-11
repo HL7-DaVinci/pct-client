@@ -14,6 +14,7 @@ export default function ClaimItem({ edit, rows, addOne, deleteOne }) {
   const [chosenVal, setChosenVal] = React.useState("");
   const [columnVal, setColumnVal] = React.useState("");
   const [dateValue, setDateValue] = React.useState("");
+  const [endDateValue, setEndDateValue] = React.useState("");
   const [currentRow, setCurrentRow] = React.useState("");
 
   const handleChange = (event) => {
@@ -24,6 +25,9 @@ export default function ClaimItem({ edit, rows, addOne, deleteOne }) {
   };
   const handleChangeDate = (newValue) => {
     setDateValue(newValue);
+  };
+  const handleChangeEndDate = (newValue) => {
+    setEndDateValue(newValue);
   };
 
   const updateParentEdit = () => {
@@ -42,6 +46,15 @@ export default function ClaimItem({ edit, rows, addOne, deleteOne }) {
     ob[num]["estimatedDateOfService"]["value"] = dateValue;
     edit(ob);
   };
+  
+  const updateEditChosenEndDate = () => {
+    var ob = {};
+    var num = currentRow;
+    ob[num] = {};
+    ob[num]["estimatedEndDateOfService"] = {};
+    ob[num]["estimatedEndDateOfService"]["value"] = endDateValue;
+    edit(ob);
+  };
 
   const updateProductServiceRow = (params) => {
     //sets in focus the item that you are editing
@@ -56,6 +69,7 @@ export default function ClaimItem({ edit, rows, addOne, deleteOne }) {
   //listens for change in the column and chosen value
   React.useEffect(updateParentEdit, [columnVal, chosenVal, currentRow, edit]);
   React.useEffect(updateEditChosenDate, [dateValue, currentRow, edit]);
+  React.useEffect(updateEditChosenEndDate, [endDateValue, currentRow, edit]);
 
   //generates options shown in menu
   function makeMenuItem(listOfOptions) {
@@ -114,6 +128,27 @@ export default function ClaimItem({ edit, rows, addOne, deleteOne }) {
               inputFormat="MM/dd/yyyy"
               onChange={(event) => {
                 handleChangeDate(event);
+                updateProductServiceRow(params);
+              }}
+              renderInput={(params) => <TextField {...params} />}
+            />
+          </LocalizationProvider>
+        );
+      },
+    },
+    {
+      field: "estimatedEndDateOfService",
+      headerName: "Estimate End Date",
+      minWidth: 185,
+      renderHeader: renderRequiredHeader,
+      required: false,
+      renderCell: (params) => {
+        return (
+          <LocalizationProvider dateAdapter={AdapterDateFns}>
+            <DatePicker
+              inputFormat="MM/dd/yyyy"
+              onChange={(event) => {
+                handleChangeEndDate(event);
                 updateProductServiceRow(params);
               }}
               renderInput={(params) => <TextField {...params} />}

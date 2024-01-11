@@ -324,7 +324,11 @@ export default function SummaryItem(props) {
                   {
                     display: "Estimate Date",
                     value: "estimatedDateOfService",
-                  },
+                  },/*
+                  {
+                    display: "Estimate End Date",
+                    value: "estimatedEndDateOfService",
+                  },*/
                   { display: "Unit Price", value: "unitPrice" },
                   { display: "Quantity", value: "quantity" },
                   { display: "Net", value: "net" },

@@ -39,6 +39,8 @@ const buildGFERequest = (input) => {
         ]
     }
 
+    GFERequest.identifier = input.identifier;
+    
     GFERequest.type = input.gfeType === "institutional" ? {
         "coding": [
             {
@@ -78,7 +80,8 @@ const buildGFERequest = (input) => {
         reference: input.insurer.reference
     };
     GFERequest.provider = {
-        reference: input.provider.reference
+        reference: input.provider.reference,
+        extension: input.provider.extension
     };
 
     if (input.careTeam) {

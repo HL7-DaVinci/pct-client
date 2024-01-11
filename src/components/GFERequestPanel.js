@@ -412,6 +412,23 @@ class GFERequestBox extends Component {
     input.gfeType = this.props.session.subjectInfo.gfeType;
 
     const fhirServerBaseUrl = this.props.ehrUrl;
+    let claim_id = Math.floor(Math.random() * 10000); 
+    input.identifier = [
+      {
+        type : {
+          coding : [
+            {
+              system : "http://terminology.hl7.org/CodeSystem/v2-0203",
+              code : "PLAC",
+              display : "Placer Identifier"
+            }
+          ]
+        },
+        system : "https://pct-client.davinci.hl7.org",
+        value : String(claim_id)
+      }
+    ]
+
 
     input.patient = {
       reference: `Patient/${this.props.session.subjectInfo.selectedPatient}`,
@@ -454,8 +471,11 @@ class GFERequestBox extends Component {
       entry: input.insurer.resource,
     });
 
+    // FIND Provider Taxonomy here
     let providerReference = undefined,
-      findProfessionalProvider = undefined;
+      findProfessionalProvider = undefined,
+      findInstitutionalProvider = undefined,
+      providerTaxonomy = undefined;
     if (this.props.session.subjectInfo.gfeType === "professional") {
       const professionalProviderList =
         this.getProfessionalBillingProviderList();
@@ -464,13 +484,62 @@ class GFERequestBox extends Component {
           provider.id ===
           this.props.session.gfeInfo[gfeId].selectedBillingProvider
       );
+      
       providerReference = findProfessionalProvider.reference;
+      console.log('test')
+      console.log(findProfessionalProvider)
+      if(findProfessionalProvider.type === "Practitioner")
+      {
+        findProfessionalProvider.resource.type.forEach((providerType) => {
+          providerType.coding.forEach((providerTypeCoding) => {
+            if (providerTypeCoding.system === "http://nucc.org/provider-taxonomy") {
+              providerTaxonomy = providerType
+            }
+          });
+        });
+      }
+      else if((findProfessionalProvider.type === "PractitionerRole") && (findProfessionalProvider.resource.specialty))
+      {
+        providerTaxonomy = findProfessionalProvider.resource.specialty[0];
+      }
+      else{
+        providerTaxonomy = {
+          coding: [
+            {
+              system: "http://nucc.org/provider-taxonomy",
+              code: "208D00000X",
+              display: "General Practice"
+            }
+          ]
+        }
+      }
+
+    
+
     } else {
+      const professionalProviderList =
+        this.getProfessionalBillingProviderList();
+      
+      findInstitutionalProvider = professionalProviderList.find(
+        (provider) =>
+          provider.reference.endsWith(this.props.session.gfeInfo[gfeId].selectedBillingProvider)
+      );
+      findInstitutionalProvider.resource.type.forEach((providerType) => {
+        providerType.coding.forEach((providerTypeCoding) => {
+          if (providerTypeCoding.system === "http://nucc.org/provider-taxonomy") {
+            providerTaxonomy = providerType
+          }
+        });
+      });
       providerReference = `Organization/${this.props.session.gfeInfo[gfeId].selectedBillingProvider}`;
     }
 
     input.provider = {
       reference: providerReference,
+      extension: [{
+        url: "http://hl7.org/fhir/us/davinci-pct/StructureDefinition/providerTaxonomy",
+        valueCodeableConcept: [ providerTaxonomy ]
+    }],
       resource:
         this.props.session.subjectInfo.gfeType === "professional"
           ? findProfessionalProvider.resource
@@ -528,6 +597,7 @@ class GFERequestBox extends Component {
         productOrService: {
           coding: [procedureCoding],
         },
+        
 
         unitPrice: {
           value: claimItem.unitPrice,
@@ -542,6 +612,47 @@ class GFERequestBox extends Component {
         },
       };
 
+      if (claimItem.estimatedDateOfService) {
+        const estimateDate = new Date(
+          Date.parse(claimItem.estimatedDateOfService.toString())
+        );
+        const month = estimateDate.getMonth() + 1;
+        const monthString = month < 10 ? "0" + month : month;
+        const dateString =
+          estimateDate.getDate() < 10
+            ? "0" + estimateDate.getDate()
+            : estimateDate.getDate();
+
+        if (claimItem.estimatedEndDateOfService) {
+          const estimateEndDate = new Date(
+            Date.parse(claimItem.estimatedEndDateOfService.toString())
+          );
+          const endMonth = estimateEndDate.getMonth() + 1;
+          const endMonthString = endMonth < 10 ? "0" + endMonth : endMonth;
+          const endDateString =
+          estimateEndDate.getDate() < 10
+              ? "0" + estimateEndDate.getDate()
+              : estimateEndDate.getDate();
+          
+          newItem.servicedDate = {
+            start: estimateDate.getFullYear() + "-" + monthString + "-" + dateString,
+            end: estimateEndDate.getFullYear() + "-" + endMonthString + "-" + endDateString,
+          };
+        }
+        else{
+          newItem.servicedDate = estimateDate.getFullYear() + "-" + monthString + "-" + dateString;
+        }
+      }
+      
+      // Service Description
+      newItem.extension = [];
+      newItem.extension.push({
+        url: "http://hl7.org/fhir/us/davinci-pct/StructureDefinition/serviceDescription",
+        valueString: procedureCodingOrig.serviceDescription,
+      });
+      
+      //estimated service date extension was replaced with the item.serviced[x]
+      /*
       newItem.extension = [];
       if (claimItem.estimatedDateOfService) {
         const estimateDate = new Date(
@@ -559,7 +670,7 @@ class GFERequestBox extends Component {
             estimateDate.getFullYear() + "-" + monthString + "-" + dateString,
         });
       }
-
+      */
       if (pos) {
         newItem.locationCodeableConcept = {
           coding: [pos],
@@ -624,21 +735,67 @@ class GFERequestBox extends Component {
         });
       }
     }
+    console.log("!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!")
+    console.log(this.props.session.subjectInfo)
+    if(this.props.session.subjectInfo.selectedSubmittingProviderName.startsWith("PractitionerRole"))
+    {
+      let findProfessionalProviderRole = undefined;
+      const professionalProviderList =
+        this.getProfessionalBillingProviderList();
+      console.log(professionalProviderList);
+      findProfessionalProviderRole = professionalProviderList.find(
+        (provider) =>
+          provider.id === this.props.session.subjectInfo.selectedSubmitter
+      );
+      console.log(findProfessionalProviderRole);
 
-    let submitterOrgReference = `Organization/${this.props.session.subjectInfo.selectedSubmitter}`;
-    input.submitter = {
-      reference: submitterOrgReference,
-      resource: this.props.session.organizationList.filter(
-        (org) =>
-          org.resource.id === this.props.session.subjectInfo.selectedSubmitter
-      )[0].resource, //undefined resource?
-    };
-    orgReferenceList.push(submitterOrgReference);
+      let submitterProviderReference = findProfessionalProviderRole.resource.practitioner.reference;
+      let submitterProviderResource = undefined;
+      console.log("REF!!!!");
+      console.log(submitterProviderReference)
+      const providerMap = this.getCareTeamProviderListOptions();
+      console.log(providerMap);
+      providerMap.forEach((providerItem) => {
+        if (providerItem.url.endsWith(submitterProviderReference)) {
+          submitterProviderResource = providerItem.resource;
+        }
+      });
+      
+      
 
-    input.bundleResources.push({
-      fullUrl: `${fhirServerBaseUrl}/${input.submitter.reference}`,
-      entry: input.submitter.resource,
-    });
+      input.submitter = {
+        reference: submitterProviderReference,
+        resource: submitterProviderResource
+        
+      };
+      
+      orgReferenceList.push(submitterProviderResource);
+
+      input.bundleResources.push({
+        fullUrl: `${fhirServerBaseUrl}/${input.submitter.reference}`,
+        entry: input.submitter.resource,
+      }); 
+
+    }
+    else
+    {
+
+      let submitterOrgReference = `Organization/${this.props.session.subjectInfo.selectedSubmitter}`;
+      input.submitter = {
+        reference: submitterOrgReference,
+        resource: this.props.session.organizationList.filter(
+          (org) =>
+            org.resource.id === this.props.session.subjectInfo.selectedSubmitter
+        )[0].resource, //undefined resource?
+      };
+      orgReferenceList.push(submitterOrgReference);
+
+      input.bundleResources.push({
+        fullUrl: `${fhirServerBaseUrl}/${input.submitter.reference}`,
+        entry: input.submitter.resource,
+      });
+    }
+    
 
     orgReferenceList.forEach((orgRef) => {
       let foundLocation = this.props.session.locationList.find(
