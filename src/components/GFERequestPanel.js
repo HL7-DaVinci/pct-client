@@ -634,7 +634,7 @@ class GFERequestBox extends Component {
               ? "0" + estimateEndDate.getDate()
               : estimateEndDate.getDate();
           
-          newItem.servicedDate = {
+          newItem.servicedPeriod = {
             start: estimateDate.getFullYear() + "-" + monthString + "-" + dateString,
             end: estimateEndDate.getFullYear() + "-" + endMonthString + "-" + endDateString,
           };
