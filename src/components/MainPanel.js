@@ -136,7 +136,11 @@ export default function MainPanel() {
   const [payerServers] = useState([
     {
       value: "http://localhost:8080/fhir",
+    },
+    {
+      value: "https://pct-payer.davinci.hl7.org/fhir",
     }
+
   ]);
   const [selectedPayerServer, setSelectedPayerServer] = useState(
     "https://pct-payer.davinci.hl7.org/fhir"

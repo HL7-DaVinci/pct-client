@@ -538,7 +538,7 @@ class GFERequestBox extends Component {
       reference: providerReference,
       extension: [{
         url: "http://hl7.org/fhir/us/davinci-pct/StructureDefinition/providerTaxonomy",
-        valueCodeableConcept: [ providerTaxonomy ]
+        valueCodeableConcept:  providerTaxonomy 
     }],
       resource:
         this.props.session.subjectInfo.gfeType === "professional"
@@ -579,6 +579,7 @@ class GFERequestBox extends Component {
       let procedureCoding = Object.assign({}, procedureCodingOrig);
       delete procedureCoding["unitPrice"];
       delete procedureCoding["revenue"];
+      delete procedureCoding["serviceDescription"];
 
       const pos = PlaceOfServiceList.find(
         (pos) => pos.display === claimItem.placeOfService
@@ -799,7 +800,16 @@ class GFERequestBox extends Component {
 
     orgReferenceList.forEach((orgRef) => {
       let foundLocation = this.props.session.locationList.find(
-        (loc) => loc.resource.managingOrganization.reference === orgRef
+        (loc) => {
+          if('managingOrganization' in loc.resource && 'reference' in loc.resource.managingOrganization)
+          {
+            return loc.resource.managingOrganization.reference === orgRef
+          }
+          else
+          {
+            return false;
+          }
+        }
       );
       if (foundLocation) {
         input.bundleResources.push({
@@ -885,14 +895,25 @@ class GFERequestBox extends Component {
             `GFE claim submission received response with status ${response.status}`,
             "network"
           );
+          console.log(response);
 
           // async bundling response (202)
           if (response.status === 202) {
             this.props.setGfeRequestSuccess(true);
-
-            const pollUrl = new URL(response.headers.get("content-location"));
+            let responseHeaders = JSON.stringify([...response.headers], null, 2);
+            console.log(`Response headers: ${responseHeaders}`);
+            for(const header of response.headers){
+              console.log(`Name: ${header[0]}, Value:${header[1]}`);
+            }
+            console.log("test-1");
+            console.log(response.headers.get("content-location"));
+            console.log("test0");
+            const pollUrl = new URL(response.headers.get("Content-Location"));
+            console.log("test1");
             this.props.setBundleId(pollUrl.searchParams.get("_bundleId"));
+            console.log("test2");
             this.props.setPollUrl(pollUrl.href);
+            console.log("test3");
           }
           // sync response (200)
           else if (response.status === 200) {
