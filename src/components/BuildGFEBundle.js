@@ -2,37 +2,79 @@ import buildGFERequest from "./BuildGFERequest";
 import { v4 } from "uuid";
 const buildGFEBundle = (input) => {
   const GFEClaim = buildGFERequest(input);
-  const bundle = {
+  /*
+  const collection_bundle = {
     resourceType: "Bundle",
-    id: "bundle-transaction",
+    id: "collection-bundle-transaction",
     type: "collection",
     entry: [],
   };
 
-  bundle.meta = {
+  collection_bundle.meta = {
     lastUpdated: new Date().toISOString(),
   };
 
-  bundle.identifier = {
+  collection_bundle.identifier = {
     system: "http://example.org/documentIDs",
-    value: "A12345",
+    value: "collection-bundle-A12345",
   };
 
-  bundle.timestamp = new Date().toISOString();
+  collection_bundle.timestamp = new Date().toISOString();
+*/
+  const gfe_bundle = {
+    resourceType: "Bundle",
+    id: `${v4()}`,
+    type: "collection",
+    entry: [],
+  };
 
-  bundle.entry.push({
+  gfe_bundle.meta = {
+    lastUpdated: new Date().toISOString(),
+  };
+
+  gfe_bundle.identifier = {
+    system: "http://example.org/documentIDs",
+    value: "gfe-bundle-A12345",
+  };
+
+  gfe_bundle.timestamp = new Date().toISOString();
+
+  gfe_bundle.entry.push({
     fullUrl: `http://example.org/fhir/Claim/PCT-Good-Faith-Estimate-${v4()}`,
     resource: GFEClaim,
   });
 
+  // Do not include the submitter in the individual GFE Bundle
   input.bundleResources.forEach((resource) => {
-    bundle.entry.push({
-      fullUrl: resource.fullUrl,
-      resource: resource.entry,
-    });
+    if(!('type' in resource && resource.type === 'submitter'))
+    {
+      gfe_bundle.entry.push({
+        fullUrl: resource.fullUrl,
+        resource: resource.entry,
+      });
+    }
+  });
+/*
+  // Add Patient, Coverage, payer, and submitter to Collection Bundle
+  input.bundleResources.forEach((resource) => {
+    if('type' in resource && (resource.type === 'patient' || resource.type === 'coverage' || resource.type === 'payer' || resource.type === 'submitter'))
+    {
+      collection_bundle.entry.push({
+        fullUrl: resource.fullUrl,
+        resource: resource.entry,
+      });
+    }
+  });
+  
+
+  collection_bundle.entry.push({
+    fullUrl: `http://example.org/fhir/Bundle/PCT-GFE-Bundle-${v4()}`,
+    resource: gfe_bundle,
   });
 
-  return bundle;
+  return collection_bundle;
+  */
+ return gfe_bundle;
 };
 
 export default buildGFEBundle;

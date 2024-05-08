@@ -129,7 +129,7 @@ const buildGFERequest = (input) => {
         }
     ];
 
-
+    /* GFE Submitter is no longer part of the GFE bundle in STU2
     GFERequest.extension = [
         {
             url: "http://hl7.org/fhir/us/davinci-pct/StructureDefinition/gfeSubmitter",
@@ -137,9 +137,13 @@ const buildGFERequest = (input) => {
                 reference: input.submitter.reference
             }
         }
-    ];
+    ];*/
 
     if (input.billing.interTransIntermediary) {
+        if(!('extension' in GFERequest))
+        {
+            GFERequest.extension = [];        
+        }
         GFERequest.extension.push({
             url: "http://hl7.org/fhir/us/davinci-pct/StructureDefinition/interTransIdentifier",
             valueIdentifier: {
@@ -149,6 +153,10 @@ const buildGFERequest = (input) => {
     };
 
     if (input.billing.gfeAssignedServiceId) {
+        if(!('extension' in GFERequest))
+        {
+            GFERequest.extension = [];        
+        }
         GFERequest.extension.push({
             "url": "http://hl7.org/fhir/us/davinci-pct/StructureDefinition/gfeProviderAssignedIdentifier",
             valueIdentifier: {

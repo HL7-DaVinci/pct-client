@@ -41,6 +41,7 @@ import {
 
 import GFERequestSummary from "./GFERequestSummary";
 import buildGFEBundle from "./BuildGFEBundle";
+import buildGFECollectionBundle from "./BuildGFECollectionBundle";
 import ViewGFERequestDialog from "./ViewGFEDialog";
 import { PlaceOfServiceList } from "../values/PlaceOfService";
 
@@ -439,6 +440,7 @@ class GFERequestBox extends Component {
     };
 
     input.bundleResources.push({
+      type: 'patient',
       fullUrl: `${fhirServerBaseUrl}/${input.patient.reference}`,
       entry: input.patient.resource,
     });
@@ -455,6 +457,7 @@ class GFERequestBox extends Component {
     };
 
     input.bundleResources.push({
+      type: 'coverage',
       fullUrl: `${fhirServerBaseUrl}/${input.request.coverage.reference}`,
       entry: input.request.coverage.resource,
     });
@@ -467,6 +470,7 @@ class GFERequestBox extends Component {
 
     orgReferenceList.push(insurerOrgRef);
     input.bundleResources.push({
+      type: 'payer',
       fullUrl: `${fhirServerBaseUrl}/${input.insurer.reference}`,
       entry: input.insurer.resource,
     });
@@ -773,6 +777,7 @@ class GFERequestBox extends Component {
       orgReferenceList.push(submitterProviderResource);
 
       input.bundleResources.push({
+        type: 'submitter',
         fullUrl: `${fhirServerBaseUrl}/${input.submitter.reference}`,
         entry: input.submitter.resource,
       }); 
@@ -792,6 +797,7 @@ class GFERequestBox extends Component {
       orgReferenceList.push(submitterOrgReference);
 
       input.bundleResources.push({
+        type: 'submitter',
         fullUrl: `${fhirServerBaseUrl}/${input.submitter.reference}`,
         entry: input.submitter.resource,
       });
@@ -954,13 +960,16 @@ class GFERequestBox extends Component {
     const ri = Object.keys(this.props.session.gfeInfo).map((gfeId) =>
       this.generateRequestInput(gfeId)
     );
+    // Generate a GFE Bundle per Claim (GFE)
     const bundles = ri.map((input) => buildGFEBundle(input));
+    // Collapse all individual GFE bundles into a single gfe bundle with no repeating resources
     const bundleEntries = bundles.reduce((acc, e) => {
       acc.push(...e.entry);
       return acc;
     }, []);
     const enteredIds = new Set();
     const uniqueEntries = [];
+    // don't include duplicates in accumulation of entries
     bundleEntries.forEach((e) => {
       if (
         e.resource.resourceType === "Claim" ||
@@ -970,8 +979,12 @@ class GFERequestBox extends Component {
         enteredIds.add(e.resource.id);
       }
     });
+    // Now put all unique entries into a single bundle and remove the rest of the bundles
     bundles[0].entry = uniqueEntries;
-    return bundles[0];
+    bundles.length = 1;
+    // Create a GFE Collection Bundle with the single GFE Bundle and the resources in it.
+    const collection_bundle = buildGFECollectionBundle(bundles, ri[0].bundleResources);
+    return collection_bundle;
   };
 
   retrieveRequestSummary = () => {
