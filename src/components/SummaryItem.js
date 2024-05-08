@@ -39,7 +39,7 @@ function createProcedureList(procedureList) {
 }
 
 function alertDialog(itemsMissing) {
-  if (itemsMissing.length === 0) {
+  if (itemsMissing === undefined || itemsMissing.length === 0) {
     return;
   }
 
