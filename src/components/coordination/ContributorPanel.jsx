@@ -1,5 +1,4 @@
 import React, { useContext, useEffect, useState } from 'react';
-import { Typography } from '@mui/material';
 import { Edit, Person } from '@mui/icons-material';
 import Grid from '@mui/material/Grid2';
 import { DataGrid, GridActionsCellItem, useGridApiRef } from '@mui/x-data-grid';
@@ -19,6 +18,11 @@ export default function ContributorPanel() {
 
   // fetch contributor tasks
   useEffect(() => {
+
+    if (!contributor || !apiRef) {
+      return;
+    }
+    
     getContributorTasks(coordinationServer, contributor).then((response) => {
       const newRows = (response.entry || []).map((entry, index) => entry.resource);
       apiRef.current.setRows(newRows);
@@ -32,7 +36,7 @@ export default function ContributorPanel() {
 
   
   useEffect(() => {
-    if (apiRef?.current) {
+    if (apiRef?.current && apiRef.current.autosizeColumns) {
       apiRef.current.autosizeColumns({ includeHeaders: true, includeOutliers: true }); 
     }
   });
@@ -73,27 +77,36 @@ export default function ContributorPanel() {
   ];
 
   return (
-    <div>
-      <Grid container marginBottom={2} spacing={2}>
-        <Grid display="flex" justifyContent="end" size={12}>
-          <Person sx={{ mx: 1 }}/> {contributor || "No contributor selected"}
+    <>
+    {
+      !contributor ? 
+      <p variant="body1">No coordination contributor selected.  Please select a valid contributor in the account menu above.</p> 
+      :
+
+      <>
+        <Grid container marginBottom={2} spacing={2}>
+          <Grid display="flex" justifyContent="end" size={12}>
+            <Person sx={{ mx: 1 }}/> {contributor || "No contributor selected"}
+          </Grid>
         </Grid>
-      </Grid>
 
-      <DataGrid
-        rows={rows} 
-        columns={columns} 
-        apiRef={apiRef} 
-        rowSelection={false}
-        autoHeight={true}
-      />
+        <DataGrid
+          rows={rows} 
+          columns={columns} 
+          apiRef={apiRef} 
+          rowSelection={false}
+          autoHeight={true}
+        />
 
-      <ContributorTaskDialog 
-        open={taskDialogOpen} 
-        onClose={handleDialogClose}
-        task={currentTask}
-        setTask={setCurrentTask}
-      />
-    </div>
+        <ContributorTaskDialog 
+          open={taskDialogOpen} 
+          onClose={handleDialogClose}
+          task={currentTask}
+          setTask={setCurrentTask}
+        />
+      </>
+    }      
+
+    </>
   );
 };

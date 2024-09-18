@@ -2,7 +2,7 @@ import React, { useMemo, useState } from "react";
 
 import "./App.css";
 import { AppContext } from "./Context";
-import { AppBar, Tabs, Tab, Grid } from "@mui/material";
+import { Tabs, Tab, Grid } from "@mui/material";
 import MainPanel from "./components/MainPanel";
 import CoordinationPanel from "./components/coordination/CoordinationPanel";
 
@@ -57,6 +57,7 @@ function App() {
 
   const [requester, setRequester] = useState(localStorage.getItem("pct-selected-requester") || "");
   const [contributor, setContributor] = useState(localStorage.getItem("pct-selected-contributor") || "");
+  const [accountSettingsError, setAccountSettingsError] = useState(!requester || !contributor);
 
   
   const appContextValue = useMemo(
@@ -64,8 +65,8 @@ function App() {
       coordinationServers, setCoordinationServers, coordinationServer, setCoordinationServer, 
       dataServers, setDataServers, dataServer, setDataServer, 
       payerServers, setPayerServers, payerServer, setPayerServer, 
-      requester, setRequester, contributor, setContributor}),
-    [coordinationServers, coordinationServer, dataServers, dataServer, payerServers, payerServer, requester, contributor]
+      requester, setRequester, contributor, setContributor, accountSettingsError, setAccountSettingsError}),
+    [coordinationServers, coordinationServer, dataServers, dataServer, payerServers, payerServer, requester, contributor, accountSettingsError]
   );
 
   return (

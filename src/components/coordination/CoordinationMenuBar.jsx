@@ -1,8 +1,8 @@
-import React from 'react';
+import React, { useContext } from 'react';
 import { createStyles, makeStyles } from "@mui/styles";
-import { AppBar, Box, IconButton, Toolbar, Typography } from '@mui/material';
-import Grid from '@mui/material/Grid2';
+import { AppBar, Badge, IconButton, Toolbar, Typography } from '@mui/material';
 import { ManageAccounts, Settings } from '@mui/icons-material';
+import { AppContext } from '../../Context';
 
 
 const useStyles = makeStyles((theme) =>
@@ -18,6 +18,8 @@ const useStyles = makeStyles((theme) =>
 
 export default function CoordinationMenuBar(props) {
   const classes = useStyles();
+
+  const { accountSettingsError } = useContext(AppContext);
 
   return (
     <AppBar position="static">
@@ -44,7 +46,11 @@ export default function CoordinationMenuBar(props) {
               aria-label="menu"
               sx={{ mr: 2 }}
               onClick={(e) => props.toggleAccountSettings(!props.showAccountSettings)}>
-              <ManageAccounts titleAccess="Account Settings" />
+                {
+                  accountSettingsError ? 
+                  <Badge variant="dot" color="error"><ManageAccounts titleAccess="Account Settings" /></Badge> 
+                  : <ManageAccounts titleAccess="Account Settings" />
+                }
             </IconButton>
             <IconButton
               size="medium"

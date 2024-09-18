@@ -21,5 +21,8 @@ export const AppContext = createContext({
   contributor: "",
   setContributor: () => {},
 
+  accountSettingsError: false,
+  setAccountSettingsError: () => {},
+
 });
 

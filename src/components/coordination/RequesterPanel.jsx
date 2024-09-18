@@ -2,7 +2,7 @@ import React, { useState, useEffect, useContext } from 'react';
 import { DataGrid, GridActionsCellItem, useGridApiRef } from '@mui/x-data-grid';
 import { getCoordinationTasks } from '../../api';
 import { AppContext } from '../../Context';
-import { Button, Icon, Typography } from '@mui/material';
+import { Button } from '@mui/material';
 import Grid from '@mui/material/Grid2';
 import { Add, Edit, Person } from '@mui/icons-material';
 import CoordinationTaskDetailsDialog from './CoordinationTaskDetailsDialog';
@@ -23,6 +23,10 @@ export default function RequesterPanel() {
   // fetch coordination tasks
   useEffect(() => {
 
+    if (!requester || !apiRef) {
+      return;
+    }
+
     getCoordinationTasks(coordinationServer, requester).then((response) => {
       console.log("getCoordinationTasks:", response);
 
@@ -38,7 +42,7 @@ export default function RequesterPanel() {
 
 
   useEffect(() => {
-    if (apiRef?.current) {
+    if (apiRef?.current && apiRef.current.autosizeColumns) {
       apiRef.current.autosizeColumns({ includeHeaders: true, includeOutliers: true }); 
     }
   });
@@ -100,44 +104,55 @@ export default function RequesterPanel() {
 
   return (
     <>
-      <Grid container marginBottom={2} spacing={2}>
-        <Grid display="flex" alignItems="center" size={6}>
-          <Button
-            variant="contained"
-            startIcon={<Add />}
-            onClick={openTaskNewDialog}
-          >
-            Add Coordination Task
-          </Button>
+
+    {
+      !requester ? 
+      <p>No coordination requester selected.  Please select a valid requester in the account menu above.</p>
+
+      :
+
+      <>
+        <Grid container marginBottom={2} spacing={2}>
+          <Grid display="flex" alignItems="center" size={6}>
+            <Button
+              variant="contained"
+              startIcon={<Add />}
+              onClick={openTaskNewDialog}
+            >
+              Add Coordination Task
+            </Button>
+          </Grid>
+
+          <Grid display="flex" alignItems="center" justifyContent="end" size={6}>
+            <Person sx={{ mx: 1 }}/> {requester || "No requester selected"}
+          </Grid>
+        
         </Grid>
+        
+        <DataGrid
+          rows={rows} 
+          columns={columns} 
+          apiRef={apiRef} 
+          pageSize={5}
+          autoHeight={true}
+        />
 
-        <Grid display="flex" alignItems="center" justifyContent="end" size={6}>
-          <Person sx={{ mx: 1 }}/> {requester || "No requester selected"}
-        </Grid>
-      
-      </Grid>
-      
-      <DataGrid
-        rows={rows} 
-        columns={columns} 
-        apiRef={apiRef} 
-        pageSize={5}
-        autoHeight={true}
-      />
+        <CoordinationTaskDetailsDialog
+          open={taskDetailsDialogOpen} 
+          onClose={handleTaskDetailsDialogClose}
+          task={currentTask}
+          setTask={setCurrentTask}
+        />
 
-      <CoordinationTaskDetailsDialog
-        open={taskDetailsDialogOpen} 
-        onClose={handleTaskDetailsDialogClose}
-        task={currentTask}
-        setTask={setCurrentTask}
-      />
-
-      <CoordinationTaskNewDialog
-        open={taskNewDialogOpen} 
-        onClose={handleTaskNewDialogClose}
-        onSave={handleTaskNewDialogSave}
-      />
+        <CoordinationTaskNewDialog
+          open={taskNewDialogOpen} 
+          onClose={handleTaskNewDialogClose}
+          onSave={handleTaskNewDialogSave}
+        />
+      </>
+    }
 
     </>
+
   );
 };
