@@ -239,6 +239,7 @@ export default function AEOBResponsePanel(props) {
 
   return (
     <div>
+      <p>AEOBResponsePanel here -- {(props.gfeRequestSuccess === true).toString()} -- {(!props.receivedAEOBResponse).toString()}</p>
       {/* <Accordion>
         <AccordionSummary
           expandIcon={<ExpandMoreIcon />}

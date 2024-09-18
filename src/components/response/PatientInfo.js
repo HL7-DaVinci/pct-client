@@ -11,7 +11,7 @@ export default function PatientInfo(props) {
     function getHumanNameDisplay(humanName) {
         var returnString = "";
 
-        if (humanName.constructor.name === 'Object' && humanName !== null) {
+        if (humanName && typeof(humanName) === typeof({})) {
             if ('text' in humanName)
                 returnString = humanName.text;
             else if ('family' in humanName) {
@@ -99,27 +99,27 @@ export default function PatientInfo(props) {
                             </Grid>
                             <Grid item>
                                 <Typography variant="body1" gutterBottom>
-                                    <b>Name:</b> {getHumanNameDisplay(getPatientResource().name[0])}
+                                    <b>Name:</b> {getHumanNameDisplay(getPatientResource()?.name[0])}
                                 </Typography>
                             </Grid>
                             <Grid item>
                                 <Typography variant="body1" gutterBottom>
-                                    <b>Birthdate:</b> {getPatientResource().birthDate}
+                                    <b>Birthdate:</b> {getPatientResource()?.birthDate}
                                 </Typography>
                             </Grid>
                             <Grid item>
                                 <Typography variant="body1" gutterBottom>
-                                    <b>Gender:</b> {getPatientResource().gender}
+                                    <b>Gender:</b> {getPatientResource()?.gender}
                                 </Typography>
                             </Grid>
                             <Grid item>
                                 <Typography variant="body1" gutterBottom>
-                                    <b>Telephone:</b> {getTelecomDisplay(getPatientResource().telecom)}
+                                    <b>Telephone:</b> {getTelecomDisplay(getPatientResource()?.telecom)}
                                 </Typography>
                             </Grid>
                             <Grid item>
                                 <Typography variant="body1" gutterBottom>
-                                    <b>Address:</b> {getAddressDisplay(getPatientResource().address)}
+                                    <b>Address:</b> {getAddressDisplay(getPatientResource()?.address)}
                                 </Typography>
                             </Grid>
                         </Grid>
@@ -133,27 +133,27 @@ export default function PatientInfo(props) {
                             </Grid>
                             <Grid item>
                                 <Typography variant="body1" gutterBottom>
-                                    <b>Payor:</b> {getPayorResource().name}
+                                    <b>Payor:</b> {getPayorResource()?.name}
                                 </Typography>
                             </Grid>
                             <Grid item>
                                 <Typography variant="body1" gutterBottom>
-                                    <b>Subscriber:</b> {getCoverageResource().subscriberId} ({getCoverageResource().relationship.coding[0].display})
+                                    <b>Subscriber:</b> {getCoverageResource()?.subscriberId} ({getCoverageResource()?.relationship.coding[0].display})
                                 </Typography>
                             </Grid>
                             <Grid item>
                                 <Typography variant="body1" gutterBottom>
-                                    <b>Member ID:</b> {getCoverageResource().id}
+                                    <b>Member ID:</b> {getCoverageResource()?.id}
                                 </Typography>
                             </Grid>
                             <Grid item>
                                 <Typography variant="body1" gutterBottom>
-                                    <b>Plan:</b> {getCoverageResource().class[0].name}
+                                    <b>Plan:</b> {getCoverageResource()?.class[0].name}
                                 </Typography>
                             </Grid>
                             <Grid item>
                                 <Typography variant="body1" gutterBottom>
-                                    <b>Coverage Period:</b> {getCoverageResource().period.start} to {getCoverageResource().period.end}
+                                    <b>Coverage Period:</b> {getCoverageResource()?.period.start} to {getCoverageResource()?.period.end}
                                 </Typography>
                             </Grid>
                         </Grid>

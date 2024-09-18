@@ -122,29 +122,7 @@ export default function MainPanel() {
     sessionInfo[selectedSession].subject = subjectInfo;
     setSessions(sessionInfo);
   };
-  const [dataServers] = useState([
-    {
-      value: "http://localhost:8081/fhir",
-    },
-    {
-      value: "https://pct-ehr.davinci.hl7.org/fhir",
-    },
-  ]);
-  const [selectedDataServer, setSelectedDataServer] = useState(
-    "https://pct-ehr.davinci.hl7.org/fhir"
-  );
-  const [payerServers] = useState([
-    {
-      value: "http://localhost:8080/fhir",
-    },
-    {
-      value: "https://pct-payer.davinci.hl7.org/fhir",
-    }
-
-  ]);
-  const [selectedPayerServer, setSelectedPayerServer] = useState(
-    "https://pct-payer.davinci.hl7.org/fhir"
-  );
+  
   const [dataServerChanged, setDataServerChanged] = useState(false);
   const [payerServerChanged, setPayerServerChanged] = useState(false);
   const [mainPanelTab, setMainPanelTab] = useState("1");
@@ -208,14 +186,6 @@ export default function MainPanel() {
                     <Grid item xs={12}>
                       <Settings
                         className={classes.settings}
-                        dataServers={dataServers}
-                        selectedDataServer={selectedDataServer}
-                        setSelectedDataServer={setSelectedDataServer}
-                        setDataServerChanged={setDataServerChanged}
-                        payerServers={payerServers}
-                        selectedPayerServer={selectedPayerServer}
-                        setSelectedPayerServer={setSelectedPayerServer}
-                        setPayerServerChanged={setPayerServerChanged}
                         resetState={resetState}
                         session={sessions[selectedSession]}
                       />
@@ -265,8 +235,6 @@ export default function MainPanel() {
                   setBundleIdentifier={setBundleIdentifier}
                   pollUrl={pollUrl}
                   setPollUrl={setPollUrl}
-                  ehrUrl={selectedDataServer}
-                  payorUrl={selectedPayerServer}
                   dataServerChanged={dataServerChanged}
                   setDataServerChanged={setDataServerChanged}
                   setReceivedAEOBResponse={setReceivedAEOBResponse}
@@ -289,7 +257,6 @@ export default function MainPanel() {
                   gfeSubmitted={gfeSubmitted}
                   bundleId={bundleId}
                   bundleIdentifier={bundleIdentifier}
-                  payorUrl={selectedPayerServer}
                   pollUrl={pollUrl}
                   setPollUrl={setPollUrl}
                   receivedAEOBResponse={receivedAEOBResponse}

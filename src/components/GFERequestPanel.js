@@ -71,8 +71,12 @@ import DeleteIcon from "@mui/icons-material/Delete";
 import ListItemIcon from "@mui/material/ListItemIcon";
 import IconButton from "@mui/material/IconButton";
 import Modal from "@mui/material/Modal";
+import { AppContext } from "../Context";
 
 class GFERequestBox extends Component {
+
+  static contextType = AppContext;
+
   constructor(props) {
     super(props);
 
@@ -127,9 +131,9 @@ class GFERequestBox extends Component {
     const fetchProviders = async () => {
       try {
         const res = await Promise.all([
-          getPractitionerRoles(this.props.ehrUrl),
-          getPractitioners(this.props.ehrUrl),
-          getOrganizations(this.props.ehrUrl),
+          getPractitionerRoles(this.context.dataServer),
+          getPractitioners(this.context.dataServer),
+          getOrganizations(this.context.dataServer),
         ]);
         await Promise.all(
           res.map((r) => {
@@ -207,14 +211,14 @@ class GFERequestBox extends Component {
   };
 
   handleOpenPatients = () => {
-    getPatients(this.props.ehrUrl).then((result) => {
+    getPatients(this.context.dataServer).then((result) => {
       const patients = result.entry;
       this.props.updateSessionInfo({ patientList: patients });
     });
   };
 
   handleOpenPriority = () => {
-    getClaims(this.props.ehrUrl).then((result) => {
+    getClaims(this.context.dataServer).then((result) => {
       const priority = result.entry;
 
       this.props.updateSessionInfo({ priorityList: priority });
@@ -227,7 +231,7 @@ class GFERequestBox extends Component {
 
     // retrieve coverage and payer info about patient
     //adding other patient info here too
-    getCoverageByPatient(this.props.ehrUrl, patientId).then((result) => {
+    getCoverageByPatient(this.context.dataServer, patientId).then((result) => {
       const subscriberText = result.data[0].subscriberId;
       const relationshipText = result.data[0].relationship.coding[0].display;
       const planName = result.data[0].class[0].name;
@@ -237,7 +241,7 @@ class GFERequestBox extends Component {
       const coveragePeriod =
         coveragePeriodTextStart + " to " + coveragePeriodTextEnd;
       if (result.data && result.data.length > 0) {
-        getCoverage(this.props.ehrUrl, result.data[0].id).then(
+        getCoverage(this.context.dataServer, result.data[0].id).then(
           (coverageResult) => {
             const reference = Object.keys(coverageResult.references)[0];
             const resource = coverageResult.references[reference];
@@ -274,7 +278,7 @@ class GFERequestBox extends Component {
       }
     });
 
-    getPatientInfo(this.props.ehrUrl, patientId).then((result) => {
+    getPatientInfo(this.context.dataServer, patientId).then((result) => {
       const addressText = result[0].address[0].text;
       const birthdateText = result[0].birthDate;
       const genderText = result[0].gender;
@@ -366,13 +370,13 @@ class GFERequestBox extends Component {
   };
 
   handleOpenOrganizationList = (e) => {
-    getOrganizations(this.props.ehrUrl).then((result) => {
+    getOrganizations(this.context.dataServer).then((result) => {
       this.props.updateSessionInfo({
         organizationList: result.entry,
       });
     });
 
-    getLocations(this.props.ehrUrl).then((result) =>
+    getLocations(this.context.dataServer).then((result) =>
       this.props.updateSessionInfo({ locationList: result.entry })
     );
   };
@@ -412,7 +416,7 @@ class GFERequestBox extends Component {
     let orgReferenceList = [];
     input.gfeType = this.props.session.subjectInfo.gfeType;
 
-    const fhirServerBaseUrl = this.props.ehrUrl;
+    const fhirServerBaseUrl = this.context.dataServer;
     let claim_id = Math.floor(Math.random() * 10000); 
     input.identifier = [
       {
@@ -889,12 +893,12 @@ class GFERequestBox extends Component {
 
       const submissionBundle = this.generateBundle();
       this.props.addToLog(
-        `Submitting GFE to ${this.props.payorUrl}/Claim/$gfe-submit`,
+        `Submitting GFE to ${this.context.payerServer}/Claim/$gfe-submit`,
         "network",
         submissionBundle
       );
 
-      submitGFEClaim(this.props.payorUrl, submissionBundle)
+      submitGFEClaim(this.context.payerServer, submissionBundle)
         .then(async (response) => {
           this.props.setSubmitting(false);
           this.props.addToLog(
@@ -1511,7 +1515,7 @@ class GFERequestBox extends Component {
   };
 
   getCareTeamProviderListOptions() {
-    const fhirServerBaseUrl = this.props.ehrUrl;
+    const fhirServerBaseUrl = this.context.dataServer;
     const providerMap = [];
     this.props.session.practitionerList.forEach((practitioner) => {
       const name = practitioner.resource.name[0];
@@ -1549,7 +1553,7 @@ class GFERequestBox extends Component {
   }
 
   getProfessionalBillingProviderList() {
-    const fhirServerBaseUrl = this.props.ehrUrl;
+    const fhirServerBaseUrl = this.context.dataServer;
     const providerMap = [];
     this.props.session.practitionerRoleList.forEach((role) => {
       const practitioner =

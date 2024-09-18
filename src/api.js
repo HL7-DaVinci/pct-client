@@ -51,6 +51,30 @@ export const getCoverageByPatient = (url, patientId) => {
     })
 }
 
+export const retrieveGFEBundle = (url, taskId) => {
+    const headers = {
+        "Content-Type": "application/fhir+json",
+        "Accept": "application/fhir+json",
+        "Accept-Encoding": "identity"
+    };
+    
+    const params = {
+        "resourceType": "Parameters",
+        "parameter": [{
+          "name": "request",
+          "valueReference": {
+              "reference": `Task/${taskId}`
+              }
+        }]
+    };
+
+    return fetch(`${url}/$gfe-retrieve`, {
+        method: "POST",
+        headers: headers,
+        body: JSON.stringify(params)
+    });
+}
+
 export const submitGFEClaim = (url, bundle) => {
     const headers = {
         "Content-Type": "application/fhir+json",
@@ -96,3 +120,22 @@ export const pollAEOBStatus = (url) => {
 export const getLocations = (url) => {
     return FHIRClient(url).request("Location");
 }
+
+
+export const getCoordinationTasks = (url, requester) => {
+    let query = `_profile=http://hl7.org/fhir/us/davinci-pct/StructureDefinition/davinci-pct-gfe-coordination-task`;
+    if (requester) {
+        query += `&requester=${encodeURIComponent(requester)}`;
+    }
+    return FHIRClient(url).request(`Task?${query}`);
+}
+
+
+export const getContributorTasks = (url, contributor) => {
+    let query = `_profile=http://hl7.org/fhir/us/davinci-pct/StructureDefinition/davinci-pct-gfe-contributor-task`;
+    if (contributor) {
+        query += `&owner=${encodeURIComponent(contributor)}`;
+    }
+    return FHIRClient(url).request(`Task?${query}`);
+}
+

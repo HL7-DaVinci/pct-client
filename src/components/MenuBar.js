@@ -54,7 +54,7 @@ export default function MenuBar(props) {
             }}
           >
             <Typography variant="h6" component="div">
-              Patient Cost Transparency Client
+              PCT GFE Submission
             </Typography>
             <div
               style={{

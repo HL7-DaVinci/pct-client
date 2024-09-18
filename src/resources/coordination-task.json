@@ -1,0 +1,29 @@
+{
+  "resourceType": "Task",
+  "meta": {
+    "profile": [
+      "http://hl7.org/fhir/us/davinci-pct/StructureDefinition/davinci-pct-gfe-coordination-task"
+    ]
+  },
+  "status": "requested",
+  "intent": "order",
+  "code": {
+    "coding": [
+      {
+        "system": "http://hl7.org/fhir/us/davinci-pct/CodeSystem/PCTGFERequestTaskCSTemporaryTrialUse",
+        "code": "gfe-coordination-task"
+      }
+    ],
+    "text": "Coordination Task"
+  },
+  "reasonCode": {
+    "coding": [
+      {
+        "system": "http://hl7.org/fhir/us/davinci-pct/CodeSystem/PCTGFERequestTaskCSTemporaryTrialUse",
+        "code": "scheduled-request"
+      }
+    ]
+  },
+  "input": [
+  ]
+}

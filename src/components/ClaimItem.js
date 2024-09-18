@@ -164,15 +164,15 @@ export default function ClaimItem({ edit, rows, addOne, deleteOne }) {
       minWidth: 120,
       renderHeader: renderRequiredHeader,
       required: true,
-      valueGetter: (params) => {
-        if (params.row.productOrService) {
+      valueGetter: (value, row) => {
+        if (row.productOrService) {
           const productOrService = ProcedureCodes.find(
             (code) =>
-              `${code.code}: ${code.display}` === params.row.productOrService
+              `${code.code}: ${code.display}` === row.productOrService
           );
           if (productOrService.unitPrice !== undefined) {
-            params.row.unitPrice = productOrService.unitPrice;
-            return params.row.unitPrice;
+            row.unitPrice = productOrService.unitPrice;
+            return row.unitPrice;
           }
         }
       },
@@ -185,12 +185,12 @@ export default function ClaimItem({ edit, rows, addOne, deleteOne }) {
       minWidth: 120,
       renderHeader: renderRequiredHeader,
       required: true,
-      valueGetter: (params) => {
-        if (params.row.quantity === undefined) {
-          params.row.quantity = 1;
-          return params.row.quantity;
+      valueGetter: (value, row) => {
+        if (row.quantity === undefined) {
+          row.quantity = 1;
+          return row.quantity;
         } else {
-          return params.row.quantity;
+          return row.quantity;
         }
       },
     },
@@ -200,13 +200,13 @@ export default function ClaimItem({ edit, rows, addOne, deleteOne }) {
       type: "number",
       renderHeader: renderRequiredHeader,
       required: false, //false since always loads with productOrService
-      valueGetter: (params) => {
-        if (params.row.unitPrice) {
-          if (params.row.quantity === undefined) {
-            params.row.quantity = 1;
-            return params.row.unitPrice * params.row.quantity;
+      valueGetter: (value, row) => {
+        if (row.unitPrice) {
+          if (row.quantity === undefined) {
+            row.quantity = 1;
+            return row.unitPrice * row.quantity;
           } else {
-            return params.row.unitPrice * params.row.quantity;
+            return row.unitPrice * row.quantity;
           }
         }
       },

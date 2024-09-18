@@ -170,54 +170,46 @@ export default function AEOBBundle(props) {
     <React.Fragment>
       <Grid container direction="column">        
         
-        <Grid container direction="row" alignItems="flex-start" justifyContent="flex-start" columnSpacing="12">
-            <Grid item>
-                <Typography variant="h5" gutterBottom>
-                <b>
-                    <u>Bundle</u>
-                </b>
-                </Typography>
-            </Grid>
-            <Grid item>
-                <Button
-                variant="contained"
-                color="primary"
-                type="show-raw-gfe"
-                onClick={props.handleOpenAEOB}
+        <Grid item>
+            <Button
+            variant="contained"
+            color="primary"
+            type="show-raw-gfe"
+            onClick={props.handleOpenAEOB}
+            >
+            Raw JSON
+            </Button>
+            <Dialog
+            maxWidth="lg"
+            open={props.openAEOB}
+            onClose={props.handleCloseAEOB}
+            >
+            <DialogTitle>Raw JSON of AEOB Response:</DialogTitle>
+            <DialogContent>
+                <Box
+                noValidate
+                component="form"
+                sx={{
+                    display: "flex",
+                    flexDirection: "column",
+                    m: "auto",
+                    width: "fit-content",
+                    height: "fit-content",
+                }}
                 >
-                Raw JSON
-                </Button>
-                <Dialog
-                maxWidth="lg"
-                open={props.openAEOB}
-                onClose={props.handleCloseAEOB}
-                >
-                <DialogTitle>Raw JSON of AEOB Response:</DialogTitle>
-                <DialogContent>
-                    <Box
-                    noValidate
-                    component="form"
-                    sx={{
-                        display: "flex",
-                        flexDirection: "column",
-                        m: "auto",
-                        width: "fit-content",
-                        height: "fit-content",
-                    }}
-                    >
-                    <div>
-                        <pre>
-                        {JSON.stringify(props.aeobResponse, undefined, 2)}
-                        </pre>
-                    </div>
-                    </Box>
-                </DialogContent>
-                <DialogActions>
-                    <Button onClick={props.handleCloseAEOB}>Close</Button>
-                </DialogActions>
-                </Dialog>
-            </Grid>
+                <div>
+                    <pre>
+                    {JSON.stringify(props.aeobResponse, undefined, 2)}
+                    </pre>
+                </div>
+                </Box>
+            </DialogContent>
+            <DialogActions>
+                <Button onClick={props.handleCloseAEOB}>Close</Button>
+            </DialogActions>
+            </Dialog>
         </Grid>
+
         <Grid item>
             <Typography variant="body1" gutterBottom>
                 ID:{" "}
