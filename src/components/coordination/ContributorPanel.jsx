@@ -5,6 +5,8 @@ import { DataGrid, GridActionsCellItem, useGridApiRef } from '@mui/x-data-grid';
 import { AppContext } from '../../Context';
 import { getContributorTasks } from '../../api';
 import ContributorTaskDialog from './ContributorTaskDialog';
+import { displayInstant, displayPeriod } from '../../util/dateUtils';
+import { getPlannedServicePeriod, getRequestInitiationTime } from '../../util/taskUtils';
 
 export default function ContributorPanel() {
 
@@ -74,6 +76,21 @@ export default function ContributorPanel() {
       valueGetter: (value, row) => row.reasonCode?.coding?.find(c => c.system === "http://hl7.org/fhir/us/davinci-pct/CodeSystem/PCTGFERequestTaskCSTemporaryTrialUse")?.code 
     },
     { field: 'requester', headerName: 'Requester', valueGetter: (value, row) => value.reference },
+    {
+      field: 'initiation',
+      headerName: 'Request Initiation',
+      valueGetter: (value, row) => displayInstant(getRequestInitiationTime(row), false)
+    },
+    {
+      field: 'servicePeriod',
+      headerName: 'Service Period',
+      valueGetter: (value, row) => displayPeriod(getPlannedServicePeriod(row), false)
+    },
+    {
+      field: 'lastModified',
+      headerName: 'Task Last Modified',
+      valueGetter: (value, row) => displayInstant(row.meta?.lastUpdated)
+    }
   ];
 
   return (

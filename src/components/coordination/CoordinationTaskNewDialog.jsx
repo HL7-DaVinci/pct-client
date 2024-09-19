@@ -7,6 +7,8 @@ import { getParticipants } from "../../util/taskUtils";
 import coordinationTask from "../../resources/coordination-task.json";
 import contributorTask from "../../resources/contributor-task.json";
 import gfeInformationBundle from "../../resources/gfe-information-bundle.json";
+import { DateTimePicker, LocalizationProvider } from "@mui/x-date-pickers";
+import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs';
 
 
 
@@ -43,6 +45,9 @@ export default function CoordinationTaskNewDialog({ open, onClose, onSave }) {
 
   const [newCoordinationTask, setNewCoordinationTask] = useState(defaultCoordinationTask);
   const [isValid, setIsValid] = useState(false);
+
+  const [startDate, setStartDate] = useState(undefined);
+  const [endDate, setEndDate] = useState(undefined);
   const [participants, setParticipants] = useState([]);
   const [selectedParticipants, setSelectedParticipants] = useState([]);
 
@@ -82,6 +87,23 @@ export default function CoordinationTaskNewDialog({ open, onClose, onSave }) {
 
     
     newCoordinationTask.id = `urn:uuid:${v4()}`;
+
+    if (!newCoordinationTask.extension) {
+      newCoordinationTask.extension = [];
+    }
+
+    newCoordinationTask.extension.push({
+      url: "http://hl7.org/fhir/us/davinci-pct/StructureDefinition/requestInitiationTime",
+      valueInstant: new Date().toISOString()
+    });
+
+    newCoordinationTask.extension.push({
+      url: "http://hl7.org/fhir/us/davinci-pct/StructureDefinition/plannedServicePeriod",
+      valuePeriod: {
+        start: startDate?.toISOString(),
+        end: endDate?.toISOString()
+      }
+    });
 
     // add coordination task first
     bundle.entry.push({
@@ -149,6 +171,16 @@ export default function CoordinationTaskNewDialog({ open, onClose, onSave }) {
                 </ListItem>
               </List>
             </Grid>
+
+            <LocalizationProvider dateAdapter={AdapterDayjs}>
+              <Grid size={6}>
+                <DateTimePicker label="Service Period Start" value={startDate} onChange={(newValue) => setStartDate(newValue)} />
+              </Grid>
+
+              <Grid size={6}>
+                <DateTimePicker label="Service Period End" value={endDate} onChange={(newValue) => setEndDate(newValue)} />
+              </Grid>
+            </LocalizationProvider>
 
             <Grid size={12}>
               <Autocomplete

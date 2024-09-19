@@ -7,6 +7,8 @@ import Grid from '@mui/material/Grid2';
 import { Add, Edit, Person } from '@mui/icons-material';
 import CoordinationTaskDetailsDialog from './CoordinationTaskDetailsDialog';
 import CoordinationTaskNewDialog from './CoordinationTaskNewDialog';
+import { getPlannedServicePeriod, getRequestInitiationTime } from '../../util/taskUtils';
+import { displayInstant, displayPeriod } from '../../util/dateUtils';
 
 
 
@@ -94,9 +96,19 @@ export default function RequesterPanel({addToLog}) {
       valueGetter: (value, row) => row.reasonCode?.coding?.find(c => c.system === "http://hl7.org/fhir/us/davinci-pct/CodeSystem/PCTGFERequestTaskCSTemporaryTrialUse")?.code 
     },
     {
+      field: 'initiation',
+      headerName: 'Request Initiation',
+      valueGetter: (value, row) => displayInstant(getRequestInitiationTime(row), false)
+    },
+    {
+      field: 'servicePeriod',
+      headerName: 'Service Period',
+      valueGetter: (value, row) => displayPeriod(getPlannedServicePeriod(row), false)
+    },
+    {
       field: 'lastModified',
-      headerName: 'Last Modified',
-      valueGetter: (value, row) => row.meta?.lastUpdated
+      headerName: 'Task Last Modified',
+      valueGetter: (value, row) => displayInstant(row.meta?.lastUpdated)
     }
   ];
 
