@@ -8,6 +8,7 @@ import { getPlannedServicePeriod, getRequestInitiationTime } from "../../util/ta
 import { FHIRClient, retrieveGFEBundle, submitGFEClaim } from "../../api";
 import { TabPanel } from "../TabPanel";
 import AEOBResponsePanel from "../AEOBResponsePanel";
+import { Editor } from "@monaco-editor/react";
 
 
 
@@ -204,7 +205,12 @@ export default function CoordinationTaskDetailsDialog({ open, onClose, task, set
 
             {/* GFE Bundle tab from $gfe-retrieve */}
             <TabPanel value={currentTab} index={TAB_GFE}>
-              <pre>{JSON.stringify(gfeBundle, null, 2)}</pre>
+              <Editor
+                height="60vh"
+                defaultLanguage="json" 
+                defaultValue={JSON.stringify(task, null, 2)}
+                options={{readOnly: true}}
+              />
             </TabPanel>
 
 

@@ -23,6 +23,7 @@ import InfoIcon from "@mui/icons-material/Info";
 import ListIcon from "@mui/icons-material/List";
 import RecommendIcon from "@mui/icons-material/Recommend";
 import Draggable from "react-draggable";
+import { Editor } from "@monaco-editor/react";
 
 export default function StatusLog(props) {
   const [isOpen, setIsOpen] = React.useState(false);
@@ -122,28 +123,20 @@ export default function StatusLog(props) {
         onClose={closeLogDialog}
         PaperComponent={PaperComponent}
         scroll='paper'
+        fullWidth={true}
       >
         <DialogTitle style={{ cursor: "move" }} id="draggable-dialog-title">
           Status Log
         </DialogTitle>
         <DialogContent dividers={true}>
-          <Box
-            noValidate
-            component="form"
-            sx={{
-              display: "flex",
-              flexDirection: "column",
-              m: "auto",
-              width: "fit-content",
-              height: "fit-content",
-            }}
-          >
-            {!!activeLog ? (
-              <div>
-                <pre>{JSON.stringify(activeLog.object, undefined, 2)}</pre>
-              </div>
-            ) : null}
-          </Box>
+          {!!activeLog ? (
+            <Editor 
+              height="75vh"
+              defaultLanguage="json"
+              defaultValue={JSON.stringify(activeLog.object, undefined, 2)}
+              options={{readOnly: true}}
+            />
+          ) : <></>}
         </DialogContent>
         <DialogActions>
           <Button onClick={closeLogDialog}>Close</Button>

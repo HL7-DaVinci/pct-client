@@ -1,5 +1,6 @@
 import * as React from 'react';
 import { Box, Button, Dialog, DialogActions, DialogContent, DialogTitle } from '@mui/material';
+import { Editor } from '@monaco-editor/react';
 
 export default function ViewGFERequestDialog(props) {
     const [open, setOpen] = React.useState(false);
@@ -29,6 +30,7 @@ export default function ViewGFERequestDialog(props) {
                 maxWidth="lg"
                 open={open}
                 onClose={handleClose}
+                fullWidth={true}
             >
                 <DialogTitle>Review Generated Good Faith Estimate Request</DialogTitle>
                 <DialogContent>
@@ -37,41 +39,47 @@ export default function ViewGFERequestDialog(props) {
                             Review Generated GFE Request
                         </DialogContentText>)
                     } */}
-                    <Box
-                        noValidate
-                        component="form"
-                        sx={{
-                            display: 'flex',
-                            flexDirection: 'column',
-                            m: 'auto',
-                            width: 'fit-content',
-                            height: "fit-content"
-                        }}
-                    >
+                    
                         {
-                            error ? (<div style={{ color: "red" }}>
-                                <span>Request Validation Errors:</span>
-                                <ul>
-                                    {
-                                        request ? (request.map(error => (
-                                            <li>
-                                                {error}
-                                            </li>
-                                        ))) : (props.error.map(error => (
-                                            <li>
-                                                {error}
-                                            </li>
-                                        )))
-                                    }
-                                </ul>
+                            error ? (
+                                <Box
+                                    noValidate
+                                    component="form"
+                                    sx={{
+                                        display: 'flex',
+                                        flexDirection: 'column',
+                                        m: 'auto',
+                                        width: 'fit-content',
+                                        height: "fit-content"
+                                    }}
+                                >
+                                    <div style={{ color: "red" }}>
+                                        <span>Request Validation Errors:</span>
+                                        <ul>
+                                            {
+                                                request ? (request.map(error => (
+                                                    <li>
+                                                        {error}
+                                                    </li>
+                                                ))) : (props.error.map(error => (
+                                                    <li>
+                                                        {error}
+                                                    </li>
+                                                )))
+                                            }
+                                        </ul>
 
-                            </div>) : (
-                                <div>
-                                    <pre>{JSON.stringify(request, undefined, 2)}</pre>
-                                </div>
+                                    </div>
+                                </Box>
+                            ) : (
+                                <Editor 
+                                    height="75vh"
+                                    defaultLanguage="json"
+                                    defaultValue={JSON.stringify(request, undefined, 2)}
+                                    options={{readOnly: true}}
+                                />
                             )
                         }
-                    </Box>
                 </DialogContent>
                 <DialogActions>
                     <Button onClick={handleClose}>Close</Button>

@@ -15,6 +15,7 @@ import jp from "jsonpath";
 import PatientInfo from "./PatientInfo";
 import SubmitterInfo from "./SubmitterInfo";
 import AEOBEntry from "./AEOBEntry";
+import { Editor } from "@monaco-editor/react";
 
 const useStyles = makeStyles({
   root: {
@@ -183,26 +184,16 @@ export default function AEOBBundle(props) {
             maxWidth="lg"
             open={props.openAEOB}
             onClose={props.handleCloseAEOB}
+            fullWidth={true}
             >
             <DialogTitle>Raw JSON of AEOB Response:</DialogTitle>
             <DialogContent>
-                <Box
-                noValidate
-                component="form"
-                sx={{
-                    display: "flex",
-                    flexDirection: "column",
-                    m: "auto",
-                    width: "fit-content",
-                    height: "fit-content",
-                }}
-                >
-                <div>
-                    <pre>
-                    {JSON.stringify(props.aeobResponse, undefined, 2)}
-                    </pre>
-                </div>
-                </Box>
+              <Editor 
+                height="75vh"
+                defaultLanguage="json"
+                defaultValue={JSON.stringify(props.aeobResponse, undefined, 2)}
+                options={{readOnly: true}}
+              />
             </DialogContent>
             <DialogActions>
                 <Button onClick={props.handleCloseAEOB}>Close</Button>

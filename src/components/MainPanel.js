@@ -162,7 +162,7 @@ export default function MainPanel() {
   return (
     <React.Fragment>
       <Grid container direction="column">
-        {/* <Grid item xs={12}>
+        <Grid item xs={12}>
           <Grid container direction="column">
             <Grid item></Grid>
             <Grid item>
@@ -203,7 +203,7 @@ export default function MainPanel() {
               </Grid>
             </Grid>
           </Grid>
-        </Grid> */}
+        </Grid>
         <Grid size={12}>
           <AppBar position="static">
             <Tabs
