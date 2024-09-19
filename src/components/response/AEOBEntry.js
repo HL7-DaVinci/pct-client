@@ -86,7 +86,7 @@ export default function AEOBEntry(props) {
                                             <b>Totals:</b>
                                         </Typography>
                                     </Grid>
-                                    {props.aeob.total.map((value, index) => {
+                                    {(props.aeob?.total || []).map((value, index) => {
                                         return <Grid item key={index}>
                                             <Typography variant="body1" gutterBottom>
                                                 <b>{value.category.coding[0].display}:</b> {getTotalAmount(value)} 

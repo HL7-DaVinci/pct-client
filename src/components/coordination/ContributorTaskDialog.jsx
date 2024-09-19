@@ -1,17 +1,24 @@
 import React, { useContext, useState } from 'react';
 import { Dialog, DialogTitle, DialogContent, DialogActions, Button, Typography, List, ListItem, ListItemText } from '@mui/material';
 import Grid from '@mui/material/Grid2';
-import { Block, Check, LibraryBooks } from '@mui/icons-material';
+import { AttachFile, Block, Check, LibraryBooks } from '@mui/icons-material';
 import { getPlannedServicePeriod, getRequestInitiationTime } from '../../util/taskUtils';
 import FHIR from 'fhirclient';
 import { AppContext } from '../../Context';
 import gfeBundle from '../../resources/gfe-bundle.json';
 import { displayInstant, displayPeriod } from '../../util/dateUtils';
+import RequestPanel from '../GFERequestPanel';
+import { generateNewSession } from '../../util/gfeUtil';
 
 export default function ContributorTaskDialog({ open, onClose, task, setTask }) {
 
   const { coordinationServer } = useContext(AppContext);
   const [updated, setUpdated] = useState(false);
+  const [showGfeBuilder, setShowGfeBuilder] = useState(false);
+  const [submissionBundle, setSubmissionBundle] = useState(undefined);
+
+  // GFE builder related
+  const [gfeSession, setGfeSession] = useState(generateNewSession());
 
   const updateTask = async (status) => {
     task.status = status;
@@ -25,8 +32,17 @@ export default function ContributorTaskDialog({ open, onClose, task, setTask }) 
 
   }
 
+
+  const updateSessionInfo = (update) => {
+    setGfeSession({ ...gfeSession, ...update });
+  };
+
   const handleCreateBundle = async () => {
     console.log("Creating GFE Bundle", gfeBundle);
+    setShowGfeBuilder(true);
+  }
+
+  const attachGfeBundle = async (bundle) => {
 
     const output = [
       {
@@ -41,7 +57,7 @@ export default function ContributorTaskDialog({ open, onClose, task, setTask }) 
         },
         valueAttachment: {
           contentType: "application/fhir+json",
-          data: btoa(JSON.stringify(gfeBundle))
+          data: btoa(JSON.stringify(bundle))
         }
       }
     ];
@@ -53,12 +69,14 @@ export default function ContributorTaskDialog({ open, onClose, task, setTask }) 
 
 
   return (
-    <Dialog open={open} onClose={() => { onClose(updated) }} maxWidth="md" fullWidth={true}>
+    <Dialog open={open} onClose={() => { onClose(updated) }} maxWidth="xl" fullWidth={true}>
       <DialogTitle>Task Details</DialogTitle>
       <DialogContent>
         {!task ? 
           <p variant="body1">No task selected</p> :
           
+          !showGfeBuilder ?
+
           <div>
             <Grid container spacing={2}>
               <Grid size={6}>
@@ -90,6 +108,20 @@ export default function ContributorTaskDialog({ open, onClose, task, setTask }) 
             </Grid>
           </div>
 
+          :
+
+          <Grid container>
+            <RequestPanel 
+              embedded={true}
+              session={gfeSession}
+              updateSessionInfo={updateSessionInfo}
+              submissionBundle={submissionBundle}
+              setSubmissionBundle={setSubmissionBundle}
+              disableGfeSubmit={true}
+              addToLog={console.log}              
+            />
+          </Grid>
+
         }
       </DialogContent>
       <DialogActions>
@@ -119,13 +151,23 @@ export default function ContributorTaskDialog({ open, onClose, task, setTask }) 
              * Task has been accepted and needs to be completed
              */
             : task?.status === "accepted" ?
-              <>
+
+              !showGfeBuilder ?
+
                 <Button color="secondary" variant="contained" startIcon={<LibraryBooks/>} 
                   onClick={handleCreateBundle}
                 >
                   Create GFE Bundle
+                </Button> 
+
+                :
+
+                <Button color="primary" variant="contained" startIcon={<AttachFile />} disabled={!submissionBundle}
+                  onClick={() => { attachGfeBundle(submissionBundle) }} 
+                >
+                  Attach GFE Bundle & Complete Task
                 </Button>
-              </> 
+
             :
               <></>
             }

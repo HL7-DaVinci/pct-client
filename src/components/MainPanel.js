@@ -1,6 +1,7 @@
 import React, { useState } from "react";
 
-import { AppBar, Grid, Tabs, Tab } from "@mui/material";
+import { AppBar, Tabs, Tab } from "@mui/material";
+import Grid from "@mui/material/Grid2";
 import { createStyles, makeStyles } from "@mui/styles";
 import { TabPanel } from "./TabPanel";
 import RequestPanel from "./GFERequestPanel";
@@ -9,6 +10,7 @@ import Settings from "./Settings";
 import MenuBar from "./MenuBar";
 import * as _ from "lodash";
 import { v4 } from "uuid";
+import { generateGFE, generateNewSession } from "../util/gfeUtil";
 
 const useStyles = makeStyles((theme) =>
   createStyles({
@@ -37,51 +39,51 @@ export default function MainPanel() {
   const [showSettings, setShowSettings] = useState(false);
   const [showLogs, setShowLogs] = useState(false);
 
-  const generateGFE = () => {
-    return {
-      careTeamList: [{ id: v4() }],
-      diagnosisList: [{ id: v4() }],
-      procedureList: [{ id: v4() }],
-      claimItemList: [{ id: v4() }],
-      selectedPriority: "",
-      selectedBillingProvider: "",
-      interTransIntermediary: "",
-      supportingInfoTypeOfBill: "",
-    };
-  };
-  const generateNewSession = () => {
-    const startingGFEId = v4();
-    const initialGFEInfo = {};
-    initialGFEInfo[startingGFEId] = generateGFE();
-    return {
-      patientList: [],
-      priorityList: [],
-      practitionerRoleList: [],
-      practitionerList: [],
-      organizationList: [],
-      resolvedReferences: {},
-      selectedProcedure: undefined,
-      locationList: [],
-      subjectInfo: {
-        gfeType: "institutional",
-        memberNumber: "",
-        selectedAddress: "",
-        birthdate: "",
-        gender: "",
-        telephone: "",
-        selectedPatient: "",
-        selectedPayor: "",
-        selectedCoverage: "",
-        subscriber: "",
-        subscriberRelationship: "",
-        coveragePlan: "",
-        coveragePeriod: "",
-        selectedBillingProvider: "",
-      },
-      gfeInfo: { ...initialGFEInfo },
-      selectedGFE: startingGFEId,
-    };
-  };
+  // const generateGFE = () => {
+  //   return {
+  //     careTeamList: [{ id: v4() }],
+  //     diagnosisList: [{ id: v4() }],
+  //     procedureList: [{ id: v4() }],
+  //     claimItemList: [{ id: v4() }],
+  //     selectedPriority: "",
+  //     selectedBillingProvider: "",
+  //     interTransIntermediary: "",
+  //     supportingInfoTypeOfBill: "",
+  //   };
+  // };
+  // const generateNewSession = () => {
+  //   const startingGFEId = v4();
+  //   const initialGFEInfo = {};
+  //   initialGFEInfo[startingGFEId] = generateGFE();
+  //   return {
+  //     patientList: [],
+  //     priorityList: [],
+  //     practitionerRoleList: [],
+  //     practitionerList: [],
+  //     organizationList: [],
+  //     resolvedReferences: {},
+  //     selectedProcedure: undefined,
+  //     locationList: [],
+  //     subjectInfo: {
+  //       gfeType: "institutional",
+  //       memberNumber: "",
+  //       selectedAddress: "",
+  //       birthdate: "",
+  //       gender: "",
+  //       telephone: "",
+  //       selectedPatient: "",
+  //       selectedPayor: "",
+  //       selectedCoverage: "",
+  //       subscriber: "",
+  //       subscriberRelationship: "",
+  //       coveragePlan: "",
+  //       coveragePeriod: "",
+  //       selectedBillingProvider: "",
+  //     },
+  //     gfeInfo: { ...initialGFEInfo },
+  //     selectedGFE: startingGFEId,
+  //   };
+  // };
 
   const initialSessionId = v4();
   const [selectedSession, setSelectedSession] = useState(initialSessionId);
@@ -160,7 +162,7 @@ export default function MainPanel() {
   return (
     <React.Fragment>
       <Grid container direction="column">
-        <Grid item xs={12}>
+        {/* <Grid item xs={12}>
           <Grid container direction="column">
             <Grid item></Grid>
             <Grid item>
@@ -201,8 +203,8 @@ export default function MainPanel() {
               </Grid>
             </Grid>
           </Grid>
-        </Grid>
-        <Grid item xs={12}>
+        </Grid> */}
+        <Grid size={12}>
           <AppBar position="static">
             <Tabs
               value={mainPanelTab}
@@ -221,10 +223,10 @@ export default function MainPanel() {
             </Tabs>
           </AppBar>
         </Grid>
-        <Grid item xs={12}>
+        <Grid size={12}>
           <Grid container spacing={1}>
             <TabPanel value={mainPanelTab} index={"1"}>
-              <Grid item xs={12}>
+              <Grid size={12}>
                 <RequestPanel
                   setSubmitting={setSubmitting}
                   submittingStatus={submitting}
@@ -249,7 +251,7 @@ export default function MainPanel() {
               </Grid>
             </TabPanel>
             <TabPanel value={mainPanelTab} index={"2"}>
-              <Grid item xs={12}>
+              <Grid size={12}>
                 <ResponsePanel
                   gfeResponse={gfeResponse}
                   submittingStatus={submitting}

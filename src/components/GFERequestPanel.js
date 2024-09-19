@@ -1586,7 +1586,16 @@ class GFERequestBox extends Component {
   }
 
   handleForward() {
-    this.setState({ verticalTabIndex: this.state.verticalTabIndex + 1 });
+    const newTabIndex = this.state.verticalTabIndex + 1;
+    this.setState({ verticalTabIndex: newTabIndex });
+
+    // if we are on the summary tab, generate the submission bundle if we have all the required information
+    if (newTabIndex === 3 && (this.missingItems || []).length < 1) {
+      if (this.props.setSubmissionBundle) {
+        this.props.setSubmissionBundle(this.generateBundle());
+      } 
+    }
+
   }
   handleBackward() {
     this.setState({ verticalTabIndex: this.state.verticalTabIndex - 1 });
@@ -1697,6 +1706,7 @@ class GFERequestBox extends Component {
                   height: "100vh",
                 }}
               >
+                { !this.props.embedded &&
                 <Box
                   sx={{
                     flexDirection: "column",
@@ -1808,6 +1818,7 @@ class GFERequestBox extends Component {
                     </ListItem>
                   </List>
                 </Box>
+                }
                 <Divider orientation="vertical" />
                 {/* Patient tab */}
                 <TabPanel value={this.state.verticalTabIndex} index={0}>
@@ -2302,15 +2313,18 @@ class GFERequestBox extends Component {
                             </Button>
                           </Grid>
                           <Grid item xs={4}>
-                            <Button
-                              loading
-                              variant="contained"
-                              color="primary"
-                              type="submit"
-                              disabled={this.props.submittingStatus === true || (!!this.missingItems && this.missingItems.length > 0)}
-                            >
-                              Submit GFE
-                            </Button>
+                            {
+                              !this.props.disableGfeSubmit &&
+                              <Button
+                                loading
+                                variant="contained"
+                                color="primary"
+                                type="submit"
+                                disabled={this.props.submittingStatus === true || (!!this.missingItems && this.missingItems.length > 0)}
+                              >
+                                Submit GFE
+                              </Button>
+                            }
                           </Grid>
                         </Grid>
                       </TabPanel>
