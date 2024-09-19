@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useContext } from 'react';
+import React, { useState, useEffect, useContext, useCallback } from 'react';
 import { DataGrid, GridActionsCellItem, useGridApiRef } from '@mui/x-data-grid';
 import { getCoordinationTasks } from '../../api';
 import { AppContext } from '../../Context';
@@ -10,7 +10,7 @@ import CoordinationTaskNewDialog from './CoordinationTaskNewDialog';
 
 
 
-export default function RequesterPanel() {
+export default function RequesterPanel({addToLog}) {
   const apiRef = useGridApiRef();
   const { coordinationServer, requester } = useContext(AppContext);
   const [rows] = useState([]);
@@ -28,11 +28,9 @@ export default function RequesterPanel() {
     }
 
     getCoordinationTasks(coordinationServer, requester).then((response) => {
-      console.log("getCoordinationTasks:", response);
-
       const newRows = (response.entry || []).map((entry, index) => entry.resource);
       apiRef.current.setRows(newRows);
-    }).catch(() => {
+    }).catch((err) => {
       apiRef.current.setRows([]);
     }).finally(() => {
       apiRef.current.autosizeColumns({ includeHeaders: true, includeOutliers: true });
@@ -142,12 +140,14 @@ export default function RequesterPanel() {
           onClose={handleTaskDetailsDialogClose}
           task={currentTask}
           setTask={setCurrentTask}
+          addToLog={addToLog}
         />
 
         <CoordinationTaskNewDialog
           open={taskNewDialogOpen} 
           onClose={handleTaskNewDialogClose}
           onSave={handleTaskNewDialogSave}
+          addToLog={addToLog}
         />
       </>
     }

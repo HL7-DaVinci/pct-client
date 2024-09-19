@@ -30,9 +30,32 @@ export default function CoordinationPanel() {
   const [currentTab, setCurrentTab] = useState("requesterTab");
   const [showSettings, setShowSettings] = useState(false);
   const [showAccountSettings, setShowAccountSettings] = useState(false);
+  const [statusLogs, setStatusLogs] = useState([]);
 
 
   const classes = useStyles();
+
+
+  // function addToLog(message, type, object) {
+  const addToLog = (message, type, object) => {
+    const consoleOuput = type === "error" ? console.error : console.log;
+    consoleOuput(
+      `${new Date().toLocaleString()} :: ${
+        !!type ? type : "info"
+      } :: ${message}`,
+      object
+    );
+
+    const newLog = {
+      message: message,
+      type: type,
+      object: object,
+      time: new Date(),
+    };
+
+    setStatusLogs([newLog, ...statusLogs]);
+  };
+
 
   return (
     <div className={classes.root}>
@@ -43,6 +66,8 @@ export default function CoordinationPanel() {
             showSettings={showSettings}
             toggleAccountSettings={(showAccountSettings) => setShowAccountSettings(showAccountSettings)}
             showAccountSettings={showAccountSettings}
+            statusLogs={statusLogs}
+            setStatusLogs={setStatusLogs}
           />
         </Grid>
 
@@ -77,11 +102,15 @@ export default function CoordinationPanel() {
 
         <Grid size={12}>
           <TabPanel value={currentTab} index="requesterTab">
-            <RequesterPanel />
+            <RequesterPanel 
+              addToLog={addToLog}
+            />
           </TabPanel>
 
           <TabPanel value={currentTab} index="contributorTab">
-            <ContributorPanel />
+            <ContributorPanel 
+              addToLog={addToLog}
+            />
           </TabPanel>
         </Grid>
       </Grid>

@@ -3,6 +3,7 @@ import { createStyles, makeStyles } from "@mui/styles";
 import { AppBar, Badge, IconButton, Toolbar, Typography } from '@mui/material';
 import { ManageAccounts, Settings } from '@mui/icons-material';
 import { AppContext } from '../../Context';
+import StatusLog from '../StatusLog';
 
 
 const useStyles = makeStyles((theme) =>
@@ -39,6 +40,9 @@ export default function CoordinationMenuBar(props) {
             PCT Coordination Platform
           </Typography>
           <div className={classes.buttons}>
+
+            <StatusLog logs={props.statusLogs} setLogs={props.setStatusLogs} />
+
             <IconButton
               size="medium"
               edge="start"

@@ -1,5 +1,5 @@
-import React, { useContext, useState } from 'react';
-import { Dialog, DialogTitle, DialogContent, DialogActions, Button, Typography, List, ListItem, ListItemText } from '@mui/material';
+import React, { useContext, useEffect, useState } from 'react';
+import { Dialog, DialogTitle, DialogContent, DialogActions, Button, List, ListItem, ListItemText } from '@mui/material';
 import Grid from '@mui/material/Grid2';
 import { AttachFile, Block, Check, LibraryBooks } from '@mui/icons-material';
 import { getPlannedServicePeriod, getRequestInitiationTime } from '../../util/taskUtils';
@@ -19,6 +19,13 @@ export default function ContributorTaskDialog({ open, onClose, task, setTask }) 
 
   // GFE builder related
   const [gfeSession, setGfeSession] = useState(generateNewSession());
+
+
+  useEffect(() => {
+    if (open) {
+      setShowGfeBuilder(false);
+    }
+  }, [open]);
 
   const updateTask = async (status) => {
     task.status = status;
@@ -63,7 +70,8 @@ export default function ContributorTaskDialog({ open, onClose, task, setTask }) 
     ];
 
     task.output = output;
-    updateTask("completed");
+    updateTask(task.status);
+    onClose(true);
 
   }
 
@@ -118,7 +126,7 @@ export default function ContributorTaskDialog({ open, onClose, task, setTask }) 
               submissionBundle={submissionBundle}
               setSubmissionBundle={setSubmissionBundle}
               disableGfeSubmit={true}
-              addToLog={console.log}              
+              addToLog={console.log}
             />
           </Grid>
 
@@ -150,26 +158,35 @@ export default function ContributorTaskDialog({ open, onClose, task, setTask }) 
             /**
              * Task has been accepted and needs to be completed
              */
-            : task?.status === "accepted" ?
+            : task?.status === "accepted" &&
 
-              !showGfeBuilder ?
+            <>
 
-                <Button color="secondary" variant="contained" startIcon={<LibraryBooks/>} 
-                  onClick={handleCreateBundle}
-                >
-                  Create GFE Bundle
-                </Button> 
+              {!showGfeBuilder ? 
+                <>
+                  <Button color="primary" variant="contained" startIcon={<LibraryBooks/>} sx={{ marginRight: 2 }}
+                    onClick={handleCreateBundle}
+                  >
+                    Create GFE Bundle
+                  </Button>
 
-                :
+                  <Button color="success" variant="contained" startIcon={<Check />}
+                  onClick={() => { updateTask("completed") }}
+                  >
+                  Mark Completed
+                  </Button>
+                </>
+                
+              :
 
                 <Button color="primary" variant="contained" startIcon={<AttachFile />} disabled={!submissionBundle}
                   onClick={() => { attachGfeBundle(submissionBundle) }} 
                 >
-                  Attach GFE Bundle & Complete Task
+                  Attach GFE Bundle
                 </Button>
+              }
 
-            :
-              <></>
+            </>
             }
           </Grid>
 

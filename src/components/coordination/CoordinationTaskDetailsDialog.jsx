@@ -12,7 +12,7 @@ import { Editor } from "@monaco-editor/react";
 
 
 
-export default function CoordinationTaskDetailsDialog({ open, onClose, task, setTask }) {
+export default function CoordinationTaskDetailsDialog({ open, onClose, task, setTask, addToLog }) {
 
   const TAB_TASK = "taskTab";
   const TAB_GFE = "gfeTab";
@@ -58,9 +58,8 @@ export default function CoordinationTaskDetailsDialog({ open, onClose, task, set
   // update task.status to "completed"
   const markCompleted = async () => {
     task.status = "completed";
-    const updatedTask = 
     FHIRClient(coordinationServer).update(task).then((response) => {
-      setTask(updatedTask);
+      setTask(response);
       setUpdated(true);
     }).catch((error) => {
       console.error("Error updating task", error);
@@ -76,7 +75,7 @@ export default function CoordinationTaskDetailsDialog({ open, onClose, task, set
     retrieveGFEBundle(coordinationServer, task.id).then((response) => {
       return response.json();
     }).then((data) => {
-      console.log("GFE Bundle", data);
+      addToLog("GFE Bundle retrieved successfully", "info", data);
       setGfeBundle(data);
       setCurrentTab(TAB_GFE);
     }).catch((error) => {
@@ -101,11 +100,13 @@ export default function CoordinationTaskDetailsDialog({ open, onClose, task, set
     setGfeRequestSuccess(false);
 
     submitGFEClaim(payerServer, gfeBundle).then((response) => {
-      console.log("GFE Claim Response", response);
+      addToLog("GFE Claim Response", "info", response);
       
       if (response.status !== 200 && response.status !== 202) {
         throw new Error("Expected 200 or 202 response, received " + response.status);
       }
+
+      addToLog("GFE Claim submitted successfully", "info", response);
 
       setGfeRequestSuccess(true);
 
@@ -208,7 +209,7 @@ export default function CoordinationTaskDetailsDialog({ open, onClose, task, set
               <Editor
                 height="60vh"
                 defaultLanguage="json" 
-                defaultValue={JSON.stringify(task, null, 2)}
+                defaultValue={JSON.stringify(gfeBundle, null, 2)}
                 options={{readOnly: true}}
               />
             </TabPanel>
@@ -236,13 +237,7 @@ export default function CoordinationTaskDetailsDialog({ open, onClose, task, set
 
         <Grid size={6}>
           {
-            currentTab === TAB_TASK && task?.status !== "completed" && (
-              <Button onClick={() => { markCompleted() }} color="success" variant="contained" startIcon={<Check />}>Mark Completed</Button>
-            )
-          }
-
-          {
-            currentTab === TAB_TASK && task?.status === "completed" && (
+            currentTab === TAB_TASK && (
               <Button onClick={() => { retrieveGFE() }} color="primary" variant="contained" startIcon={<LibraryBooks />}>Retrieve GFE Bundle</Button>
             )
           }
@@ -250,6 +245,12 @@ export default function CoordinationTaskDetailsDialog({ open, onClose, task, set
           {
             currentTab === TAB_GFE && (
               <Button onClick={() => { submitGFE() }} color="primary" variant="contained" startIcon={<LibraryBooks />}>Submit GFE to Payer</Button>
+            )
+          }
+          
+          {
+            currentTab === TAB_TASK && task?.status !== "completed" && (
+              <Button onClick={() => { markCompleted() }} color="success" variant="contained" startIcon={<Check />} sx={{marginLeft: 2}}>Mark Completed</Button>
             )
           }
           
