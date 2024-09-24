@@ -124,6 +124,23 @@ export default function CoordinationTaskNewDialog({ open, onClose, onSave }) {
         owner: { reference: participant },
       }
 
+      if (!newContributorTask.extension) {
+        newContributorTask.extension = [];
+      }
+
+      newContributorTask.extension.push({
+        url: "http://hl7.org/fhir/us/davinci-pct/StructureDefinition/requestInitiationTime",
+        valueInstant: new Date().toISOString()
+      });
+  
+      newContributorTask.extension.push({
+        url: "http://hl7.org/fhir/us/davinci-pct/StructureDefinition/plannedServicePeriod",
+        valuePeriod: {
+          start: startDate?.toISOString(),
+          end: endDate?.toISOString()
+        }
+      });
+
       bundle.entry.push({
         resource: newContributorTask,
         request: {
@@ -134,15 +151,13 @@ export default function CoordinationTaskNewDialog({ open, onClose, onSave }) {
       
     });
     
-    const res = await fetch(coordinationServer, {
+    await fetch(coordinationServer, {
       method: "POST",
       headers: {
         "Content-Type": "application/fhir+json"
       },
       body: JSON.stringify(bundle)
     });
-
-    console.log("Coordination Bundle Response", res);
 
     onClose(true);
   }

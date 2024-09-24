@@ -31,7 +31,7 @@ export default function CoordinationTaskDetailsDialog({ open, onClose, task, set
   const [receivedAEOBResponse, setReceivedAEOBResponse] = useState(undefined);
 
 
-  // fetch related contrinutor tasks
+  // fetch related contributor tasks
   useEffect(() => {
 
     if (!task) {
