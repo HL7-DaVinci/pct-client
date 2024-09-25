@@ -5,7 +5,7 @@ import { DataGrid, GridActionsCellItem, useGridApiRef } from '@mui/x-data-grid';
 import { AppContext } from '../../Context';
 import { getContributorTasks } from '../../api';
 import ContributorTaskDialog from './ContributorTaskDialog';
-import { displayInstant, displayPeriod } from '../../util/dateUtils';
+import { displayInstant, displayPeriod } from '../../util/displayUtils';
 import { getPlannedServicePeriod, getRequestInitiationTime } from '../../util/taskUtils';
 
 export default function ContributorPanel() {

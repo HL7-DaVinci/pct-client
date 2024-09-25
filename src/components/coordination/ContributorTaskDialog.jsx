@@ -1,12 +1,11 @@
 import React, { useCallback, useContext, useEffect, useState } from 'react';
 import { Dialog, DialogTitle, DialogContent, DialogActions, Button, List, ListItem, ListItemText, Tabs, Tab, Accordion, AccordionSummary, AccordionDetails } from '@mui/material';
 import Grid from '@mui/material/Grid2';
-import { ArrowDropDown, AttachFile, Block, Check, LibraryBooks } from '@mui/icons-material';
+import { ArrowDropDown, AttachFile, Block, Check, LibraryBooks, Task } from '@mui/icons-material';
 import { getPlannedServicePeriod, getRequestInitiationTime } from '../../util/taskUtils';
 import FHIR from 'fhirclient';
 import { AppContext } from '../../Context';
-import gfeBundle from '../../resources/gfe-bundle.json';
-import { displayInstant, displayPeriod } from '../../util/dateUtils';
+import { displayInstant, displayPeriod } from '../../util/displayUtils';
 import RequestPanel from '../GFERequestPanel';
 import { generateNewSession } from '../../util/gfeUtil';
 import { TabPanel } from '../TabPanel';
@@ -98,7 +97,6 @@ export default function ContributorTaskDialog({ open, onClose, task, setTask }) 
   };
 
   const handleCreateBundle = async () => {
-    console.log("Creating GFE Bundle", gfeBundle);
     setShowGfeBuilder(true);
   }
 
@@ -302,12 +300,18 @@ export default function ContributorTaskDialog({ open, onClose, task, setTask }) 
                 </>
                 
               :
+                <>
+                  <Button color="primary" variant="contained" startIcon={<AttachFile />} disabled={!submissionBundle}
+                    onClick={() => { attachGfeBundle(submissionBundle) }} 
+                  >
+                    Attach GFE Bundle
+                  </Button>
 
-                <Button color="primary" variant="contained" startIcon={<AttachFile />} disabled={!submissionBundle}
-                  onClick={() => { attachGfeBundle(submissionBundle) }} 
-                >
-                  Attach GFE Bundle
-                </Button>
+                  <Button color="secondary" variant="contained" startIcon={<Task />} sx={{ mx: 2 }}
+                    onClick={() => setShowGfeBuilder(false)}>
+                    View Task Details
+                  </Button>
+                </>
               }
 
             </>

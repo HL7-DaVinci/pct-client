@@ -8,7 +8,7 @@ import { Add, Edit, Person } from '@mui/icons-material';
 import CoordinationTaskDetailsDialog from './CoordinationTaskDetailsDialog';
 import CoordinationTaskNewDialog from './CoordinationTaskNewDialog';
 import { getPlannedServicePeriod, getRequestInitiationTime } from '../../util/taskUtils';
-import { displayInstant, displayPeriod } from '../../util/dateUtils';
+import { displayInstant, displayPeriod } from '../../util/displayUtils';
 
 
 

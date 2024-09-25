@@ -1,26 +1,30 @@
 import { useContext, useEffect, useState } from "react";
 import { AppContext } from "../../Context";
-import { Button, Dialog, DialogActions, DialogContent, DialogTitle, List, ListItem, ListItemText, Paper, Tab, Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Tabs, Typography } from "@mui/material";
-import { Check, LibraryBooks } from "@mui/icons-material";
+import { Accordion, AccordionDetails, AccordionSummary, Button, Dialog, DialogActions, DialogContent, DialogTitle, List, ListItem, ListItemText, Paper, Tab, Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Tabs, Typography } from "@mui/material";
+import { ArrowDropDown, Check, LibraryBooks } from "@mui/icons-material";
 import Grid from "@mui/material/Grid2";
-import { displayInstant, displayPeriod } from "../../util/dateUtils";
+import { displayInstant, displayPeriod } from "../../util/displayUtils";
 import { getPlannedServicePeriod, getRequestInitiationTime } from "../../util/taskUtils";
 import { FHIRClient, retrieveGFEBundle, submitGFEClaim } from "../../api";
 import { TabPanel } from "../TabPanel";
 import AEOBResponsePanel from "../AEOBResponsePanel";
 import { Editor } from "@monaco-editor/react";
+import GFEInformationBundleView from "../shared/GFEInformationBundleView";
 
 
 
 export default function CoordinationTaskDetailsDialog({ open, onClose, task, setTask, addToLog }) {
 
   const TAB_TASK = "taskTab";
+  const TAB_TASK_JSON = "taskJsonTab";
+  const TAB_INFO_BUNDLE_JSON = "infoBundleJsonTab";
   const TAB_GFE = "gfeTab";
   const TAB_AEOB = "aeobTab";
   
   const { coordinationServer, payerServer } = useContext(AppContext);
   const [updated, setUpdated] = useState(false);
   const [currentTab, setCurrentTab] = useState(TAB_TASK);
+  const [infoBundle, setInfoBundle] = useState(undefined);
   const [contributorTasks, setContributorTasks] = useState([]);
   const [gfeBundle, setGfeBundle] = useState(undefined);
 
@@ -37,6 +41,19 @@ export default function CoordinationTaskDetailsDialog({ open, onClose, task, set
     if (!task) {
       return;
     }
+
+    const infoBundleInput = (task.input || []).find((input) => input.type?.coding[0].code === "gfe-information-bundle");
+    if (infoBundleInput) {
+      try {
+        const bundleData = atob(infoBundleInput.valueAttachment.data);
+        setInfoBundle(JSON.parse(bundleData));
+      }
+      catch (e) {
+        console.error("Error parsing GFE Information Bundle", e);
+        setInfoBundle(undefined);
+      }
+    }
+
     
     FHIRClient(coordinationServer).request(`Task?part-of=${task.id}`).then((response) => {
       const res = (response.entry || []).map((entry) => entry.resource);
@@ -49,6 +66,7 @@ export default function CoordinationTaskDetailsDialog({ open, onClose, task, set
   const handleClose = () => {
     setCurrentTab(TAB_TASK);
     setGfeBundle(undefined);
+    setGfeSubmitted(false);
 
     onClose(updated);
     setUpdated(false);
@@ -134,7 +152,13 @@ export default function CoordinationTaskDetailsDialog({ open, onClose, task, set
 
 
   return (
-    <Dialog open={open} onClose={() => { handleClose() }} maxWidth="xl" fullWidth={true}>
+    <Dialog open={open} onClose={() => { handleClose() }} maxWidth="xl" fullWidth={true}
+      PaperProps={{
+        sx: {
+          minHeight: "85vh",
+        }
+      }}
+    >
       <DialogTitle>Coordination Task Details</DialogTitle>
       <DialogContent>
         {!task ? 
@@ -144,6 +168,8 @@ export default function CoordinationTaskDetailsDialog({ open, onClose, task, set
 
             <Tabs value={currentTab} onChange={(e, newValue) => setCurrentTab(newValue)} variant="fullWidth">
               <Tab label="Task" value={TAB_TASK} />
+              <Tab label="Task JSON" value={TAB_TASK_JSON} />
+              <Tab label="GFE Information Bundle JSON" value={TAB_INFO_BUNDLE_JSON} />
               <Tab label="GFE Bundle" value={TAB_GFE} disabled={!gfeBundle} />
               <Tab label="GFE Submit (AEOB)" value={TAB_AEOB} disabled={!gfeSubmitted} />
             </Tabs>
@@ -201,13 +227,50 @@ export default function CoordinationTaskDetailsDialog({ open, onClose, task, set
                   </TableBody>
                 </Table>
               </TableContainer>
+
+
+              <Accordion sx={{ my: 2}}>
+                <AccordionSummary expandIcon={<ArrowDropDown />}>GFE Information Bundle Details</AccordionSummary>
+                <AccordionDetails>
+                  {
+                    !infoBundle ? <>No valid GFE information bundle attached to the coordination task.</>
+                    :
+                    <GFEInformationBundleView bundle={infoBundle} />
+                  }
+                </AccordionDetails>
+              </Accordion>
+
+            </TabPanel>
+
+            {/* Task JSON tab */}
+            <TabPanel value={currentTab} index={TAB_TASK_JSON}>
+              <Editor
+                height="65vh"
+                defaultLanguage="json" 
+                defaultValue={JSON.stringify(task, null, 2)}
+                options={{readOnly: true}}
+              />
+            </TabPanel>
+
+            {/* GFE Information Bundle JSON tab */}
+            <TabPanel value={currentTab} index={TAB_INFO_BUNDLE_JSON}>
+              {
+                !infoBundle ? <>No valid GFE information bundle attached to the coordination task.</>
+                :
+                <Editor
+                  height="65vh"
+                  defaultLanguage="json" 
+                  defaultValue={JSON.stringify(infoBundle, null, 2)}
+                  options={{readOnly: true}}
+                />
+              }
             </TabPanel>
 
 
             {/* GFE Bundle tab from $gfe-retrieve */}
             <TabPanel value={currentTab} index={TAB_GFE}>
               <Editor
-                height="60vh"
+                height="65vh"
                 defaultLanguage="json" 
                 defaultValue={JSON.stringify(gfeBundle, null, 2)}
                 options={{readOnly: true}}
@@ -237,7 +300,7 @@ export default function CoordinationTaskDetailsDialog({ open, onClose, task, set
 
         <Grid size={6}>
           {
-            currentTab === TAB_TASK && (
+            (currentTab === TAB_TASK || currentTab === TAB_TASK_JSON || currentTab === TAB_INFO_BUNDLE_JSON) && (
               <Button onClick={() => { retrieveGFE() }} color="primary" variant="contained" startIcon={<LibraryBooks />}>Retrieve GFE Bundle</Button>
             )
           }
@@ -249,7 +312,7 @@ export default function CoordinationTaskDetailsDialog({ open, onClose, task, set
           }
           
           {
-            currentTab === TAB_TASK && task?.status !== "completed" && (
+            (currentTab === TAB_TASK || currentTab === TAB_TASK_JSON || currentTab === TAB_INFO_BUNDLE_JSON) && task?.status !== "completed" && (
               <Button onClick={() => { markCompleted() }} color="success" variant="contained" startIcon={<Check />} sx={{marginLeft: 2}}>Mark Completed</Button>
             )
           }
