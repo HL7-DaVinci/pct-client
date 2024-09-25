@@ -17,11 +17,10 @@ function App() {
       value: "https://pct-coordination-platform.davinci.hl7.org/fhir",
     },
   ]);
+
   const [coordinationServer, setCoordinationServer] = useState(
     localStorage.getItem("pct-selected-coordination-server") ||
-    window.location.hostname === "localhost"
-      ? coordinationServers[0].value
-      : coordinationServers[1].value
+    (window.location.hostname === "localhost" ? coordinationServers[0].value : coordinationServers[1].value)
   );
 
   const [dataServers, setDataServers] = useState([
@@ -34,9 +33,7 @@ function App() {
   ]);
   const [dataServer, setDataServer] = useState(
     localStorage.getItem("pct-selected-data-server") ||
-    window.location.hostname === "localhost"
-      ? dataServers[0].value
-      : dataServers[1].value
+    (window.location.hostname === "localhost" ? dataServers[0].value : dataServers[1].value)
   );
   
   const [payerServers, setPayerServers] = useState([
@@ -50,9 +47,7 @@ function App() {
   ]);
   const [payerServer, setPayerServer] = useState(
     localStorage.getItem("pct-selected-payer-server") ||
-    window.location.hostname === "localhost"
-      ? payerServers[0].value
-      : payerServers[1].value
+    (window.location.hostname === "localhost" ? payerServers[0].value : payerServers[1].value)
   );
 
   const [requester, setRequester] = useState(localStorage.getItem("pct-selected-requester") || "");

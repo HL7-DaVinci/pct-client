@@ -2,23 +2,10 @@ import React, { useContext } from 'react';
 
 import { Autocomplete, TextField } from '@mui/material';
 import Grid from '@mui/material/Grid2';
-import { createStyles, makeStyles } from "@mui/styles";
 import { AppContext } from '../Context';
 
-const useStyles = makeStyles((theme) =>
-    createStyles({
-        input: {
-            fontSize: 14,
-            '& input': {
-                width: 400
-            }
-        }
-    }),
-);
 
 export default function Settings(props) {
-
-    const classes = useStyles();
 
     const {
         coordinationServers,
@@ -35,7 +22,6 @@ export default function Settings(props) {
     const handleCoordinationServerChanges = (newValue) => {
         setCoordinationServer(newValue);
         localStorage.setItem("pct-selected-coordination-server", newValue);
-        // props.setCoordinationServerChanged(true);
         if (props.resetState) {
             props.resetState();
         }
