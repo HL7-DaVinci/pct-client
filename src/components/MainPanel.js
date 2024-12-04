@@ -16,7 +16,8 @@ const useStyles = makeStyles((theme) =>
   createStyles({
     root: {
       width: "100%",
-      backgroundColor: theme.palette.background,
+      textAlign: 'start',
+      backgroundColor: theme.palette.background.paper
     },
     settings: {
       marginLeft: 30,
@@ -39,62 +40,10 @@ export default function MainPanel() {
   const [showSettings, setShowSettings] = useState(false);
   const [showLogs, setShowLogs] = useState(false);
 
-  // const generateGFE = () => {
-  //   return {
-  //     careTeamList: [{ id: v4() }],
-  //     diagnosisList: [{ id: v4() }],
-  //     procedureList: [{ id: v4() }],
-  //     claimItemList: [{ id: v4() }],
-  //     selectedPriority: "",
-  //     selectedBillingProvider: "",
-  //     interTransIntermediary: "",
-  //     supportingInfoTypeOfBill: "",
-  //   };
-  // };
-  // const generateNewSession = () => {
-  //   const startingGFEId = v4();
-  //   const initialGFEInfo = {};
-  //   initialGFEInfo[startingGFEId] = generateGFE();
-  //   return {
-  //     patientList: [],
-  //     priorityList: [],
-  //     practitionerRoleList: [],
-  //     practitionerList: [],
-  //     organizationList: [],
-  //     resolvedReferences: {},
-  //     selectedProcedure: undefined,
-  //     locationList: [],
-  //     subjectInfo: {
-  //       gfeType: "institutional",
-  //       memberNumber: "",
-  //       selectedAddress: "",
-  //       birthdate: "",
-  //       gender: "",
-  //       telephone: "",
-  //       selectedPatient: "",
-  //       selectedPayor: "",
-  //       selectedCoverage: "",
-  //       subscriber: "",
-  //       subscriberRelationship: "",
-  //       coveragePlan: "",
-  //       coveragePeriod: "",
-  //       selectedBillingProvider: "",
-  //     },
-  //     gfeInfo: { ...initialGFEInfo },
-  //     selectedGFE: startingGFEId,
-  //   };
-  // };
-
   const initialSessionId = v4();
   const [selectedSession, setSelectedSession] = useState(initialSessionId);
   const initialSession = {};
   initialSession[initialSessionId] = generateNewSession();
-
-  // const exampleSessions = require("../exampleState").exampleSessions;
-  // const initialSessionId = Object.keys(exampleSessions)[0];
-  // const [selectedSession, setSelectedSession] = useState(initialSessionId);
-  // const initialSession = {};
-  // initialSession[initialSessionId] = exampleSessions[initialSessionId];
 
   const [sessions, setSessions] = useState(initialSession);
   const addNewSession = () => {
@@ -160,50 +109,37 @@ export default function MainPanel() {
   }
 
   return (
-    <React.Fragment>
-      <Grid container direction="column">
-        <Grid item xs={12}>
-          <Grid container direction="column">
-            <Grid item></Grid>
-            <Grid item>
-              <MenuBar
-                toggleSettings={setShowSettings}
-                showSettings={showSettings}
-                toggleLogs={setShowLogs}
-                showLogs={showLogs}
-                selectedSession={selectedSession}
-                setSelectedSession={setSelectedSession}
-                sessions={Object.keys(sessions)}
-                addNewSession={addNewSession}
-                setGfeRequestSuccess={setGfeRequestSuccess}
-                setMainPanelTab={setMainPanelTab}
-                statusLogs={statusLogs}
-                setStatusLogs={setStatusLogs}
+      <div className={classes.root}>
+        <Grid container>
+          <Grid size={12}>
+            <MenuBar
+              toggleSettings={setShowSettings}
+              showSettings={showSettings}
+              toggleLogs={setShowLogs}
+              showLogs={showLogs}
+              selectedSession={selectedSession}
+              setSelectedSession={setSelectedSession}
+              sessions={Object.keys(sessions)}
+              addNewSession={addNewSession}
+              setGfeRequestSuccess={setGfeRequestSuccess}
+              setMainPanelTab={setMainPanelTab}
+              statusLogs={statusLogs}
+              setStatusLogs={setStatusLogs}
+            />
+          </Grid>
+          <Grid size={12}>
+            {showSettings ? (
+              <Settings
+                className={classes.settings}
+                resetState={resetState}
+                session={sessions[selectedSession]}
               />
-            </Grid>
-            <Grid item xs={12}>
-              <Grid container>
-                {showSettings ? (
-                  <Grid container className={classes.settings}>
-                    <Grid item xs={12}>
-                      <Settings
-                        className={classes.settings}
-                        resetState={resetState}
-                        session={sessions[selectedSession]}
-                      />
-                    </Grid>
-                  </Grid>
-                ) : (
-                  <Grid container>
-                    <Grid item>
-                      <span></span>
-                    </Grid>
-                  </Grid>
-                )}
-              </Grid>
-            </Grid>
+            ) : (
+              <span></span>
+            )}
           </Grid>
         </Grid>
+
         <Grid size={12}>
           <AppBar position="static">
             <Tabs
@@ -221,7 +157,7 @@ export default function MainPanel() {
                 value="2"
               />
             </Tabs>
-          </AppBar>
+          </AppBar>          
         </Grid>
         <Grid size={12}>
           <Grid container spacing={1}>
@@ -272,7 +208,6 @@ export default function MainPanel() {
             </TabPanel>
           </Grid>
         </Grid>
-      </Grid>
-    </React.Fragment>
+      </div>
   );
 }

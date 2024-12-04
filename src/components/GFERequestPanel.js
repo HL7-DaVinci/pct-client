@@ -1099,6 +1099,7 @@ class GFERequestBox extends Component {
 
     //diagnosis
     //check if given, and all required fields exist
+    let principalDiagnosisFound = 0;
     for (let i = 0; i < summary.diagnosisList.length; i++) {
       //if diagnosis there, but not type, throw error
       if (
@@ -1121,8 +1122,19 @@ class GFERequestBox extends Component {
         !summary.diagnosisList[i].diagnosis &&
         !summary.diagnosisList[i].type
       ) {
-        this.missingItems.push("diagnosis");
+        this.missingItems.push("diagnosis required");
       }
+
+      // check if principal diagnosis
+      if (summary.diagnosisList[i].diagnosis && summary.diagnosisList[i].type?.toLowerCase() === "principal") {
+        principalDiagnosisFound++;
+      }
+    }
+    // exactly one principal diagnosis is required
+    if (principalDiagnosisFound === 0) {
+      this.missingItems.push("diagnosis with type \"principal\" required");
+    } else if (principalDiagnosisFound > 1) {
+      this.missingItems.push("only one diagnosis with type \"principal\" allowed");
     }
 
     //procedure
@@ -1402,7 +1414,9 @@ class GFERequestBox extends Component {
   deleteOneDiagnosisItem = (id) => {
     const gfeInfo = _.cloneDeep(this.props.session.gfeInfo);
     gfeInfo[this.props.session.selectedGFE].diagnosisList =
-      this.props.session.diagnosisList.filter((item) => item.id !== id);
+      this.props.session.gfeInfo[
+        this.props.session.selectedGFE
+      ].diagnosisList.filter((item) => item.id !== id);
     this.props.updateSessionInfo({ gfeInfo });
   };
 
