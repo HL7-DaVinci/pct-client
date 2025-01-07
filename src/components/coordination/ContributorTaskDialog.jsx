@@ -81,6 +81,29 @@ export default function ContributorTaskDialog({ open, onClose, task, setTask }) 
 
   const updateTask = async (status) => {
     task.status = status;
+    if (status === "rejected"){
+      // set default statusReason
+      task.statusReason= {
+        coding: [
+          {
+            system: "http://hl7.org/fhir/us/davinci-pct/CodeSystem/PCTTaskStatusReasonCSTemporaryTrialUse",
+            code: "service-not-provided",
+            display: "Service Not Provided"
+          },
+        ],
+      };
+    }
+    if (status === "rejected" || status === "completed") {
+      task.businessStatus= {
+        coding: [
+          {
+            system: "http://hl7.org/fhir/us/davinci-pct/CodeSystem/PCTTaskBusinessStatusCSTemporaryTrialUse",
+            code: "closed",
+            display: "Closed"
+          },
+        ],
+      };
+    }
     const updatedTask = await FHIR.client(coordinationServer).update(task);
     setTask(updatedTask);
     setUpdated(true);
@@ -263,7 +286,7 @@ export default function ContributorTaskDialog({ open, onClose, task, setTask }) 
               /**
                * Task is currently requested and needs to be accepted or rejected
                */
-            task?.status === "requested" ? 
+            task?.status === "received" ?
               <>
                 <Button color="success" variant="contained" startIcon={<Check/>}
                   onClick={() => { updateTask("accepted") }}
@@ -291,7 +314,10 @@ export default function ContributorTaskDialog({ open, onClose, task, setTask }) 
                   >
                     Create GFE Bundle
                   </Button>
-
+                  <Button color="warning" variant="contained" startIcon={<Block/>} sx={{ mx: 2 }}
+                          onClick={() => { updateTask("rejected") }}>
+                    Reject Task
+                  </Button>
                   <Button color="success" variant="contained" startIcon={<Check />}
                   onClick={() => { updateTask("completed") }}
                   >

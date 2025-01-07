@@ -3,7 +3,7 @@ import { Edit, Person } from '@mui/icons-material';
 import Grid from '@mui/material/Grid2';
 import { DataGrid, GridActionsCellItem, useGridApiRef } from '@mui/x-data-grid';
 import { AppContext } from '../../Context';
-import { getContributorTasks } from '../../api';
+import {FHIRClient, getContributorTasks} from '../../api';
 import ContributorTaskDialog from './ContributorTaskDialog';
 import { displayInstant, displayPeriod } from '../../util/displayUtils';
 import { getPlannedServicePeriod, getRequestInitiationTime } from '../../util/taskUtils';
@@ -44,8 +44,18 @@ export default function ContributorPanel() {
   });
 
 
-  const openTaskDialog = (task) => {
+  const openTaskDialog = async (task) => {
+    if(task.status === "requested") {
+      // read task resource from server
+      FHIRClient(coordinationServer).request(`Task/${task.id}?_profile=http://hl7.org/fhir/us/davinci-pct/StructureDefinition/davinci-pct-gfe-contributor-task`).then((response) => {
+        task = response;
+      }).catch((error) => {
+        console.error("Error fetching task", error);
+        alert("Error fetching task: " + error?.message);
+      });
+    }
     setCurrentTask(task);
+    setRefreshTasks(task);
     setTaskDialogOpen(true);
   }
 

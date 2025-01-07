@@ -5,7 +5,7 @@
       "http://hl7.org/fhir/us/davinci-pct/StructureDefinition/davinci-pct-gfe-coordination-task"
     ]
   },
-  "status": "requested",
+  "status": "ready",
   "intent": "order",
   "code": {
     "coding": [

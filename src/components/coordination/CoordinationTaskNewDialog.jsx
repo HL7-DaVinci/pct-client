@@ -120,7 +120,7 @@ export default function CoordinationTaskNewDialog({ open, onClose, onSave }) {
 
       const newContributorTask = {
         ...defaultContributorTask,
-        partOf: { reference: newCoordinationTask.id },
+        partOf: [ { reference: newCoordinationTask.id } ],
         owner: { reference: participant },
       }
 

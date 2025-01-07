@@ -73,9 +73,30 @@ export default function CoordinationTaskDetailsDialog({ open, onClose, task, set
   }
 
 
-  // update task.status to "completed"
-  const markCompleted = async () => {
-    task.status = "completed";
+  // update task status to mark "completed", "cancelled" or "entered-in-error"
+  const updateTask = async (status) => {
+    task.status = status;
+    if (status === "completed" || status === "cancelled"){
+      // set default statusReason
+      task.statusReason= {
+        coding: [
+          {
+            system: "http://hl7.org/fhir/us/davinci-pct/CodeSystem/PCTTaskStatusReasonCSTemporaryTrialUse",
+            code: status === "completed" ? "fulfilled" : "service-cancelled",
+            display: status === "completed" ? "Fulfilled" : "Service Cancelled"
+          },
+        ],
+      };
+    }
+    task.businessStatus= {
+      coding: [
+        {
+          system: "http://hl7.org/fhir/us/davinci-pct/CodeSystem/PCTTaskBusinessStatusCSTemporaryTrialUse",
+          code: "closed",
+          display: "Closed"
+        },
+      ],
+    };
     FHIRClient(coordinationServer).update(task).then((response) => {
       setTask(response);
       setUpdated(true);
@@ -298,7 +319,7 @@ export default function CoordinationTaskDetailsDialog({ open, onClose, task, set
 
       <Grid container spacing={2} sx={{flexGrow: 1}}>
 
-        <Grid size={6}>
+        <Grid size={8}>
           {
             (currentTab === TAB_TASK || currentTab === TAB_TASK_JSON || currentTab === TAB_INFO_BUNDLE_JSON) && (
               <Button onClick={() => { retrieveGFE() }} color="primary" variant="contained" startIcon={<LibraryBooks />}>Retrieve GFE Bundle</Button>
@@ -310,11 +331,21 @@ export default function CoordinationTaskDetailsDialog({ open, onClose, task, set
               <Button onClick={() => { submitGFE() }} color="primary" variant="contained" startIcon={<LibraryBooks />}>Submit GFE to Payer</Button>
             )
           }
-          
+
           {
-            (currentTab === TAB_TASK || currentTab === TAB_TASK_JSON || currentTab === TAB_INFO_BUNDLE_JSON) && task?.status !== "completed" && (
-              <Button onClick={() => { markCompleted() }} color="success" variant="contained" startIcon={<Check />} sx={{marginLeft: 2}}>Mark Completed</Button>
+            (currentTab === TAB_TASK || currentTab === TAB_TASK_JSON || currentTab === TAB_INFO_BUNDLE_JSON) && task?.status === "in-progress" && (
+              <Button onClick={() => { updateTask("completed") }} color="success" variant="contained" startIcon={<Check />} sx={{marginLeft: 2}}>Mark Completed</Button>
             )
+          }
+          {
+              (currentTab === TAB_TASK || currentTab === TAB_TASK_JSON || currentTab === TAB_INFO_BUNDLE_JSON) && ( task?.status === "ready" || task?.status === "draft" || task?.status === "in-progress" ) && (
+                  <Button onClick={() => { updateTask("cancelled") }} color="success" variant="contained" startIcon={<Check />} sx={{marginLeft: 2}}>Mark Cancelled</Button>
+              )
+          }
+          {
+              (currentTab === TAB_TASK || currentTab === TAB_TASK_JSON || currentTab === TAB_INFO_BUNDLE_JSON) && ( task?.status === "ready" || task?.status === "draft"  || task?.status === "in-progress" ) && (
+                  <Button onClick={() => { updateTask("entered-in-error") }} color="success" variant="contained" startIcon={<Check />} sx={{marginLeft: 2}}>Mark Entered In Error</Button>
+              )
           }
           
         </Grid>
