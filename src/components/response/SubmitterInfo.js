@@ -27,8 +27,7 @@ export default function SubmitterInfo(props) {
             return "Unknown Provider";
         }
 
-        const parsedProps = { ...props }; // Adjust the structure as needed
-        const submitterProviderURL = jp.query(parsedProps, eobQuery)[0];
+        const submitterProviderURL = jp.query(props, eobQuery)[0];
         console.log("Submitter Provider URL:", submitterProviderURL);
         if (!submitterProviderURL) {
             console.warn("Provider reference not found in ExplanationOfBenefit");
