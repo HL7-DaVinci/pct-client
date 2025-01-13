@@ -18,23 +18,18 @@ export default function SubmitterInfo(props) {
     }
 
     function getSubmittingProviderId() {
-        // Retrieve the provider reference from ExplanationOfBenefit
-        const eobQuery = '$..[?(@.resourceType == "ExplanationOfBenefit")].provider.reference';
-        console.log("ExplanationOfBenefit Resources:", eobQuery);
+        // Retrieve insurer reference from ExplanationOfBenefit
+        const insurerQuery = '$..[?(@.resourceType == "ExplanationOfBenefit")].insurer.reference';
+        const submitterProviderURL = jp.query(props, insurerQuery)[0];
 
-        if (!eobQuery.length) {
-            console.warn("No ExplanationOfBenefit resources found");
-            return "Unknown Provider";
-        }
-
-        const submitterProviderURL = jp.query(props, eobQuery)[0];
-        console.log("Submitter Provider URL:", submitterProviderURL);
         if (!submitterProviderURL) {
-            console.warn("Provider reference not found in ExplanationOfBenefit");
+            console.warn("Insurer reference not found in ExplanationOfBenefit");
             return "Unknown Provider";
         }
 
-        // Construct query to fetch provider organization ID
+        console.log("Submitter Provider URL:", submitterProviderURL);
+
+        // Retrieve provider ID using the full URL
         const fullString = `$..[?(@.fullUrl == '${submitterProviderURL}')].resource.id`;
         const providerId = jp.query(props, fullString)[0];
 
@@ -43,6 +38,7 @@ export default function SubmitterInfo(props) {
             return "Unknown Provider ID";
         }
 
+        console.log("Provider ID:", providerId);
         return providerId;
     }
     return (
