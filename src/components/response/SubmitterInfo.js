@@ -7,20 +7,39 @@ export default function SubmitterInfo(props) {
     function getSubmitterResource() {
         return jp.query(props, '$..[?(@.resourceType == "ExplanationOfBenefit")]')[0];
     }
+
     function getSubmittingProviderResource(eobResource) {
-        return jp.query(props, "$..[?(@.fullUrl ==".concat("'", getSubmitterResource().provider.reference, "')].resource"))[0];
+        const submitterResource = getSubmitterResource();
+        if (!submitterResource) {
+            console.error("Submitter resource not found in AEOB bundle");
+            return null;
+        }
+        return jp.query(props, "$..[?(@.fullUrl ==".concat("'", submitterResource.provider.reference, "')].resource"))[0];
     }
 
     function getSubmittingProviderId() {
+        // Retrieve insurer reference from ExplanationOfBenefit
+        const insurerQuery = '$..[?(@.resourceType == "ExplanationOfBenefit")].insurer.reference';
+        const submitterProviderURL = jp.query(props, insurerQuery)[0];
 
-        //get the insurance url from insurance ref
-        const submitterProviderURL = jp.query(props, '$..[?(@.resourceType == "ExplanationOfBenefit")].provider.reference')[0];
+        if (!submitterProviderURL) {
+            console.warn("Insurer reference not found in ExplanationOfBenefit");
+            return "Unknown Provider";
+        }
 
-        //get the id of the provider organization using that url
-        const fullString = "$..[?(@.fullUrl ==" + "'".concat(submitterProviderURL, "'", ")].resource.id");
+        console.log("Submitter Provider URL:", submitterProviderURL);
 
-        //returns string: submitter-org-1
-        return jp.query(props, (fullString))[0];
+        // Retrieve provider ID using the full URL
+        const fullString = `$..[?(@.fullUrl == '${submitterProviderURL}')].resource.id`;
+        const providerId = jp.query(props, fullString)[0];
+
+        if (!providerId) {
+            console.warn(`No provider organization found for URL: ${submitterProviderURL}`);
+            return "Unknown Provider ID";
+        }
+
+        console.log("Provider ID:", providerId);
+        return providerId;
     }
     return (
         <React.Fragment>
