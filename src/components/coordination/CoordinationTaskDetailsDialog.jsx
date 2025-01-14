@@ -187,7 +187,8 @@ export default function CoordinationTaskDetailsDialog({ open, onClose, task, set
 
           <>
 
-            <Tabs value={currentTab} onChange={(e, newValue) => setCurrentTab(newValue)} variant="fullWidth">
+            <Tabs value={currentTab} onChange={(e, newValue) => setCurrentTab(newValue)} variant="fullWidth"
+              sx={{ position: 'sticky', top: 0, backgroundColor: 'white', zIndex: 1 }}>
               <Tab label="Task" value={TAB_TASK} />
               <Tab label="Task JSON" value={TAB_TASK_JSON} />
               <Tab label="GFE Information Bundle JSON" value={TAB_INFO_BUNDLE_JSON} />

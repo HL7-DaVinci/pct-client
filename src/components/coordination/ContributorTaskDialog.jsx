@@ -33,32 +33,29 @@ export default function ContributorTaskDialog({ open, onClose, task, setTask }) 
 
   const loadCoordinationTask = useCallback(() => {
 
-    if (task && task.partOf) {
-      setCoordinationTaskRef((task.partOf || []).find((reference) => reference.reference.includes("Task/"))?.reference);
-      if (coordinationTaskRef) {
-        FHIRClient(coordinationServer).request(coordinationTaskRef).then((coordinationTask) => {
-          setCoordinationTask(coordinationTask);
-          const infoBundleInput = (coordinationTask.input || []).find((input) => input.type?.coding[0].code === "gfe-information-bundle");
-          if (infoBundleInput) {
-            try {
-              const bundleData = atob(infoBundleInput.valueAttachment.data);
-              setInfoBundle(JSON.parse(bundleData));
-            }
-            catch (e) {
-              console.error("Error parsing GFE Information Bundle", e);
-              setInfoBundle(undefined);
-            }
+    if (coordinationTaskRef) {
+      FHIRClient(coordinationServer).request(coordinationTaskRef).then((coordinationTask) => {
+        setCoordinationTask(coordinationTask);
+        const infoBundleInput = (coordinationTask.input || []).find((input) => input.type?.coding[0].code === "gfe-information-bundle");
+        if (infoBundleInput) {
+          try {
+            const bundleData = atob(infoBundleInput.valueAttachment.data);
+            setInfoBundle(JSON.parse(bundleData));
           }
-        }).catch((error) => {
-          console.error("Error loading coordination task", error);
-          setCoordinationTaskRef(undefined);
-          setCoordinationTask(undefined);
-          setInfoBundle(undefined);
-        });
-      }
+          catch (e) {
+            console.error("Error parsing GFE Information Bundle", e);
+            setInfoBundle(undefined);
+          }
+        }
+      }).catch((error) => {
+        console.error("Error loading coordination task", error);
+        setCoordinationTaskRef(undefined);
+        setCoordinationTask(undefined);
+        setInfoBundle(undefined);
+      });
     }
 
-  }, [task, coordinationServer, coordinationTaskRef]);
+  }, [coordinationServer, coordinationTaskRef]);
 
 
   useEffect(() => {
@@ -67,7 +64,8 @@ export default function ContributorTaskDialog({ open, onClose, task, setTask }) 
     if (open) {
       setCurrentTab("summaryTab");
       setShowGfeBuilder(false);
-      loadCoordinationTask();
+      const taskRef = (task.partOf || []).find((reference) => reference.reference.includes("Task/"))?.reference;
+      setCoordinationTaskRef(taskRef);
     }
     else {
       setTask(undefined);
@@ -76,7 +74,13 @@ export default function ContributorTaskDialog({ open, onClose, task, setTask }) 
       setInfoBundle(undefined);
       setSubmissionBundle(undefined);
     }
-  }, [open, loadCoordinationTask, setTask]);
+  }, [open, setTask, task]);
+
+  useEffect(() => {
+    if (coordinationTaskRef) {
+      loadCoordinationTask();
+    }
+  }, [coordinationTaskRef, loadCoordinationTask]);
 
 
   const updateTask = async (status) => {
@@ -166,7 +170,8 @@ export default function ContributorTaskDialog({ open, onClose, task, setTask }) 
           !showGfeBuilder ?
 
           <>
-            <Tabs value={currentTab} onChange={(e, newValue) => setCurrentTab(newValue)} variant="fullWidth">
+            <Tabs value={currentTab} onChange={(e, newValue) => setCurrentTab(newValue)} variant="fullWidth"
+              sx={{ position: 'sticky', top: 0, backgroundColor: 'white', zIndex: 1 }}>
               <Tab label="Summary" value={"summaryTab"}></Tab>
               <Tab label="Contributor Task JSON" value={"taskJsonTab"}></Tab>
               <Tab label="Coordination Task JSON" value={"coordinationTaskTab"}></Tab>

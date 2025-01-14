@@ -1,5 +1,6 @@
 import React from 'react';
-import { Grid, Typography } from '@mui/material';
+import { Typography } from '@mui/material';
+import Grid from '@mui/material/Grid2';
 import jp from "jsonpath";
 
 export default function SubmitterInfo(props) {
@@ -8,7 +9,7 @@ export default function SubmitterInfo(props) {
         return jp.query(props, '$..[?(@.resourceType == "ExplanationOfBenefit")]')[0];
     }
 
-    function getSubmittingProviderResource(eobResource) {
+    function getSubmittingProviderResource() {
         const submitterResource = getSubmitterResource();
         if (!submitterResource) {
             console.error("Submitter resource not found in AEOB bundle");
@@ -43,21 +44,16 @@ export default function SubmitterInfo(props) {
     }
     return (
         <React.Fragment>
-            <Grid style={{ marginTop: 10 }}>
-
-
-                <Grid item>
-                    <Grid container spacing={0}>
-                        <Grid item xs={5}>
-                            <Typography variant="h5" gutterBottom>
-                                <b><u>GFE Submitter</u></b>
-                            </Typography>
-                        </Grid>
-                    </Grid>
-                </Grid>
-                <Grid item>
+            <Grid direction="column" container style={{ marginTop: 10 }}> 
+                <Grid>
+                    <Typography variant="h5" gutterBottom>
+                        <b><u>GFE Submitter</u></b>
+                    </Typography>
+                </Grid>                    
+                
+                <Grid>
                     <Typography variant="body1" gutterBottom className={props.classes.spaceBelow}>
-                        <b>Submitting Provider:</b> {props.getNameDisplay(getSubmittingProviderResource(jp.query(props, '$..[?(@.resourceType == "ExplanationOfBenefit")]')[0]))} ({getSubmittingProviderId()})
+                        <b>Submitting Provider:</b> {props.getNameDisplay(getSubmittingProviderResource())} ({getSubmittingProviderId()})
                     </Typography>
                 </Grid>
             </Grid>
