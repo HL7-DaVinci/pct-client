@@ -32,7 +32,6 @@ export default function ContributorPanel() {
       apiRef.current.setRows([]);
     }).finally(() => {
       apiRef.current.autosizeColumns({ includeHeaders: true, includeOutliers: true });
-      setRefreshTasks(false);
     });
   }, [coordinationServer, contributor, apiRef, refreshTasks]);
 
@@ -47,22 +46,28 @@ export default function ContributorPanel() {
   const openTaskDialog = async (task) => {
     if(task.status === "requested") {
       // read task resource from server
-      FHIRClient(coordinationServer).request(`Task/${task.id}?_profile=http://hl7.org/fhir/us/davinci-pct/StructureDefinition/davinci-pct-gfe-contributor-task`).then((response) => {
-        task = response;
+      FHIRClient(coordinationServer).request(`Task/${task.id}`).then((response) => {
+        if (response.resourceType !== "Task") {
+          throw new Error("Expected a resource of type Task");
+        }
+        setCurrentTask(response);
+        setRefreshTasks(!refreshTasks);
       }).catch((error) => {
         console.error("Error fetching task", error);
         alert("Error fetching task: " + error?.message);
       });
     }
+
     setCurrentTask(task);
-    setRefreshTasks(task);
     setTaskDialogOpen(true);
   }
 
   const handleDialogClose = (updated) => {
     setTaskDialogOpen(false);
     setCurrentTask(undefined);
-    setRefreshTasks(updated);
+    if (updated) {
+      setRefreshTasks(!refreshTasks);
+    }
   }
 
   const columns = [

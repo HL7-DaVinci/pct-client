@@ -54,8 +54,8 @@ export default function CoordinationTaskNewDialog({ open, onClose, onSave }) {
 
   useEffect(() => {
     setNewCoordinationTask({...defaultCoordinationTask});
-    setSelectedParticipants([]);
-  },[open, defaultCoordinationTask]);
+    setSelectedParticipants([requester]);
+  },[open, defaultCoordinationTask, requester]);
 
   useEffect(() => {
     getParticipants(dataServer).then((options) => {
