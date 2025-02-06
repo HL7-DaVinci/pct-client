@@ -1,6 +1,6 @@
 import { useCallback, useContext, useEffect, useMemo, useState } from "react";
 import { AppContext } from "../../Context";
-import { Autocomplete, Button, Dialog, DialogActions, DialogContent, DialogTitle, List, ListItem, ListItemText, TextField } from "@mui/material";
+import { Alert, Autocomplete, Button, Dialog, DialogActions, DialogContent, DialogTitle, List, ListItem, ListItemText, TextField } from "@mui/material";
 import Grid from "@mui/material/Grid2";
 import { v4 } from "uuid";
 import { getParticipants } from "../../util/taskUtils";
@@ -18,18 +18,17 @@ export default function CoordinationTaskNewDialog({ open, onClose, onSave }) {
 
 
   const resolveReference = useCallback((reference) => {
-    if (coordinationServer !== dataServer) {
+    // if (coordinationServer !== dataServer) {
 
-      const parts = reference.split("/");
-      const resourceType = parts[0];
-      const id = parts[1];
+    //   const parts = reference.split("/");
+    //   const resourceType = parts[0];
+    //   const id = parts[1];
 
-      console.log("new reference:", `${dataServer.replace(/\/+$/, '')}/${resourceType}/${id}`);
-      return `${dataServer.replace(/\/+$/, '')}/${resourceType}/${id}`;
-    }
+    //   return `${dataServer.replace(/\/+$/, '')}/${resourceType}/${id}`;
+    // }
 
     return reference;
-  }, [coordinationServer, dataServer]);
+  }, []); //[coordinationServer, dataServer]);
 
   const defaultCoordinationTask = useMemo(() => ({
     ...coordinationTask, 
@@ -60,6 +59,7 @@ export default function CoordinationTaskNewDialog({ open, onClose, onSave }) {
 
   const [newCoordinationTask, setNewCoordinationTask] = useState(defaultCoordinationTask);
   const [isValid, setIsValid] = useState(false);
+  const [errorMsg, setErrorMsg] = useState(undefined);
 
   const [startDate, setStartDate] = useState(undefined);
   const [endDate, setEndDate] = useState(undefined);
@@ -68,6 +68,7 @@ export default function CoordinationTaskNewDialog({ open, onClose, onSave }) {
 
 
   useEffect(() => {
+    setErrorMsg(undefined);
     setNewCoordinationTask({...defaultCoordinationTask});
     setSelectedParticipants([requester]);
   },[open, defaultCoordinationTask, requester]);
@@ -165,16 +166,40 @@ export default function CoordinationTaskNewDialog({ open, onClose, onSave }) {
       });
       
     });
-    
-    await fetch(coordinationServer, {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/fhir+json"
-      },
-      body: JSON.stringify(bundle)
-    });
 
-    onClose(true);
+    setErrorMsg(undefined);
+    
+    try {
+
+      const response = await fetch(coordinationServer, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/fhir+json"
+        },
+        body: JSON.stringify(bundle)
+      });
+
+      response.json().then((data) => {
+        if (response.ok) {
+          onClose(true);
+          return;
+        }
+
+        if (data.issue && data.issue.length > 0) {
+          setErrorMsg(data.issue[0].diagnostics);
+        }
+        else {
+          console.error("Error saving task:", data);
+          setErrorMsg("An error occurred while saving the task. Check the console or server logs for more information.");
+        }
+      });
+
+    }
+    catch (error) {
+      console.error("Error saving task:", error);
+      setErrorMsg("An error occurred while saving the task. Check the console or server logs for more information.");
+    }
+    
   }
 
   return (
@@ -186,8 +211,10 @@ export default function CoordinationTaskNewDialog({ open, onClose, onSave }) {
       { !newCoordinationTask ? <div>No task defined.</div> :
 
         <div>
-          <pre>coordinationServer: { coordinationServer }</pre>
-          <pre>dataServer: { dataServer }</pre>
+          { 
+            errorMsg && 
+            <Alert severity="error">{errorMsg}</Alert>
+          }
           <Grid container spacing={2}>
             <Grid size={6}>
               <List>
