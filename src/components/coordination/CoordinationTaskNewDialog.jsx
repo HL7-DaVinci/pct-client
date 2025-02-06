@@ -1,4 +1,4 @@
-import { useContext, useEffect, useMemo, useState } from "react";
+import { useCallback, useContext, useEffect, useMemo, useState } from "react";
 import { AppContext } from "../../Context";
 import { Autocomplete, Button, Dialog, DialogActions, DialogContent, DialogTitle, List, ListItem, ListItemText, TextField } from "@mui/material";
 import Grid from "@mui/material/Grid2";
@@ -16,9 +16,24 @@ export default function CoordinationTaskNewDialog({ open, onClose, onSave }) {
   
   const { coordinationServer, dataServer, requester } = useContext(AppContext);
 
+
+  const resolveReference = useCallback((reference) => {
+    if (coordinationServer !== dataServer) {
+
+      const parts = reference.split("/");
+      const resourceType = parts[0];
+      const id = parts[1];
+
+      console.log("new reference:", `${dataServer.replace(/\/+$/, '')}/${resourceType}/${id}`);
+      return `${dataServer.replace(/\/+$/, '')}/${resourceType}/${id}`;
+    }
+
+    return reference;
+  }, [coordinationServer, dataServer]);
+
   const defaultCoordinationTask = useMemo(() => ({
     ...coordinationTask, 
-    requester: { reference: requester },
+    requester: { reference: resolveReference(requester) },
     input: [
       {
         "type": {
@@ -36,12 +51,12 @@ export default function CoordinationTaskNewDialog({ open, onClose, onSave }) {
         }
       }
     ]
-  }),[requester]);
+  }),[resolveReference, requester]);
 
   const defaultContributorTask = useMemo(() => ({
     ...contributorTask,
-    requester: { reference: requester }
-  }),[requester]);
+    requester: { reference: resolveReference(requester) }
+  }),[resolveReference, requester]);
 
   const [newCoordinationTask, setNewCoordinationTask] = useState(defaultCoordinationTask);
   const [isValid, setIsValid] = useState(false);
@@ -121,7 +136,7 @@ export default function CoordinationTaskNewDialog({ open, onClose, onSave }) {
       const newContributorTask = {
         ...defaultContributorTask,
         partOf: [ { reference: newCoordinationTask.id } ],
-        owner: { reference: participant },
+        owner: { reference: resolveReference(participant) },
       }
 
       if (!newContributorTask.extension) {
@@ -171,6 +186,8 @@ export default function CoordinationTaskNewDialog({ open, onClose, onSave }) {
       { !newCoordinationTask ? <div>No task defined.</div> :
 
         <div>
+          <pre>coordinationServer: { coordinationServer }</pre>
+          <pre>dataServer: { dataServer }</pre>
           <Grid container spacing={2}>
             <Grid size={6}>
               <List>

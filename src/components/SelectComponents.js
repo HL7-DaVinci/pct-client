@@ -1,11 +1,5 @@
 import { Select, MenuItem } from "@mui/material";
-
-export const getPatientDisplayName = (patient) => {
-  if (patient === undefined) return null;
-  const name = patient.resource.name[0];
-  if (name.text != null) return name.text;
-  else return `${name.given[0]} ${name.family}`;
-};
+import { getHumanDisplayName } from "../util/displayUtils";
 
 export const PatientSelect = (
   patients,
@@ -26,7 +20,7 @@ export const PatientSelect = (
         patients.map((patient) => {
           return (
             <MenuItem key={patient.resource.id} value={patient.resource.id}>
-              {getPatientDisplayName(patient)}
+              {getHumanDisplayName(patient.resource)}
             </MenuItem>
           );
         })

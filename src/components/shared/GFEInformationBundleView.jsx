@@ -1,8 +1,7 @@
 import React, { useCallback, useEffect, useState } from 'react';
 import { Paper, Table, TableHead, TableRow, TableCell, TableBody, TableContainer } from '@mui/material';
 import Grid from '@mui/material/Grid2';
-import { getPatientDisplayName } from '../SelectComponents';
-import { displayAddress, displayPeriod } from '../../util/displayUtils';
+import { displayAddress, displayPeriod, getCodingDisplayFragment, getDisplayForReferenceFromBundle, getHumanDisplayName } from '../../util/displayUtils';
 
 
 export default function GFEInformationBundleView({ bundle }) {
@@ -87,7 +86,7 @@ export default function GFEInformationBundleView({ bundle }) {
                     return (
                       <TableRow>
                         <TableCell>{patient.resource.id}</TableCell>
-                        <TableCell>{getPatientDisplayName(patient)}</TableCell>
+                        <TableCell>{getHumanDisplayName(patient.resource)}</TableCell>
                         <TableCell>{patient.resource.birthDate}</TableCell>
                         <TableCell>{patient.resource.gender}</TableCell>
                         <TableCell>{patient.resource.telecom[0]?.value}</TableCell>
@@ -126,9 +125,9 @@ export default function GFEInformationBundleView({ bundle }) {
                 <TableRow>
                   <TableCell>{coverage.resource.id}</TableCell>
                   <TableCell>{coverage.resource.status}</TableCell>
-                  <TableCell>{coverage.resource.beneficiary?.reference}</TableCell>
+                  <TableCell>{ getDisplayForReferenceFromBundle(coverage.resource.beneficiary?.reference, bundle)}</TableCell>
                   <TableCell>{coverage.resource.subscriberId}</TableCell>
-                  <TableCell>{(coverage.resource.payor||[])[0]?.reference}</TableCell>
+                  <TableCell>{ getDisplayForReferenceFromBundle((coverage.resource.payor||[])[0]?.reference, bundle) }</TableCell>
                   <TableCell>{(coverage.resource.relationship?.coding||[])[0]?.code}</TableCell>
                   <TableCell>{ displayPeriod(coverage.resource.period, false)}</TableCell>
                 </TableRow>
@@ -213,7 +212,7 @@ export default function GFEInformationBundleView({ bundle }) {
                       <TableRow>
                         <TableCell>{location.resource.id}</TableCell>
                         <TableCell>{location.resource.name}</TableCell>
-                        <TableCell>{((location.resource.type||[])[0]?.coding||[]).map(c => c.code).join(", ")}</TableCell>
+                        <TableCell>{((location.resource.type||[])[0]?.coding||[]).map(c => c.display ?? c.code).join(", ")}</TableCell>
                         <TableCell>{(location.resource.telecom||[])[0]?.value}</TableCell>
                         <TableCell>{displayAddress((location.resource.address||[])[0])}</TableCell>
                       </TableRow>
@@ -259,8 +258,8 @@ export default function GFEInformationBundleView({ bundle }) {
                         <TableCell>{serviceRequest.resource.id}</TableCell>
                         <TableCell>{serviceRequest.resource.status}</TableCell>
                         <TableCell>{serviceRequest.resource.intent}</TableCell>
-                        <TableCell>{serviceRequest.resource.subject?.reference}</TableCell>
-                        <TableCell>{serviceRequest.resource.requester?.reference}</TableCell>
+                        <TableCell>{getDisplayForReferenceFromBundle(serviceRequest.resource.subject?.reference, bundle)}</TableCell>
+                        <TableCell>{getDisplayForReferenceFromBundle(serviceRequest.resource.requester?.reference, bundle)}</TableCell>
                         <TableCell>
                           {
                             serviceRequest.resource.occurrencePeriod ? 
@@ -268,7 +267,11 @@ export default function GFEInformationBundleView({ bundle }) {
                             : serviceRequest.resource.occurrenceDateTime?.toLocaleString()
                           }
                         </TableCell>
-                        <TableCell>{((serviceRequest.resource.code?.coding||[]).map(c => `${c.code} (${c.system || 'unknown'})`).join(", "))}</TableCell>
+                        <TableCell>
+                          {
+                            getCodingDisplayFragment(serviceRequest.resource.code?.coding)
+                          }
+                        </TableCell>
                         <TableCell>{serviceRequest.resource.quantityQuantity?.value}</TableCell>
                       </TableRow>
                     );
@@ -313,8 +316,8 @@ export default function GFEInformationBundleView({ bundle }) {
                         <TableCell>{deviceRequest.resource.id}</TableCell>
                         <TableCell>{deviceRequest.resource.status}</TableCell>
                         <TableCell>{deviceRequest.resource.intent}</TableCell>
-                        <TableCell>{deviceRequest.resource.subject?.reference}</TableCell>
-                        <TableCell>{deviceRequest.resource.requester?.reference}</TableCell>
+                        <TableCell>{ getDisplayForReferenceFromBundle(deviceRequest.resource.subject?.reference, bundle) }</TableCell>
+                        <TableCell>{ getDisplayForReferenceFromBundle(deviceRequest.resource.requester?.reference, bundle) }</TableCell>
                         <TableCell>
                           {
                             deviceRequest.resource.occurrencePeriod ? 
@@ -327,7 +330,7 @@ export default function GFEInformationBundleView({ bundle }) {
                             deviceRequest.resource.codeReference ?
                             deviceRequest.resource.codeReference.reference
                             :
-                            (deviceRequest.resource.codeCodeableConcept?.coding||[]).map(c => `${c.code} (${c.system || 'unknown'})`).join(", ")
+                            getCodingDisplayFragment(deviceRequest.resource.codeCodeableConcept?.coding)
                           }
                         </TableCell>
                       </TableRow>
