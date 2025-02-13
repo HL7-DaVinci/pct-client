@@ -994,6 +994,30 @@ class GFERequestBox extends Component {
       }
     });
 
+    // Fix extensions in Claim resources to comply with FHIR constraints
+    uniqueEntries.forEach((entry) => {
+      if (entry.resource.resourceType === "Claim") {
+        const claim = entry.resource;
+
+        if (claim.provider && claim.provider.extension) {
+          claim.provider.extension = claim.provider.extension.map((ext) => {
+            if (ext.extension && ext.value) {
+              console.warn(`Removing value[x] from extension in Claim/${claim.id} due to FHIR constraint violation`, ext);
+              delete ext.value; // Ensure compliance with FHIR ext-1 constraint
+            }
+
+            // Ensure the extension has a valid structure but keep value dynamic
+            if (!ext.extension && !ext.value) {
+              console.warn(`Adding missing value[x] to extension in Claim/${claim.id}`, ext);
+              ext.valueCodeableConcept = {}; // Empty object to ensure valid structure
+            }
+
+            return ext;
+          });
+        }
+      }
+    });
+    
     // Track missing referenced resources
     const referencedResources = new Set();
 
@@ -1054,7 +1078,6 @@ class GFERequestBox extends Component {
 
     return collection_bundle;
   };
-
 
   retrieveRequestSummary = () => {
     if (Object.keys(this.props.session.gfeInfo).length === 0) {
