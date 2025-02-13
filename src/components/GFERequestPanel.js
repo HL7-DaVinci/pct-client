@@ -962,34 +962,87 @@ class GFERequestBox extends Component {
 
   generateBundle = () => {
     const ri = Object.keys(this.props.session.gfeInfo).map((gfeId) =>
-      this.generateRequestInput(gfeId)
+        this.generateRequestInput(gfeId)
     );
+
     // Generate a GFE Bundle per Claim (GFE)
     const bundles = ri.map((input) => buildGFEBundle(input));
-    // Collapse all individual GFE bundles into a single gfe bundle with no repeating resources
+
+    // Collapse all individual GFE bundles into a single GFE bundle with no repeating resources
     const bundleEntries = bundles.reduce((acc, e) => {
       acc.push(...e.entry);
       return acc;
     }, []);
+
     const enteredIds = new Set();
     const uniqueEntries = [];
+
     // don't include duplicates in accumulation of entries
     bundleEntries.forEach((e) => {
-      if (
-        e.resource.resourceType === "Claim" ||
-        !enteredIds.has(e.resource.id)
-      ) {
+      if (e.resource.resourceType === "Claim" || !enteredIds.has(e.resource.id)) {
         uniqueEntries.push(e);
         enteredIds.add(e.resource.id);
       }
     });
+
+    // Track missing referenced resources
+    const referencedResources = new Set();
+
+    uniqueEntries.forEach((entry) => {
+      const resource = entry.resource;
+
+      if (resource.resourceType === "Procedure" && resource.procedure?.reference) {
+        referencedResources.add(resource.procedure.reference);
+      }
+
+      // Collect references from Diagnoses (Condition)
+      if (resource.resourceType === "Condition" && resource.condition?.reference) {
+        referencedResources.add(resource.condition.reference);
+      }
+
+      // Collect references from PractitionerRoles to Organizations
+      if (resource.resourceType === "PractitionerRole" && resource.organization?.reference) {
+        referencedResources.add(resource.organization.reference);
+      }
+    });
+
+    // Add missing referenced resources from available lists
+    this.props.session.careTeamProviderList.forEach(provider => {
+      if (referencedResources.has(`Practitioner/${provider.id}`) && !enteredIds.has(provider.id)) {
+        uniqueEntries.push({ resource: provider });
+        enteredIds.add(provider.id);
+      }
+    });
+
+    this.props.session.professionalBillingProviderList.forEach(providerRole => {
+      if (referencedResources.has(`PractitionerRole/${providerRole.id}`) && !enteredIds.has(providerRole.id)) {
+        uniqueEntries.push({ resource: providerRole });
+        enteredIds.add(providerRole.id);
+      }
+
+      // Ensure organizations referenced by PractitionerRole are included
+      if (providerRole.organization?.reference) {
+        referencedResources.add(providerRole.organization.reference);
+      }
+    });
+
+    this.props.session.organizationList.forEach(org => {
+      if (referencedResources.has(`Organization/${org.id}`) && !enteredIds.has(org.id)) {
+        uniqueEntries.push({ resource: org });
+        enteredIds.add(org.id);
+      }
+    });
+
     // Now put all unique entries into a single bundle and remove the rest of the bundles
     bundles[0].entry = uniqueEntries;
     bundles.length = 1;
-    // Create a GFE Collection Bundle with the single GFE Bundle and the resources in it.
+
+    // Create a GFE Collection Bundle with the single GFE Bundle and its resources
     const collection_bundle = buildGFECollectionBundle(bundles, ri[0].bundleResources);
+
     return collection_bundle;
   };
+
 
   retrieveRequestSummary = () => {
     if (Object.keys(this.props.session.gfeInfo).length === 0) {
