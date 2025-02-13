@@ -1007,20 +1007,23 @@ class GFERequestBox extends Component {
     });
 
     // Add missing referenced resources from available lists
-    this.props.session.careTeamProviderList.forEach(provider => {
+    const providerMap = this.getCareTeamProviderListOptions();
+    providerMap.forEach(provider => {
       if (referencedResources.has(`Practitioner/${provider.id}`) && !enteredIds.has(provider.id)) {
         uniqueEntries.push({ resource: provider });
         enteredIds.add(provider.id);
       }
     });
 
-    this.props.session.professionalBillingProviderList.forEach(providerRole => {
+    const billingProviderMap = this.getProfessionalBillingProviderList();
+    billingProviderMap.forEach(providerRole => {
       if (referencedResources.has(`PractitionerRole/${providerRole.id}`) && !enteredIds.has(providerRole.id)) {
         uniqueEntries.push({ resource: providerRole });
         enteredIds.add(providerRole.id);
       }
 
       // Ensure organizations referenced by PractitionerRole are included
+
       if (providerRole.organization?.reference) {
         referencedResources.add(providerRole.organization.reference);
       }
