@@ -970,7 +970,16 @@ class GFERequestBox extends Component {
 
     // Collapse all individual GFE bundles into a single GFE bundle with no repeating resources
     const bundleEntries = bundles.reduce((acc, e) => {
-      acc.push(...e.entry);
+      e.entry.forEach((entry) => {
+        const resource = entry.resource;
+        if (resource.resourceType === "Claim" && entry.fullUrl) {
+          const extractedId = entry.fullUrl.split("/").pop(); // Extracts the last part of the URL
+          if (!resource.id) {
+            resource.id = extractedId;
+          }
+        }
+        acc.push(entry);
+      });
       return acc;
     }, []);
 
