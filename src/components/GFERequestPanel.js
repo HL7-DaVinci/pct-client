@@ -1006,18 +1006,62 @@ class GFERequestBox extends Component {
               delete ext.value; // Ensure compliance with FHIR ext-1 constraint
             }
 
-            // Ensure the extension has a valid structure but keep value dynamic
             if (!ext.extension && !ext.value) {
-              console.warn(`Adding missing value[x] to extension in Claim/${claim.id}`, ext);
-              ext.valueCodeableConcept = {}; // Empty object to ensure valid structure
+             console.warn(`Adding missing value[x]`);
+              ext.valueCodeableConcept = {
+                /*coding: [
+                  {
+                    //Placeholders
+                    system: "http://nucc.org/provider-taxonomy",
+                    code: "2084N0400X",
+                    display: "Neurology Physician"
+                  }
+                ] */
+              }
             }
+
+            // Retrieve provider role info dynamically
+            /*const providerRole = uniqueEntries.find(
+                (e) => e.resource.resourceType === "PractitionerRole" && e.resource.practitioner?.reference === claim.provider.reference
+            );
+
+            if (!ext.extension && !ext.value && providerRole) {
+              const specialty = providerRole.resource.specialty?.[0]; // Assume first specialty is primary
+
+              if (specialty?.coding?.length) {
+                ext.valueCodeableConcept = specialty; // Use dynamically retrieved specialty
+              } else {
+                console.warn(`Missing specialty for PractitionerRole/${providerRole.resource.id}, extension may be incomplete.`);
+              }
+            }*/
 
             return ext;
           });
         }
       }
     });
-    
+
+    // Fix Coverage resources to remove invalid extensions
+    uniqueEntries.forEach((entry) => {
+      if (entry.resource.resourceType === "Coverage") {
+        const coverage = entry.resource;
+
+        // Ensure it follows Da Vinci PCT Profile
+        coverage.meta = {
+          profile: ["http://hl7.org/fhir/us/davinci-pct/StructureDefinition/davinci-pct-coverage"]
+        };
+
+        // Remove invalid extension
+        if (coverage.extension && Array.isArray(coverage.extension)) {
+          console.log(`Before filtering extensions in Coverage/${coverage.id}:`, coverage.extension);
+          coverage.extension = coverage.extension.filter(
+              (ext) => ext.url !== "http://hl7.org/fhir/5.0/StructureDefinition/extension-Coverage.kind"
+          );
+          console.log(`After filtering extensions in Coverage/${coverage.id}:`, coverage.extension);
+        }
+      }
+    });
+
     // Track missing referenced resources
     const referencedResources = new Set();
 
@@ -1041,7 +1085,8 @@ class GFERequestBox extends Component {
 
     // Add missing referenced resources from available lists
     const providerMap = this.getCareTeamProviderListOptions();
-    providerMap.forEach(provider => {
+    const providerListOptions = providerMap.map((provider) => provider.display);
+    providerListOptions.forEach(provider => {
       if (referencedResources.has(`Practitioner/${provider.id}`) && !enteredIds.has(provider.id)) {
         uniqueEntries.push({ resource: provider });
         enteredIds.add(provider.id);
