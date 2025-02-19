@@ -537,6 +537,17 @@ class GFERequestBox extends Component {
           if (providerTypeCoding.system === "http://nucc.org/provider-taxonomy") {
             providerTaxonomy = providerType
           }
+          else {
+            providerTaxonomy = {
+              coding: [
+                {
+                  system: "http://nucc.org/provider-taxonomy",
+                  code: "208D00000X",
+                  display: "General Practice"
+                }
+              ]
+            }
+          }
         });
       });
       providerReference = `Organization/${this.props.session.gfeInfo[gfeId].selectedBillingProvider}`;
@@ -991,74 +1002,6 @@ class GFERequestBox extends Component {
       if (e.resource.resourceType === "Claim" || !enteredIds.has(e.resource.id)) {
         uniqueEntries.push(e);
         enteredIds.add(e.resource.id);
-      }
-    });
-
-    // Fix extensions in Claim resources to comply with FHIR constraints
-    uniqueEntries.forEach((entry) => {
-      if (entry.resource.resourceType === "Claim") {
-        const claim = entry.resource;
-
-        if (claim.provider && claim.provider.extension) {
-          claim.provider.extension = claim.provider.extension.map((ext) => {
-            if (ext.extension && ext.value) {
-              console.warn(`Removing value[x] from extension in Claim/${claim.id} due to FHIR constraint violation`, ext);
-              delete ext.value; // Ensure compliance with FHIR ext-1 constraint
-            }
-
-            if (!ext.extension && !ext.value) {
-             console.warn(`Adding missing value[x]`);
-              ext.valueCodeableConcept = {
-                /*coding: [
-                  {
-                    //Placeholders
-                    system: "http://nucc.org/provider-taxonomy",
-                    code: "2084N0400X",
-                    display: "Neurology Physician"
-                  }
-                ] */
-              }
-            }
-
-            // Retrieve provider role info dynamically
-            /*const providerRole = uniqueEntries.find(
-                (e) => e.resource.resourceType === "PractitionerRole" && e.resource.practitioner?.reference === claim.provider.reference
-            );
-
-            if (!ext.extension && !ext.value && providerRole) {
-              const specialty = providerRole.resource.specialty?.[0]; // Assume first specialty is primary
-
-              if (specialty?.coding?.length) {
-                ext.valueCodeableConcept = specialty; // Use dynamically retrieved specialty
-              } else {
-                console.warn(`Missing specialty for PractitionerRole/${providerRole.resource.id}, extension may be incomplete.`);
-              }
-            }*/
-
-            return ext;
-          });
-        }
-      }
-    });
-
-    // Fix Coverage resources to remove invalid extensions
-    uniqueEntries.forEach((entry) => {
-      if (entry.resource.resourceType === "Coverage") {
-        const coverage = entry.resource;
-
-        // Ensure it follows Da Vinci PCT Profile
-        coverage.meta = {
-          profile: ["http://hl7.org/fhir/us/davinci-pct/StructureDefinition/davinci-pct-coverage"]
-        };
-
-        // Remove invalid extension
-        if (coverage.extension && Array.isArray(coverage.extension)) {
-          console.log(`Before filtering extensions in Coverage/${coverage.id}:`, coverage.extension);
-          coverage.extension = coverage.extension.filter(
-              (ext) => ext.url !== "http://hl7.org/fhir/5.0/StructureDefinition/extension-Coverage.kind"
-          );
-          console.log(`After filtering extensions in Coverage/${coverage.id}:`, coverage.extension);
-        }
       }
     });
 
