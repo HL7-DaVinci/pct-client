@@ -21,26 +21,31 @@ export default function RequesterPanel({addToLog}) {
   const [currentTask, setCurrentTask] = useState(undefined);
   const [refreshTasks, setRefreshTasks] = useState(false);
 
-
   // fetch coordination tasks
   useEffect(() => {
-    if (!requester || !apiRef) {
+    if (!requester) {
       return;
     }
 
     getCoordinationTasks(coordinationServer, requester)
         .then((response) => {
           const newRows = (response.entry || []).map((entry) => entry.resource);
-          setRows(newRows); // Update state correctly
+
+          // Merge existing tasks to prevent UI flickering
+          setRows((prevRows) => {
+            const newTaskIds = new Set(newRows.map((task) => task.id));
+            const mergedRows = [...newRows, ...prevRows.filter((task) => !newTaskIds.has(task.id))];
+            return mergedRows;
+          });
         })
         .catch(() => {
-          setRows([]); // Clear on failure
+          setRows([]);
         })
         .finally(() => {
-          apiRef.current.autosizeColumns({ includeHeaders: true, includeOutliers: true });
           setRefreshTasks(false);
         });
-  }, [coordinationServer, requester, refreshTasks]);
+
+  }, [coordinationServer, requester, refreshTasks]); // Refresh on task changes
 
   useEffect(() => {
     if (apiRef?.current && apiRef.current.autosizeColumns) {
@@ -70,10 +75,10 @@ export default function RequesterPanel({addToLog}) {
     setRefreshTasks(updated);
   }
 
-  const handleTaskNewDialogSave = () => {
-    setRefreshTasks(true);
+  const handleTaskNewDialogSave = (task) => {
+    setRows((prevRows) => [task, ...prevRows]); // Immediately add task to UI
+    setRefreshTasks(true); // Still refresh to sync with API
   };
-
 
   const columns = [
     { 
