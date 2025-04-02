@@ -15,7 +15,7 @@ import { displayInstant, displayPeriod } from '../../util/displayUtils';
 export default function RequesterPanel({addToLog}) {
   const apiRef = useGridApiRef();
   const { coordinationServer, requester } = useContext(AppContext);
-  const [rows] = useState([]);
+  const [rows, setRows] = useState([]);
   const [taskDetailsDialogOpen, setTaskDetailsDialogOpen] = useState(false);
   const [taskNewDialogOpen, setTaskNewDialogOpen] = useState(false);
   const [currentTask, setCurrentTask] = useState(undefined);
@@ -24,22 +24,23 @@ export default function RequesterPanel({addToLog}) {
 
   // fetch coordination tasks
   useEffect(() => {
-
     if (!requester || !apiRef) {
       return;
     }
 
-    getCoordinationTasks(coordinationServer, requester).then((response) => {
-      const newRows = (response.entry || []).map((entry, index) => entry.resource);
-      apiRef.current.setRows(newRows);
-    }).catch((err) => {
-      apiRef.current.setRows([]);
-    }).finally(() => {
-      apiRef.current.autosizeColumns({ includeHeaders: true, includeOutliers: true });
-      setRefreshTasks(false);
-    });
-  }, [coordinationServer, requester, apiRef, refreshTasks]);
-
+    getCoordinationTasks(coordinationServer, requester)
+        .then((response) => {
+          const newRows = (response.entry || []).map((entry) => entry.resource);
+          setRows(newRows); // Update state correctly
+        })
+        .catch(() => {
+          setRows([]); // Clear on failure
+        })
+        .finally(() => {
+          apiRef.current.autosizeColumns({ includeHeaders: true, includeOutliers: true });
+          setRefreshTasks(false);
+        });
+  }, [coordinationServer, requester, refreshTasks]);
 
   useEffect(() => {
     if (apiRef?.current && apiRef.current.autosizeColumns) {
@@ -69,9 +70,9 @@ export default function RequesterPanel({addToLog}) {
     setRefreshTasks(updated);
   }
 
-  const handleTaskNewDialogSave = (task) => {
+  const handleTaskNewDialogSave = () => {
     setRefreshTasks(true);
-  }
+  };
 
 
   const columns = [
@@ -140,11 +141,10 @@ export default function RequesterPanel({addToLog}) {
         </Grid>
 
         <DataGrid
-          rows={rows} 
-          columns={columns} 
-          apiRef={apiRef} 
-          pageSize={5}
-          autoHeight={true}
+            rows={rows} // Updated to use state
+            columns={columns}
+            pageSize={5}
+            autoHeight={true}
         />
 
         <CoordinationTaskDetailsDialog
