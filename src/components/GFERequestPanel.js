@@ -72,6 +72,7 @@ import ListItemIcon from "@mui/material/ListItemIcon";
 import IconButton from "@mui/material/IconButton";
 import Modal from "@mui/material/Modal";
 import { AppContext } from "../Context";
+import { getHumanDisplayName } from "../util/displayUtils";
 
 class GFERequestBox extends Component {
 
@@ -232,15 +233,16 @@ class GFERequestBox extends Component {
     // retrieve coverage and payer info about patient
     //adding other patient info here too
     getCoverageByPatient(this.context.dataServer, patientId).then((result) => {
-      const subscriberText = result.data[0].subscriberId;
-      const relationshipText = result.data[0].relationship.coding[0].display;
-      const planName = result.data[0].class[0].name;
-      const coveragePeriodTextStart = result.data[0].period.start;
-      const coveragePeriodTextEnd = result.data[0].period.end;
-
-      const coveragePeriod =
-        coveragePeriodTextStart + " to " + coveragePeriodTextEnd;
+      
       if (result.data && result.data.length > 0) {
+        const subscriberText = result.data[0].subscriberId;
+        const relationshipText = result.data[0].relationship.coding[0].display;
+        const planName = result.data[0].class[0].name;
+        const coveragePeriodTextStart = result.data[0].period.start;
+        const coveragePeriodTextEnd = result.data[0].period.end;
+
+        const coveragePeriod = coveragePeriodTextStart + " to " + coveragePeriodTextEnd;
+
         getCoverage(this.context.dataServer, result.data[0].id).then(
           (coverageResult) => {
             const reference = Object.keys(coverageResult.references)[0];
@@ -1617,12 +1619,14 @@ class GFERequestBox extends Component {
       });
     });
     this.props.session.practitionerRoleList.forEach((role) => {
-      const practitioner =
-        this.props.session.resolvedReferences[role.practitioner.reference];
+      if (!role.practitioner?.reference) {
+        return;
+      }
+      const practitioner = this.props.session.resolvedReferences[role.practitioner.reference];
       const organization =
-        this.props.session.resolvedReferences[role.organization.reference];
+        role.organization ? this.props.session.resolvedReferences[role.organization.reference] : undefined;
       const display = practitioner
-        ? `${practitioner.name[0].text} from ${organization.name}`
+        ? `${getHumanDisplayName(practitioner)} from ${organization?.name || "Unknown Organization"}`
         : "";
       providerMap.push({
         type: "PractitionerRole",
@@ -1646,12 +1650,14 @@ class GFERequestBox extends Component {
     const fhirServerBaseUrl = this.context.dataServer;
     const providerMap = [];
     this.props.session.practitionerRoleList.forEach((role) => {
-      const practitioner =
-        this.props.session.resolvedReferences[role.practitioner.reference];
+      if (!role.practitioner?.reference) {
+        return;
+      }
+      const practitioner = this.props.session.resolvedReferences[role.practitioner.reference];
       const organization =
-        this.props.session.resolvedReferences[role.organization.reference];
+        role.organization ? this.props.session.resolvedReferences[role.organization.reference] : undefined;
       const display = practitioner
-        ? `${practitioner.name[0].text} from ${organization.name}`
+        ? `${getHumanDisplayName(practitioner)} from ${organization?.name || "Unknown Organization"}`
         : "";
       providerMap.push({
         type: "PractitionerRole",
