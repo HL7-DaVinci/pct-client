@@ -35,7 +35,7 @@ export const displayAddress = (address) => {
 }
 
 export const getHumanDisplayName = (resource) => {
-  if (resource === undefined) return null;
+  if (resource === undefined || !Array.isArray(resource.name) || resource.name.length === 0) return null;
   const name = resource.name[0];
   if (name.text != null) return name.text;
   else return `${name.given[0]} ${name.family}`;
