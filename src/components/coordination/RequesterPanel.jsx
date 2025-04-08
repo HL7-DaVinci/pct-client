@@ -21,38 +21,42 @@ export default function RequesterPanel({addToLog}) {
   const [currentTask, setCurrentTask] = useState(undefined);
   const [refreshTasks, setRefreshTasks] = useState(false);
 
-  // fetch coordination tasks
+  // Fetch coordination tasks when requester or refresh flag changes
   useEffect(() => {
-    if (!requester) {
-      return;
-    }
+    if (!requester) return;
 
-    getCoordinationTasks(coordinationServer, requester)
-        .then((response) => {
-          const newRows = (response.entry || []).map((entry) => entry.resource);
+    console.log("Fetching coordination tasks...");
 
-          // Merge existing tasks to prevent UI flickering
-          setRows((prevRows) => {
-            const newTaskIds = new Set(newRows.map((task) => task.id));
-            const mergedRows = [...newRows, ...prevRows.filter((task) => !newTaskIds.has(task.id))];
-            return mergedRows;
-          });
-        })
-        .catch(() => {
-          setRows([]);
-        })
-        .finally(() => {
-          setRefreshTasks(false);
+    const fetch = async () => {
+      try {
+        const response = await getCoordinationTasks(coordinationServer, requester);
+        console.log("API Response at", new Date().toISOString(), response);
+
+        const newRows = (response.entry || []).map((entry) => entry.resource);
+
+        // Merge: keep optimistic rows if they’re not in the new result
+        setRows((prevRows) => {
+          const fetchedIds = new Set(newRows.map((r) => r.id));
+          const optimisticRows = prevRows.filter(r => !fetchedIds.has(r.id));
+          return [...newRows, ...optimisticRows];
         });
 
-  }, [coordinationServer, requester, refreshTasks]); // Refresh on task changes
+      } catch (err) {
+        console.error("Error fetching tasks:", err);
+        setRows([]);
+      } finally {
+        setRefreshTasks(false);
+      }
+    };
 
+    fetch().catch(console.error);
+  }, [coordinationServer, requester, refreshTasks]);
+  
   useEffect(() => {
     if (apiRef?.current && apiRef.current.autosizeColumns) {
       apiRef.current.autosizeColumns({ includeHeaders: true, includeOutliers: true }); 
     }
   });
-
 
   const openTaskDetailsDialog = (task) => {
     setCurrentTask(task);
@@ -76,8 +80,9 @@ export default function RequesterPanel({addToLog}) {
   }
 
   const handleTaskNewDialogSave = (task) => {
+    console.log("Saving new task locally:", task);
     setRows((prevRows) => [task, ...prevRows]); // Immediately add task to UI
-    setRefreshTasks(true); // Still refresh to sync with API
+    setTimeout(() => setRefreshTasks((prev) => !prev), 3000); // Wait 3 sec
   };
 
   const columns = [
@@ -146,6 +151,7 @@ export default function RequesterPanel({addToLog}) {
         </Grid>
 
         <DataGrid
+            key={rows.length}
             rows={rows} // Updated to use state
             columns={columns}
             pageSize={5}

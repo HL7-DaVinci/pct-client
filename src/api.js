@@ -127,7 +127,11 @@ export const getCoordinationTasks = (url, requester) => {
     if (requester) {
         query += `&requester=${encodeURIComponent(requester)}`;
     }
-    return FHIRClient(url).request(`Task?${query}`);
+    return FHIRClient(url).request(`Task?${query}`)
+        .then((response) => {
+            console.log("API Response at", new Date().toISOString(), response);
+            return response;
+        });
 }
 
 
