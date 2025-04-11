@@ -29,6 +29,10 @@ export default function RequesterPanel({addToLog}) {
       return;
     }
 
+    if (!refreshTasks) {
+      return;
+    }
+
     getCoordinationTasks(coordinationServer, requester).then((response) => {
       const newRows = (response.entry || []).map((entry, index) => entry.resource);
       apiRef.current.setRows(newRows);
@@ -46,6 +50,10 @@ export default function RequesterPanel({addToLog}) {
       apiRef.current.autosizeColumns({ includeHeaders: true, includeOutliers: true }); 
     }
   });
+
+  useEffect(() => {
+    setRefreshTasks(true);
+  },[]);
 
 
   const openTaskDetailsDialog = (task) => {
