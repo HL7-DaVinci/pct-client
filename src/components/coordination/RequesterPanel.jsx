@@ -15,45 +15,48 @@ import { displayInstant, displayPeriod } from '../../util/displayUtils';
 export default function RequesterPanel({addToLog}) {
   const apiRef = useGridApiRef();
   const { coordinationServer, requester } = useContext(AppContext);
-  const [rows] = useState([]);
+  const [rows, setRows] = useState([]);
   const [taskDetailsDialogOpen, setTaskDetailsDialogOpen] = useState(false);
   const [taskNewDialogOpen, setTaskNewDialogOpen] = useState(false);
   const [currentTask, setCurrentTask] = useState(undefined);
-  const [refreshTasks, setRefreshTasks] = useState(false);
+  const [total, setTotal] = useState(undefined);
 
 
-  // fetch coordination tasks
-  useEffect(() => {
+  const fetchTasks = useCallback(async () => {
 
-    if (!requester || !apiRef) {
+    if (!requester || !coordinationServer) {
       return;
     }
 
-    if (!refreshTasks) {
-      return;
-    }
+    try {
+      const response = await getCoordinationTasks(coordinationServer, requester);
+      const newRows = (response.entry || []).map((entry) => entry.resource);
 
-    getCoordinationTasks(coordinationServer, requester).then((response) => {
-      const newRows = (response.entry || []).map((entry, index) => entry.resource);
-      apiRef.current.setRows(newRows);
-    }).catch((err) => {
-      apiRef.current.setRows([]);
-    }).finally(() => {
-      apiRef.current.autosizeColumns({ includeHeaders: true, includeOutliers: true });
-      setRefreshTasks(false);
-    });
-  }, [coordinationServer, requester, apiRef, refreshTasks]);
+      setRows(newRows);
+      setTotal(response.total);
+      return response;
+    }
+    catch (error) {
+      console.error("RequesterPanel: error refreshing tasks", error);
+      setRows([]);
+      setTotal(0);
+      return null;
+    }
+  }, [requester, coordinationServer]);
 
 
   useEffect(() => {
     if (apiRef?.current && apiRef.current.autosizeColumns) {
-      apiRef.current.autosizeColumns({ includeHeaders: true, includeOutliers: true }); 
+      setTimeout(() => {
+        apiRef.current.autosizeColumns({ includeHeaders: true, includeOutliers: true });
+      }, 0);
     }
-  });
+  }, [apiRef, rows, taskDetailsDialogOpen, taskNewDialogOpen]);
 
+  // refresh tasks when requester or coordination server changes
   useEffect(() => {
-    setRefreshTasks(true);
-  },[]);
+    fetchTasks();
+  }, [fetchTasks, requester, coordinationServer]);
 
 
   const openTaskDetailsDialog = (task) => {
@@ -64,21 +67,31 @@ export default function RequesterPanel({addToLog}) {
   const handleTaskDetailsDialogClose = (updated) => {
     setTaskDetailsDialogOpen(false);
     setCurrentTask(undefined);
-    setRefreshTasks(updated);
+    if (updated) {
+      fetchTasks();
+    }
   }
 
   const openTaskNewDialog = () => {
     setTaskNewDialogOpen(true);
   }
 
-  const handleTaskNewDialogClose = (updated) => {
+  const handleTaskNewDialogClose = async (updated) => {
     setTaskNewDialogOpen(false);
     setCurrentTask(undefined);
-    setRefreshTasks(updated);
-  }
 
-  const handleTaskNewDialogSave = (task) => {
-    setRefreshTasks(true);
+    // successful save of a new task
+    if (updated) {
+      const expectedTotal = total + 1;
+      let res = await fetchTasks();
+
+      // handle case where task has been saved but is not showing in search results yet
+      while (res.total && res.total !== expectedTotal) {
+        console.log(`Result total expected to be ${expectedTotal} but was ${res.total}.  Trying again in 2 seconds`);
+        await new Promise(resolve => setTimeout(resolve, 2000));
+        await fetchTasks();
+      }
+    }
   }
 
 
@@ -150,8 +163,9 @@ export default function RequesterPanel({addToLog}) {
         <DataGrid
           rows={rows} 
           columns={columns} 
-          apiRef={apiRef} 
-          pageSize={5}
+          apiRef={apiRef}
+          paginationModel={{ pageSize: 100, page: 0 }}
+          pageSizeOptions={[5, 10, 25, 50, 100]}
           autoHeight={true}
         />
 
@@ -166,7 +180,6 @@ export default function RequesterPanel({addToLog}) {
         <CoordinationTaskNewDialog
           open={taskNewDialogOpen} 
           onClose={handleTaskNewDialogClose}
-          onSave={handleTaskNewDialogSave}
           addToLog={addToLog}
         />
       </>

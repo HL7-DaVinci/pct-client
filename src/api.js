@@ -123,7 +123,7 @@ export const getLocations = (url) => {
 
 
 export const getCoordinationTasks = (url, requester) => {
-    let query = `_profile=http://hl7.org/fhir/us/davinci-pct/StructureDefinition/davinci-pct-gfe-coordination-task`;
+    let query = `_total=accurate&_profile=http://hl7.org/fhir/us/davinci-pct/StructureDefinition/davinci-pct-gfe-coordination-task`;
     if (requester) {
         query += `&requester=${encodeURIComponent(requester)}`;
     }
@@ -132,7 +132,7 @@ export const getCoordinationTasks = (url, requester) => {
 
 
 export const getContributorTasks = (url, contributor) => {
-    let query = `_profile=http://hl7.org/fhir/us/davinci-pct/StructureDefinition/davinci-pct-gfe-contributor-task`;
+    let query = `_total=accurate&_profile=http://hl7.org/fhir/us/davinci-pct/StructureDefinition/davinci-pct-gfe-contributor-task`;
     if (contributor) {
         query += `&owner=${encodeURIComponent(contributor)}`;
     }

@@ -12,7 +12,7 @@ export default function ContributorPanel() {
 
   const apiRef = useGridApiRef();
   const { coordinationServer, contributor } = useContext(AppContext);
-  const [rows] = useState([]);
+  const [rows, setRows] = useState([]);
   const [taskDialogOpen, setTaskDialogOpen] = useState(false);
   const [currentTask, setCurrentTask] = useState(undefined);
   const [refreshTasks, setRefreshTasks] = useState(false);
@@ -24,14 +24,18 @@ export default function ContributorPanel() {
     if (!contributor || !apiRef) {
       return;
     }
+
+    if (!refreshTasks) {
+      return;
+    }
     
     getContributorTasks(coordinationServer, contributor).then((response) => {
       const newRows = (response.entry || []).map((entry, index) => entry.resource);
-      apiRef.current.setRows(newRows);
+      setRows(newRows);
     }).catch(() => {
-      apiRef.current.setRows([]);
+      setRows([]);
     }).finally(() => {
-      apiRef.current.autosizeColumns({ includeHeaders: true, includeOutliers: true });
+      setRefreshTasks(false);
     });
   }, [coordinationServer, contributor, apiRef, refreshTasks]);
 
@@ -66,7 +70,7 @@ export default function ContributorPanel() {
     setTaskDialogOpen(false);
     setCurrentTask(undefined);
     if (updated) {
-      setRefreshTasks(!refreshTasks);
+      setRefreshTasks(!!updated);
     }
   }
 

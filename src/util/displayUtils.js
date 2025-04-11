@@ -69,7 +69,7 @@ export const getDisplayForReferenceFromBundle = (reference, bundle) => {
   }
 
   const entry = entries.find((entry) => entry.resource.resourceType === type && entry.resource.id === id);
-  console.log("entry:", entry);
+  // console.log("entry:", entry);
 
   if (!entry) {
     return reference;

@@ -79,12 +79,9 @@ export default function GFEInformationBundleView({ bundle }) {
               </TableHead>
               <TableBody>
                 {
-                  (patients || []).map((patient, index) => {
-                    if (!patient.resource) {
-                      return <></>;
-                    }
+                  (patients || []).filter(p => !!p.resource).map((patient, index) => {
                     return (
-                      <TableRow>
+                      <TableRow key={index}>
                         <TableCell>{patient.resource.id}</TableCell>
                         <TableCell>{getHumanDisplayName(patient.resource)}</TableCell>
                         <TableCell>{patient.resource.birthDate}</TableCell>
@@ -157,12 +154,9 @@ export default function GFEInformationBundleView({ bundle }) {
                 </TableHead>
                 <TableBody>
                   {
-                    (organizations || []).map((organization, index) => {
-                      if (!organization.resource) {
-                        return <></>;
-                      }
+                    (organizations || []).filter(o => o.resource).map((organization, index) => {
                       return (
-                        <TableRow>
+                        <TableRow key={index}>
                           <TableCell>{organization.resource.id}</TableCell>
                           <TableCell>
                             {
@@ -203,13 +197,9 @@ export default function GFEInformationBundleView({ bundle }) {
               </TableHead>
               <TableBody>
                 {
-                  (locations || []).map((location, index) => {
-
-                    if (!location.resource) {
-                      return <></>;
-                    }
+                  (locations || []).filter(l => l.resource).map((location, index) => {
                     return (
-                      <TableRow>
+                      <TableRow key={index}>
                         <TableCell>{location.resource.id}</TableCell>
                         <TableCell>{location.resource.name}</TableCell>
                         <TableCell>{((location.resource.type||[])[0]?.coding||[]).map(c => c.display ?? c.code).join(", ")}</TableCell>
@@ -249,12 +239,9 @@ export default function GFEInformationBundleView({ bundle }) {
               </TableHead>
               <TableBody>
                 {
-                  (serviceRequests || []).map((serviceRequest, index) => {
-                    if (!serviceRequest.resource) {
-                      return <></>;
-                    }
+                  (serviceRequests || []).filter(s => s.resource).map((serviceRequest, index) => {
                     return (
-                      <TableRow>
+                      <TableRow key={index}>
                         <TableCell>{serviceRequest.resource.id}</TableCell>
                         <TableCell>{serviceRequest.resource.status}</TableCell>
                         <TableCell>{serviceRequest.resource.intent}</TableCell>
@@ -307,12 +294,9 @@ export default function GFEInformationBundleView({ bundle }) {
               </TableHead>
               <TableBody>
                 {
-                  (deviceRequests || []).map((deviceRequest, index) => {
-                    if (!deviceRequest.resource) {
-                      return <></>;
-                    }
+                  (deviceRequests || []).filter(d => d.resource).map((deviceRequest, index) => {
                     return (
-                      <TableRow>
+                      <TableRow key={index}>
                         <TableCell>{deviceRequest.resource.id}</TableCell>
                         <TableCell>{deviceRequest.resource.status}</TableCell>
                         <TableCell>{deviceRequest.resource.intent}</TableCell>
