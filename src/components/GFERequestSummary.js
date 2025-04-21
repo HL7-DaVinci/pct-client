@@ -20,7 +20,7 @@ const useStyles = makeStyles((theme) =>
   })
 );
 
-export default function GFERequestsummary(props) {
+export default function GFERequestSummary(props) {
   const classes = useStyles();
   const { summary } = props;
   const SummaryText = (props) => {

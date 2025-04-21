@@ -5,7 +5,13 @@ import jp from "jsonpath";
 export default function PatientInfo(props) {
 
     function getPatientResource() {
-        return jp.query(props, "$..[?(@.fullUrl ==".concat("'", jp.query(props, '$..[?(@.resourceType == "ExplanationOfBenefit")].patient.reference')[0] + "')].resource"))[0];
+
+        const patient = jp.query(props, '$..[?(@.resourceType == "Patient")]')[0];
+        if (!patient) {
+            console.warn("No patient resource found");
+            return undefined;
+        }
+        return patient;
     }
 
     function getHumanNameDisplay(humanName) {
@@ -42,6 +48,9 @@ export default function PatientInfo(props) {
                 }
                 else if ('system' in telecom) {
                     returnString += "(" + telecom.system + ")";
+                }
+                else {
+                    returnString += "NA";
                 }
                 returnString += "; ";
             });
