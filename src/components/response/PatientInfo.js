@@ -81,11 +81,35 @@ export default function PatientInfo(props) {
     }
 
     function getCoverageResource() {
-        return jp.query(props, "$..[?(@.fullUrl ==".concat("'", jp.query(props, '$..[?(@.resourceType == "ExplanationOfBenefit")].insurance[0].coverage.reference')[0] + "')].resource"))[0];
+
+        const coverage = jp.query(props, '$..[?(@.resourceType == "Coverage")]')[0];
+        if (!coverage) {
+            console.warn("No coverage resource found");
+            return undefined;
+        }
+        return coverage;
     }
 
     function getPayorResource() {
-        return jp.query(props, "$..[?(@.fullUrl ==".concat("'", jp.query(props, '$..[?(@.resourceType == "ExplanationOfBenefit")].insurer.reference')[0] + "')].resource"))[0];
+
+        const payorRef = jp.query(props, '$..[?(@.resourceType == "Coverage")].payor[0].reference')[0];
+        if (!payorRef) {
+            console.warn("No payor reference found in Coverage");
+            return undefined;
+        }
+
+        const [resourceType, id] = payorRef.split("/");
+        if (!resourceType || !id) {
+            console.warn("Invalid payor reference format:", payorRef);
+            return undefined;
+        }
+
+        const payor = jp.query(props, `$..[?(@.resourceType == "${resourceType}" && @.id == "${id}")]`)[0];
+        if (!payor) {
+            console.warn(`No patient resource found with fullUrl: ${payorRef}`);
+            return undefined;
+        }
+        return payor;
     }
 
     return (
