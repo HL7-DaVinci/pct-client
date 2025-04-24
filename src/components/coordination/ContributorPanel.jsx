@@ -24,10 +24,6 @@ export default function ContributorPanel() {
     if (!contributor || !apiRef) {
       return;
     }
-
-    if (!refreshTasks) {
-      return;
-    }
     
     getContributorTasks(coordinationServer, contributor).then((response) => {
       const newRows = (response.entry || []).map((entry, index) => entry.resource);
@@ -70,7 +66,7 @@ export default function ContributorPanel() {
     setTaskDialogOpen(false);
     setCurrentTask(undefined);
     if (updated) {
-      setRefreshTasks(!!updated);
+      setRefreshTasks(!updated);
     }
   }
 
