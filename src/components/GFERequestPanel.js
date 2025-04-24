@@ -896,7 +896,9 @@ class GFERequestBox extends Component {
     });
     //const { valid, error } = this.isRequestValid();
     const error = [];
-    const valid = true;
+
+    const submissionBundle = this.generateBundle();
+    const valid = this.validateSubmissionBundle(submissionBundle, error);
 
     if (valid) {
       this.props.setSubmitting(true);
@@ -904,7 +906,6 @@ class GFERequestBox extends Component {
       this.props.setGfeResponse(undefined);
       this.props.setReceivedAEOBResponse(undefined);
 
-      const submissionBundle = this.generateBundle();
       this.props.addToLog(
         `Submitting GFE to ${this.context.payerServer}/Claim/$gfe-submit`,
         "network",
@@ -971,6 +972,41 @@ class GFERequestBox extends Component {
         submissionError: error,
       });
     }
+  };
+
+  validateSubmissionBundle = (bundle, error) => {
+    const claim = bundle.entry.find(e => e.resource.resourceType === "Claim")?.resource;
+    const coverage = bundle.entry.find(e => e.resource.resourceType === "Coverage")?.resource;
+
+    if (!claim?.identifier || claim.identifier.length === 0) {
+      error.push("Claim.identifier is required.");
+    }
+
+    if (!claim?.diagnosis?.some(d => d.type?.some(t => t.coding?.some(c => c.code === "principal")))) {
+      error.push("Claim.diagnosis must include a principal diagnosis.");
+    }
+
+    if (!claim?.provider?.extension?.length) {
+      error.push("Claim.provider.extension is required.");
+    }
+
+    if (!claim?.item?.every(i => i.extension?.some(ext => ext.url.includes("serviceDescription")))) {
+      error.push("Each Claim.item must include a serviceDescription extension.");
+    }
+
+    if (!claim?.item?.every(i => i.servicedDate || i.servicedPeriod)) {
+      error.push("Each Claim.item must have a serviced[x] date.");
+    }
+
+    if (coverage?.identifier?.length > 1) {
+      error.push("Coverage.identifier must not have more than one value.");
+    }
+
+    if (!coverage?.subscriber?.display) {
+      error.push("Coverage.subscriber.display is required.");
+    }
+
+    return { valid: error.length === 0 };
   };
 
   generateBundle = () => {
