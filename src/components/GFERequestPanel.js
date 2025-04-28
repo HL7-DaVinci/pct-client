@@ -983,12 +983,20 @@ class GFERequestBox extends Component {
       error.push("Claim.identifier is required.");
     }
 
+    if (!claim?.identifier?.some(id => id.system?.toLowerCase().includes("plac"))) {
+      error.push("Claim.identifier must include a PLAC identifier.");
+    }
+
     if (!claim?.diagnosis?.some(d => d.type?.some(t => t.coding?.some(c => c.code === "principal")))) {
       error.push("Claim.diagnosis must include a principal diagnosis.");
     }
 
     if (!claim?.provider?.extension?.length) {
       error.push("Claim.provider.extension is required.");
+    }
+
+    if (!claim?.provider?.extension?.some(ext => ext.url?.toLowerCase().includes("providertaxonomy"))) {
+      error.push("Claim.provider.extension must include a providerTaxonomy extension.");
     }
 
     if (!claim?.item?.every(i => i.extension?.some(ext => ext.url.includes("serviceDescription")))) {
