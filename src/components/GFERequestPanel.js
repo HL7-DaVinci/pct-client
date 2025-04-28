@@ -898,7 +898,7 @@ class GFERequestBox extends Component {
     const error = [];
 
     const submissionBundle = this.generateBundle();
-    const valid = this.validateSubmissionBundle(submissionBundle, error);
+    const { valid } = this.validateSubmissionBundle(submissionBundle, error);
 
     if (valid) {
       this.props.setSubmitting(true);
