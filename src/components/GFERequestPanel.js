@@ -893,6 +893,7 @@ class GFERequestBox extends Component {
     e.preventDefault();
     this.setState({
       openErrorDialog: false,
+      error: [],
     });
     //const { valid, error } = this.isRequestValid();
     const error = [];
@@ -969,7 +970,7 @@ class GFERequestBox extends Component {
     } else {
       this.setState({
         openErrorDialog: true,
-        submissionError: error,
+        error: error,
       });
     }
   };
@@ -2489,6 +2490,7 @@ class GFERequestBox extends Component {
             <ViewErrorDialog
               open={this.state.openErrorDialog}
               setOpen={(open) => this.setState({ openErrorDialog: open })}
+              error={this.state.error}
             />
           ) : null}
           {this.state.submittingStatus === true ? (
