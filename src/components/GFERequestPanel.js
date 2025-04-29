@@ -978,16 +978,13 @@ class GFERequestBox extends Component {
   validateSubmissionBundle = (bundle, error) => {
     const claim = bundle.entry.find(e => e.resource.resourceType === "Bundle")?.resource.entry
         .find(e => e.resource.resourceType === "Claim")?.resource;
-    //const gfeBundle = bundle.entry.find(e => e.resource.resourceType === "Bundle")?.resource;
-    //const claim = gfeBundle.entry.find(e => e.resource.resourceType === "Claim")?.resource;
-    //const claim = findResourceInBundle(bundle, "Claim");
     const coverage = bundle.entry.find(e => e.resource.resourceType === "Coverage")?.resource;
 
     if (!claim?.identifier || claim.identifier.length === 0) {
       error.push("Claim.identifier is required.");
     }
 
-    if (!claim?.identifier?.some(id => id.system?.toLowerCase().includes("plac"))) {
+    if (!claim?.identifier?.some(id => id.type?.coding?.some(coding => coding.code === "PLAC"))) {
       error.push("Claim.identifier must include a PLAC identifier.");
     }
 
@@ -1015,33 +1012,12 @@ class GFERequestBox extends Component {
       error.push("Coverage.identifier must not have more than one value.");
     }
 
-    if (!coverage?.subscriber?.display) {
-      error.push("Coverage.subscriber.display is required.");
+    if (!coverage?.relationship?.coding?.some(c => !!c.display)) {
+      error.push("Coverage subscriber display is required.");
     }
 
     return { valid: error.length === 0 };
   };
-
-  /*findResourceInBundle = (bundle, resourceType) => {
-    if (!bundle?.entry) return null;
-
-    for (const entry of bundle.entry) {
-      const res = entry.resource;
-
-      if (!res) continue;
-
-      if (res.resourceType === resourceType) {
-        return res;
-      }
-
-      if (res.resourceType === "Bundle") {
-        const nested = findResourceInBundle(res, resourceType);
-        if (nested) return nested;
-      }
-    }
-
-    return null;
-  };*/
 
   generateBundle = () => {
     const ri = Object.keys(this.props.session.gfeInfo).map((gfeId) =>
