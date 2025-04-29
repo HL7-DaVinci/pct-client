@@ -976,7 +976,11 @@ class GFERequestBox extends Component {
   };
 
   validateSubmissionBundle = (bundle, error) => {
-    const claim = bundle.entry.find(e => e.resource.resourceType === "Claim")?.resource;
+    const claim = bundle.entry.find(e => e.resource.resourceType === "Bundle")?.resource.entry
+        .find(e => e.resource.resourceType === "Claim")?.resource;
+    //const gfeBundle = bundle.entry.find(e => e.resource.resourceType === "Bundle")?.resource;
+    //const claim = gfeBundle.entry.find(e => e.resource.resourceType === "Claim")?.resource;
+    //const claim = findResourceInBundle(bundle, "Claim");
     const coverage = bundle.entry.find(e => e.resource.resourceType === "Coverage")?.resource;
 
     if (!claim?.identifier || claim.identifier.length === 0) {
@@ -1017,6 +1021,27 @@ class GFERequestBox extends Component {
 
     return { valid: error.length === 0 };
   };
+
+  /*findResourceInBundle = (bundle, resourceType) => {
+    if (!bundle?.entry) return null;
+
+    for (const entry of bundle.entry) {
+      const res = entry.resource;
+
+      if (!res) continue;
+
+      if (res.resourceType === resourceType) {
+        return res;
+      }
+
+      if (res.resourceType === "Bundle") {
+        const nested = findResourceInBundle(res, resourceType);
+        if (nested) return nested;
+      }
+    }
+
+    return null;
+  };*/
 
   generateBundle = () => {
     const ri = Object.keys(this.props.session.gfeInfo).map((gfeId) =>
