@@ -1,5 +1,6 @@
 import buildGFERequest from "./BuildGFERequest";
 import { v4 } from "uuid";
+import buildGFEBundleSummary from "./BuildGFEBundleSummary";
 const buildGFEBundle = (input) => {
   const GFEClaim = buildGFERequest(input);
   /*
@@ -74,6 +75,13 @@ const buildGFEBundle = (input) => {
 
   return collection_bundle;
   */
+  const gfeSummary = buildGFEBundleSummary(gfe_bundle);
+
+  gfe_bundle.entry.push({
+    fullUrl: `http://example.org/fhir/Claim/${gfeSummary.id}`,
+    resource: gfeSummary,
+  });
+
  return gfe_bundle;
 };
 
