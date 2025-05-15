@@ -128,7 +128,14 @@ export default function ContributorTaskDialog({ open, onClose, task, setTask }) 
   }
 
   const attachGfeBundle = async (bundle) => {
-
+    let gfeBundle = bundle;
+    // if bundle is a collection bundle, pull GFE bundle from collection bundle
+    const nestedBundle = bundle.entry?.find(
+        (entry) => entry.resource?.resourceType === "Bundle"
+    );
+    if(nestedBundle && nestedBundle.resource){
+      gfeBundle = nestedBundle.resource;
+    }
     const output = [
       {
         type: {
@@ -142,7 +149,7 @@ export default function ContributorTaskDialog({ open, onClose, task, setTask }) 
         },
         valueAttachment: {
           contentType: "application/fhir+json",
-          data: btoa(JSON.stringify(bundle))
+          data: btoa(JSON.stringify(gfeBundle))
         }
       }
     ];
