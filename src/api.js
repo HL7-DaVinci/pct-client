@@ -122,19 +122,19 @@ export const getLocations = (url) => {
 }
 
 
-export const getCoordinationTasks = (url, requester) => {
+export const getCoordinationTasks = (url, dataServer, requester) => {
     let query = `_total=accurate&_profile=http://hl7.org/fhir/us/davinci-pct/StructureDefinition/davinci-pct-gfe-coordination-task`;
     if (requester) {
-        query += `&requester=${encodeURIComponent(requester)}`;
+        query += `&requester=${encodeURIComponent(`${dataServer.replace(/\/+$/, '')}/${requester}`)}`;
     }
     return FHIRClient(url).request(`Task?${query}`);
 }
 
 
-export const getContributorTasks = (url, contributor) => {
+export const getContributorTasks = (url, dataServer, contributor) => {
     let query = `_total=accurate&_profile=http://hl7.org/fhir/us/davinci-pct/StructureDefinition/davinci-pct-gfe-contributor-task`;
     if (contributor) {
-        query += `&owner=${encodeURIComponent(contributor)}`;
+        query += `&owner=${encodeURIComponent(`${dataServer.replace(/\/+$/, '')}/${contributor}`)}`;
     }
     return FHIRClient(url).request(`Task?${query}`);
 }

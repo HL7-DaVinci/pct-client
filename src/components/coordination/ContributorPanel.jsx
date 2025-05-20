@@ -11,7 +11,7 @@ import { getPlannedServicePeriod, getRequestInitiationTime } from '../../util/ta
 export default function ContributorPanel() {
 
   const apiRef = useGridApiRef();
-  const { coordinationServer, contributor } = useContext(AppContext);
+  const { coordinationServer, dataServer, contributor } = useContext(AppContext);
   const [rows, setRows] = useState([]);
   const [taskDialogOpen, setTaskDialogOpen] = useState(false);
   const [currentTask, setCurrentTask] = useState(undefined);
@@ -25,7 +25,7 @@ export default function ContributorPanel() {
       return;
     }
     
-    getContributorTasks(coordinationServer, contributor).then((response) => {
+    getContributorTasks(coordinationServer, dataServer, contributor).then((response) => {
       const newRows = (response.entry || []).map((entry, index) => entry.resource);
       setRows(newRows);
     }).catch(() => {

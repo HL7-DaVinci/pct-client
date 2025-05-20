@@ -18,17 +18,16 @@ export default function CoordinationTaskNewDialog({ open, onClose, onSave }) {
 
 
   const resolveReference = useCallback((reference) => {
-    // if (coordinationServer !== dataServer) {
+     if (coordinationServer !== dataServer) {
+       const parts = reference.split("/");
+       const resourceType = parts[0];
+       const id = parts[1];
 
-    //   const parts = reference.split("/");
-    //   const resourceType = parts[0];
-    //   const id = parts[1];
-
-    //   return `${dataServer.replace(/\/+$/, '')}/${resourceType}/${id}`;
-    // }
+       return `${dataServer.replace(/\/+$/, '')}/${resourceType}/${id}`;
+     }
 
     return reference;
-  }, []); //[coordinationServer, dataServer]);
+  }, [coordinationServer, dataServer]);
 
   const defaultCoordinationTask = useMemo(() => ({
     ...coordinationTask, 

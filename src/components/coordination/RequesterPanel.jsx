@@ -14,7 +14,7 @@ import { displayInstant, displayPeriod } from '../../util/displayUtils';
 
 export default function RequesterPanel({addToLog}) {
   const apiRef = useGridApiRef();
-  const { coordinationServer, requester } = useContext(AppContext);
+  const { coordinationServer, dataServer, requester } = useContext(AppContext);
   const [rows, setRows] = useState([]);
   const [taskDetailsDialogOpen, setTaskDetailsDialogOpen] = useState(false);
   const [taskNewDialogOpen, setTaskNewDialogOpen] = useState(false);
@@ -29,7 +29,7 @@ export default function RequesterPanel({addToLog}) {
     }
 
     try {
-      const response = await getCoordinationTasks(coordinationServer, requester);
+      const response = await getCoordinationTasks(coordinationServer, dataServer, requester);
       const newRows = (response.entry || []).map((entry) => entry.resource);
 
       setRows(newRows);
