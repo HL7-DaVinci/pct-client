@@ -10,6 +10,7 @@ const buildGFECollectionBundle = (gfe_bundles, bundleResources) => {
   };
 
   collection_bundle.meta = {
+    profile: ["http://hl7.org/fhir/us/davinci-pct/StructureDefinition/davinci-pct-gfe-collection-bundle"],
     lastUpdated: new Date().toISOString(),
   };
 

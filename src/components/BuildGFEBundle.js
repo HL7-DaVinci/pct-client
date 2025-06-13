@@ -30,6 +30,7 @@ const buildGFEBundle = (input) => {
   };
 
   gfe_bundle.meta = {
+    profile: ["http://hl7.org/fhir/us/davinci-pct/StructureDefinition/davinci-pct-gfe-bundle"],
     lastUpdated: new Date().toISOString(),
   };
 
