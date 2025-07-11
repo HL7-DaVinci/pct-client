@@ -41,7 +41,7 @@ import {
 
 import GFERequestSummary from "./GFERequestSummary";
 import buildGFEBundle from "./BuildGFEBundle";
-import buildGFECollectionBundle from "./BuildGFECollectionBundle";
+import buildGFEPacketBundle from "./BuildGFEPacketBundle";
 import ViewGFERequestDialog from "./ViewGFEDialog";
 import { PlaceOfServiceList } from "../values/PlaceOfService";
 
@@ -1109,10 +1109,10 @@ class GFERequestBox extends Component {
     bundles[0].entry = uniqueEntries;
     bundles.length = 1;
 
-    // Create a GFE Collection Bundle with the single GFE Bundle and its resources
-    const collection_bundle = buildGFECollectionBundle(bundles, ri[0].bundleResources);
+    // Create a GFE Packet Bundle with the single GFE Bundle and its resources
+    const packet_bundle = buildGFEPacketBundle(bundles, ri[0].bundleResources);
 
-    return collection_bundle;
+    return packet_bundle;
   };
 
   retrieveRequestSummary = () => {

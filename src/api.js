@@ -53,25 +53,13 @@ export const getCoverageByPatient = (url, patientId) => {
 
 export const retrieveGFEBundle = (url, taskId) => {
     const headers = {
-        "Content-Type": "application/fhir+json",
         "Accept": "application/fhir+json",
         "Accept-Encoding": "identity"
     };
-    
-    const params = {
-        "resourceType": "Parameters",
-        "parameter": [{
-          "name": "request",
-          "valueReference": {
-              "reference": `Task/${taskId}`
-              }
-        }]
-    };
 
-    return fetch(`${url}/$gfe-retrieve`, {
+    return fetch(`${url}/Task/${taskId}/$gfe-retrieve`, {
         method: "POST",
-        headers: headers,
-        body: JSON.stringify(params)
+        headers: headers
     });
 }
 

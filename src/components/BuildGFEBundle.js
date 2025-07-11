@@ -67,7 +67,7 @@ const buildGFEBundle = (input) => {
       });
     }
   });
-  
+
 
   collection_bundle.entry.push({
     fullUrl: `http://example.org/fhir/Bundle/PCT-GFE-Bundle-${v4()}`,
@@ -78,10 +78,11 @@ const buildGFEBundle = (input) => {
   */
   const gfeSummary = buildGFEBundleSummary(gfe_bundle);
 
-  gfe_bundle.entry.push({
+  // Add GFE summary as the first entry in the bundle
+  gfe_bundle.entry = [{
     fullUrl: `http://example.org/fhir/Claim/${gfeSummary.id}`,
     resource: gfeSummary,
-  });
+  }].concat(gfe_bundle.entry);
 
  return gfe_bundle;
 };
