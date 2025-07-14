@@ -977,8 +977,13 @@ class GFERequestBox extends Component {
 
   validateSubmissionBundle = (bundle, error) => {
     const claim = bundle.entry.find(e => e.resource.resourceType === "Bundle")?.resource.entry
-        .find(e => e.resource.resourceType === "Claim")?.resource;
+        .find(e => e.resource.resourceType === "Claim" && !(e.resource.type?.coding?.some(coding => coding.code === "estimate-summary")))?.resource;
     const coverage = bundle.entry.find(e => e.resource.resourceType === "Coverage")?.resource;
+
+    if (!claim) {
+      error.push("No valid Claim resource found in bundle.");
+      return { valid: false };
+    }
 
     if (!claim?.identifier || claim.identifier.length === 0) {
       error.push("Claim.identifier is required.");
