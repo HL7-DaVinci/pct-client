@@ -6,21 +6,18 @@ const buildGFEPacketBundle = (gfe_bundles, bundleResources) => {
   const document_bundle = {
     resourceType: "Bundle",
     id: "document-bundle-transaction",
+    meta: {
+      profile: ["http://hl7.org/fhir/us/davinci-pct/StructureDefinition/davinci-pct-gfe-packet"],
+      lastUpdated: new Date().toISOString(),
+    },
+    identifier: {
+      system: "http://example.org/documentIDs",
+      value: "document-bundle-A12345",
+    },
     type: "document",
+    timestamp: new Date().toISOString(),
     entry: [],
   };
-
-  document_bundle.meta = {
-    profile: ["http://hl7.org/fhir/us/davinci-pct/StructureDefinition/davinci-pct-gfe-packet"],
-    lastUpdated: new Date().toISOString(),
-  };
-
-  document_bundle.identifier = {
-    system: "http://example.org/documentIDs",
-    value: "document-bundle-A12345",
-  };
-
-  document_bundle.timestamp = new Date().toISOString();
 
   // Add Patient, Coverage, payer, and submitter to document Bundle
   bundleResources.forEach((resource) => {

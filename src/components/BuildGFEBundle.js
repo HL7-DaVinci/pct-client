@@ -25,21 +25,18 @@ const buildGFEBundle = (input) => {
   const gfe_bundle = {
     resourceType: "Bundle",
     id: `${v4()}`,
+    meta: {
+      profile: ["http://hl7.org/fhir/us/davinci-pct/StructureDefinition/davinci-pct-gfe-bundle"],
+      lastUpdated: new Date().toISOString(),
+    },
+    identifier: {
+      system: "http://example.org/documentIDs",
+      value: "gfe-bundle-A12345",
+    },
     type: "collection",
+    timestamp: new Date().toISOString(),
     entry: [],
   };
-
-  gfe_bundle.meta = {
-    profile: ["http://hl7.org/fhir/us/davinci-pct/StructureDefinition/davinci-pct-gfe-bundle"],
-    lastUpdated: new Date().toISOString(),
-  };
-
-  gfe_bundle.identifier = {
-    system: "http://example.org/documentIDs",
-    value: "gfe-bundle-A12345",
-  };
-
-  gfe_bundle.timestamp = new Date().toISOString();
 
   gfe_bundle.entry.push({
     fullUrl: `http://example.org/fhir/Claim/PCT-Good-Faith-Estimate-${v4()}`,

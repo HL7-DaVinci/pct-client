@@ -12,91 +12,47 @@ const buildGFEComposition = (gfeBundles) => {
         ? { reference: `Patient/${patientEntry.resource.id}` }
         : undefined;
 
-    // Gather authors from GFE Bundles (Organization and Practitioner references excluding payers)
+    // Gather authors from GFE Bundles (All the provider references who submitted)
     const authors = [];
-    gfeBundles.forEach(bundle => {
-        bundle.entry?.forEach(e => {
-            if (e.resource.resourceType === "Organization") {
-                // Exclude organizations with type code "pay"
-                const orgType = e.resource.type?.[0]?.coding?.[0]?.code;
-                if (orgType !== "pay") {
-                    const orgRef = { reference: `Organization/${e.resource.id}` };
-                    if (!authors.find(a => a.reference === orgRef.reference)) {
-                        authors.push(orgRef);
-                    }
-                }
-            } else if (e.resource.resourceType === "Practitioner") {
-                const pracRef = { reference: `Practitioner/${e.resource.id}` };
-                if (!authors.find(a => a.reference === pracRef.reference)) {
-                    authors.push(pracRef);
-                }
-            }
-        });
-    });
-
-    // Gather linkingIdentifier and requestOriginationType from GFE Bundles (first found)
-    let linkingIdentifier;
-    let requestOriginationType;
-    for (const bundle of gfeBundles) {
-        if (bundle.linkingIdentifier) {
-            linkingIdentifier = bundle.linkingIdentifier;
-        }
-        if (bundle.requestOriginationType) {
-            requestOriginationType = bundle.requestOriginationType;
-        }
-        // If using FHIR extensions, look for them in the bundle or its resources
-        if (bundle.extension) {
-            bundle.extension.forEach(ext => {
-                if (
-                    ext.url === "http://hl7.org/fhir/us/davinci-pct/StructureDefinition/gfeServiceLinkingInfo" &&
-                    ext.extension
-                ) {
-                    const linkExt = ext.extension.find(e => e.url === "linkingIdentifier");
-                    if (linkExt) linkingIdentifier = linkExt.valueString;
-                }
-                if (
-                    ext.url === "http://hl7.org/fhir/us/davinci-pct/StructureDefinition/requestOriginationType" &&
-                    ext.valueCodeableConcept
-                ) {
-                    requestOriginationType = ext.valueCodeableConcept;
-                }
-            });
-        }
-        if (linkingIdentifier && requestOriginationType) break;
-    }
 
     // Build extensions array
     const extensions = [];
-    if (linkingIdentifier) {
-        extensions.push({
-            url: "http://hl7.org/fhir/us/davinci-pct/StructureDefinition/gfeServiceLinkingInfo",
-            extension: [
+    extensions.push({
+        url: "http://hl7.org/fhir/us/davinci-pct/StructureDefinition/gfeServiceLinkingInfo",
+        extension: [
+            {
+                url: "linkingIdentifier",
+                valueString: "223452-2342-2435-008002"
+            }
+        ]
+    });
+    extensions.push({
+        url: "http://hl7.org/fhir/us/davinci-pct/StructureDefinition/requestOriginationType",
+        valueCodeableConcept: {
+            coding: [
                 {
-                    url: "linkingIdentifier",
-                    valueString: linkingIdentifier
+                    system: "http://hl7.org/fhir/us/davinci-pct/CodeSystem/PCTGFERequestTypeCSTemporaryTrialUse",
+                    code: "nonscheduled-request"
                 }
             ]
-        });
-    }
-    if (requestOriginationType) {
-        extensions.push({
-            url: "http://hl7.org/fhir/us/davinci-pct/StructureDefinition/requestOriginationType",
-            valueCodeableConcept: requestOriginationType
-        });
-    }
+        }
+    });
+
+
 
     // Build sections for each GFE bundle
     const sections = gfeBundles.map(bundle => {
-        // Find author organizations and practitioners in this bundle (excluding payers)
+        // Find authors (all the providers who submitted)
         const sectionAuthors = [];
         bundle.entry?.forEach(e => {
-            if (e.resource.resourceType === "Organization") {
-                const orgType = e.resource.type?.[0]?.coding?.[0]?.code;
-                if (orgType !== "pay") {
-                    sectionAuthors.push({ reference: `Organization/${e.resource.id}` });
+            if (e.resource.resourceType === "Claim" && !(e.resource.type?.coding?.some(coding => coding.code === "estimate-summary"))) {
+                if (e.resource.provider && e.resource.provider.reference) {
+                    const providerRef = e.resource.provider;
+                    if (!authors.find(a => a.reference === providerRef.reference)) {
+                        authors.push({ reference: providerRef.reference });
+                    }
+                    sectionAuthors.push({ reference: providerRef.reference });
                 }
-            } else if (e.resource.resourceType === "Practitioner") {
-                sectionAuthors.push({ reference: `Practitioner/${e.resource.id}` });
             }
         });
         return {
@@ -154,7 +110,7 @@ const buildGFEComposition = (gfeBundles) => {
         subject: patientRef,
         date: new Date().toISOString(),
         author: authors,
-        title: `Good Faith Estimate Packet for ${patientEntry?.resource?.name?.[0]?.given?.join(" ")} ${patientEntry?.resource?.name?.[0]?.family || ""}`.trim(),
+        title: `GFE Composition for ${patientEntry?.resource?.name?.[0]?.given?.join(" ")} ${patientEntry?.resource?.name?.[0]?.family || ""}`.trim(),
         section: sections
     };
 
