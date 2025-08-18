@@ -1,5 +1,5 @@
 import React, { useContext, useEffect, useState } from 'react';
-import { Edit, Person } from '@mui/icons-material';
+import { Edit, Person, AttachFile } from '@mui/icons-material';
 import Grid from '@mui/material/Grid2';
 import { DataGrid, GridActionsCellItem, useGridApiRef } from '@mui/x-data-grid';
 import { AppContext } from '../../Context';
@@ -70,6 +70,18 @@ export default function ContributorPanel() {
     }
   }
 
+  // Helper function to check if GFE bundle is attached for contributor task
+  function hasGfeBundle(row) {
+    return Array.isArray(row.output) && row.output.some(
+        out =>
+            out.type?.coding?.some(
+                c =>
+                    c.system === "http://hl7.org/fhir/us/davinci-pct/CodeSystem/PCTTaskOutputTypeCSTemporaryTrialUse" &&
+                    c.code === "gfe-bundle"
+            )
+    );
+  }
+
   const columns = [
     {
       field: 'actions',
@@ -85,6 +97,9 @@ export default function ContributorPanel() {
     },
     { field: 'id', headerName: 'ID' },
     { field: 'status', headerName: 'Status' },
+    {
+      field: 'gfeBundle', headerName: <AttachFile fontSize="small" sx={{ verticalAlign: 'middle' }} />, description: 'GFE Bundle attached', valueGetter: (value, row) => hasGfeBundle(row) ? "Yes" : "No",
+    },
     { 
       field: 'reason',
       headerName: 'Reason',
