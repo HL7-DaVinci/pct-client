@@ -12,6 +12,7 @@ import { TabPanel } from '../TabPanel';
 import { Editor } from '@monaco-editor/react';
 import { FHIRClient } from '../../api';
 import GFEInformationBundleView from '../shared/GFEInformationBundleView';
+import DialogContentText from '@mui/material/DialogContentText';
 
 
 
@@ -26,6 +27,7 @@ export default function ContributorTaskDialog({ open, onClose, task, setTask }) 
   const [coordinationTaskRef, setCoordinationTaskRef] = useState(undefined);
   const [coordinationTask, setCoordinationTask] = useState(undefined);
   const [infoBundle, setInfoBundle] = useState(undefined);
+  const [showAttachConfirm, setShowAttachConfirm] = useState(false);
 
   // GFE builder related
   const [gfeSession, setGfeSession] = useState(generateNewSession());
@@ -127,7 +129,7 @@ export default function ContributorTaskDialog({ open, onClose, task, setTask }) 
     setShowGfeBuilder(true);
   }
 
-  const attachGfeBundle = async (bundle) => {
+  const attachGfeBundle = async (bundle, markCompleted = false) => {
     let gfeBundle = bundle;
     // if bundle is a collection bundle, pull GFE bundle from collection bundle
     const nestedBundle = bundle.entry?.find(
@@ -155,6 +157,9 @@ export default function ContributorTaskDialog({ open, onClose, task, setTask }) 
     ];
 
     task.output = output;
+    if (markCompleted) {
+        task.status = "completed";
+    }
     updateTask(task.status);
     onClose(true);
 
@@ -162,6 +167,7 @@ export default function ContributorTaskDialog({ open, onClose, task, setTask }) 
 
 
   return (
+      <>
     <Dialog open={open} onClose={() => { onClose(updated) }} maxWidth="xl" fullWidth={true}
       PaperProps={{
         sx: {
@@ -171,9 +177,9 @@ export default function ContributorTaskDialog({ open, onClose, task, setTask }) 
     >
       <DialogTitle>Contributor Task Details</DialogTitle>
       <DialogContent>
-        {!task ? 
+        {!task ?
           <p variant="body1">No task selected</p> :
-          
+
           !showGfeBuilder ?
 
           <>
@@ -233,7 +239,7 @@ export default function ContributorTaskDialog({ open, onClose, task, setTask }) 
 
 
             <TabPanel value={currentTab} index="taskJsonTab">
-              <Editor 
+              <Editor
                 height="65vh"
                 defaultLanguage="json"
                 defaultValue={JSON.stringify(task, null, 2)}
@@ -243,7 +249,7 @@ export default function ContributorTaskDialog({ open, onClose, task, setTask }) 
 
             <TabPanel value={currentTab} index="coordinationTaskTab">
               {
-                !coordinationTask ? <>Could not load coordination task {  
+                !coordinationTask ? <>Could not load coordination task {
                   coordinationTaskRef ? `from reference: ${coordinationTaskRef}` : "because no reference was found in the task."
                 }</>
 
@@ -276,7 +282,7 @@ export default function ContributorTaskDialog({ open, onClose, task, setTask }) 
           :
 
           <Grid container>
-            <RequestPanel 
+            <RequestPanel
               embedded={true}
               session={gfeSession}
               updateSessionInfo={updateSessionInfo}
@@ -294,7 +300,7 @@ export default function ContributorTaskDialog({ open, onClose, task, setTask }) 
 
           <Grid size={6}>
 
-            {              
+            {
               /**
                * Task is currently requested and needs to be accepted or rejected
                */
@@ -311,7 +317,7 @@ export default function ContributorTaskDialog({ open, onClose, task, setTask }) 
                   Reject Task
                 </Button>
               </>
-            
+
             /**
              * Task has been accepted and needs to be completed
              */
@@ -319,7 +325,7 @@ export default function ContributorTaskDialog({ open, onClose, task, setTask }) 
 
             <>
 
-              {!showGfeBuilder ? 
+              {!showGfeBuilder ?
                 <>
                   <Button color="primary" variant="contained" startIcon={<LibraryBooks/>} sx={{ marginRight: 2 }}
                     onClick={handleCreateBundle}
@@ -336,11 +342,11 @@ export default function ContributorTaskDialog({ open, onClose, task, setTask }) 
                   Mark Completed
                   </Button>
                 </>
-                
+
               :
                 <>
                   <Button color="primary" variant="contained" startIcon={<AttachFile />} disabled={!submissionBundle}
-                    onClick={() => { attachGfeBundle(submissionBundle) }} 
+                    onClick={() => { setShowAttachConfirm(true); }}
                   >
                     Attach GFE Bundle
                   </Button>
@@ -360,9 +366,41 @@ export default function ContributorTaskDialog({ open, onClose, task, setTask }) 
             <Button onClick={() => { onClose(updated) }} color="primary" variant="contained">Close</Button>
           </Grid>
 
-        </Grid>
-      </DialogActions>
-    </Dialog>
+          </Grid>
+        </DialogActions>
+      </Dialog>
+
+      {/* Attach GFE Bundle Confirmation Dialog */}
+      <Dialog open={showAttachConfirm} onClose={() => setShowAttachConfirm(false)}>
+        <DialogTitle>Attach GFE Bundle</DialogTitle>
+        <DialogContent sx={{ minWidth: 360 }}>
+          <DialogContentText>
+            Mark task completed ?
+          </DialogContentText>
+        </DialogContent>
+        <DialogActions>
+          <Button
+            color="success"
+            variant="contained"
+            onClick={() => {attachGfeBundle(submissionBundle, true);setShowAttachConfirm(false);}}
+          >
+            Yes
+          </Button>
+          <Button
+            color="primary"
+            variant="contained"
+            onClick={() => {attachGfeBundle(submissionBundle, false);setShowAttachConfirm(false);}}
+          >
+            No
+          </Button>
+          <Button
+            onClick={() => setShowAttachConfirm(false)}
+          >
+            Cancel
+          </Button>
+        </DialogActions>
+      </Dialog>
+    </>
   );
 
 };
