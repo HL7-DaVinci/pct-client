@@ -37,7 +37,7 @@ export default function AEOBEntry(props) {
                 >
                     <Grid container direction='row' spacing={2}>
                         <Grid item>
-                            <Typography><b>AEOB: </b>{props.aeob.id}</Typography>
+                            <Typography><b>{props.aeob.type?.coding?.some(c => c.code === "estimate-summary") ? "AEOB Summary" : "AEOB"}:</b> {props.aeob.id}</Typography>
                         </Grid>
 
                         <Grid item>

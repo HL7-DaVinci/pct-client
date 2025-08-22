@@ -51,7 +51,7 @@ export const getCoverageByPatient = (url, patientId) => {
     })
 }
 
-export const retrieveGFEBundle = (url, taskId) => {
+export const retrieveGFEPacket = (url, taskId) => {
     const headers = {
         "Accept": "application/fhir+json",
         "Accept-Encoding": "identity"

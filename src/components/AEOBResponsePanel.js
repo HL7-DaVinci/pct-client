@@ -354,7 +354,7 @@ export default function AEOBResponsePanel(props) {
               type="submit"
               onClick={handleAEOBPoll}
             >
-              Query AEOB Bundle
+              Query AEOB Packet
             </Button>
             <Button
               variant="outlined"

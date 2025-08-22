@@ -133,6 +133,7 @@ export default function ContributorPanel() {
       <>
         <Grid container marginBottom={2} spacing={2}>
           <Grid display="flex" justifyContent="end" size={12}>
+            <span style={{ marginRight: 8 }}>Currently displaying contributor tasks for:</span>
             <Person sx={{ mx: 1 }}/> {contributor || "No contributor selected"}
           </Grid>
         </Grid>

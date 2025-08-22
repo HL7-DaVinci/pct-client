@@ -247,7 +247,7 @@ export default function CoordinationTaskNewDialog({ open, onClose, onSave }) {
                 getOptionLabel={(option) => option}
                 value={selectedParticipants}
                 onChange={(e, newValue) => setSelectedParticipants(newValue)}
-                renderInput={(params) => <TextField {...params} label="Participants" />}
+                renderInput={(params) => <TextField {...params} label="Contributors" />}
               />
             </Grid>
           </Grid>

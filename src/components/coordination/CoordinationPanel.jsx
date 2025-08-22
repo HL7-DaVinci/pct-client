@@ -96,7 +96,7 @@ export default function CoordinationPanel() {
         <Grid size={12}>
           <Tabs value={currentTab} onChange={(e, newValue) => setCurrentTab(newValue)} variant="fullWidth">
             <Tab label="Coordination Requester" value={"requesterTab"}></Tab>
-            <Tab label="Coordination Contributor" value={"contributorTab"}></Tab>
+            <Tab label="Contributor" value={"contributorTab"}></Tab>
           </Tabs>
         </Grid>
 

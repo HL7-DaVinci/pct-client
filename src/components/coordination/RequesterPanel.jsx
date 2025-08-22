@@ -155,6 +155,7 @@ export default function RequesterPanel({addToLog}) {
           </Grid>
 
           <Grid display="flex" alignItems="center" justifyContent="end" size={6}>
+            <span style={{ marginRight: 8 }}>Currently displaying coordination tasks for:</span>
             <Person sx={{ mx: 1 }}/> {requester || "No requester selected"}
           </Grid>
         

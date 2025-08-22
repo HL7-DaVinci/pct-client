@@ -1,11 +1,12 @@
 import { useContext, useEffect, useState } from "react";
 import { AppContext } from "../../Context";
 import { Accordion, AccordionDetails, AccordionSummary, Button, Dialog, DialogActions, DialogContent, DialogTitle, List, ListItem, ListItemText, Paper, Tab, Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Tabs, Typography } from "@mui/material";
-import { ArrowDropDown, Check, LibraryBooks } from "@mui/icons-material";
+import { ArrowDropDown, Check, LibraryBooks, AttachFile } from "@mui/icons-material";
+import Tooltip from "@mui/material/Tooltip";
 import Grid from "@mui/material/Grid2";
 import { displayInstant, displayPeriod } from "../../util/displayUtils";
 import { getPlannedServicePeriod, getRequestInitiationTime } from "../../util/taskUtils";
-import { FHIRClient, retrieveGFEBundle, submitGFEClaim } from "../../api";
+import { FHIRClient, retrieveGFEPacket, submitGFEClaim } from "../../api";
 import { TabPanel } from "../TabPanel";
 import AEOBResponsePanel from "../AEOBResponsePanel";
 import { Editor } from "@monaco-editor/react";
@@ -26,7 +27,7 @@ export default function CoordinationTaskDetailsDialog({ open, onClose, task, set
   const [currentTab, setCurrentTab] = useState(TAB_TASK);
   const [infoBundle, setInfoBundle] = useState(undefined);
   const [contributorTasks, setContributorTasks] = useState([]);
-  const [gfeBundle, setGfeBundle] = useState(undefined);
+  const [gfePacket, setGfePacket] = useState(undefined);
 
   // aeob response panel related
   const [gfeSubmitted, setGfeSubmitted] = useState(false);
@@ -65,7 +66,7 @@ export default function CoordinationTaskDetailsDialog({ open, onClose, task, set
 
   const handleClose = () => {
     setCurrentTab(TAB_TASK);
-    setGfeBundle(undefined);
+    setGfePacket(undefined);
     setGfeSubmitted(false);
 
     onClose(updated);
@@ -110,18 +111,18 @@ export default function CoordinationTaskDetailsDialog({ open, onClose, task, set
 
   // invokes the $gfe-retrieve operation
   const retrieveGFE = () => {
-    
-    retrieveGFEBundle(coordinationServer, task.id).then((response) => {
+
+    retrieveGFEPacket(coordinationServer, task.id).then((response) => {
       return response.json();
     }).then((data) => {
-      addToLog("GFE Bundle retrieved successfully", "info", data);
-      setGfeBundle(data);
+      addToLog("GFE Packet retrieved successfully", "info", data);
+      setGfePacket(data);
       setCurrentTab(TAB_GFE);
     }).catch((error) => {
-      console.error("Error retrieving GFE Bundle", error);
-      alert("Error retrieving GFE Bundle: " + error?.message);
+      console.error("Error retrieving GFE Packet", error);
+      alert("Error retrieving GFE Packet: " + error?.message);
       setCurrentTab(TAB_TASK);
-      setGfeBundle(undefined);
+      setGfePacket(undefined);
     });
 
   }
@@ -130,15 +131,15 @@ export default function CoordinationTaskDetailsDialog({ open, onClose, task, set
   // invokes the $gfe-submit operation
   const submitGFE = async (tab) => {
 
-    if (!gfeBundle) {
-      alert("No GFE Bundle to submit");
+    if (!gfePacket) {
+      alert("No GFE Packet to submit");
       return;
     }
 
     setGfeSubmitted(true);
     setGfeRequestSuccess(false);
 
-    submitGFEClaim(payerServer, gfeBundle).then((response) => {
+    submitGFEClaim(payerServer, gfePacket).then((response) => {
       addToLog("GFE Claim Response", "info", response);
       
       if (response.status !== 200 && response.status !== 202) {
@@ -192,7 +193,7 @@ export default function CoordinationTaskDetailsDialog({ open, onClose, task, set
               <Tab label="Task" value={TAB_TASK} />
               <Tab label="Task JSON" value={TAB_TASK_JSON} />
               <Tab label="GFE Information Bundle JSON" value={TAB_INFO_BUNDLE_JSON} />
-              <Tab label="GFE Bundle" value={TAB_GFE} disabled={!gfeBundle} />
+              <Tab label="GFE Packet" value={TAB_GFE} disabled={!gfePacket} />
               <Tab label="GFE Submit (AEOB)" value={TAB_AEOB} disabled={!gfeSubmitted} />
             </Tabs>
 
@@ -236,6 +237,7 @@ export default function CoordinationTaskDetailsDialog({ open, onClose, task, set
                       <TableCell>ID</TableCell>
                       <TableCell>Participant</TableCell>
                       <TableCell>Status</TableCell>
+                      <TableCell><Tooltip title="GFE Bundle attached"><AttachFile fontSize="small" /></Tooltip></TableCell>
                     </TableRow>
                   </TableHead>
                   <TableBody>
@@ -244,6 +246,7 @@ export default function CoordinationTaskDetailsDialog({ open, onClose, task, set
                         <TableCell>{contributorTask.id}</TableCell>
                         <TableCell>{contributorTask.owner?.reference}</TableCell>
                         <TableCell>{contributorTask.status}</TableCell>
+                        <TableCell>{(contributorTask.output || []).some(out => out.type?.coding?.some(coding => coding.code === "gfe-bundle")) ? "Yes" : "No"}</TableCell>
                       </TableRow>
                     ))}
                   </TableBody>
@@ -294,7 +297,7 @@ export default function CoordinationTaskDetailsDialog({ open, onClose, task, set
               <Editor
                 height="65vh"
                 defaultLanguage="json" 
-                defaultValue={JSON.stringify(gfeBundle, null, 2)}
+                defaultValue={JSON.stringify(gfePacket, null, 2)}
                 options={{readOnly: true}}
               />
             </TabPanel>
@@ -323,7 +326,7 @@ export default function CoordinationTaskDetailsDialog({ open, onClose, task, set
         <Grid size={8}>
           {
             (currentTab === TAB_TASK || currentTab === TAB_TASK_JSON || currentTab === TAB_INFO_BUNDLE_JSON) && (
-              <Button onClick={() => { retrieveGFE() }} color="primary" variant="contained" startIcon={<LibraryBooks />}>Retrieve GFE Bundle</Button>
+              <Button onClick={() => { retrieveGFE() }} color="primary" variant="contained" startIcon={<LibraryBooks />}>Retrieve GFE Packet</Button>
             )
           }
 
