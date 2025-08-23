@@ -11,7 +11,7 @@ import { TabPanel } from "../TabPanel";
 import AEOBResponsePanel from "../AEOBResponsePanel";
 import { Editor } from "@monaco-editor/react";
 import GFEInformationBundleView from "../shared/GFEInformationBundleView";
-
+import buildGFEPacketDocumentReference from "../BuildGFEPacketDocumentReference";
 
 
 export default function CoordinationTaskDetailsDialog({ open, onClose, task, setTask, addToLog }) {
@@ -22,7 +22,7 @@ export default function CoordinationTaskDetailsDialog({ open, onClose, task, set
   const TAB_GFE = "gfeTab";
   const TAB_AEOB = "aeobTab";
   
-  const { coordinationServer, payerServer } = useContext(AppContext);
+  const { coordinationServer, payerServer, dataServer } = useContext(AppContext);
   const [updated, setUpdated] = useState(false);
   const [currentTab, setCurrentTab] = useState(TAB_TASK);
   const [infoBundle, setInfoBundle] = useState(undefined);
@@ -116,6 +116,14 @@ export default function CoordinationTaskDetailsDialog({ open, onClose, task, set
       return response.json();
     }).then((data) => {
       addToLog("GFE Packet retrieved successfully", "info", data);
+      // Create document reference and post to EHR Server
+      const docRef = buildGFEPacketDocumentReference(data, task);
+      FHIRClient(dataServer).update(docRef).then((response) => {
+        addToLog("DocumentReference posted to EHR");
+      }).catch((error) => {
+        console.error("Error posting DocumentReference to EHR", error);
+        addToLog("Error posting DocumentReference to EHR", "error", error);
+      });
       setGfePacket(data);
       setCurrentTab(TAB_GFE);
     }).catch((error) => {
