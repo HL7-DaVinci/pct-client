@@ -1,4 +1,7 @@
 # Patient Cost Transparency Client
+
+[![Build Status](https://ci.hl7.org/api/badges/HL7-DaVinci/pct-client/status.svg)](https://ci.hl7.org/HL7-DaVinci/pct-client)
+
 This project provides a web application that is capable of generating GFE request and displaying the GFE response.
 This version of the reference Implementation supports the [STU1 version of the Da Vinci Patient Cost Transparency Implementation Guide](https://hl7.org/fhir/us/davinci-pct/STU1/)
 In addition, it provides a functionality to allow the client to send the inquiry request for Advance EOB and displays the response from the payer server.  This project is written in JavaScript and runs in [node.js](https://nodejs.org/en/).  
