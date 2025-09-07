@@ -85,7 +85,7 @@ export default function ContributorTaskDialog({ open, onClose, task, setTask }) 
   }, [coordinationTaskRef, loadCoordinationTask]);
 
 
-  const updateTask = async (status) => {
+  const updateTask = async (status, source) => {
     task.status = status;
     if (status === "rejected"){
       // set default statusReason
@@ -114,7 +114,7 @@ export default function ContributorTaskDialog({ open, onClose, task, setTask }) 
     setTask(updatedTask);
     setUpdated(true);
 
-    if (status === "rejected" || status === "completed") {
+    if (status === "rejected" || status === "completed" || source === "attachGfeBundle") {
       onClose(updated);
     }
 
@@ -160,8 +160,7 @@ export default function ContributorTaskDialog({ open, onClose, task, setTask }) 
     if (markCompleted) {
         task.status = "completed";
     }
-    updateTask(task.status);
-    onClose(true);
+    updateTask(task.status, "attachGfeBundle");
 
   }
 

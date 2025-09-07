@@ -89,7 +89,8 @@ export default function RequesterPanel({addToLog}) {
       while (res.total && res.total !== expectedTotal) {
         console.log(`Result total expected to be ${expectedTotal} but was ${res.total}.  Trying again in 2 seconds`);
         await new Promise(resolve => setTimeout(resolve, 2000));
-        await fetchTasks();
+        // Set 'res' to updated task state for accurate tracking
+        res = await fetchTasks();
       }
     }
   }

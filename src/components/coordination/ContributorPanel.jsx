@@ -33,7 +33,7 @@ export default function ContributorPanel() {
     }).finally(() => {
       setRefreshTasks(false);
     });
-  }, [coordinationServer, contributor, apiRef, refreshTasks]);
+  }, [coordinationServer, dataServer, contributor, apiRef, refreshTasks]);
 
   
   useEffect(() => {
@@ -51,7 +51,7 @@ export default function ContributorPanel() {
           throw new Error("Expected a resource of type Task");
         }
         setCurrentTask(response);
-        setRefreshTasks(!refreshTasks);
+        setRefreshTasks((prev) => !prev);
       }).catch((error) => {
         console.error("Error fetching task", error);
         alert("Error fetching task: " + error?.message);
@@ -66,7 +66,7 @@ export default function ContributorPanel() {
     setTaskDialogOpen(false);
     setCurrentTask(undefined);
     if (updated) {
-      setRefreshTasks(!updated);
+      setRefreshTasks((prev) => !prev);
     }
   }
 
