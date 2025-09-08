@@ -7,7 +7,7 @@ import {FHIRClient, getContributorTasks} from '../../api';
 import ContributorTaskDialog from './ContributorTaskDialog';
 import { displayInstant, displayPeriod } from '../../util/displayUtils';
 import { getPlannedServicePeriod, getRequestInitiationTime } from '../../util/taskUtils';
-
+import { Box } from '@mui/material';
 export default function ContributorPanel() {
 
   const apiRef = useGridApiRef();
@@ -38,9 +38,11 @@ export default function ContributorPanel() {
   
   useEffect(() => {
     if (apiRef?.current && apiRef.current.autosizeColumns) {
-      apiRef.current.autosizeColumns({ includeHeaders: true, includeOutliers: true }); 
+      setTimeout(() => {
+        apiRef.current.autosizeColumns({ includeHeaders: true, includeOutliers: true });
+      }, 0);
     }
-  });
+  }, [apiRef, rows, taskDialogOpen]);
 
 
   const openTaskDialog = async (task) => {
@@ -96,7 +98,19 @@ export default function ContributorPanel() {
       ]}
     },
     { field: 'id', headerName: 'ID' },
-    { field: 'status', headerName: 'Status' },
+    {
+      field: 'status',
+      headerName: 'Status',
+      renderCell: (params) => {
+        const status = params.value || '';
+        const badgeClass = `status-badge status-${status.replace(/_/g, '-').toLowerCase()}`;
+        return (
+          <Box component="span" className={badgeClass}>
+            {status}
+          </Box>
+        );
+      }
+    },
     {
       field: 'gfeBundle', headerName: <AttachFile fontSize="small" sx={{ verticalAlign: 'middle' }} />, description: 'GFE Bundle attached', valueGetter: (value, row) => hasGfeBundle(row) ? "Yes" : "No",
     },
@@ -132,9 +146,13 @@ export default function ContributorPanel() {
 
       <>
         <Grid container marginBottom={2} spacing={2}>
-          <Grid display="flex" justifyContent="end" size={12}>
-            <span style={{ marginRight: 8 }}>Currently displaying contributor tasks for:</span>
-            <Person sx={{ mx: 1 }}/> {contributor || "No contributor selected"}
+          <Grid display="flex" alignItems="center" justifyContent="space-between" size={12} sx={{ marginBottom: 2 }}>
+            <div style={{ display: 'flex', alignItems: 'center' }}>
+              <span style={{ marginRight: 8, fontSize: '1.15rem', fontWeight: 370 }}>
+                Currently displaying contributor tasks for:
+              </span>
+              <Person sx={{ mx: 1 }}/> {contributor || "No contributor selected"}
+            </div>
           </Grid>
         </Grid>
 
@@ -144,6 +162,19 @@ export default function ContributorPanel() {
           apiRef={apiRef} 
           rowSelection={false}
           autoHeight={true}
+          sx={{
+            '& .MuiDataGrid-columnHeaders': {
+              backgroundColor: '#f5f7fa',
+              color: '#556cd6',
+              fontWeight: 700,
+              fontSize: '1.08rem',
+              borderBottom: '2px solid #e2e8f0',
+              letterSpacing: '0.03em',
+            },
+            '& .MuiDataGrid-cell': {
+              fontSize: '0.97rem',
+            },
+          }}
         />
 
         <ContributorTaskDialog 

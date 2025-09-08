@@ -8,6 +8,8 @@ import RequesterPanel from './RequesterPanel';
 import ContributorPanel from './ContributorPanel';
 import Settings from '../Settings';
 import AccountSettings from './AccountSettings';
+import AEOBPanel from './AEOBPanel';
+import GFEPanel from './GFEPanel';
 
 
 const useStyles = makeStyles((theme) =>
@@ -31,7 +33,7 @@ export default function CoordinationPanel() {
   const [showSettings, setShowSettings] = useState(false);
   const [showAccountSettings, setShowAccountSettings] = useState(false);
   const [statusLogs, setStatusLogs] = useState([]);
-
+  const [selectedButton, setSelectedButton] = useState('coordination');
 
   const classes = useStyles();
 
@@ -56,6 +58,58 @@ export default function CoordinationPanel() {
     setStatusLogs([newLog, ...statusLogs]);
   };
 
+  // Content selection logic for navigation pane
+  let content;
+  switch (selectedButton) {
+    case 'coordination':
+      content = (
+        <>
+          <div className="tab-navigation">
+            <button
+              className={`tab-button${currentTab === 'requesterTab' ? ' active' : ''}`}
+              onClick={() => setCurrentTab('requesterTab')}
+            >
+              Coordination Tasks
+            </button>
+            <button
+              className={`tab-button${currentTab === 'contributorTab' ? ' active' : ''}`}
+              onClick={() => setCurrentTab('contributorTab')}
+            >
+              Contributor Tasks
+            </button>
+          </div>
+          <Grid size={12} sx={{ minHeight: 400 }}>
+            <TabPanel value={currentTab} index="requesterTab">
+              <RequesterPanel addToLog={addToLog} />
+            </TabPanel>
+            <TabPanel value={currentTab} index="contributorTab">
+              <ContributorPanel addToLog={addToLog} />
+            </TabPanel>
+            <TabPanel value={currentTab} index="aeobsTab">
+              <AEOBPanel />
+            </TabPanel>
+            <TabPanel value={currentTab} index="gfesTab">
+              <GFEPanel />
+            </TabPanel>
+          </Grid>
+        </>
+      );
+      break;
+    case 'gfes':
+      content = (
+        <GFEPanel />
+      );
+      break;
+    case 'aeobs':
+      content = (
+        <AEOBPanel />
+      );
+      break;
+    default:
+      content = (
+        <div className="content-placeholder">Select a section.</div>
+      );
+  }
 
   return (
     <div className={classes.root}>
@@ -92,30 +146,37 @@ export default function CoordinationPanel() {
             <span></span>
           )}
         </Grid>
-
-        <Grid size={12}>
-          <Tabs value={currentTab} onChange={(e, newValue) => setCurrentTab(newValue)} variant="fullWidth">
-            <Tab label="Coordination Requester" value={"requesterTab"}></Tab>
-            <Tab label="Contributor" value={"contributorTab"}></Tab>
-          </Tabs>
-        </Grid>
-
-        <Grid size={12}>
-          <TabPanel value={currentTab} index="requesterTab">
-            <RequesterPanel 
-              addToLog={addToLog}
-            />
-          </TabPanel>
-
-          <TabPanel value={currentTab} index="contributorTab">
-            <ContributorPanel 
-              addToLog={addToLog}
-            />
-          </TabPanel>
-        </Grid>
       </Grid>
+      <div className="layout-container">
+        {/* Navigation Pane (Left Side) */}
+        <div className="navigation-pane">
+          <div className="nav-buttons">
+            <button
+                className={`nav-button${selectedButton === 'coordination' ? ' selected' : ''}`}
+              onClick={() => setSelectedButton('coordination')}
+            >
+              Coordination
+            </button>
+            <button
+                className={`nav-button${selectedButton === 'gfes' ? ' selected' : ''}`}
+              onClick={() => setSelectedButton('gfes')}
+            >
+              My GFEs
+            </button>
+            <button
+                className={`nav-button${selectedButton === 'aeobs' ? ' selected' : ''}`}
+              onClick={() => setSelectedButton('aeobs')}
+            >
+              My AEOBs
+            </button>
+          </div>
+        </div>
+        <div className="divider-line"></div>
+        <div className="content-area">
+          {content}
+        </div>
+      </div>
     </div>
   );
 
 }
-
