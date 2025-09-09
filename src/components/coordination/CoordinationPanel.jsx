@@ -86,7 +86,7 @@ export default function CoordinationPanel() {
               <ContributorPanel addToLog={addToLog} />
             </TabPanel>
             <TabPanel value={currentTab} index="aeobsTab">
-              <AEOBPanel />
+              <AEOBPanel selectedButton={selectedButton} />
             </TabPanel>
             <TabPanel value={currentTab} index="gfesTab">
               <GFEPanel />
@@ -102,7 +102,7 @@ export default function CoordinationPanel() {
       break;
     case 'aeobs':
       content = (
-        <AEOBPanel />
+        <AEOBPanel selectedButton={selectedButton} />
       );
       break;
     default:

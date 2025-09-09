@@ -1,7 +1,16 @@
-import React, { useState } from 'react';
+import React, { useState, useContext, useEffect } from 'react';
 import { DataGrid } from '@mui/x-data-grid';
 import Grid from '@mui/material/Grid2';
-
+import Dialog from '@mui/material/Dialog';
+import DialogTitle from '@mui/material/DialogTitle';
+import DialogContent from '@mui/material/DialogContent';
+import IconButton from '@mui/material/IconButton';
+import CloseIcon from '@mui/icons-material/Close';
+import { AppContext } from '../../Context';
+import {Editor} from "@monaco-editor/react";
+import {Person} from "@mui/icons-material";
+import AEOBBundle from '../../components/response/AEOBBundle';
+import { searchAEOBDocumentReference } from '../../api';
 
 const columns = [
   { field: 'dateOfRequest', headerName: 'Date of request', flex: 1 },
@@ -9,24 +18,171 @@ const columns = [
   { field: 'encounterPeriod', headerName: 'Encounter period', flex: 1 },
   { field: 'serviceRequested', headerName: 'Service/Device requested', flex: 1 },
   { field: 'condition', headerName: 'Condition', flex: 1 },
-  { field: 'fhirResource', headerName: 'FHIR Resource', flex: 1 }
+  {
+    field: 'fhirResource',
+    headerName: 'FHIR Resource',
+    flex: 1,
+    renderCell: (params) => (
+      <a
+        href="#"
+        style={{ color: '#1976d2', textDecoration: 'underline', cursor: 'pointer' }}
+        onClick={e => {
+          e.stopPropagation();
+          e.preventDefault();
+          params.row.onFhirResourceClick();
+        }}
+      >
+        View JSON
+      </a>
+    )
+  }
 ];
 
-export default function AEOBPanel() {
-  const [rows] = useState(undefined);
+const formatDate = dateStr => dateStr ? dateStr.split('T')[0] : '';
+
+const fetchAeobPacket = async (row) => {
+  const docRef = row?.fhirJson ? row.fhirJson : row;
+  const base64Binary = docRef?.content?.[0]?.attachment?.data;
+  if (!base64Binary) {
+    return { error: 'Attachment data not found in DocumentReference content.' };
+  }
+  try {
+    const base64BinaryDecoded = atob(base64Binary);
+    return JSON.parse(base64BinaryDecoded);
+  } catch (e) {
+    return { error: 'Failed to decode or parse AEOB packet.' };
+    console.error('Error decoding or parsing AEOB packet from DocumentReference:', e);
+  }
+};
+
+export default function AEOBPanel({ selectedButton }) {
+  const [rows, setRows] = useState(undefined);
   const [requestDate, setRequestDate] = useState('');
   const [encounterDate, setEncounterDate] = useState('');
+  const { payerServer, requester } = useContext(AppContext);
+  const [selectedRow, setSelectedRow] = useState(null);
+  const [aeobPacket, setAeobPacket] = useState(null);
+  const [jsonDialogOpen, setJsonDialogOpen] = useState(false);
+  const [jsonDialogData, setJsonDialogData] = useState(null);
 
-  const handleSearch = () => {
-    console.log('Search clicked:', { requestDate, encounterDate });
+  useEffect(() => {
+    // Only runs when requester changes AND user is in 'My AEOBs' panel
+    if (selectedButton === 'aeobs') {
+      handleClearFields();
+      handleSearch(true);
+    }
+  }, [requester]);
+
+  const handleFhirResourceClick = async (row) => {
+    const packet = await fetchAeobPacket(row);
+    setJsonDialogData(packet);
+    setJsonDialogOpen(true);
+  };
+
+  const handleSearch = async (isDefaultSearch = false) => {
+    // For search, require at least one date
+    if (!isDefaultSearch && !requestDate && !encounterDate) {
+      alert('Please enter Request/Encounter Date to search.');
+      return;
+    }
+    const params = {};
+    if (requestDate) params['estimate-initiation-time'] = requestDate;
+    if (encounterDate) {
+      // Dates within the period, including the start and end, will match.
+      params['planned-period'] = [`le${encounterDate}`, `ge${encounterDate}`];
+    }
+    if (requester) params['author'] = requester;
+
+    try {
+      const response = await searchAEOBDocumentReference(payerServer, params);
+      const data = await response.json();
+      // Map DocumentReference resources to table rows
+      const newRows = (data.entry || [])
+        .map((entry, idx) => {
+          const doc = entry.resource;
+          let encounterPeriod = '';
+          const gfeExt = doc.extension?.find(
+            ext => ext.url === 'http://hl7.org/fhir/us/davinci-pct/StructureDefinition/gfeServiceLinkingInfo'
+          );
+          const plannedPeriodExt = gfeExt?.extension?.find(
+            ext => ext.url === 'plannedPeriodOfService'
+          );
+          const period = plannedPeriodExt?.valuePeriod;
+          if (period) {
+            encounterPeriod = `${formatDate(period.start) || ''} - ${formatDate(period.end) || ''}`;
+          }
+          return {
+            id: doc.id || idx,
+            dateOfRequest: (() => {
+              const ext = doc.extension?.find(
+                ext => ext.url === 'http://hl7.org/fhir/us/davinci-pct/StructureDefinition/requestInitiationTime'
+              );
+              const instant = ext?.valueInstant || '';
+              return instant ? instant.split('T')[0] : '';
+            })(),
+            patient: doc?.subject?.reference || '',
+            encounterPeriod,
+            serviceRequested: (() => {
+              const exts = doc.extension?.filter(
+                ext => ext.url === 'http://hl7.org/fhir/us/davinci-pct/StructureDefinition/estimateProcedureOrService'
+              ) || [];
+              const displays = exts.flatMap(ext =>
+                ext.valueCodeableConcept?.coding?.map(c => c.display).filter(Boolean) || []
+              );
+              return displays.join(', ');
+            })(),
+            condition: (() => {
+              const ext = doc.extension?.find(
+                ext => ext.url === 'http://hl7.org/fhir/us/davinci-pct/StructureDefinition/estimateCondition'
+              );
+              return ext?.valueCodeableConcept?.coding?.[0]?.display || '';
+            })(),
+            fhirJson: doc,
+            onFhirResourceClick: () => handleFhirResourceClick({ fhirJson: doc })
+          };
+        })
+      setRows(newRows);
+    } catch (err) {
+      setRows([]);
+      alert('Error fetching AEOBs')
+      console.log("Error fetching AEOBs:", err);
+    }
+  };
+
+  const handleRowClick = (params) => {
+    setSelectedRow(params.row);
+    fetchAeobPacket(params.row).then(packet => setAeobPacket(packet));
+  };
+
+  const handleCloseDetailsDialog = () => {
+    setSelectedRow(null);
+    setAeobPacket(null);
+  };
+
+  const handleCloseJsonDialog = () => {
+    setJsonDialogOpen(false);
+    setJsonDialogData(null);
+  };
+
+  const handleClearFields = () => {
+    setRequestDate('');
+    setEncounterDate('');
+    setRows([]);
   };
 
   return (
     <Grid container spacing={2}>
       <Grid size={12}>
-        <h2 style={{ marginBottom: '1rem', color: '#333', fontWeight: 500, fontSize: '1.25rem' }}>
-          My AEOBs
-        </h2>
+        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '1rem' }}>
+          <h2 style={{ color: '#333', fontWeight: 500, fontSize: '1.25rem', margin: 0 }}>
+            My AEOBs
+          </h2>
+          <span style={{ display: 'flex', alignItems: 'center' }}>
+            <Person sx={{ verticalAlign: 'middle', mr: 1 }} style={{ fontSize: '1.15em' }} />
+            <span style={{ fontWeight: 400, fontSize: '1rem', marginRight: 6 }}>Author:</span>
+            <span style={{ fontSize: '1rem' }}>{requester || "No requester selected"}</span>
+          </span>
+        </div>
       </Grid>
       <Grid size={12} sx={{ marginBottom: 2 }}>
         <div className="date-filters">
@@ -55,6 +211,13 @@ export default function AEOBPanel() {
             >
               Search
             </button>
+            <button
+              className="search-button"
+              style={{ marginLeft: 8 }}
+              onClick={e => { e.preventDefault(); handleClearFields(); }}
+            >
+              Clear
+            </button>
           </div>
         </div>
       </Grid>
@@ -63,6 +226,7 @@ export default function AEOBPanel() {
           rows={rows}
           columns={columns}
           autoHeight={true}
+          onRowClick={handleRowClick}
           sx={{
             '& .MuiDataGrid-columnHeaders': {
               backgroundColor: '#f5f7fa',
@@ -78,6 +242,72 @@ export default function AEOBPanel() {
           }}
         />
       </Grid>
+      <Dialog
+        open={!!selectedRow}
+        onClose={handleCloseDetailsDialog}
+        maxWidth="lg"
+        fullWidth
+      >
+        <DialogTitle>
+          AEOB Details
+          <IconButton
+            aria-label="close"
+            onClick={handleCloseDetailsDialog}
+            sx={{
+              position: 'absolute',
+              right: 8,
+              top: 8,
+              color: (theme) => theme.palette.grey[500],
+            }}
+            size="large"
+          >
+            <CloseIcon />
+          </IconButton>
+        </DialogTitle>
+        <DialogContent dividers>
+          {aeobPacket && <AEOBBundle data={aeobPacket} showRawJsonButton={false} />}
+          {aeobPacket?.error && <div>{aeobPacket.error}</div>}
+        </DialogContent>
+      </Dialog>
+      <Dialog
+        open={jsonDialogOpen}
+        onClose={handleCloseJsonDialog}
+        maxWidth="lg"
+        fullWidth
+      >
+        <DialogTitle>
+          AEOB Packet JSON
+          <IconButton
+            aria-label="close"
+            onClick={handleCloseJsonDialog}
+            sx={{
+              position: 'absolute',
+              right: 8,
+              top: 8,
+              color: (theme) => theme.palette.grey[500],
+            }}
+            size="large"
+          >
+            <CloseIcon />
+          </IconButton>
+        </DialogTitle>
+        <DialogContent dividers>
+          {jsonDialogData?.error && <div>{jsonDialogData.error}</div>}
+          {jsonDialogData && !jsonDialogData.error && (
+            Array.isArray(jsonDialogData) && jsonDialogData.length === 0 ? (
+              <div>AEOB packet is empty.</div>
+            ) : (
+              <Editor
+                height="75vh"
+                width="100%"
+                defaultLanguage="json"
+                value={JSON.stringify(jsonDialogData, null, 2)}
+                options={{ readOnly: true, fontSize: 16 }}
+              />
+            )
+          )}
+        </DialogContent>
+      </Dialog>
     </Grid>
   );
 }

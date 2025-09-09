@@ -98,6 +98,7 @@ const useStyles = makeStyles({
 
 export default function AEOBBundle(props) {
   const classes = useStyles();
+  const showRawJsonButton = props.showRawJsonButton !== undefined ? props.showRawJsonButton : true;
 
   function getNameDisplay(resource) {
     var returnString = "";
@@ -169,8 +170,8 @@ export default function AEOBBundle(props) {
 
   return (
     <React.Fragment>
-      <Grid container direction="column">        
-        
+      <Grid container direction="column">
+        {showRawJsonButton && (
         <Grid item>
             <Button
             variant="contained"
@@ -188,7 +189,7 @@ export default function AEOBBundle(props) {
             >
             <DialogTitle>Raw JSON of AEOB Response:</DialogTitle>
             <DialogContent>
-              <Editor 
+              <Editor
                 height="75vh"
                 defaultLanguage="json"
                 defaultValue={JSON.stringify(props.aeobResponse, undefined, 2)}
@@ -200,7 +201,7 @@ export default function AEOBBundle(props) {
             </DialogActions>
             </Dialog>
         </Grid>
-
+            )}
         <Grid item>
             <Typography variant="body1" gutterBottom>
                 ID:{" "}

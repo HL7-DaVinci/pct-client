@@ -127,3 +127,14 @@ export const getContributorTasks = (url, dataServer, contributor) => {
     return FHIRClient(url).request(`Task?${query}`);
 }
 
+export const searchAEOBDocumentReference = (url, params) => {
+    const headers = {
+        "Accept": "application/fhir+json"
+    };
+    const query = new URLSearchParams(params).toString();
+    return fetch(`${url}/DocumentReference?${query}`, {
+        method: "GET",
+        headers: headers
+    });
+}
+
