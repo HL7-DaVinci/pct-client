@@ -1,6 +1,6 @@
-import React, { useContext } from 'react';
-
-import { Autocomplete, TextField } from '@mui/material';
+import React, { useContext, useState } from 'react';
+import { Autocomplete, TextField, Dialog, DialogTitle, DialogContent, DialogActions, Button, InputAdornment, IconButton, Tooltip } from '@mui/material';
+import LockIcon from '@mui/icons-material/Lock';
 import Grid from '@mui/material/Grid2';
 import { AppContext } from '../Context';
 
@@ -18,6 +18,12 @@ export default function Settings(props) {
         payerServer,
         setPayerServer
     } = useContext(AppContext);
+
+    const [tokenDialogOpen, setTokenDialogOpen] = useState(false);
+    const [tokenValue, setTokenValue] = useState('');
+
+    // Helper to check if selected payer server needs token
+    const needsToken = (server) => server && !(server.includes('localhost') || server.includes('pct-payer'));
 
     const handleCoordinationServerChanges = (newValue) => {
         setCoordinationServer(newValue);
@@ -46,6 +52,16 @@ export default function Settings(props) {
         }
     }
 
+    const handleTokenSave = () => {
+        localStorage.setItem('payer-token', tokenValue);
+        setTokenDialogOpen(false);
+        setTokenValue('');
+    };
+
+    const handleTokenCancel = () => {
+        setTokenDialogOpen(false);
+        setTokenValue('');
+    };
 
     return (
         <Grid container 
@@ -103,10 +119,51 @@ export default function Settings(props) {
                             label="Payer GFE Data Server" 
                             margin="normal"
                             variant="outlined"
+                            placeholder={needsToken(payerServer) ? 'needs token' : ''}
+                            InputProps={{
+                                ...params.InputProps,
+                                endAdornment: needsToken(payerServer) ? (
+                                    <InputAdornment position="end">
+                                        <Tooltip title="Click to add or update auth token for this server.">
+                                            <IconButton
+                                                aria-label="add token"
+                                                onClick={() => setTokenDialogOpen(true)}
+                                                edge="end"
+                                                size="small"
+                                            >
+                                                <LockIcon style={{ color: '#888' }} />
+                                            </IconButton>
+                                        </Tooltip>
+                                    </InputAdornment>
+                                ) : params.InputProps.endAdornment,
+                            }}
+                            inputProps={{
+                                ...params.inputProps,
+                                style: needsToken(payerServer) ? { color: '#888' } : {},
+                            }}
                         />
                     )}
                 />
             </Grid>
+            <Dialog open={tokenDialogOpen} onClose={handleTokenCancel}>
+                <DialogTitle>Enter Auth Token for Payer Server</DialogTitle>
+                <DialogContent>
+                    <TextField
+                        autoFocus
+                        margin="dense"
+                        label="Token"
+                        type="text"
+                        fullWidth
+                        variant="outlined"
+                        value={tokenValue}
+                        onChange={e => setTokenValue(e.target.value)}
+                    />
+                </DialogContent>
+                <DialogActions>
+                    <Button onClick={handleTokenCancel}>Cancel</Button>
+                    <Button onClick={handleTokenSave} variant="contained" color="primary">Save</Button>
+                </DialogActions>
+            </Dialog>
         </Grid>
     )
 }

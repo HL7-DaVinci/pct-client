@@ -10,7 +10,7 @@ import { AppContext } from '../../Context';
 import {Editor} from "@monaco-editor/react";
 import {Person} from "@mui/icons-material";
 import AEOBBundle from '../../components/response/AEOBBundle';
-import { searchAEOBDocumentReference } from '../../api';
+import {searchDocumentReference} from '../../api';
 
 const columns = [
   { field: 'dateOfRequest', headerName: 'Date of request', flex: 1 },
@@ -50,8 +50,8 @@ const fetchAeobPacket = async (row) => {
     const base64BinaryDecoded = atob(base64Binary);
     return JSON.parse(base64BinaryDecoded);
   } catch (e) {
+    console.error('Failed to decode or parse AEOB packet.', e);
     return { error: 'Failed to decode or parse AEOB packet.' };
-    console.error('Error decoding or parsing AEOB packet from DocumentReference:', e);
   }
 };
 
@@ -64,10 +64,11 @@ export default function AEOBPanel({ selectedButton }) {
   const [aeobPacket, setAeobPacket] = useState(null);
   const [jsonDialogOpen, setJsonDialogOpen] = useState(false);
   const [jsonDialogData, setJsonDialogData] = useState(null);
+  const [paginationModel, setPaginationModel] = useState({ pageSize: 10, page: 0 });
 
   useEffect(() => {
-    // Only runs when requester changes AND user is in 'My AEOBs' panel
-    if (selectedButton === 'aeobs') {
+    // Search when requester changes AND user is in 'My AEOBs' panel
+    if (selectedButton === 'aeobs' && requester) {
       handleClearFields();
       handleSearch(true);
     }
@@ -85,16 +86,21 @@ export default function AEOBPanel({ selectedButton }) {
       alert('Please enter Request/Encounter Date to search.');
       return;
     }
-    const params = {};
+    let params = {};
+    params = { type: 'aeob-packet' };
     if (requestDate) params['estimate-initiation-time'] = requestDate;
     if (encounterDate) {
-      // Dates within the period, including the start and end, will match.
+      // Dates within the period, including the start and end, should match.
       params['planned-period'] = [`le${encounterDate}`, `ge${encounterDate}`];
     }
     if (requester) params['author'] = requester;
 
     try {
-      const response = await searchAEOBDocumentReference(payerServer, params);
+      const response = await searchDocumentReference(payerServer, params);
+      if (response.status === 401) {
+        alert('Your token is expired or invalid. Please update your auth token in Settings.');
+        return;
+      }
       const data = await response.json();
       // Map DocumentReference resources to table rows
       const newRows = (data.entry || [])
@@ -107,9 +113,12 @@ export default function AEOBPanel({ selectedButton }) {
           const plannedPeriodExt = gfeExt?.extension?.find(
             ext => ext.url === 'plannedPeriodOfService'
           );
-          const period = plannedPeriodExt?.valuePeriod;
-          if (period) {
+          // Check for valuePeriod or valueDate
+          if (plannedPeriodExt?.valuePeriod) {
+            const period = plannedPeriodExt.valuePeriod;
             encounterPeriod = `${formatDate(period.start) || ''} - ${formatDate(period.end) || ''}`;
+          } else if (plannedPeriodExt?.valueDate) {
+            encounterPeriod = formatDate(plannedPeriodExt.valueDate);
           }
           return {
             id: doc.id || idx,
@@ -225,6 +234,9 @@ export default function AEOBPanel({ selectedButton }) {
         <DataGrid
           rows={rows}
           columns={columns}
+          paginationModel={paginationModel}
+          onPaginationModelChange={setPaginationModel}
+          pageSizeOptions={[5, 10, 25, 50, 100]}
           autoHeight={true}
           onRowClick={handleRowClick}
           sx={{

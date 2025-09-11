@@ -168,12 +168,11 @@ export default function RequesterPanel({addToLog}) {
               </span>
               <Person sx={{ mx: 1 }}/> {requester || "No requester selected"}
             </div>
-          </Grid>
-          <Grid size={12} sx={{ marginBottom: 2 }}>
             <Button
               variant="contained"
               startIcon={<Add />}
               onClick={openTaskNewDialog}
+              sx={{ marginLeft: 'auto' }}
             >
               Add Coordination Task
             </Button>

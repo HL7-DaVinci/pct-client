@@ -127,10 +127,14 @@ export const getContributorTasks = (url, dataServer, contributor) => {
     return FHIRClient(url).request(`Task?${query}`);
 }
 
-export const searchAEOBDocumentReference = (url, params) => {
+export const searchDocumentReference = (url, params) => {
     const headers = {
         "Accept": "application/fhir+json"
     };
+    const tokenValue = localStorage.getItem('payer-token');
+    if (tokenValue) {
+        headers['Authorization'] = `Bearer ${tokenValue}`;
+    }
     const query = new URLSearchParams(params).toString();
     return fetch(`${url}/DocumentReference?${query}`, {
         method: "GET",

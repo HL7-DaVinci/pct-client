@@ -97,7 +97,7 @@ export default function CoordinationPanel() {
       break;
     case 'gfes':
       content = (
-        <GFEPanel />
+        <GFEPanel selectedButton={selectedButton} />
       );
       break;
     case 'aeobs':
