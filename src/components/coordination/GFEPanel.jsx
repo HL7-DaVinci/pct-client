@@ -96,6 +96,11 @@ export default function GFEPanel({ selectedButton }) {
       // Dates within the period, including the start and end, should match.
       params['planned-period'] = [`le${encounterDate}`, `ge${encounterDate}`];
     }
+      // Hack to send author param (requester) only for specific payers localhost/pct-ehr, as the search param may not be supported by all servers yet.
+      // TODO use servers capability statement to determine which search param is supported
+      if (dataServer && (dataServer.includes('localhost') || dataServer.includes('pct-ehr')) && requester) {
+          params['author'] = requester;
+      }
     try {
       const response = await searchDocumentReference(dataServer, params);
       if (response.status === 401) {
