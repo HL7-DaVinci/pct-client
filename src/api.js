@@ -69,7 +69,12 @@ export const submitGFEClaim = (url, bundle) => {
         "Accept": "application/fhir+json",
         "Accept-Encoding": "identity"
     };
-    
+    if(url.includes("healthsparq")) {
+        const tokenValue = localStorage.getItem('payer-token');
+        if (tokenValue) {
+            headers['Subject-Token'] = `${tokenValue}`;
+        }
+    }
     return fetch(`${url}/Claim/$gfe-submit`, {
         method: "POST",
         headers: headers,
@@ -94,14 +99,21 @@ export const sendAEOInquiry = (url, bundleIdentifier) => {
 }
 
 export const pollAEOBStatus = (url) => {
+    const headers = {
+        "Content-Type": "application/json",
+        "Accept": "*/*",
+        "Access-Control-Request-Headers": "Retry-After",
+        "Origin": "*"
+    };
+    if(url.includes("healthsparq")) {
+        const subjectToken = localStorage.getItem('payer-token');
+        if (subjectToken) {
+            headers['Subject-Token'] = subjectToken;
+        }
+    }
     return fetch(url, {
         method: "GET",
-        headers: {
-            "Content-Type": "application/json",
-            "Accept": "*/*",
-            "Access-Control-Request-Headers": "Retry-After",
-            "Origin": "*"
-        }
+        headers: headers
     });
 }
 
