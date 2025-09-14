@@ -102,7 +102,7 @@ export default function GFEPanel({ selectedButton }) {
           params['author'] = requester;
       }
     try {
-      const response = await searchDocumentReference(dataServer, params);
+      const response = await searchDocumentReference(dataServer, params, "ehr");
       if (response.status === 401) {
         alert('Your token is expired or invalid. Please update your auth token in Settings.');
         return;

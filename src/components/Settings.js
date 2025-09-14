@@ -21,9 +21,9 @@ export default function Settings(props) {
 
     const [tokenDialogOpen, setTokenDialogOpen] = useState(false);
     const [tokenValue, setTokenValue] = useState('');
+    const [tokenDialogType, setTokenDialogType] = useState('');
 
-    // Helper to check if selected payer server needs token
-    const needsToken = (server) => server && !(server.includes('localhost') || server.includes('pct-payer'));
+    const needsToken = (server) => server && !(server.includes('localhost') || server.includes('pct-payer') || server.includes('pct-coordination-platform') || server.includes('pct-ehr'));
 
     const handleCoordinationServerChanges = (newValue) => {
         setCoordinationServer(newValue);
@@ -52,15 +52,42 @@ export default function Settings(props) {
         }
     }
 
+    const handleCoordinationServerLockClick = () => {
+        setTokenDialogType('cp');
+        setTokenDialogOpen(true);
+    };
+    const handlePayerServerLockClick = () => {
+        setTokenDialogType('payer');
+        setTokenDialogOpen(true);
+    };
+    const handleEHRServerLockClick = () => {
+        setTokenDialogType('ehr');
+        setTokenDialogOpen(true);
+    };
+
     const handleTokenSave = () => {
-        localStorage.setItem('payer-token', tokenValue);
+        switch (tokenDialogType) {
+            case 'cp':
+                localStorage.setItem('cp-token', tokenValue);
+                break;
+            case 'payer':
+                localStorage.setItem('payer-token', tokenValue);
+                break;
+            case 'ehr':
+                localStorage.setItem('ehr-token', tokenValue);
+                break;
+            default:
+                break;
+        }
         setTokenDialogOpen(false);
         setTokenValue('');
+        setTokenDialogType('');
     };
 
     const handleTokenCancel = () => {
         setTokenDialogOpen(false);
         setTokenValue('');
+        setTokenDialogType('');
     };
 
     return (
@@ -83,6 +110,28 @@ export default function Settings(props) {
                             label="Coordination Platform Server" 
                             margin="normal"
                             variant="outlined"
+                            placeholder={needsToken(coordinationServer) ? 'needs token' : ''}
+                            InputProps={{
+                                ...params.InputProps,
+                                endAdornment: needsToken(coordinationServer) ? (
+                                    <InputAdornment position="end">
+                                        <Tooltip title="Click to add or update auth token for this server.">
+                                            <IconButton
+                                                aria-label="add token"
+                                                onClick={handleCoordinationServerLockClick}
+                                                edge="end"
+                                                size="small"
+                                            >
+                                                <LockIcon style={{ color: '#888' }} />
+                                            </IconButton>
+                                        </Tooltip>
+                                    </InputAdornment>
+                                ) : params.InputProps.endAdornment,
+                            }}
+                            inputProps={{
+                                ...params.inputProps,
+                                style: needsToken(coordinationServer) ? { color: '#888' } : {},
+                            }}
                         />
                     )}
                 />
@@ -101,6 +150,28 @@ export default function Settings(props) {
                             label="Provider Data Server" 
                             margin="normal"
                             variant="outlined"
+                            placeholder={needsToken(dataServer) ? 'needs token' : ''}
+                            InputProps={{
+                                ...params.InputProps,
+                                endAdornment: needsToken(dataServer) ? (
+                                    <InputAdornment position="end">
+                                        <Tooltip title="Click to add or update auth token for this server.">
+                                            <IconButton
+                                                aria-label="add token"
+                                                onClick={handleEHRServerLockClick}
+                                                edge="end"
+                                                size="small"
+                                            >
+                                                <LockIcon style={{ color: '#888' }} />
+                                            </IconButton>
+                                        </Tooltip>
+                                    </InputAdornment>
+                                ) : params.InputProps.endAdornment,
+                            }}
+                            inputProps={{
+                                ...params.inputProps,
+                                style: needsToken(dataServer) ? { color: '#888' } : {},
+                            }}
                         />
                     )}
                 />
@@ -127,7 +198,7 @@ export default function Settings(props) {
                                         <Tooltip title="Click to add or update auth token for this server.">
                                             <IconButton
                                                 aria-label="add token"
-                                                onClick={() => setTokenDialogOpen(true)}
+                                                onClick={handlePayerServerLockClick}
                                                 edge="end"
                                                 size="small"
                                             >
@@ -145,8 +216,11 @@ export default function Settings(props) {
                     )}
                 />
             </Grid>
-            <Dialog open={tokenDialogOpen} onClose={handleTokenCancel}>
-                <DialogTitle>Enter Auth Token for Payer Server</DialogTitle>
+            <Dialog open={tokenDialogOpen} onClose={handleTokenCancel}  maxWidth="sm" fullWidth>
+                <DialogTitle>
+                    {tokenDialogType === 'cp' ? 'Enter Auth Token for Coordination Platform Server' :
+                        tokenDialogType === 'payer' ? 'Enter Auth Token for Payer Server' : 'Enter Auth Token for EHR Server'}
+                </DialogTitle>
                 <DialogContent>
                     <TextField
                         autoFocus

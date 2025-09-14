@@ -100,7 +100,7 @@ export default function AEOBPanel({ selectedButton }) {
     }
 
     try {
-      const response = await searchDocumentReference(payerServer, params);
+      const response = await searchDocumentReference(payerServer, params, "payer");
       if (response.status === 401) {
         alert('Your token is expired or invalid. Please update your auth token in Settings.');
         return;

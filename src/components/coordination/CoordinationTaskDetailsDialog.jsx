@@ -6,7 +6,7 @@ import Tooltip from "@mui/material/Tooltip";
 import Grid from "@mui/material/Grid2";
 import { displayInstant, displayPeriod } from "../../util/displayUtils";
 import { getPlannedServicePeriod, getRequestInitiationTime } from "../../util/taskUtils";
-import { FHIRClient, retrieveGFEPacket, submitGFEClaim } from "../../api";
+import { FHIRClient, retrieveGFEPacket, submitGFEClaim, getAccessToken } from "../../api";
 import { TabPanel } from "../TabPanel";
 import AEOBResponsePanel from "../AEOBResponsePanel";
 import { Editor } from "@monaco-editor/react";
@@ -56,7 +56,7 @@ export default function CoordinationTaskDetailsDialog({ open, onClose, task, set
     }
 
     
-    FHIRClient(coordinationServer).request(`Task?part-of=${task.id}`).then((response) => {
+    FHIRClient(coordinationServer, getAccessToken("cp")).request(`Task?part-of=${task.id}`).then((response) => {
       const res = (response.entry || []).map((entry) => entry.resource);
       setContributorTasks(res);
     });
@@ -98,7 +98,7 @@ export default function CoordinationTaskDetailsDialog({ open, onClose, task, set
         },
       ],
     };
-    FHIRClient(coordinationServer).update(task).then((response) => {
+    FHIRClient(coordinationServer, getAccessToken("cp")).update(task).then((response) => {
       setTask(response);
       setUpdated(true);
     }).catch((error) => {
@@ -118,7 +118,7 @@ export default function CoordinationTaskDetailsDialog({ open, onClose, task, set
       addToLog("GFE Packet retrieved successfully", "info", data);
       // Create document reference and post to EHR Server
       const docRef = buildGFEPacketDocumentReference(data, task);
-      FHIRClient(dataServer).update(docRef).then((response) => {
+      FHIRClient(dataServer, getAccessToken("ehr")).update(docRef).then((response) => {
         addToLog("DocumentReference posted to EHR");
       }).catch((error) => {
         console.error("Error posting DocumentReference to EHR", error);

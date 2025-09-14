@@ -10,7 +10,7 @@ import RequestPanel from '../GFERequestPanel';
 import { generateNewSession } from '../../util/gfeUtil';
 import { TabPanel } from '../TabPanel';
 import { Editor } from '@monaco-editor/react';
-import { FHIRClient } from '../../api';
+import { FHIRClient, getAccessToken} from '../../api';
 import GFEInformationBundleView from '../shared/GFEInformationBundleView';
 import DialogContentText from '@mui/material/DialogContentText';
 
@@ -36,7 +36,7 @@ export default function ContributorTaskDialog({ open, onClose, task, setTask }) 
   const loadCoordinationTask = useCallback(() => {
 
     if (coordinationTaskRef) {
-      FHIRClient(coordinationServer).request(coordinationTaskRef).then((coordinationTask) => {
+      FHIRClient(coordinationServer, getAccessToken("cp")).request(coordinationTaskRef).then((coordinationTask) => {
         setCoordinationTask(coordinationTask);
         const infoBundleInput = (coordinationTask.input || []).find((input) => input.type?.coding[0].code === "gfe-information-bundle");
         if (infoBundleInput) {

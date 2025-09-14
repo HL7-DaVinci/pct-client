@@ -3,7 +3,7 @@ import { Edit, Person, AttachFile } from '@mui/icons-material';
 import Grid from '@mui/material/Grid2';
 import { DataGrid, GridActionsCellItem, useGridApiRef } from '@mui/x-data-grid';
 import { AppContext } from '../../Context';
-import {FHIRClient, getContributorTasks} from '../../api';
+import {FHIRClient, getContributorTasks, getAccessToken} from '../../api';
 import ContributorTaskDialog from './ContributorTaskDialog';
 import { displayInstant, displayPeriod } from '../../util/displayUtils';
 import { getPlannedServicePeriod, getRequestInitiationTime } from '../../util/taskUtils';
@@ -48,7 +48,7 @@ export default function ContributorPanel() {
   const openTaskDialog = async (task) => {
     if(task.status === "requested") {
       // read task resource from server
-      FHIRClient(coordinationServer).request(`Task/${task.id}`).then((response) => {
+      FHIRClient(coordinationServer, getAccessToken("cp")).request(`Task/${task.id}`).then((response) => {
         if (response.resourceType !== "Task") {
           throw new Error("Expected a resource of type Task");
         }

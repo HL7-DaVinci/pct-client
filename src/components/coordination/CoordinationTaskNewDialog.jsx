@@ -9,7 +9,7 @@ import contributorTask from "../../resources/contributor-task.json";
 import gfeInformationBundle from "../../resources/gfe-information-bundle.json";
 import { DateTimePicker, LocalizationProvider } from "@mui/x-date-pickers";
 import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs';
-
+import { getAccessToken } from "../../api";
 
 
 export default function CoordinationTaskNewDialog({ open, onClose, onSave }) {
@@ -167,14 +167,18 @@ export default function CoordinationTaskNewDialog({ open, onClose, onSave }) {
     });
 
     setErrorMsg(undefined);
-    
-    try {
 
+    try {
+      const cpToken = getAccessToken("cp");
+      const headers = {
+        "Content-Type": "application/fhir+json"
+      };
+      if (cpToken) {
+        headers["Authorization"] = `Bearer ${cpToken}`;
+      }
       const response = await fetch(coordinationServer, {
         method: "POST",
-        headers: {
-          "Content-Type": "application/fhir+json"
-        },
+        headers,
         body: JSON.stringify(bundle)
       });
 
