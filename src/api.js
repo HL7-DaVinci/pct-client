@@ -77,7 +77,7 @@ export const submitGFEClaim = (url, bundle) => {
         const tokenValue = localStorage.getItem('payer-token');
         if (tokenValue) {
             headers['Subject-Token'] = `${tokenValue}`;
-            headers['Content-Location'] = "";
+            //headers['Content-Location'] = "";
         }
     }
     return fetch(`${url}/Claim/$gfe-submit`, {
