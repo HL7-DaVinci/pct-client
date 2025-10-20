@@ -126,6 +126,18 @@ class GFERequestBox extends Component {
       this.resetState();
       this.props.setDataServerChanged(false);
     }
+    // If patientId changes in session, fetch new patient details
+    const prevPatientId = prevProps.session?.subjectInfo?.selectedPatient;
+    const currentPatientId = this.props.session?.subjectInfo?.selectedPatient;
+    if (currentPatientId && currentPatientId !== prevPatientId) {
+      this.fetchAndSetPatientDetails(currentPatientId);
+    }
+    // If submitterId changes in session, fetch new submitter details
+    const prevSubmitterId = prevProps.session?.subjectInfo?.selectedSubmitter;
+    const currentSubmitterId = this.props.session?.subjectInfo?.selectedSubmitter;
+    if (currentSubmitterId && currentSubmitterId !== prevSubmitterId) {
+      this.fetchAndSetSubmitterDetails(currentSubmitterId);
+    }
   }
 
   componentDidMount() {
@@ -203,6 +215,16 @@ class GFERequestBox extends Component {
       }
     };
     fetchProviders();
+    // Automatically fetch patient details if patientId is present in session
+    const patientId = this.props.session?.subjectInfo?.selectedPatient;
+    if (patientId) {
+      this.fetchAndSetPatientDetails(patientId);
+    }
+    // Automatically fetch submitter details if submitter is present in session
+    const submitterId = this.props.session?.subjectInfo?.selectedSubmitter;
+    if (submitterId) {
+      this.fetchAndSetSubmitterDetails(submitterId);
+    }
   }
 
   resetState = () => {
@@ -226,14 +248,12 @@ class GFERequestBox extends Component {
     });
   };
 
-  //when select the patient, changes fields within the form specific
-  handleSelectPatient = (e) => {
-    const patientId = e.target.value;
-
+  // Fetch and set patient details
+  fetchAndSetPatientDetails = (patientId) => {
     // retrieve coverage and payer info about patient
     //adding other patient info here too
     getCoverageByPatient(this.context.dataServer, patientId).then((result) => {
-      
+
       if (result.data && result.data.length > 0) {
         const subscriberText = result.data[0].subscriberId;
         const relationshipText = result.data[0].relationship.coding[0].display;
@@ -344,6 +364,12 @@ class GFERequestBox extends Component {
     });
   };
 
+  //when select the patient, changes fields within the form specific
+  handleSelectPatient = (e) => {
+    const patientId = e.target.value;
+    this.fetchAndSetPatientDetails(patientId);
+  };
+
   handleSelectPriority = (e) => {
     const priorityLevel = e.target.value;
     const gfeInfo = _.cloneDeep(this.props.session.gfeInfo);
@@ -384,18 +410,26 @@ class GFERequestBox extends Component {
   };
 
   handleSelectSubmitter = (e) => {
+    const submitterId = e.target.value;
+    this.fetchAndSetSubmitterDetails(submitterId);
+  };
+
+  // Fetch and set submitter details
+  fetchAndSetSubmitterDetails = (submitterId) => {
+    if (!submitterId) return;
     const allSubmittersList = this.getProfessionalBillingProviderList();
     let selectedSubmittingProviderName = "";
     //set name of provider to display name instead of code in summary tab
     for (let i = 0; i < allSubmittersList.length; i++) {
-      if (e.target.value === allSubmittersList[i].resource.id) {
+      if (submitterId === allSubmittersList[i].id) {
         selectedSubmittingProviderName = allSubmittersList[i].display;
+        break;
       }
     }
     this.props.updateSessionInfo({
       subjectInfo: {
         ...this.props.session.subjectInfo,
-        selectedSubmitter: e.target.value,
+        selectedSubmitter: submitterId,
         selectedSubmittingProviderName,
       },
     });
@@ -498,7 +532,7 @@ class GFERequestBox extends Component {
       providerReference = findProfessionalProvider.reference;
       console.log('test')
       console.log(findProfessionalProvider)
-      if(findProfessionalProvider.type === "Practitioner")
+      if(findProfessionalProvider.type === "Practitioner" && (findProfessionalProvider.resource.type))
       {
         findProfessionalProvider.resource.type.forEach((providerType) => {
           providerType.coding.forEach((providerTypeCoding) => {
@@ -799,6 +833,24 @@ class GFERequestBox extends Component {
         entry: input.submitter.resource,
       }); 
 
+    }
+    else if (this.props.session.subjectInfo.selectedSubmittingProviderName.startsWith("Practitioner")) {
+      let submitterPractitionerReference = `Practitioner/${this.props.session.subjectInfo.selectedSubmitter}`;
+      let submitterPractitionerResource = this.props.session.practitionerList.find(
+          (pract) => pract.resource.id === this.props.session.subjectInfo.selectedSubmitter
+      )?.resource;
+
+      input.submitter = {
+        reference: submitterPractitionerReference,
+        resource: submitterPractitionerResource,
+      };
+      orgReferenceList.push(submitterPractitionerReference);
+
+      input.bundleResources.push({
+        type: 'submitter',
+        fullUrl: `${fhirServerBaseUrl}/${input.submitter.reference}`,
+        entry: input.submitter.resource,
+      });
     }
     else
     {
@@ -1700,7 +1752,7 @@ class GFERequestBox extends Component {
   getProfessionalBillingProviderList() {
     const fhirServerBaseUrl = this.context.dataServer;
     const providerMap = [];
-    this.props.session.practitionerRoleList.forEach((role) => {
+    /*this.props.session.practitionerRoleList.forEach((role) => {
       if (!role.practitioner?.reference) {
         return;
       }
@@ -1717,6 +1769,17 @@ class GFERequestBox extends Component {
         reference: `PractitionerRole/${role.id}`,
         url: `${fhirServerBaseUrl}/PractitionerRole/${role.id}`,
         id: role.id,
+      });
+    });*/
+    this.props.session.practitionerList.forEach((practitioner) => {
+      const name = practitioner.resource.name[0];
+      providerMap.push({
+        type: "Practitioner",
+        display: `Practitioner - ${name.given[0]} ${name.family}`,
+        resource: practitioner.resource,
+        reference: `Practitioner/${practitioner.resource.id}`,
+        url: practitioner.fullUrl,
+        id: practitioner.resource.id,
       });
     });
     this.props.session.organizationList.forEach((org) => {

@@ -125,7 +125,38 @@ export default function ContributorTaskDialog({ open, onClose, task, setTask }) 
     setGfeSession({ ...gfeSession, ...update });
   };
 
-  const handleCreateBundle = async () => {
+  const handleCreateBundle = () => {
+    // Autofill Patient and Submitter(Task.owner) during GFE Bundle Creation from task details
+    let providerId, providerType;
+    const ownerReference = task?.owner?.reference;
+    console.log("Owner Reference:", ownerReference);
+    if (ownerReference) {
+      // Match resource type and id at the end of the string, supporting both relative and absolute references
+      const match = ownerReference.match(/(?:^|\/)(Organization|Practitioner)\/([^\/]+)$/);
+      if (match) {
+        providerType = match[1];
+        providerId = match[2];
+      }
+      console.log("Provider Type:", providerType, "Provider ID:", providerId);
+    }
+    let gfeType = gfeSession.subjectInfo?.gfeType;
+    if (providerType === "Practitioner") {
+      gfeType = "professional";
+    }
+    const patient = infoBundle?.entry?.find((entry) => entry.resource?.resourceType === "Patient")?.resource;
+    const patientId = patient?.id;
+    if (patientId) {
+      setGfeSession((prevSession) => ({
+        ...prevSession,
+        patientList: [{ resource: patient }],
+        subjectInfo: {
+          ...prevSession.subjectInfo,
+          selectedPatient: patient.id,
+          selectedSubmitter: providerId,
+          gfeType: gfeType,
+        }
+      }));
+    }
     setShowGfeBuilder(true);
   }
 
