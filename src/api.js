@@ -186,3 +186,35 @@ export const getAccessToken = (key) => {
     }
     return null;
 };
+
+export const getExpandedCPTCodes = async (url, valueSetUrl, text = "") => {
+    if (!url || !valueSetUrl || !text) return [];
+    const token = getAccessToken("ehr");
+    const headers = { "Accept": "application/fhir+json" };
+    if (token) headers["Authorization"] = `Bearer ${token}`;
+
+    // Helper function to fetch expansion results
+    const fetchExpansion = async (expandUrl) => {
+        const response = await fetch(expandUrl, { headers });
+        if (!response.ok) return [];
+        const data = await response.json();
+        if (data.expansion && Array.isArray(data.expansion.contains)) {
+            return data.expansion.contains.map(e => ({ code: e.code || "", display: e.display || "" }));
+        }
+        return [];
+    };
+    // In FHIR R4, the $expand filter param matches only display, not code
+    //If text is numeric (code search), get all code concepts and filter manually; else use expand filter param.
+    if (/^\d+$/.test(text)) {
+        const expandUrl = `${url}/ValueSet/$expand?url=${encodeURIComponent(valueSetUrl)}`;
+        const allCodes = await fetchExpansion(expandUrl);
+        const match = allCodes.filter(e =>
+            (e.code && e.code.includes(text)) ||
+            (e.display && e.display.toLowerCase().includes(text.toLowerCase()))
+        );
+        if (match.length > 0) return match;
+        return await fetchExpansion(`${expandUrl}&filter=${text}`);
+    } else {
+        return await fetchExpansion(`${url}/ValueSet/$expand?url=${encodeURIComponent(valueSetUrl)}&filter=${text}`);
+    }
+};
