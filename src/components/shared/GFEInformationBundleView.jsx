@@ -327,6 +327,62 @@ export default function GFEInformationBundleView({ bundle }) {
         </Grid>
       }
 
+      {
+
+        /* MedicationRequest */
+
+          (medicationRequests || []).length > 0 &&
+
+          <Grid size={12}>
+            <h4>Medication Requests</h4>
+            <TableContainer component={Paper}>
+              <Table size="small">
+                <TableHead>
+                  <TableRow>
+                    <TableCell>ID</TableCell>
+                    <TableCell>Status</TableCell>
+                    <TableCell>Intent</TableCell>
+                    <TableCell>Subject</TableCell>
+                    <TableCell>Requester</TableCell>
+                    <TableCell>Occurrence</TableCell>
+                    <TableCell>Code</TableCell>
+                  </TableRow>
+                </TableHead>
+                <TableBody>
+                  {
+                    (medicationRequests || []).filter(d => d.resource).map((medicationRequest, index) => {
+                      return (
+                          <TableRow key={index}>
+                            <TableCell>{medicationRequest.resource.id}</TableCell>
+                            <TableCell>{medicationRequest.resource.status}</TableCell>
+                            <TableCell>{medicationRequest.resource.intent}</TableCell>
+                            <TableCell>{ getDisplayForReferenceFromBundle(medicationRequest.resource.subject?.reference, bundle) }</TableCell>
+                            <TableCell>{ getDisplayForReferenceFromBundle(medicationRequest.resource.requester?.reference, bundle) }</TableCell>
+                            <TableCell>
+                              {
+                                medicationRequest.resource.occurrencePeriod ?
+                                    displayPeriod(medicationRequest.resource.occurrencePeriod)
+                                    : medicationRequest.resource.occurrenceDateTime?.toLocaleString()
+                              }
+                            </TableCell>
+                            <TableCell>
+                              {
+                                medicationRequest.resource.codeReference ?
+                                    medicationRequest.resource.codeReference.reference
+                                    :
+                                    getCodingDisplayFragment(medicationRequest.resource.medicationCodeableConcept?.coding)
+                              }
+                            </TableCell>
+                          </TableRow>
+                      );
+                    })
+                  }
+                </TableBody>
+              </Table>
+            </TableContainer>
+          </Grid>
+      }
+
 
     </Grid>
   );

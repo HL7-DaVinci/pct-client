@@ -1,6 +1,6 @@
 import { useCallback, useContext, useEffect, useMemo, useState } from "react";
 import { AppContext } from "../../Context";
-import { Alert, Autocomplete, Button, Dialog, DialogActions, DialogContent, DialogTitle, List, ListItem, ListItemText, TextField, MenuItem } from "@mui/material";
+import { Alert, Autocomplete, Button, Dialog, DialogActions, DialogContent, DialogTitle, List, ListItem, ListItemText, TextField, MenuItem, Box } from "@mui/material";
 import Grid from "@mui/material/Grid2";
 import { v4 } from "uuid";
 import { getParticipants } from "../../util/taskUtils";
@@ -9,9 +9,8 @@ import contributorTask from "../../resources/contributor-task.json";
 import buildGFEInformationBundle from "../BuildGFEInformationBundle";
 import { DateTimePicker, LocalizationProvider } from "@mui/x-date-pickers";
 import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs';
-import { getAccessToken, getPatients, getCoverageByPatient } from "../../api";
-import ServiceItem from "../ServiceItem";
-
+import { getAccessToken, getPatients, getCoverageByPatient, getExpandedValueset } from "../../api";
+import RequestItem from "../RequestItem";
 
 export default function CoordinationTaskNewDialog({ open, onClose }) {
   
@@ -30,7 +29,7 @@ export default function CoordinationTaskNewDialog({ open, onClose }) {
     return reference;
   }, [coordinationServer, dataServer]);
 
-  function addOneServiceItem(rows) {
+  function addOneItem(rows) {
     return [
       ...rows,
       {
@@ -42,13 +41,13 @@ export default function CoordinationTaskNewDialog({ open, onClose }) {
     ];
   }
 
-  function editServiceItem(rows, id, field, value) {
+  function editItem(rows, id, field, value) {
     return rows.map(row =>
         row.id === id ? { ...row, [field]: value } : row
     );
   }
 
-  function deleteOneServiceItem(rows, id) {
+  function deleteOneItem(rows, id) {
     return rows.filter(row => row.id !== id);
   }
 
@@ -91,6 +90,8 @@ export default function CoordinationTaskNewDialog({ open, onClose }) {
   const [patientCoverages, setPatientCoverages] = useState([]);
   const [coverageWithPayorOrg, setCoverageWithPayorOrg] = useState([]);
   const [servicesRows, setServicesRows] = useState([]);
+  const [deviceRows, setDeviceRows] = useState([]);
+  const [medicationRows, setMedicationRows] = useState([]);
 
   useEffect(() => {
     setStep(0);
@@ -115,8 +116,12 @@ export default function CoordinationTaskNewDialog({ open, onClose }) {
   useEffect(() => {
     if (open) {
       setServicesRows((prev) => (prev.length === 0 ? [{ id: v4(), description: "", code: "", quantity: 1 }] : prev));
+      setDeviceRows((prev) => (prev.length === 0 ? [{ id: v4(), description: "", code: "", quantity: 1 }] : prev));
+      setMedicationRows((prev) => (prev.length === 0 ? [{ id: v4(), description: "", code: "", quantity: 1 }] : prev));
     } else{
         setServicesRows([]);
+        setDeviceRows([]);
+        setMedicationRows([]);
     }
   }, [open]);
 
@@ -127,11 +132,14 @@ export default function CoordinationTaskNewDialog({ open, onClose }) {
       setIsValid(
           !!selectedPatient &&
           !!selectedCoverage &&
-          servicesRows.length > 0 &&
-          servicesRows.some(row => !!row.code || !!row.description)
+          (
+              servicesRows.some(row => !!row.code || !!row.description) ||
+              deviceRows.some(row => !!row.code || !!row.description) ||
+              medicationRows.some(row => !!row.code || !!row.description)
+          )
       );
     }
-  }, [step, selectedParticipants, selectedPatient, selectedCoverage, servicesRows]);
+  }, [step, selectedParticipants, selectedPatient, selectedCoverage, servicesRows, deviceRows, medicationRows]);
 
   useEffect(() => {
     if (selectedPatient) {
@@ -237,8 +245,11 @@ export default function CoordinationTaskNewDialog({ open, onClose }) {
       payor: payorOrgs,
       providers: [],
       providerOrganizations: [],
-      requestedServiceItems: servicesRows
+      requestedServiceItems: servicesRows,
+      deviceRequestItems: deviceRows,
+      medicationRequestItems: medicationRows
     });
+    //console.log("GFE Information Bundle:", gfeInformationBundle);
     // Set valueAttachment before saving
     if (newCoordinationTask.input && newCoordinationTask.input.length > 0) {
       newCoordinationTask.input[0].valueAttachment = {
@@ -354,19 +365,17 @@ export default function CoordinationTaskNewDialog({ open, onClose }) {
 
   return (
 
-    <Dialog open={open} onClose={handleClose} maxWidth="md" fullWidth={true}>
+    <Dialog open={open} onClose={handleClose} maxWidth="lg" fullWidth={true} sx={{'& .MuiDialog-paper': { minWidth: 1200 }}}>
       <DialogTitle>New Coordination Task</DialogTitle>
-      <divider />
       <DialogContent>
-
+        <div>
+        {errorMsg && <Alert severity="error" sx={{ mb: 1 }}>{errorMsg}</Alert>}
+        <Box sx={{ height: 15 }} />
+        </div>
       { !newCoordinationTask ? <div>No task defined.</div> : (
       <>
       {step === 0 && (
         <div>
-          {
-            errorMsg &&
-            <Alert severity="error">{errorMsg}</Alert>
-          }
           <Grid container spacing={2}>
             <Grid size={6}>
               <List>
@@ -400,7 +409,7 @@ export default function CoordinationTaskNewDialog({ open, onClose }) {
                 getOptionLabel={(option) => option}
                 value={selectedParticipants}
                 onChange={(e, newValue) => setSelectedParticipants(newValue)}
-                renderInput={(params) => <TextField {...params} label="Contributors" />}
+                renderInput={(params) => <TextField {...params} label={<span>Contributors <span style={{color:'red'}}>*</span></span>} />}
               />
             </Grid>
           </Grid>
@@ -412,7 +421,7 @@ export default function CoordinationTaskNewDialog({ open, onClose }) {
                 <Grid size={6}>
                   <TextField
                       select
-                      label="Patient"
+                      label={<span>Patient <span style={{color:'red'}}>*</span></span>}
                       fullWidth
                       value={selectedPatient}
                       onChange={e => setSelectedPatient(e.target.value)}
@@ -435,7 +444,7 @@ export default function CoordinationTaskNewDialog({ open, onClose }) {
                 <Grid size={6}>
                   <TextField
                       select
-                      label="Insurance"
+                      label={<span>Insurance <span style={{color:'red'}}>*</span></span>}
                       fullWidth
                       value={selectedCoverage}
                       onChange={e => setSelectedCoverage(e.target.value)}
@@ -451,14 +460,43 @@ export default function CoordinationTaskNewDialog({ open, onClose }) {
                   </TextField>
                 </Grid>
               </Grid>
-              <div style={{ margin: '8px 0 4px 0', fontWeight: 500 }}> Services:<span style={{ color: 'red' }}>*</span></div>
-              <div>
-                <ServiceItem rows={servicesRows} setRows={setServicesRows}
-                      addOne={() => setServicesRows(prev => addOneServiceItem(prev))}
-                      edit={(id, field, value) => setServicesRows(prev => editServiceItem(prev, id, field, value))}
-                      deleteOne={id => setServicesRows(prev => deleteOneServiceItem(prev, id))}
-                />
-              </div>
+              <Box sx={{ height: 16 }} />
+              {(!servicesRows.some(row => !!row.code || !!row.description) &&
+                !deviceRows.some(row => !!row.code || !!row.description) &&
+                !medicationRows.some(row => !!row.code || !!row.description)) && (
+                <Alert severity="error" sx={{ mb: 2 }}>
+                  Please add at least one Service, Device, or Medication item.
+                </Alert>
+              )}
+              <div style={{ margin: '8px 0 4px 0', fontWeight: 500 }}> Service:</div>
+              <RequestItem
+                  rows={servicesRows}
+                  setRows={setServicesRows}
+                  addOne={() => setServicesRows(prev => addOneItem(prev))}
+                  edit={(id, field, value) => setServicesRows(prev => editItem(prev, id, field, value))}
+                  deleteOne={id => setServicesRows(prev => deleteOneItem(prev, id))}
+                  valueSetUrl="http://example.org/fhir/ValueSet/PCTClientServiceItems"
+              />
+              <Box sx={{ height: 2 }} />
+              <div style={{ margin: '8px 0 4px 0', fontWeight: 500 }}> Device:</div>
+              <RequestItem
+                  rows={deviceRows}
+                  setRows={setDeviceRows}
+                  addOne={() => setDeviceRows(prev => addOneItem(prev))}
+                  edit={(id, field, value) => setDeviceRows(prev => editItem(prev, id, field, value))}
+                  deleteOne={id => setDeviceRows(prev => deleteOneItem(prev, id))}
+                  valueSetUrl="http://example.org/fhir/ValueSet/PCTClientDeviceItems"
+              />
+              <Box sx={{ height: 2 }} />
+              <div style={{ margin: '8px 0 4px 0', fontWeight: 500 }}> Medication:</div>
+              <RequestItem
+                  rows={medicationRows}
+                  setRows={setMedicationRows}
+                  addOne={() => setMedicationRows(prev => addOneItem(prev))}
+                  edit={(id, field, value) => setMedicationRows(prev => editItem(prev, id, field, value))}
+                  deleteOne={id => setMedicationRows(prev => deleteOneItem(prev, id))}
+                  valueSetUrl="http://example.org/fhir/ValueSet/PCTClientMedicationItems"
+              />
             </div>
         )}
       </>

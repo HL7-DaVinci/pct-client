@@ -187,7 +187,7 @@ export const getAccessToken = (key) => {
     return null;
 };
 
-export const getExpandedCPTCodes = async (url, valueSetUrl, text = "") => {
+export const getExpandedValueset = async (url, valueSetUrl, text = "") => {
     if (!url || !valueSetUrl || !text) return [];
     const token = getAccessToken("ehr");
     const headers = { "Accept": "application/fhir+json" };

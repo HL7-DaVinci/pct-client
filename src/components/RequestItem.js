@@ -8,12 +8,12 @@ import DialogTitle from "@mui/material/DialogTitle";
 import DialogContent from "@mui/material/DialogContent";
 import DialogActions from "@mui/material/DialogActions";
 import Button from "@mui/material/Button";
-import { getExpandedCPTCodes } from '../api';
+import {getExpandedValueset} from '../api';
 import { useContext } from "react";
 import { AppContext } from "../Context";
 import {Box} from "@mui/material";
 
-export default function ServiceItem({ rows, setRows, addOne, edit, deleteOne }) {
+export default function RequestItem({ rows, setRows, addOne, edit, deleteOne, valueSetUrl }) {
     const appContext = useContext(AppContext);
     const [searchOpen, setSearchOpen] = React.useState(false);
     const [searchValue, setSearchValue] = React.useState("");
@@ -42,8 +42,7 @@ export default function ServiceItem({ rows, setRows, addOne, edit, deleteOne }) 
         setLoading(true);
         setSearchPerformed(true);
         try {
-            const valueSetUrl = "http://example.org/fhir/ValueSet/PCTClientServiceItems";
-            const results = await getExpandedCPTCodes(appContext.dataServer, valueSetUrl, searchValue);
+            const results = await getExpandedValueset(appContext.dataServer, valueSetUrl, searchValue);
             setSearchResults(results.filter(r =>
                 r.code?.toLowerCase().includes(searchValue.toLowerCase()) ||
                 r.display?.toLowerCase().includes(searchValue.toLowerCase())
@@ -71,8 +70,8 @@ export default function ServiceItem({ rows, setRows, addOne, edit, deleteOne }) 
             field: "description",
             headerName: "Description",
             renderHeader: renderRequiredHeader,
-            minWidth: 200,
-            flex: 1.5,
+            minWidth:  150,
+            flex: 1.0,
             editable: false,
             renderCell: (params) => (
                 <div style={{ display: "flex", alignItems: "center", width: "100%", justifyContent: "center", height: "100%" }}>
@@ -136,6 +135,17 @@ export default function ServiceItem({ rows, setRows, addOne, edit, deleteOne }) 
                     />
                 </div>
             ),
+        },
+        {
+            field: "spacer",
+            headerName: "",
+            minWidth: 32,
+            flex: 0.2,
+            sortable: false,
+            filterable: false,
+            editable: false,
+            disableColumnMenu: true,
+            renderCell: () => <div />
         },
     ];
 

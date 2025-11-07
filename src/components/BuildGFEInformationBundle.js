@@ -1,7 +1,7 @@
 import { v4 as uuidv4 } from 'uuid';
 
-// Dynamically build a GFE Information Bundle from patient, coverage and ServiceRequest resources
-export default function buildGFEInformationBundle({ patient, coverage, payor, providers = [], providerOrganizations = [], requestedServiceItems = [] }) {
+// Dynamically build a GFE Information Bundle from patient, coverage, ServiceRequest, DeviceRequest, and MedicationRequest resources
+export default function buildGFEInformationBundle({ patient, coverage, payor, providers = [], providerOrganizations = [], requestedServiceItems = [], deviceRequestItems = [], medicationRequestItems = [] }) {
     const patientEntry = (patient && patient.id) ? {
         id: patient.id,
         fullUrl: `http://example.org/fhir/Patient/${patient.id}`,
@@ -41,17 +41,35 @@ export default function buildGFEInformationBundle({ patient, coverage, payor, pr
     const requestedServiceItemEntries = Array.isArray(requestedServiceItems)
         ? requestedServiceItems.map((item) => {
             const srId = `PCT-ServiceRequest-${uuidv4()}`;
-            const srResource = createServiceRequestResource({
-                code: item.code,
-                description: item.description,
-                patientId: patient?.id || 'unknown',
-                id: srId,
-                system: item.system // Use system from the row
-            });
+            const srResource = createRequestItemResource(item, 'ServiceRequest', srId, patient?.id || 'unknown');
             return {
                 id: srId,
                 fullUrl: `http://example.org/fhir/ServiceRequest/${srId}`,
                 resource: srResource
+            };
+        })
+        : [];
+
+    const deviceRequestItemEntries = Array.isArray(deviceRequestItems)
+        ? deviceRequestItems.map((item) => {
+            const drId = `PCT-DeviceRequest-${uuidv4()}`;
+            const drResource = createRequestItemResource(item, 'DeviceRequest', drId, patient?.id || 'unknown');
+            return {
+                id: drId,
+                fullUrl: `http://example.org/fhir/DeviceRequest/${drId}`,
+                resource: drResource
+            };
+        })
+        : [];
+
+    const medicationRequestItemEntries = Array.isArray(medicationRequestItems)
+        ? medicationRequestItems.map((item) => {
+            const mrId = `PCT-MedicationRequest-${uuidv4()}`;
+            const mrResource = createRequestItemResource(item, 'MedicationRequest', mrId, patient?.id || 'unknown');
+            return {
+                id: mrId,
+                fullUrl: `http://example.org/fhir/MedicationRequest/${mrId}`,
+                resource: mrResource
             };
         })
         : [];
@@ -72,37 +90,47 @@ export default function buildGFEInformationBundle({ patient, coverage, payor, pr
             ...(payorEntry ? [payorEntry] : []),
             ...providerEntries,
             ...providerOrganizationEntries,
-            ...requestedServiceItemEntries
+            ...requestedServiceItemEntries,
+            ...deviceRequestItemEntries,
+            ...medicationRequestItemEntries
         ]
     };
 }
 
-function createServiceRequestResource({ code, description, patientId, id, system }) {
+function createRequestItemResource(item, resourceType, id, patientId) {
+    // Use a single template and fill in details dynamically
+    let codeProp, codeSystem;
+    if (resourceType === 'ServiceRequest') {
+        codeProp = 'code';
+        codeSystem = 'http://www.ama-assn.org/go/cpt';
+    } else if (resourceType === 'DeviceRequest') {
+        codeProp = 'codeCodeableConcept';
+        codeSystem = 'http://snomed.info/sct';
+    } else if (resourceType === 'MedicationRequest') {
+        codeProp = 'medicationCodeableConcept';
+        codeSystem = 'http://www.nlm.nih.gov/research/umls/rxnorm';
+    } else {
+        codeProp = 'code';
+        codeSystem = item.system || '';
+    }
+
     return {
-        resourceType: "ServiceRequest",
-        id: id,
+        resourceType,
+        id,
         meta: {
-            profile: [
-                "http://hl7.org/fhir/us/davinci-pct/StructureDefinition/davinci-pct-servicerequest"
-            ]
+            profile: [`http://hl7.org/fhir/StructureDefinition/${resourceType}`]
         },
-        text: {
-            status: "generated",
-            div: `<div xmlns=\"http://www.w3.org/1999/xhtml\"><a name=\"ServiceRequest_${id}\"> </a><p><b>Generated Narrative: ServiceRequest</b><a name=\"${id}\"> </a></p><div style=\"display: inline-block; background-color: #d9e0e7; padding: 6px; margin: 4px; border: 1px solid #8da1b4; border-radius: 5px; line-height: 60%\"><p style=\"margin-bottom: 0px\">Resource ServiceRequest &quot;${id}&quot; </p><p style=\"margin-bottom: 0px\">Profile: <a href=\"StructureDefinition-davinci-pct-servicerequest.html\">PCT GFE ServiceRequest</a></p></div><p><b>status</b>: active</p><p><b>intent</b>: proposal</p><p><b>code</b>: ${description} <span style=\"background: LightGoldenRodYellow; margin: 4px; border: 1px solid khaki\"> (<a href=\"http://terminology.hl7.org/5.3.0/CodeSystem-CPT.html\">Current Procedural Terminology (CPTÂ®)</a>#${code})</span></p><p><b>subject</b>: See on this page: Patient/${patientId}</p></div>`
-        },
-        status: "active",
-        intent: "proposal",
-        code: {
+        status: 'active',
+        intent: 'proposal',
+        subject: { reference: `Patient/${patientId}` },
+        [codeProp]: {
             coding: [
                 {
-                    system: system || "http://www.ama-assn.org/go/cpt",
-                    code: code,
-                    display: description
+                    system: codeSystem,
+                    code: item.code,
+                    display: item.description
                 }
             ]
-        },
-        subject: {
-            reference: `Patient/${patientId}`
         }
     };
 }
