@@ -326,7 +326,6 @@ export const getExpandedValueset = async (url, valueSetUrl, text = "") => {
  * Fetches CapabilityStatement and extracts supported search parameters for a given resource type and server.
  */
 export const getSupportedSearchParams = async (url, resourceType = "Task", context) => {
-    alert("Fetching CapabilityStatement from:", url, " for resourceType:", resourceType, " context:", context);
     const capability = await FHIRClient(url, getAccessToken(context)).request("metadata");
     let searchParams = [];
     const localStorageKey = `searchParams_${resourceType}_${context}`;
