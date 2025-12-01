@@ -127,62 +127,165 @@ export const getLocations = (url) => {
 }
 
 
-export const getCoordinationTasks = (url, dataServer, requester) => {
-    let query;
-    if (!needsToken(url)) {
-        query = `_total=accurate&_profile=http://hl7.org/fhir/us/davinci-pct/StructureDefinition/davinci-pct-gfe-coordination-task`;
-        if (requester) {
-            query += `&requester=${encodeURIComponent(`${dataServer.replace(/\/+$/, '')}/${requester}`)}`;
+export const getCoordinationTasks = async (url, dataServer, requester) => {
+    let queryParams = [];
+    const isRequesterSupported = isSearchParamsSupported("requester", "Task", "cp");
+    const isCodeSupported = isSearchParamsSupported("code", "Task", "cp");
+    if (isCodeSupported) {
+        queryParams.push("code=gfe-coordination-task");
+    }
+    if (requester && isRequesterSupported) {
+        const requesterValue = `${dataServer.replace(/\/+$/, '')}/${requester}`;
+        queryParams.push(`requester=${encodeURIComponent(requesterValue)}`);
+    }
+    const query = queryParams.length ? queryParams.join('&') : '';
+    try {
+        const response = await FHIRClient(url, getAccessToken("cp")).request(`Task${query ? '?' + query : ''}`);
+        let filteredEntries = response.entry || [];
+        // Manual filters if server does not support code or requester
+        if (!isCodeSupported || (!isRequesterSupported && requester)) {
+            filteredEntries = filteredEntries.filter(entry => {
+                let codeMatch = true;
+                let requesterMatch = true;
+                if (!isCodeSupported) {
+                    const codingArr = entry.resource?.code?.coding;
+                    codeMatch = Array.isArray(codingArr) && codingArr.some(coding =>
+                        coding.system === "http://hl7.org/fhir/us/davinci-pct/CodeSystem/PCTGFERequestTaskCSTemporaryTrialUse" &&
+                        coding.code === "gfe-coordination-task"
+                    );
+                }
+                if (!isRequesterSupported && requester) {
+                    const requesterRef = entry.resource?.requester?.reference;
+                    requesterMatch = requesterRef === `${dataServer.replace(/\/+$/, '')}/${requester}`;
+                }
+                return codeMatch && requesterMatch;
+            });
         }
-        return FHIRClient(url, getAccessToken("cp")).request(`Task?${query}`);
-    } else {
-        return FHIRClient(url, getAccessToken("cp")).request("Task");
+        return { ...response, entry: filteredEntries };
+    } catch (error) {
+        console.error('[CoordinationTasks] Error:', error);
+        return { entry: [], error };
     }
 }
 
-export const getContributorTasks = (url, dataServer, contributor) => {
-    let query;
-    if (!needsToken(url)) {
-        query = `_total=accurate&_profile=http://hl7.org/fhir/us/davinci-pct/StructureDefinition/davinci-pct-gfe-contributor-task`;
-        if (contributor) {
-            query += `&owner=${encodeURIComponent(`${dataServer.replace(/\/+$/, '')}/${contributor}`)}`;
+export const getContributorTasks = async (url, dataServer, contributor) => {
+    let queryParams = [];
+    const isOwnerSupported = isSearchParamsSupported("owner", "Task", "cp");
+    const isCodeSupported = isSearchParamsSupported("code", "Task", "cp");
+    if (isCodeSupported) {
+        queryParams.push("code=gfe-contributor-task");
+    }
+    if (contributor && isOwnerSupported) {
+        const ownerValue = `${dataServer.replace(/\/+$/, '')}/${contributor}`;
+        queryParams.push(`owner=${encodeURIComponent(ownerValue)}`);
+    }
+    const query = queryParams.length ? queryParams.join('&') : '';
+    try {
+        const response = await FHIRClient(url, getAccessToken("cp")).request(`Task${query ? '?' + query : ''}`);
+        let filteredEntries = response.entry || [];
+        // Manual filters if server does not support code or owner
+        if (!isCodeSupported || (!isOwnerSupported && contributor)) {
+            filteredEntries = filteredEntries.filter(entry => {
+                let codeMatch = true;
+                let ownerMatch = true;
+                if (!isCodeSupported) {
+                    const codingArr = entry.resource?.code?.coding;
+                    codeMatch = Array.isArray(codingArr) && codingArr.some(coding =>
+                        coding.system === "http://hl7.org/fhir/us/davinci-pct/CodeSystem/PCTGFERequestTaskCSTemporaryTrialUse" &&
+                        coding.code === "gfe-contributor-task"
+                    );
+                }
+                if (!isOwnerSupported && contributor) {
+                    const ownerRef = entry.resource?.owner?.reference;
+                    ownerMatch = ownerRef === `${dataServer.replace(/\/+$/, '')}/${contributor}`;
+                }
+                return codeMatch && ownerMatch;
+            });
         }
-        return FHIRClient(url, getAccessToken("cp")).request(`Task?${query}`);
-    } else {
-        return FHIRClient(url, getAccessToken("cp")).request("Task");
+        return { ...response, entry: filteredEntries };
+    } catch (error) {
+        console.error('[ContributorTasks] Error:', error);
+        return { entry: [], error };
     }
 }
 
-export const searchDocumentReference = (url, params, key) => {
+export const getContributorTasksByPartOf = async (coordinationServer, taskId) => {
+    const isPartOfSupported = isSearchParamsSupported("part-of", "Task", "cp");
+    if (isPartOfSupported) {
+        const response = await FHIRClient(coordinationServer, getAccessToken("cp")).request(`Task?part-of=${encodeURIComponent(taskId)}`);
+        return (response.entry || []).map((entry) => entry.resource);
+    } else {
+        // Manual filter
+        const response = await FHIRClient(coordinationServer, getAccessToken("cp")).request(`Task`);
+        const filtered = (response.entry || []).filter(entry => {
+            const partOfRef = entry.resource?.partOf?.reference;
+            return partOfRef === `Task/${taskId}` || partOfRef === taskId;
+        }).map(entry => entry.resource);
+        return filtered;
+    }
+};
+
+export const searchDocumentReference = async (url, params, context) => {
+    let searchParams = {...params};
+    const isTypeSupported = isSearchParamsSupported('type', 'DocumentReference', context);
+    const isAuthorSupported = isSearchParamsSupported('author', 'DocumentReference', context);
+    let requiredType = null;
+    if (!isTypeSupported && searchParams['type']) {
+        requiredType = searchParams['type'];
+        delete searchParams['type'];
+    }
+    if (!isAuthorSupported) {
+        delete searchParams['author'];
+    }
     const headers = {
         "Accept": "application/fhir+json"
     };
-    const tokenValue = getAccessToken(key)
+    const tokenValue = getAccessToken(context)
     if (tokenValue) {
-        //console.log("Adding Authorization header with token:", tokenValue);
         headers['Authorization'] = `Bearer ${tokenValue}`;
     }
-    const query = new URLSearchParams(params).toString();
-    return fetch(`${url}/DocumentReference?${query}`, {
+    const query = new URLSearchParams(searchParams).toString();
+    const fetchUrl = query ? `${url}/DocumentReference?${query}` : `${url}/DocumentReference`;
+    const response = await fetch(fetchUrl, {
         method: "GET",
         headers: headers
     });
+    if (!isTypeSupported && requiredType) {
+        // Manual filter for type
+        try {
+            if (response.entry && Array.isArray(response.entry)) {
+                const filteredEntries = response.entry.filter(entry => {
+                    const codings = entry.resource?.type?.coding || [];
+                    return codings.some(coding =>
+                        coding.system === "http://hl7.org/fhir/us/davinci-pct/CodeSystem/PCTDocumentTypeTemporaryTrialUse" &&
+                        coding.code === requiredType
+                    );
+                });
+                return {...response, entry: filteredEntries};
+            }
+            return response;
+        } catch (e) {
+            console.error('[searchDocumentReference] Error filtering type:', e);
+            return response;
+        }
+    }
+    return response;
 }
 
 export function needsToken(url) {
     return url && !(url.includes('localhost') || url.includes('pct-payer') || url.includes('pct-coordination-platform') || url.includes('pct-ehr'));
 }
 
-export const getAccessToken = (key) => {
+export const getAccessToken = (context) => {
     const tokenKeyMap = {
         payer: 'payer-token',
         ehr: 'ehr-token',
         cp: 'cp-token'
     };
     //console.log("Getting access token for key:", key);
-    if (key && tokenKeyMap[key]) {
+    if (context && tokenKeyMap[context]) {
         //console.log(`Retrieving token for key: ${key}, tokenKey: ${tokenKeyMap[key]}, tokenValue: ${localStorage.getItem(tokenKeyMap[key])}`);
-        return localStorage.getItem(tokenKeyMap[key]);
+        return localStorage.getItem(tokenKeyMap[context]);
     }
     return null;
 };
@@ -218,3 +321,43 @@ export const getExpandedValueset = async (url, valueSetUrl, text = "") => {
         return await fetchExpansion(`${url}/ValueSet/$expand?url=${encodeURIComponent(valueSetUrl)}&filter=${text}`);
     }
 };
+
+/**
+ * Fetches CapabilityStatement and extracts supported search parameters for a given resource type and server.
+ */
+export const getSupportedSearchParams = async (url, resourceType = "Task", context) => {
+    alert("Fetching CapabilityStatement from:", url, " for resourceType:", resourceType, " context:", context);
+    const capability = await FHIRClient(url, getAccessToken(context)).request("metadata");
+    let searchParams = [];
+    const localStorageKey = `searchParams_${resourceType}_${context}`;
+    if (capability.rest && Array.isArray(capability.rest)) {
+        const rest = capability.rest.find(r => r.resource);
+        if (rest) {
+            const resource = rest.resource.find(res => res.type === resourceType);
+            if (resource && Array.isArray(resource.searchParam)) {
+                searchParams = resource.searchParam.map(param => param.name);
+                localStorage.setItem(localStorageKey, JSON.stringify(searchParams));
+                console.log(`${localStorageKey}:`, searchParams);
+            } else {
+                console.warn(`Resource type '${resourceType}' not found in CapabilityStatement for context '${context}'.`);
+                localStorage.setItem(localStorageKey, JSON.stringify([]));
+            }
+        }
+    } else {
+        localStorage.setItem(localStorageKey, JSON.stringify([]));
+    }
+};
+
+export function isSearchParamsSupported(param, resourceType = "Task", context) {
+    const key = `searchParams_${resourceType}_${context}`;
+    let params = localStorage.getItem(key);
+    if (params) {
+        try {
+            const arr = JSON.parse(params);
+            return arr.includes(param);
+        } catch (e) {
+            console.warn(`Failed to parse stored searchParams for ${resourceType} (${context})`, e);
+        }
+    }
+    return false;
+}

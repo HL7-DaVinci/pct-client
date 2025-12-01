@@ -10,7 +10,7 @@ import CloseIcon from "@mui/icons-material/Close";
 import DialogContent from "@mui/material/DialogContent";
 import AEOBBundle from "../response/AEOBBundle";
 import {Editor} from "@monaco-editor/react";
-import {searchDocumentReference} from "../../api";
+import {isSearchParamsSupported, searchDocumentReference} from "../../api";
 import { Button } from '@mui/material';
 
 const columns = [
@@ -91,16 +91,13 @@ export default function GFEPanel({ selectedButton }) {
     }
     let params = {};
     params = { type: 'gfe-packet' };
+    params['author'] = requester;
     if (requestDate) params['estimate-initiation-time'] = requestDate;
     if (encounterDate) {
       // Dates within the period, including the start and end, should match.
       params['planned-period'] = [`le${encounterDate}`, `ge${encounterDate}`];
     }
-      // Hack to send author param (requester) only for specific payers localhost/pct-ehr, as the search param may not be supported by all servers yet.
-      // TODO use servers capability statement to determine which search param is supported
-      if (dataServer && (dataServer.includes('localhost') || dataServer.includes('pct-ehr')) && requester) {
-          params['author'] = requester;
-      }
+
     try {
       const response = await searchDocumentReference(dataServer, params, "ehr");
       if (response.status === 401) {
@@ -193,7 +190,7 @@ export default function GFEPanel({ selectedButton }) {
           <span style={{ display: 'flex', alignItems: 'center' }}>
             <Person sx={{ verticalAlign: 'middle', mr: 1 }} style={{ fontSize: '1.15em' }} />
             <span style={{ fontWeight: 400, fontSize: '1rem', marginRight: 6 }}>Author:</span>
-            <span style={{ fontSize: '1rem' }}>{requester || "No requester selected"}</span>
+            <span style={{ fontSize: '1rem' }}>{isSearchParamsSupported('author', 'DocumentReference', 'ehr') ? (requester || "No requester selected") : "All"}</span>
           </span>
         </div>
       </Grid>
@@ -207,6 +204,7 @@ export default function GFEPanel({ selectedButton }) {
               className="date-input"
               value={requestDate}
               onChange={e => setRequestDate(e.target.value)}
+              disabled={!isSearchParamsSupported('estimate-initiation-time', 'DocumentReference', 'ehr')}
             />
           </div>
           <div className="filter-row">
@@ -217,6 +215,7 @@ export default function GFEPanel({ selectedButton }) {
               className="date-input"
               value={encounterDate}
               onChange={e => setEncounterDate(e.target.value)}
+              disabled={!isSearchParamsSupported('planned-period', 'DocumentReference', 'ehr')}
             />
             <button
               className="search-button"

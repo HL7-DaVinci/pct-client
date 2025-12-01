@@ -6,7 +6,7 @@ import Tooltip from "@mui/material/Tooltip";
 import Grid from "@mui/material/Grid2";
 import { displayInstant, displayPeriod } from "../../util/displayUtils";
 import { getPlannedServicePeriod, getRequestInitiationTime } from "../../util/taskUtils";
-import { FHIRClient, retrieveGFEPacket, submitGFEClaim, getAccessToken } from "../../api";
+import { FHIRClient, retrieveGFEPacket, submitGFEClaim, getAccessToken, getContributorTasksByPartOf} from "../../api";
 import { TabPanel } from "../TabPanel";
 import AEOBResponsePanel from "../AEOBResponsePanel";
 import { Editor } from "@monaco-editor/react";
@@ -55,11 +55,7 @@ export default function CoordinationTaskDetailsDialog({ open, onClose, task, set
       }
     }
 
-    
-    FHIRClient(coordinationServer, getAccessToken("cp")).request(`Task?part-of=${task.id}`).then((response) => {
-      const res = (response.entry || []).map((entry) => entry.resource);
-      setContributorTasks(res);
-    });
+    getContributorTasksByPartOf(coordinationServer, task.id).then(setContributorTasks);
 
   }, [task, coordinationServer]);
 

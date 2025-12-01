@@ -3,7 +3,7 @@ import { Autocomplete, TextField, Dialog, DialogTitle, DialogContent, DialogActi
 import LockIcon from '@mui/icons-material/Lock';
 import Grid from '@mui/material/Grid2';
 import { AppContext } from '../Context';
-
+import { getSupportedSearchParams } from '../api';
 
 export default function Settings(props) {
 
@@ -25,30 +25,50 @@ export default function Settings(props) {
 
     const needsToken = (server) => server && !(server.includes('localhost') || server.includes('pct-payer') || server.includes('pct-coordination-platform') || server.includes('pct-ehr'));
 
-    const handleCoordinationServerChanges = (newValue) => {
+    const handleCoordinationServerChanges = async (newValue) => {
+        if (newValue === coordinationServer) return;
         setCoordinationServer(newValue);
         localStorage.setItem("pct-selected-coordination-server", newValue);
         if (props.resetState) {
             props.resetState();
         }
+        // Fetch new capability statement when CoordinationServer address is updated
+        try {
+            await getSupportedSearchParams(newValue, "Task", "cp");
+        } catch (err) {
+            console.error('Error fetching capability statement:', err);
+        }
     }
 
-    const handleDataServerChanges = (newValue) => {
-        console.log("handleDataServerChanges", newValue);
+    const handleDataServerChanges = async (newValue) => {
+        if (newValue === dataServer) return;
         setDataServer(newValue);
         localStorage.setItem("pct-selected-data-server", newValue);
         // props.setDataServerChanged(true);
         if (props.resetState) {
             props.resetState();
         }
+        // Fetch capability statement when EHR Server address is updated
+        try {
+            await  getSupportedSearchParams(newValue, "DocumentReference", "ehr");
+        } catch (err) {
+            console.error('Error fetching capability statement:', err);
+        }
     }
 
-    const handlePayerServerChanges = (newValue) => {
+    const handlePayerServerChanges = async (newValue) => {
+        if (newValue === payerServer) return;
         setPayerServer(newValue);
         localStorage.setItem("pct-selected-payer-server", newValue);
         // props.setPayerServerChanged(true);
         if (props.resetState) {
             props.resetState();
+        }
+        // Fetch capability statement when Payer server address is updated
+        try {
+            await  getSupportedSearchParams(newValue, "DocumentReference", "payer");
+        } catch (err) {
+            console.error('Error fetching capability statement:', err);
         }
     }
 

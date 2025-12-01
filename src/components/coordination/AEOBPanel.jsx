@@ -10,7 +10,7 @@ import { AppContext } from '../../Context';
 import {Editor} from "@monaco-editor/react";
 import {Person} from "@mui/icons-material";
 import AEOBBundle from '../../components/response/AEOBBundle';
-import {searchDocumentReference} from '../../api';
+import {isSearchParamsSupported, searchDocumentReference} from '../../api';
 
 const columns = [
   { field: 'dateOfRequest', headerName: 'Date of request', flex: 1 },
@@ -195,7 +195,7 @@ export default function AEOBPanel({ selectedButton }) {
           <span style={{ display: 'flex', alignItems: 'center' }}>
             <Person sx={{ verticalAlign: 'middle', mr: 1 }} style={{ fontSize: '1.15em' }} />
             <span style={{ fontWeight: 400, fontSize: '1rem', marginRight: 6 }}>Author:</span>
-            <span style={{ fontSize: '1rem' }}>{requester || "No requester selected"}</span>
+            <span style={{ fontSize: '1rem' }}>{isSearchParamsSupported('author', 'DocumentReference', 'payer') ? (requester || "No requester selected") : "All"}</span>
           </span>
         </div>
       </Grid>
@@ -209,6 +209,7 @@ export default function AEOBPanel({ selectedButton }) {
               className="date-input"
               value={requestDate}
               onChange={e => setRequestDate(e.target.value)}
+              disabled={!isSearchParamsSupported('estimate-initiation-time', 'DocumentReference', 'payer')}
             />
           </div>
           <div className="filter-row">
@@ -219,6 +220,7 @@ export default function AEOBPanel({ selectedButton }) {
               className="date-input"
               value={encounterDate}
               onChange={e => setEncounterDate(e.target.value)}
+              disabled={!isSearchParamsSupported('planned-period', 'DocumentReference', 'payer')}
             />
             <button
               className="search-button"

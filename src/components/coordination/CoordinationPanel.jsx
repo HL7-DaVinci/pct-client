@@ -1,5 +1,4 @@
-import { useState } from 'react';
-import { Tabs, Tab } from "@mui/material";
+import {useContext, useEffect, useState} from 'react';
 import Grid from "@mui/material/Grid2";
 import { createStyles, makeStyles } from "@mui/styles";
 import { TabPanel } from '../TabPanel';
@@ -10,6 +9,8 @@ import Settings from '../Settings';
 import AccountSettings from './AccountSettings';
 import AEOBPanel from './AEOBPanel';
 import GFEPanel from './GFEPanel';
+import {getSupportedSearchParams} from "../../api";
+import {AppContext} from "../../Context";
 
 
 const useStyles = makeStyles((theme) =>
@@ -36,7 +37,33 @@ export default function CoordinationPanel() {
   const [selectedButton, setSelectedButton] = useState('coordination');
 
   const classes = useStyles();
+  const appContext = useContext(AppContext);
 
+  useEffect(() => {
+    async function fetchSupportedSearchParams() {
+      console.log("  Fetching supported search parameters from servers...");
+      try {
+        const coordinationParams = await getSupportedSearchParams(
+            appContext.coordinationServer,
+            'Task',
+            'cp'
+        );
+        const dataParams = await getSupportedSearchParams(
+            appContext.dataServer,
+            'DocumentReference',
+            'ehr'
+        );
+        const payerParams = await getSupportedSearchParams(
+            appContext.payerServer,
+            'DocumentReference',
+            'payer'
+        );
+      } catch (error) {
+        console.error('Error fetching supported search params:', error);
+      }
+    }
+    fetchSupportedSearchParams();
+  }, []);
 
   // function addToLog(message, type, object) {
   const addToLog = (message, type, object) => {
