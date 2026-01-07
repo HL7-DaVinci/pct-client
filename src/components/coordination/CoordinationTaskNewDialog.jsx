@@ -9,7 +9,7 @@ import contributorTask from "../../resources/contributor-task.json";
 import buildGFEInformationBundle from "../BuildGFEInformationBundle";
 import { DateTimePicker, LocalizationProvider } from "@mui/x-date-pickers";
 import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs';
-import { getAccessToken, getPatients, getCoverageByPatient, getExpandedValueset } from "../../api";
+import { getAccessToken, getPatients, getCoverageByPatient } from "../../api";
 import RequestItem from "../RequestItem";
 
 export default function CoordinationTaskNewDialog({ open, onClose }) {
@@ -17,6 +17,7 @@ export default function CoordinationTaskNewDialog({ open, onClose }) {
   const { coordinationServer, dataServer, requester } = useContext(AppContext);
 
 
+  /* The participants are being fetched from coordinationServer itself, so a relative reference is used
   const resolveReference = useCallback((reference) => {
      if (coordinationServer !== dataServer) {
        const parts = reference.split("/");
@@ -27,7 +28,7 @@ export default function CoordinationTaskNewDialog({ open, onClose }) {
      }
 
     return reference;
-  }, [coordinationServer, dataServer]);
+  }, [coordinationServer, dataServer]);*/
 
   function addOneItem(rows) {
     return [
@@ -53,7 +54,7 @@ export default function CoordinationTaskNewDialog({ open, onClose }) {
 
   const defaultCoordinationTask = useMemo(() => ({
     ...coordinationTask,
-    requester: { reference: resolveReference(requester) },
+    requester: { reference: requester },
     input: [
       {
         "type": {
@@ -68,12 +69,12 @@ export default function CoordinationTaskNewDialog({ open, onClose }) {
         // valueAttachment will be set after Save
       }
     ]
-  }),[resolveReference, requester]);
+  }),[requester]);
 
   const defaultContributorTask = useMemo(() => ({
     ...contributorTask,
-    requester: { reference: resolveReference(requester) }
-  }),[resolveReference, requester]);
+    requester: { reference: requester }
+  }),[requester]);
 
   const [newCoordinationTask, setNewCoordinationTask] = useState(defaultCoordinationTask);
   const [isValid, setIsValid] = useState(false);
@@ -101,11 +102,14 @@ export default function CoordinationTaskNewDialog({ open, onClose }) {
   },[open, defaultCoordinationTask, requester]);
 
   useEffect(() => {
-    getParticipants(dataServer).then((options) => {
+    getParticipants(coordinationServer).then((options) => {
       setParticipants(options);
     });
+  }, [coordinationServer]);
+
+  useEffect(() => {
     getPatients(dataServer).then(result => setPatients(result?.entry ?? []));
-  },[dataServer]);
+  }, [dataServer]);
 
 
   useEffect(() => {
@@ -274,7 +278,7 @@ export default function CoordinationTaskNewDialog({ open, onClose }) {
       const newContributorTask = {
         ...defaultContributorTask,
         partOf: [ { reference: newCoordinationTask.id } ],
-        owner: { reference: resolveReference(participant) },
+        owner: { reference: participant },
       }
 
       if (!newContributorTask.extension) {

@@ -39,7 +39,8 @@ export default function buildGFEInformationBundle({ patient, coverage, payor, pr
 
     // Multiple requested items (ServiceRequest)
     const requestedServiceItemEntries = Array.isArray(requestedServiceItems)
-        ? requestedServiceItems.map((item) => {
+        ? requestedServiceItems.filter(item => item.code && item.description)
+            .map((item) => {
             const srId = `PCT-ServiceRequest-${uuidv4()}`;
             const srResource = createRequestItemResource(item, 'ServiceRequest', srId, patient?.id || 'unknown');
             return {
@@ -51,7 +52,8 @@ export default function buildGFEInformationBundle({ patient, coverage, payor, pr
         : [];
 
     const deviceRequestItemEntries = Array.isArray(deviceRequestItems)
-        ? deviceRequestItems.map((item) => {
+        ? deviceRequestItems.filter(item => item.code && item.description)
+            .map((item) => {
             const drId = `PCT-DeviceRequest-${uuidv4()}`;
             const drResource = createRequestItemResource(item, 'DeviceRequest', drId, patient?.id || 'unknown');
             return {
@@ -63,7 +65,8 @@ export default function buildGFEInformationBundle({ patient, coverage, payor, pr
         : [];
 
     const medicationRequestItemEntries = Array.isArray(medicationRequestItems)
-        ? medicationRequestItems.map((item) => {
+        ? medicationRequestItems.filter(item => item.code && item.description)
+            .map((item) => {
             const mrId = `PCT-MedicationRequest-${uuidv4()}`;
             const mrResource = createRequestItemResource(item, 'MedicationRequest', mrId, patient?.id || 'unknown');
             return {

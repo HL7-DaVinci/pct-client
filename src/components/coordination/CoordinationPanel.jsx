@@ -112,12 +112,6 @@ export default function CoordinationPanel() {
             <TabPanel value={currentTab} index="contributorTab">
               <ContributorPanel addToLog={addToLog} />
             </TabPanel>
-            <TabPanel value={currentTab} index="aeobsTab">
-              <AEOBPanel selectedButton={selectedButton} />
-            </TabPanel>
-            <TabPanel value={currentTab} index="gfesTab">
-              <GFEPanel />
-            </TabPanel>
           </Grid>
         </>
       );

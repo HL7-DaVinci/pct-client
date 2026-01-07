@@ -12,8 +12,8 @@ export const
     return FHIR.client(config);
 };
 
-export const getOrganizations = (url) => {
-    return FHIRClient(url, getAccessToken("ehr")).request("Organization");
+export const getOrganizations = (url, context = "cp") => {
+    return FHIRClient(url, getAccessToken(context)).request("Organization");
 };
 
 export const getPatients = (url) => FHIRClient(url, getAccessToken("ehr")).request("Patient");
@@ -95,8 +95,8 @@ export const getPractitionerRoles = (url) => {
     })
 }
 
-export const getPractitioners = (url) => {
-    return FHIRClient(url, getAccessToken("ehr")).request("Practitioner");
+export const getPractitioners = (url, context = "cp") => {
+    return FHIRClient(url, getAccessToken(context)).request("Practitioner");
 }
 
 export const sendAEOInquiry = (url, bundleIdentifier) => {
@@ -135,8 +135,7 @@ export const getCoordinationTasks = async (url, dataServer, requester) => {
         queryParams.push("code=gfe-coordination-task");
     }
     if (requester && isRequesterSupported) {
-        const requesterValue = `${dataServer.replace(/\/+$/, '')}/${requester}`;
-        queryParams.push(`requester=${encodeURIComponent(requesterValue)}`);
+        queryParams.push(`requester=${encodeURIComponent(requester)}`);
     }
     const query = queryParams.length ? queryParams.join('&') : '';
     try {
@@ -156,7 +155,7 @@ export const getCoordinationTasks = async (url, dataServer, requester) => {
                 }
                 if (!isRequesterSupported && requester) {
                     const requesterRef = entry.resource?.requester?.reference;
-                    requesterMatch = requesterRef === `${dataServer.replace(/\/+$/, '')}/${requester}`;
+                    requesterMatch = requesterRef === requester;
                 }
                 return codeMatch && requesterMatch;
             });
@@ -176,8 +175,7 @@ export const getContributorTasks = async (url, dataServer, contributor) => {
         queryParams.push("code=gfe-contributor-task");
     }
     if (contributor && isOwnerSupported) {
-        const ownerValue = `${dataServer.replace(/\/+$/, '')}/${contributor}`;
-        queryParams.push(`owner=${encodeURIComponent(ownerValue)}`);
+        queryParams.push(`owner=${encodeURIComponent(contributor)}`);
     }
     const query = queryParams.length ? queryParams.join('&') : '';
     try {
@@ -197,7 +195,7 @@ export const getContributorTasks = async (url, dataServer, contributor) => {
                 }
                 if (!isOwnerSupported && contributor) {
                     const ownerRef = entry.resource?.owner?.reference;
-                    ownerMatch = ownerRef === `${dataServer.replace(/\/+$/, '')}/${contributor}`;
+                    ownerMatch = ownerRef === contributor;
                 }
                 return codeMatch && ownerMatch;
             });

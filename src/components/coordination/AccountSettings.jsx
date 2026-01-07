@@ -6,17 +6,17 @@ import { AppContext } from '../../Context';
 import { getParticipants } from '../../util/taskUtils';
 
 
-export default function AccountSettings(props) {
+export default function AccountSettings() {
 
-  const { dataServer, requester, setRequester, contributor, setContributor, setAccountSettingsError } = useContext(AppContext);
+  const { coordinationServer, requester, setRequester, contributor, setContributor, setAccountSettingsError } = useContext(AppContext);
   const [accountOptions, setAccountOptions] = useState([]);
 
-  // fetch practitioners and organizations for requester options
+  // fetch practitioners and organizations for requester, contributor options from coordination server
   useEffect(() => {
-    getParticipants(dataServer).then((options) => {
+    getParticipants(coordinationServer).then((options) => {
       setAccountOptions(options);
     });
-  }, [dataServer]);
+  }, [coordinationServer]);
 
 
   useEffect(() => {

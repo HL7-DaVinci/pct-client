@@ -144,9 +144,9 @@ class GFERequestBox extends Component {
     const fetchProviders = async () => {
       try {
         const res = await Promise.all([
-          getPractitionerRoles(this.context.dataServer),
-          getPractitioners(this.context.dataServer),
-          getOrganizations(this.context.dataServer),
+          getPractitionerRoles(this.context.dataServer, "ehr"),
+          getPractitioners(this.context.dataServer, "ehr"),
+          getOrganizations(this.context.dataServer, "ehr"),
         ]);
         await Promise.all(
           res.map((r) => {
@@ -398,7 +398,7 @@ class GFERequestBox extends Component {
   };
 
   handleOpenOrganizationList = (e) => {
-    getOrganizations(this.context.dataServer).then((result) => {
+    getOrganizations(this.context.dataServer, "ehr").then((result) => {
       this.props.updateSessionInfo({
         organizationList: result.entry,
       });
