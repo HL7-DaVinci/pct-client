@@ -318,11 +318,23 @@ export default function CoordinationTaskNewDialog({ open, onClose }) {
       if (cpToken) {
         headers["Authorization"] = `Bearer ${cpToken}`;
       }
-      const response = await fetch(coordinationServer, {
+
+      // Try new $gfe-coordination-request operation endpoint first
+      let response = await fetch(`${coordinationServer}/$gfe-coordination-request`, {
         method: "POST",
         headers,
         body: JSON.stringify(bundle)
       });
+
+      // If endpoint does not exist or returns error, fallback to normal POST
+      if (!response.ok && (response.status === 400 || response.status === 404 || response.status === 405)) {
+        console.warn("$gfe-coordination-request endpoint not available (status:", response.status, "). Falling back to /Bundle endpoint.");
+        response = await fetch(coordinationServer, {
+          method: "POST",
+          headers,
+          body: JSON.stringify(bundle)
+        });
+      }
 
       response.json().then((data) => {
         if (response.ok) {
