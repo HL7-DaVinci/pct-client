@@ -186,7 +186,7 @@ export default function PatientInfo(props) {
                             </Grid>
                             <Grid item>
                                 <Typography variant="body1" gutterBottom>
-                                    <b>Coverage Period:</b> {getCoverageResource()?.period.start} to {getCoverageResource()?.period.end}
+                                    <b>Coverage Period:</b> {getCoverageResource()?.period?.start || "-"}  to {getCoverageResource()?.period?.end || "-"}
                                 </Typography>
                             </Grid>
                         </Grid>

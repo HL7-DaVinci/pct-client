@@ -214,17 +214,19 @@ class GFERequestBox extends Component {
         );
       }
     };
-    fetchProviders();
-    // Automatically fetch patient details if patientId is present in session
-    const patientId = this.props.session?.subjectInfo?.selectedPatient;
-    if (patientId) {
-      this.fetchAndSetPatientDetails(patientId);
-    }
-    // Automatically fetch submitter details if submitter is present in session
-    const submitterId = this.props.session?.subjectInfo?.selectedSubmitter;
-    if (submitterId) {
-      this.fetchAndSetSubmitterDetails(submitterId);
-    }
+    // Fetch providers, then sequentially fetch patient and submitter details to autofill
+    const fetchAll = async () => {
+      await fetchProviders();
+      const patientId = this.props.session?.subjectInfo?.selectedPatient;
+      if (patientId) {
+        this.fetchAndSetPatientDetails(patientId);
+      }
+      const submitterId = this.props.session?.subjectInfo?.selectedSubmitter;
+      if (submitterId) {
+        this.fetchAndSetSubmitterDetails(submitterId);
+      }
+    };
+    fetchAll();
   }
 
   resetState = () => {
@@ -258,10 +260,13 @@ class GFERequestBox extends Component {
         const subscriberText = result.data[0].subscriberId;
         const relationshipText = result.data[0].relationship.coding[0].display;
         const planName = result.data[0].class[0].name;
-        const coveragePeriodTextStart = result.data[0].period.start;
-        const coveragePeriodTextEnd = result.data[0].period.end;
+        const coveragePeriodTextStart = result.data[0].period?.start || "";
+        const coveragePeriodTextEnd = result.data[0].period?.end || "";
 
-        const coveragePeriod = coveragePeriodTextStart + " to " + coveragePeriodTextEnd;
+        const coveragePeriod =
+            (coveragePeriodTextStart || coveragePeriodTextEnd)
+                ? `${coveragePeriodTextStart || "-"} to ${coveragePeriodTextEnd || "-"}`
+                : "";
 
         getCoverage(this.context.dataServer, result.data[0].id).then(
           (coverageResult) => {
@@ -301,11 +306,10 @@ class GFERequestBox extends Component {
     });
 
     getPatientInfo(this.context.dataServer, patientId).then((result) => {
-      const addressText = result[0].address[0].text;
-      const birthdateText = result[0].birthDate;
-      const genderText = result[0].gender;
-      const telephoneText =
-        result[0].telecom !== undefined ? result[0].telecom[0].value : null;
+      const addressText = result?.[0]?.address?.[0]?.text ?? null;
+      const birthdateText = result?.[0]?.birthDate ?? null;
+      const genderText = result?.[0]?.gender ?? null;
+      const telephoneText = result?.[0]?.telecom?.[0]?.value ?? null;
       let memberNumber;
       //ensure correct id for member
       if (
@@ -331,7 +335,7 @@ class GFERequestBox extends Component {
             patientName = `${this.props.session.patientList[i].resource.name[0].given[0]} ${this.props.session.patientList[i].resource.name[0].family}`;
         }
       }
-      if (addressText && addressText.length > 0) {
+      if (addressText && addressText.length > 0) {//TODO validate this logic
         let subjectInfo = {
           ...this.props.session.subjectInfo,
           selectedAddress: addressText,
@@ -418,11 +422,13 @@ class GFERequestBox extends Component {
   fetchAndSetSubmitterDetails = (submitterId) => {
     if (!submitterId) return;
     const allSubmittersList = this.getProfessionalBillingProviderList();
+    console.log("Professional billing providers list size:", allSubmittersList?.length ?? 0);
     let selectedSubmittingProviderName = "";
     //set name of provider to display name instead of code in summary tab
     for (let i = 0; i < allSubmittersList.length; i++) {
       if (submitterId === allSubmittersList[i].id) {
         selectedSubmittingProviderName = allSubmittersList[i].display;
+        console.log("Submitting Provider Id, Name:", submitterId, selectedSubmittingProviderName);
         break;
       }
     }
@@ -1750,7 +1756,7 @@ class GFERequestBox extends Component {
   }
 
   getProfessionalBillingProviderList() {
-    const fhirServerBaseUrl = this.context.dataServer;
+    //const fhirServerBaseUrl = this.context.dataServer;
     const providerMap = [];
     /*this.props.session.practitionerRoleList.forEach((role) => {
       if (!role.practitioner?.reference) {

@@ -358,3 +358,66 @@ export function isSearchParamsSupported(param, resourceType = "Task", context) {
     }
     return false;
 }
+
+export const searchResourceByParams = async (url, type, params = [], context = "ehr") => {
+    if (!params || params.length === 0) return null;
+    let query = `${type}`;
+    if (params.length > 0) {
+        const queryString = params.map(([k, v]) => `${encodeURIComponent(k)}=${encodeURIComponent(v)}`).join('&');
+        query += `?${queryString}`;
+    }
+    console.log(`Searching for ${type} with params:`, query);
+    try {
+        const result = await FHIRClient(url, getAccessToken(context)).request(query);
+        if (result && result.entry && result.entry.length > 0) {
+            const resource = result.entry[0].resource;
+            console.log(`Found existing ${type} (id):`, resource.id);
+            return resource;
+        }
+    } catch (e) {
+        console.error(`Error searching for ${type}:`, e);
+    }
+    return null;
+};
+
+export const upsertResource = async (url, resource, context = "ehr") => {
+    if (!resource || !resource.resourceType) return { resource: null, created: false, updated: false };
+    const type = resource.resourceType;
+    try {
+        // If resource.id is present, use update (PUT) to create with client-supplied id
+        if (resource.id) {
+            // Remove urn:uuid: prefix from id if present to use as FHIR id
+            const resourceId = resource.id;
+            if (typeof resourceId === 'string') {
+                const urnMatch = resourceId.match(/^urn:uuid:(.+)$/);
+                if (urnMatch) resource.id = urnMatch[1];
+            }
+            const resourceUrl = `${url}/${type}/${resource.id}`;
+            const token = getAccessToken(context);
+            const response = await fetch(resourceUrl, {
+                method: "PUT",
+                headers: {
+                    "Content-Type": "application/fhir+json",
+                    "Accept": "application/fhir+json",
+                    ...(token ? { "Authorization": `Bearer ${token}` } : {})
+                },
+                body: JSON.stringify(resource)
+            });
+            let createdResource = null;
+            if (response.ok) {
+                createdResource = await response.json();
+                console.info(`[upsertResource] PUT succeeded for resourceType=${type}, id=${createdResource?.id}`);
+            }
+            console.info("Response status:", response.status);
+            return { resource: createdResource, created: response.status === 201, updated: response.status === 200 };
+        } else {
+            // No resource.id, create resource (POST) with server-generated id
+            const created = await FHIRClient(url, getAccessToken(context)).create(resource);
+            console.info(`[upsertResource] POST (server-generated id) for ${type}:`, created.id);
+            return { resource: created, created: true, updated: false };
+        }
+    } catch (e) {
+        console.error(`Error upserting ${type}/${resource.id}:`, e);
+        return { resource: null, created: false, updated: false, error: e };
+    }
+};

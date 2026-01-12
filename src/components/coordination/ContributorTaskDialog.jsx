@@ -5,12 +5,12 @@ import { ArrowDropDown, AttachFile, Block, Check, LibraryBooks, Task } from '@mu
 import { getPlannedServicePeriod, getRequestInitiationTime } from '../../util/taskUtils';
 import FHIR from 'fhirclient';
 import { AppContext } from '../../Context';
-import { displayInstant, displayPeriod } from '../../util/displayUtils';
+import { displayInstant, displayPeriod, getHumanDisplayName } from '../../util/displayUtils';
 import RequestPanel from '../GFERequestPanel';
 import { generateNewSession } from '../../util/gfeUtil';
 import { TabPanel } from '../TabPanel';
 import { Editor } from '@monaco-editor/react';
-import { FHIRClient, getAccessToken} from '../../api';
+import { FHIRClient, getAccessToken, upsertResource, searchResourceByParams } from '../../api';
 import GFEInformationBundleView from '../shared/GFEInformationBundleView';
 import DialogContentText from '@mui/material/DialogContentText';
 
@@ -19,7 +19,7 @@ import DialogContentText from '@mui/material/DialogContentText';
 
 export default function ContributorTaskDialog({ open, onClose, task, setTask }) {
 
-  const { coordinationServer } = useContext(AppContext);
+  const { coordinationServer, dataServer } = useContext(AppContext);
   const [updated, setUpdated] = useState(false);
   const [currentTab, setCurrentTab] = useState("summaryTab");
   const [showGfeBuilder, setShowGfeBuilder] = useState(false);
@@ -125,7 +125,143 @@ export default function ContributorTaskDialog({ open, onClose, task, setTask }) 
     setGfeSession({ ...gfeSession, ...update });
   };
 
+  /**
+   * Upsert resources from a FHIR Bundle (infoBundle) into the EHR system.
+   */
+    async function upsertInfoBundleResources(infoBundle) {
+      if (!infoBundle || !Array.isArray(infoBundle.entry)) return;
+      const resourceTypes = ["Patient", "Coverage", "Practitioner", "Organization"];
+      // Group resources by type
+      const resourceMap = (infoBundle.entry || [])
+        .map((entry) => entry.resource)
+        .reduce((resourceMap, res) => {
+          if (resourceTypes.includes(res?.resourceType)) {
+            if (!resourceMap[res.resourceType]) resourceMap[res.resourceType] = [];
+            resourceMap[res.resourceType].push(res);
+          }
+          return resourceMap;
+        }, {});
+      const patients = resourceMap.Patient || [];
+      const coverages = resourceMap.Coverage || [];
+      const practitioners = resourceMap.Practitioner || [];
+      const organizations = resourceMap.Organization || [];
+
+      // Upsert Patients and their Coverages
+      for (const patient of patients) {
+        try {
+          console.log("Processing Patient :", patient.id);
+          // Find Coverage for this patient
+          const patientCoverage = coverages.find((coverage) => {
+            const beneficiaryRef = coverage.beneficiary?.reference;
+            return beneficiaryRef === `Patient/${patient.id}` || beneficiaryRef === patient.id;
+          });
+          //console.log("Found Coverages for Patient:", patient.id, patientCoverage);
+
+          const name = getHumanDisplayName(patient);
+          const birthDate = patient.birthDate;
+          const gender = patient.gender;
+          if (!name) {
+            console.error('Invalid, Patient name is missing, cannot upsert patient/coverage:', patient);
+            continue;
+          }
+          const params = [];
+          params.push(["name", name]);
+          if (birthDate !== undefined) params.push(["birthdate", birthDate]);
+          if (gender !== undefined) params.push(["gender", gender]);
+
+          // Search for existing Patient
+          const existingPatient = await searchResourceByParams(dataServer, "Patient", params);
+          if (existingPatient) {
+            patient.id = existingPatient.id;
+            console.log(`Patient found in system. Patient:`, existingPatient.id);
+          }
+          const patientResult = await upsertResource(dataServer, patient);
+          if (!patientResult || !patientResult.resource) {
+            console.error('Upsert patient did not return a response:', patientResult);
+            continue;
+          }
+          if (!patientCoverage) {
+            console.warn(`No Coverage found for Patient/${patient.id}, skipping Coverage upsert.`);
+            continue;
+          }
+          // If adding patient, add coverage
+          if (patientResult.created) {
+            console.log("Patient is created, Creating New Coverage for Patient:", patientResult.resource.id, "Coverage:", patientCoverage.id);
+            await upsertResource(dataServer, patientCoverage);
+          } else {
+            console.log("Patient is updated, Checking existing Coverage for Patient to update:", patient.id);
+            const covParams = [];
+            if (patientCoverage.beneficiary?.reference) covParams.push(["beneficiary", patientCoverage.beneficiary.reference]);
+            const subscriberRef = patientCoverage.subscriber?.reference;
+            // Use subscriberRef if present, otherwise assume subscriber is patient
+            if (subscriberRef) {
+              covParams.push(["subscriber", subscriberRef]);
+            } else {
+              covParams.push(["subscriber", `Patient/${patient.id}`]);
+            }
+            if (Array.isArray(patientCoverage.payor) && patientCoverage.payor[0]?.reference) covParams.push(["payor", patientCoverage.payor[0].reference]);
+            //if (patientCoverage.relationship?.coding && patientCoverage.relationship.coding[0]?.code) covParams.push(["relationship", patientCoverage.relationship.coding[0].code]);
+
+            const existingCoverage = await searchResourceByParams(dataServer, "Coverage", covParams);
+            if (existingCoverage) {
+              patientCoverage.id = existingCoverage.id;
+              console.log(`Coverage found in system. Coverage:`, existingCoverage.id);
+              await upsertResource(dataServer, patientCoverage);
+            } else {
+              console.log("Patient is updated but no existing Coverage found, creating new Coverage for Patient:", patientResult.resource.id, "Coverage:", patientCoverage.id);
+              const upsertResultCoverage = await upsertResource(dataServer, patientCoverage);
+              if (!upsertResultCoverage || !upsertResultCoverage.resource) {
+                console.error('Upsert did not return a coverage resource:', upsertResultCoverage);
+                continue;
+              }
+            }
+          }
+        } catch (error) {
+          console.error('Failed to upsert resource:', error);
+        }
+      }
+
+      // Upsert Practitioners
+      for (const practitioner of practitioners) {
+        const name = getHumanDisplayName(practitioner);
+        let npi = undefined;
+        if (Array.isArray(practitioner.identifier)) {
+          const npiObj = practitioner.identifier.find(id => id.system && id.system.includes("npi"));
+          npi = npiObj && npiObj.value ? npiObj.value : undefined;
+        }
+        const params = [];
+        if (name !== undefined) params.push(["name", name]);
+        if (npi !== undefined) params.push(["identifier", npi]);
+        const existingPractitioner = await searchResourceByParams(dataServer, "Practitioner", params);
+        if (existingPractitioner) {
+          practitioner.id = existingPractitioner.id;
+          console.log(`Practitioner found in system. Practitioner:`, existingPractitioner.id);
+        }
+        await upsertResource(dataServer, practitioner);
+      }
+
+      // Upsert Organizations
+      for (const organization of organizations) {
+        const name = organization.name;
+        const params = [];
+        if (name !== undefined) params.push(["name", name]);
+        const existingOrganization = await searchResourceByParams(dataServer, "Organization", params);
+        if (existingOrganization) {
+          organization.id = existingOrganization.id;
+          console.log(`Organization found in system. Organization:`, existingOrganization.id);
+        }
+        await upsertResource(dataServer, organization);
+      }
+    }
+
   const handleCreateBundle = () => {
+    // Upsert missing/new resources from information bundle into EHR system
+    upsertInfoBundleResources(infoBundle).then(() => {
+      console.log("All missing resources upserted successfully.");
+    }).catch((error) => {
+      console.error("Error upserting missing resources:", error);
+    });
+
     // Autofill Patient and Submitter(Task.owner) during GFE Bundle Creation from task details
     let providerId, providerType;
     const ownerReference = task?.owner?.reference;
