@@ -86,8 +86,8 @@ export default function GFEInformationBundleView({ bundle }) {
                         <TableCell>{getHumanDisplayName(patient.resource)}</TableCell>
                         <TableCell>{patient.resource.birthDate}</TableCell>
                         <TableCell>{patient.resource.gender}</TableCell>
-                        <TableCell>{patient.resource.telecom[0]?.value}</TableCell>
-                        <TableCell>{displayAddress(patient.resource.address[0])}</TableCell>
+                        <TableCell>{patient.resource.telecom?.[0]?.value || ""}</TableCell>
+                        <TableCell>{displayAddress(patient.resource.address?.[0])}</TableCell>
                       </TableRow>
                     );
                   })
