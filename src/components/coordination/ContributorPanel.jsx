@@ -119,7 +119,7 @@ export default function ContributorPanel() {
       headerName: 'Reason',
       valueGetter: (value, row) => row.reasonCode?.coding?.find(c => c.system === "http://hl7.org/fhir/us/davinci-pct/CodeSystem/PCTGFERequestTaskCSTemporaryTrialUse")?.code 
     },
-    { field: 'requester', headerName: 'Requester', valueGetter: (value, row) => value.reference },
+    { field: 'requester', headerName: 'Requester', valueGetter: (value, row) => value?.reference || '' },
     {
       field: 'initiation',
       headerName: 'Request Initiation',
