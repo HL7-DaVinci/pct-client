@@ -52,6 +52,8 @@ function App() {
 
   const [requester, setRequester] = useState(localStorage.getItem("pct-selected-requester") || "");
   const [contributor, setContributor] = useState(localStorage.getItem("pct-selected-contributor") || "");
+  const [requesterDisplayName, setRequesterDisplayName] = useState(localStorage.getItem("pct-selected-requester-display") || "");
+  const [contributorDisplayName, setContributorDisplayName] = useState(localStorage.getItem("pct-selected-contributor-display") || "");
   const [accountSettingsError, setAccountSettingsError] = useState(!requester || !contributor);
 
   
@@ -60,8 +62,8 @@ function App() {
       coordinationServers, setCoordinationServers, coordinationServer, setCoordinationServer, 
       dataServers, setDataServers, dataServer, setDataServer, 
       payerServers, setPayerServers, payerServer, setPayerServer, 
-      requester, setRequester, contributor, setContributor, accountSettingsError, setAccountSettingsError}),
-    [coordinationServers, coordinationServer, dataServers, dataServer, payerServers, payerServer, requester, contributor, accountSettingsError]
+      requester, setRequester, requesterDisplayName, setRequesterDisplayName, contributor, setContributor, contributorDisplayName, setContributorDisplayName, accountSettingsError, setAccountSettingsError}),
+    [coordinationServers, coordinationServer, dataServers, dataServer, payerServers, payerServer, requester, requesterDisplayName, contributor, contributorDisplayName, accountSettingsError]
   );
 
   return (

@@ -16,7 +16,11 @@ export default function Settings(props) {
         setDataServer,
         payerServers,
         payerServer,
-        setPayerServer
+        setPayerServer,
+        setRequester,
+        setContributor,
+        setRequesterDisplayName,
+        setContributorDisplayName
     } = useContext(AppContext);
 
     const [tokenDialogOpen, setTokenDialogOpen] = useState(false);
@@ -25,10 +29,23 @@ export default function Settings(props) {
 
     const needsToken = (server) => server && !(server.includes('localhost') || server.includes('pct-payer') || server.includes('pct-coordination-platform') || server.includes('pct-ehr'));
 
+    const resetParticipants = () => {
+        setRequester("");
+        setContributor("");
+        setRequesterDisplayName("");
+        setContributorDisplayName("");
+        localStorage.removeItem("pct-selected-requester");
+        localStorage.removeItem("pct-selected-contributor");
+        localStorage.removeItem("pct-selected-requester-display");
+        localStorage.removeItem("pct-selected-contributor-display");
+    };
+
     const handleCoordinationServerChanges = async (newValue) => {
         if (newValue === coordinationServer) return;
         setCoordinationServer(newValue);
         localStorage.setItem("pct-selected-coordination-server", newValue);
+        // Clear requester and contributor selections when coordination server changes
+        resetParticipants();
         if (props.resetState) {
             props.resetState();
         }

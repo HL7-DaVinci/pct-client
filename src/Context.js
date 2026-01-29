@@ -18,8 +18,13 @@ export const AppContext = createContext({
 
   requester: "",
   setRequester: () => {},
+  requesterDisplayName: "",
+  setRequesterDisplayName: () => {},
+
   contributor: "",
   setContributor: () => {},
+  contributorDisplayName: "",
+  setContributorDisplayName: () => {},
 
   accountSettingsError: false,
   setAccountSettingsError: () => {},

@@ -421,3 +421,28 @@ export const upsertResource = async (url, resource, context = "ehr") => {
         return { resource: null, created: false, updated: false, error: e };
     }
 };
+
+export const searchCoordinationEntities = async (url, type, text = "") => {
+    if (!url || !type || !text) return [];
+    const context = "cp";
+    const token = getAccessToken(context);
+    const headers = { "Accept": "application/fhir+json" };
+    if (token) headers["Authorization"] = `Bearer ${token}`;
+    let results = [];
+    try {
+        // _id search first
+        const byId = await FHIRClient(url, token).request(`${type}?_id=${encodeURIComponent(text)}`);
+        if (byId?.entry?.length > 0) {
+            results = byId.entry.map(entry => entry.resource);
+            return results;
+        }
+        // Fallback to partial name search
+        const byName = await FHIRClient(url, token).request(`${type}?name=${encodeURIComponent(text)}`);
+        if (byName?.entry?.length > 0) {
+            results = byName.entry.map(entry => entry.resource);
+        }
+    } catch (e) {
+        throw new Error(e?.message || "Error searching for entities");
+    }
+    return results;
+};

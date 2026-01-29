@@ -1,6 +1,6 @@
-import { useCallback, useContext, useEffect, useMemo, useState } from "react";
+import { useContext, useEffect, useMemo, useState } from "react";
 import { AppContext } from "../../Context";
-import { Alert, Autocomplete, Button, Dialog, DialogActions, DialogContent, DialogTitle, List, ListItem, ListItemText, TextField, MenuItem, Box } from "@mui/material";
+import { Alert, Autocomplete, Button, Dialog, DialogActions, DialogContent, DialogTitle, List, ListItem, ListItemText, TextField, MenuItem, Box, InputAdornment, IconButton } from "@mui/material";
 import Grid from "@mui/material/Grid2";
 import { v4 } from "uuid";
 import { getParticipants } from "../../util/taskUtils";
@@ -11,10 +11,13 @@ import { DateTimePicker, LocalizationProvider } from "@mui/x-date-pickers";
 import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs';
 import { getAccessToken, getPatients, getCoverageByPatient } from "../../api";
 import RequestItem from "../RequestItem";
+import ParticipantSearchDialog from "../shared/ParticipantSearchDialog";
+import { getDisplayNameForParticipant } from '../../util/displayUtils';
+import SearchIcon from "@mui/icons-material/Search";
 
 export default function CoordinationTaskNewDialog({ open, onClose }) {
   
-  const { coordinationServer, dataServer, requester } = useContext(AppContext);
+  const { coordinationServer, coordinationServers, dataServer, requester } = useContext(AppContext);
 
 
   /* The participants are being fetched from coordinationServer itself, so a relative reference is used
@@ -93,19 +96,30 @@ export default function CoordinationTaskNewDialog({ open, onClose }) {
   const [servicesRows, setServicesRows] = useState([]);
   const [deviceRows, setDeviceRows] = useState([]);
   const [medicationRows, setMedicationRows] = useState([]);
+  const [searchDialogOpen, setSearchDialogOpen] = useState(false);
+  const [searchTarget, setSearchTarget] = useState(null);
+  const appContext = useContext(AppContext);
+  const isServerInList = coordinationServers && coordinationServers.some(s => (s.value || s) === coordinationServer);
 
   useEffect(() => {
     setStep(0);
     setErrorMsg(undefined);
     setNewCoordinationTask({...defaultCoordinationTask});
-    setSelectedParticipants([requester]);
-  },[open, defaultCoordinationTask, requester]);
+    if (isServerInList) {
+      setSelectedParticipants(participants.filter(p => p.value === requester));
+    } else {
+      setSelectedParticipants(requester ? [{ value: requester, label: requester }] : []);
+    }
+    }, [open, defaultCoordinationTask, requester, isServerInList, participants]);
 
   useEffect(() => {
-    getParticipants(coordinationServer).then((options) => {
-      setParticipants(options);
-    });
-  }, [coordinationServer]);
+    // For servers in the list, prefetch participants due to fewer resources; otherwise, allow manual fetch only by ID or Name.
+    if (isServerInList) {
+      getParticipants(coordinationServer).then((options) => {
+        setParticipants(options || []);
+      });
+    }
+  }, [coordinationServer, isServerInList]);
 
   useEffect(() => {
     getPatients(dataServer).then(result => setPatients(result?.entry ?? []));
@@ -278,7 +292,7 @@ export default function CoordinationTaskNewDialog({ open, onClose }) {
       const newContributorTask = {
         ...defaultContributorTask,
         partOf: [ { reference: newCoordinationTask.id } ],
-        owner: { reference: participant },
+        owner: { reference: participant?.value },
       }
 
       if (!newContributorTask.extension) {
@@ -359,6 +373,22 @@ export default function CoordinationTaskNewDialog({ open, onClose }) {
     
   }
 
+  const handleCloseSearchDialog = () => {
+    setSearchDialogOpen(false);
+    setSearchTarget(null);
+  };
+
+  const handleSelectResult = resource => {
+    if (!resource || !resource.resourceType || !resource.id) return;
+    const value = `${resource.resourceType}/${resource.id}`;
+    const label = getDisplayNameForParticipant(resource);
+    const result = { value, label };
+    if (!selectedParticipants.some(p => p.value === value)) {
+      setSelectedParticipants(prev => Array.isArray(prev) ? [...prev, result] : [result]);
+    }
+    handleCloseSearchDialog();
+  }
+
   // Helper function for coverage label
   function getCoverageLabel(coverage) {
     let insurer = '';
@@ -422,10 +452,28 @@ export default function CoordinationTaskNewDialog({ open, onClose }) {
               <Autocomplete
                 multiple
                 options={participants}
-                getOptionLabel={(option) => option}
+                getOptionLabel={(option) => option.label}
                 value={selectedParticipants}
                 onChange={(e, newValue) => setSelectedParticipants(newValue)}
-                renderInput={(params) => <TextField {...params} label={<span>Contributors <span style={{color:'red'}}>*</span></span>} />}
+                disabled={!isServerInList}
+                isOptionEqualToValue={(option, value) => option?.value === value?.value}
+                renderInput={(params) => <TextField {...params} label={<span>Contributors <span style={{color:'red'}}>*</span></span>} InputProps={{
+                  ...params.InputProps,
+                  endAdornment: (
+                      <>
+                        <InputAdornment position="end">
+                          <IconButton
+                              aria-label="search contributors"
+                              onClick={() => setSearchDialogOpen(true)}
+                              size="large"
+                          >
+                            <SearchIcon />
+                          </IconButton>
+                        </InputAdornment>
+                        {params.InputProps.endAdornment}
+                      </>
+                  ),
+                }}/>}
               />
             </Grid>
           </Grid>
@@ -537,6 +585,14 @@ export default function CoordinationTaskNewDialog({ open, onClose }) {
 
       </Grid>
       </DialogActions>
+      <ParticipantSearchDialog
+          open={searchDialogOpen}
+          onClose={handleCloseSearchDialog}
+          onSelect={handleSelectResult}
+          coordinationServer={appContext.coordinationServer}
+          getResultDisplay={getDisplayNameForParticipant}
+          target={searchTarget}
+      />
     </Dialog>
 
   );

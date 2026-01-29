@@ -1745,6 +1745,10 @@ class GFERequestBox extends Component {
       });
     });
     this.props.session.organizationList.forEach((org) => {
+      // Skip payer organizations
+      if (org.resource?.type?.some(t => t?.coding?.some(c => c?.code === 'pay'))) {
+        return;
+      }
       providerMap.push({
         type: "Organization",
         display: `Organization - ${org.resource.name}`,

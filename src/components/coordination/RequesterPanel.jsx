@@ -15,7 +15,7 @@ import { Box } from '@mui/material';
 
 export default function RequesterPanel({addToLog}) {
   const apiRef = useGridApiRef();
-  const { coordinationServer, dataServer, requester } = useContext(AppContext);
+  const { coordinationServer, dataServer, requester, requesterDisplayName } = useContext(AppContext);
   const [rows, setRows] = useState([]);
   const [taskDetailsDialogOpen, setTaskDetailsDialogOpen] = useState(false);
   const [taskNewDialogOpen, setTaskNewDialogOpen] = useState(false);
@@ -166,7 +166,7 @@ export default function RequesterPanel({addToLog}) {
               <span style={{ marginRight: 8, fontSize: '1.15rem', fontWeight: 370 }}>
                 Currently displaying coordination tasks for:
               </span>
-              <Person sx={{ mx: 1 }}/> {requester || "No requester selected"}
+              <Person sx={{ mx: 1 }}/> {requesterDisplayName || requester || "No requester selected"}
             </div>
             <Button
               variant="contained"

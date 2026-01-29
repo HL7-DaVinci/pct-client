@@ -11,7 +11,6 @@ import DialogContent from "@mui/material/DialogContent";
 import AEOBBundle from "../response/AEOBBundle";
 import {Editor} from "@monaco-editor/react";
 import {isSearchParamsSupported, searchDocumentReference} from "../../api";
-import { Button } from '@mui/material';
 
 const columns = [
   { field: 'dateOfRequest', headerName: 'Date of request', flex: 1 },
@@ -62,7 +61,7 @@ export default function GFEPanel({ selectedButton }) {
   const [rows, setRows] = useState(undefined);
   const [requestDate, setRequestDate] = useState('');
   const [encounterDate, setEncounterDate] = useState('');
-  const { dataServer, requester } = useContext(AppContext);
+  const { dataServer, requester, requesterDisplayName } = useContext(AppContext);
   const [selectedRow, setSelectedRow] = useState(null);
   const [GFEPacket, setGFEPacket] = useState(null);
   const [jsonDialogOpen, setJsonDialogOpen] = useState(false);
@@ -190,7 +189,7 @@ export default function GFEPanel({ selectedButton }) {
           <span style={{ display: 'flex', alignItems: 'center' }}>
             <Person sx={{ verticalAlign: 'middle', mr: 1 }} style={{ fontSize: '1.15em' }} />
             <span style={{ fontWeight: 400, fontSize: '1rem', marginRight: 6 }}>Author:</span>
-            <span style={{ fontSize: '1rem' }}>{isSearchParamsSupported('author', 'DocumentReference', 'ehr') ? (requester || "No requester selected") : "All"}</span>
+            <span style={{ fontSize: '1rem' }}>{isSearchParamsSupported('author', 'DocumentReference', 'ehr') ? (requesterDisplayName || "No requester selected") : "All"}</span>
           </span>
         </div>
       </Grid>

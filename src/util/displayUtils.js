@@ -88,3 +88,26 @@ export const getDisplayForReferenceFromBundle = (reference, bundle) => {
   return reference;
 
 }
+
+export function getDisplayNameForParticipant(resource) {
+  if (!resource) return '';
+
+  if (resource.resourceType === 'Practitioner') {
+    let lastName = '', firstName = '', suffix = '';
+    if (Array.isArray(resource.name) && resource.name.length > 0) {
+      const n = resource.name[0] || {};
+      lastName = n.family || '';
+      firstName = Array.isArray(n.given) && n.given.length > 0 ? n.given.join(' ') : '';
+      suffix = Array.isArray(n.suffix) && n.suffix.length > 0 ? ` ${n.suffix.join(' ')}` : '';
+      return `Practitioner: ${resource.id} - ${lastName}, ${firstName}${suffix}`.trim();
+    }
+    return resource.id;
+  }
+
+  if (resource.resourceType === 'Organization') {
+    const orgName = typeof resource.name === 'string' ? resource.name : '';
+    return `Organization: ${resource.id} - ${orgName}`.trim();
+  }
+
+  return resource.id;
+}

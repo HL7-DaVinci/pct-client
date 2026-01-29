@@ -11,7 +11,7 @@ import { Box } from '@mui/material';
 export default function ContributorPanel() {
 
   const apiRef = useGridApiRef();
-  const { coordinationServer, dataServer, contributor } = useContext(AppContext);
+  const { coordinationServer, dataServer, contributor, contributorDisplayName } = useContext(AppContext);
   const [rows, setRows] = useState([]);
   const [taskDialogOpen, setTaskDialogOpen] = useState(false);
   const [currentTask, setCurrentTask] = useState(undefined);
@@ -140,8 +140,8 @@ export default function ContributorPanel() {
   return (
     <>
     {
-      !contributor ? 
-      <p variant="body1">No coordination contributor selected.  Please select a valid contributor in the account menu above.</p> 
+      !contributor ?
+      <p variant="body1">No coordination contributor selected.  Please select a valid contributor in the account menu above.</p>
       :
 
       <>
@@ -151,7 +151,7 @@ export default function ContributorPanel() {
               <span style={{ marginRight: 8, fontSize: '1.15rem', fontWeight: 370 }}>
                 Currently displaying contributor tasks for:
               </span>
-              <Person sx={{ mx: 1 }}/> {contributor || "No contributor selected"}
+              <Person sx={{ mx: 1 }}/> {contributorDisplayName || contributor || "No contributor selected"}
             </div>
           </Grid>
         </Grid>

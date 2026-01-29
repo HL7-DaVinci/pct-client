@@ -1,4 +1,5 @@
 import { getOrganizations, getPractitioners } from "../api";
+import {getDisplayNameForParticipant} from "./displayUtils";
 
 
 export function getParticipants(coordinationServer) {
@@ -9,10 +10,17 @@ export function getParticipants(coordinationServer) {
   ]).then((res) => {
     (res || []).forEach((bundle) => {
       bundle.entry.forEach((entry) => {
-        options.push(`${entry.resource.resourceType}/${entry.resource.id}`);
+        if (!entry.resource) return;
+        // Skip payer organizations in participants
+        if (entry.resource.resourceType === "Organization" && entry.resource?.type?.some(t => t?.coding?.some(c => c?.code === 'pay'))) {
+          return;
+        }
+        const label = getDisplayNameForParticipant(entry.resource);
+        const value = `${entry.resource.resourceType}/${entry.resource.id}`;
+        if (label && value) options.push({ value, label });
       });
     });
-    options.sort();
+    options.sort((a, b) => a.label.localeCompare(b.label));
     return options;
   }).catch(() => {
     return [];
