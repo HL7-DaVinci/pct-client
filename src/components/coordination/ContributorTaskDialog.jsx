@@ -27,6 +27,7 @@ export default function ContributorTaskDialog({ open, onClose, task, setTask }) 
   const [coordinationTaskRef, setCoordinationTaskRef] = useState(undefined);
   const [coordinationTask, setCoordinationTask] = useState(undefined);
   const [infoBundle, setInfoBundle] = useState(undefined);
+  const [providerInfoBundle, setProviderInfoBundle] = useState(undefined);
   const [showAttachConfirm, setShowAttachConfirm] = useState(false);
 
   // GFE builder related
@@ -332,6 +333,28 @@ export default function ContributorTaskDialog({ open, onClose, task, setTask }) 
   }
 
 
+  useEffect(() => {
+    if (task && task.input) {
+      const providerInfoInput = (task.input || []).find(
+        (input) => input.type?.coding?.[0]?.code === "gfe-information-bundle"
+      );
+      if (providerInfoInput) {
+        try {
+          const bundleData = atob(providerInfoInput.valueAttachment.data);
+          setProviderInfoBundle(JSON.parse(bundleData));
+        } catch (e) {
+          console.error("Error parsing Provider GFE Information Bundle", e);
+          setProviderInfoBundle(undefined);
+        }
+      } else {
+        setProviderInfoBundle(undefined);
+      }
+    } else {
+      setProviderInfoBundle(undefined);
+    }
+  }, [task]);
+
+
   return (
       <>
     <Dialog open={open} onClose={() => { onClose(updated) }} maxWidth="xl" fullWidth={true}
@@ -354,7 +377,8 @@ export default function ContributorTaskDialog({ open, onClose, task, setTask }) 
               <Tab label="Summary" value={"summaryTab"}></Tab>
               <Tab label="Contributor Task JSON" value={"taskJsonTab"}></Tab>
               <Tab label="Coordination Task JSON" value={"coordinationTaskTab"}></Tab>
-              <Tab label="GFE Information Bundle JSON" value={"infoBundleTab"}></Tab>
+              <Tab label="General GFE Information Bundle JSON" value={"infoBundleTab"}></Tab>
+              <Tab label="Provider GFE Information Bundle JSON" value={"providerInfoBundleTab"}></Tab>
             </Tabs>
 
 
@@ -390,12 +414,25 @@ export default function ContributorTaskDialog({ open, onClose, task, setTask }) 
                 <Grid size={12}>
 
                   <Accordion defaultExpanded>
-                    <AccordionSummary expandIcon={<ArrowDropDown />}>GFE Information Bundle Details</AccordionSummary>
+                    <AccordionSummary expandIcon={<ArrowDropDown />}>General GFE Information Bundle Details</AccordionSummary>
                     <AccordionDetails>
                       {
                         !infoBundle ? <>No valid GFE information bundle attached to the coordination task.</>
                         :
                         <GFEInformationBundleView bundle={infoBundle} />
+                      }
+                    </AccordionDetails>
+                  </Accordion>
+                </Grid>
+                {/* Provider GFE Information Bundle Section */}
+                <Grid size={12}>
+                  <Accordion defaultExpanded>
+                    <AccordionSummary expandIcon={<ArrowDropDown />}>Provider GFE Information Bundle Details</AccordionSummary>
+                    <AccordionDetails>
+                      {
+                        !providerInfoBundle ? <>No valid Provider GFE information bundle attached to the contributor task.</>
+                        :
+                        <GFEInformationBundleView bundle={providerInfoBundle} />
                       }
                     </AccordionDetails>
                   </Accordion>
@@ -441,6 +478,20 @@ export default function ContributorTaskDialog({ open, onClose, task, setTask }) 
                   defaultValue={JSON.stringify(infoBundle, null, 2)}
                   options={{ readOnly: true }}
                 />
+              }
+            </TabPanel>
+
+            <TabPanel value={currentTab} index="providerInfoBundleTab">
+              {
+                !providerInfoBundle ? <>No valid Provider GFE information bundle attached to the contributor task.</>
+                    :
+
+                    <Editor
+                        height="65vh"
+                        defaultLanguage="json"
+                        defaultValue={JSON.stringify(providerInfoBundle, null, 2)}
+                        options={{ readOnly: true }}
+                    />
               }
             </TabPanel>
           </>
