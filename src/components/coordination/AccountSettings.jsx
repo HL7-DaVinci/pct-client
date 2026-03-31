@@ -8,7 +8,7 @@ import IconButton from "@mui/material/IconButton";
 import SearchIcon from "@mui/icons-material/Search";
 import {getDisplayNameForParticipant} from "../../util/displayUtils";
 
-export default function AccountSettings() {
+export default function AccountSettings({ selectedButton }) {
 
   const { coordinationServer, coordinationServers, requester, setRequester, setRequesterDisplayName, contributor, setContributor, setContributorDisplayName, setAccountSettingsError } = useContext(AppContext);
   const [accountOptions, setAccountOptions] = useState([]);
@@ -96,6 +96,8 @@ export default function AccountSettings() {
     }
   }
 
+  // Determine label for requester dropdown
+  const requesterLabel = (selectedButton === 'gfes' || selectedButton === 'aeobs') ? 'Author' : 'Requester';
 
   return (
     <div>
@@ -109,7 +111,7 @@ export default function AccountSettings() {
           disabled={!isServerInList}
           getOptionLabel={option => option?.label}
           isOptionEqualToValue={(option, value) => option?.value === value?.value}
-          renderInput={(params) => <TextField {...params} label="Requester" InputProps={{
+          renderInput={(params) => <TextField {...params} label={requesterLabel} InputProps={{
             ...params.InputProps,
             endAdornment: (
                 <>

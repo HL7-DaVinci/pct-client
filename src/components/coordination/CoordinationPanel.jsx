@@ -150,7 +150,7 @@ export default function CoordinationPanel() {
           {showAccountSettings ? (
             <AccountSettings
               className={classes.settings}
-              // resetState={resetState}
+              selectedButton={selectedButton}
             />
           ) : (
             <span></span>
