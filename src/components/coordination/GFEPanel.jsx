@@ -88,8 +88,7 @@ export default function GFEPanel({ selectedButton }) {
       alert('Please enter Request/Encounter Date to search.');
       return;
     }
-    let params = {};
-    params = { type: 'gfe-packet' };
+    let params = { type: 'gfe-packet' };
     params['author'] = requester;
     if (requestDate) params['estimate-initiation-time'] = requestDate;
     if (encounterDate) {
@@ -99,13 +98,12 @@ export default function GFEPanel({ selectedButton }) {
 
     try {
       const response = await searchDocumentReference(dataServer, params, "ehr");
-      if (response.status === 401) {
+      if (response?.status === 401) {
         alert('Your token is expired or invalid. Please update your auth token in Settings.');
         return;
       }
-      const data = await response.json();
       // Map DocumentReference resources to table rows
-      const newRows = (data.entry || [])
+      const newRows = (response.entry || [])
           .map((entry, idx) => {
             const doc = entry.resource;
             let encounterPeriod = '';
@@ -154,6 +152,7 @@ export default function GFEPanel({ selectedButton }) {
           })
       setRows(newRows);
     } catch (error) {
+      setRows([]);
       alert('An error occurred while searching: ' + (error.message || error));
     }
   };

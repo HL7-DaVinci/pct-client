@@ -42,19 +42,49 @@ const formatDate = dateStr => dateStr ? dateStr.split('T')[0] : '';
 
 const fetchAeobPacket = async (row) => {
   const docRef = row?.fhirJson ? row.fhirJson : row;
-  const base64Binary = docRef?.content?.[0]?.attachment?.data;
-  if (!base64Binary) {
-    return { error: 'Attachment data not found in DocumentReference content.' };
+  const attachment = docRef?.content?.[0]?.attachment;
+
+  console.log('DocumentReference id:', docRef?.id);
+  console.log('DocumentReference attachment.data present:', !!attachment?.data);
+  console.log('DocumentReference attachment.url present:', !!attachment?.url);
+
+  // 1. Prefer base64-encoded inline content data
+  const base64Binary = attachment?.data;
+  if (base64Binary) {
+    try {
+      const base64BinaryDecoded = atob(base64Binary);
+      const result = JSON.parse(base64BinaryDecoded);
+      // add log
+      console.log('Successfully fetched data from attachment.data, returning JSON object.');
+      return result;
+    } catch (e) {
+      console.warn('[fetchAeobPacket] ❌ Failed to decode inline data, falling back to URL.', e);
+    }
+  } else {
+    console.log('[fetchAeobPacket] No inline data found in attachment, trying URL fallback.');
   }
-  try {
-    const base64BinaryDecoded = atob(base64Binary);
-    // Log the decoded base64BinaryDecoded
-    //console.log("Decoded json ", base64BinaryDecoded);
-    return JSON.parse(base64BinaryDecoded);
-  } catch (e) {
-    console.error('Failed to decode or parse AEOB packet.', e);
-    return { error: 'Failed to decode or parse AEOB packet.' };
+
+  // 2. Fall back to URL
+  const attachmentUrl = attachment?.url;
+  if (attachmentUrl) {
+    try {
+      const response = await fetch(attachmentUrl, {
+        headers: { Accept: 'application/fhir+json, application/json' }
+      });
+      if (!response.ok) {
+        console.error(`[fetchAeobPacket] URL fetch failed (HTTP ${response.status}).`);
+      } else {
+        const result = await response.json();
+        console.log('Successfully fetched data from attachment.url, returning JSON object.');
+        return result;
+      }
+    } catch (e) {
+      console.error('[fetchAeobPacket] ❌ Error fetching from URL.', e);
+    }
+  } else {
+    console.log('No URL found in attachment, skipping URL fetch.');
   }
+  return { error: 'Attachment data not found in DocumentReference content (no usable data or url).' };
 };
 
 export default function AEOBPanel({ selectedButton }) {
@@ -88,8 +118,7 @@ export default function AEOBPanel({ selectedButton }) {
       alert('Please enter Request/Encounter Date to search.');
       return;
     }
-    let params = {};
-    params = { type: 'aeob-packet' };
+    let params = { type: 'aeob-packet' };
     params['author'] = requester;
     if (requestDate) params['estimate-initiation-time'] = requestDate;
     if (encounterDate) {
@@ -99,13 +128,12 @@ export default function AEOBPanel({ selectedButton }) {
 
     try {
       const response = await searchDocumentReference(payerServer, params, "payer");
-      if (response.status === 401) {
+      if (response?.status === 401) {
         alert('Your token is expired or invalid. Please update your auth token in Settings.');
         return;
       }
-      const data = await response.json();
       // Map DocumentReference resources to table rows
-      const newRows = (data.entry || [])
+      const newRows = (response.entry || [])
         .map((entry, idx) => {
           const doc = entry.resource;
           let encounterPeriod = '';

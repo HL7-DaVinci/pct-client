@@ -239,15 +239,18 @@ export const searchDocumentReference = async (url, params, context) => {
         "Accept": "application/fhir+json"
     };
     const tokenValue = getAccessToken(context)
-    if (tokenValue) {
+    if(tokenValue && url.includes("healthsparq")) {
+            headers['Subject-Token'] = `${tokenValue}`;
+    } else if (tokenValue) {
         headers['Authorization'] = `Bearer ${tokenValue}`;
     }
     const query = new URLSearchParams(searchParams).toString();
     const fetchUrl = query ? `${url}/DocumentReference?${query}` : `${url}/DocumentReference`;
-    const response = await fetch(fetchUrl, {
+    let response = await fetch(fetchUrl, {
         method: "GET",
         headers: headers
     });
+    response = await response.json();
     if (!isTypeSupported && requiredType) {
         // Manual filter for type
         try {
@@ -324,7 +327,19 @@ export const getExpandedValueset = async (url, valueSetUrl, text = "") => {
  * Fetches CapabilityStatement and extracts supported search parameters for a given resource type and server.
  */
 export const getSupportedSearchParams = async (url, resourceType = "Task", context) => {
-    const capability = await FHIRClient(url, getAccessToken(context)).request("metadata");
+    const tokenValue = getAccessToken(context);
+    const headers = { "Accept": "application/fhir+json" };
+    if (tokenValue && url.includes("healthsparq")) {
+        headers['Subject-Token'] = `${tokenValue}`;
+    } else if (tokenValue) {
+        headers['Authorization'] = `Bearer ${tokenValue}`;
+    }
+
+    const response = await fetch(`${url}/metadata`, {
+        method: "GET",
+        headers
+    });
+    const capability = await response.json();
     let searchParams = [];
     const localStorageKey = `searchParams_${resourceType}_${context}`;
     if (capability.rest && Array.isArray(capability.rest)) {
