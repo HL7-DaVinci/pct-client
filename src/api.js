@@ -200,7 +200,38 @@ export const getContributorTasks = async (url, dataServer, contributor) => {
                 return codeMatch && ownerMatch;
             });
         }
-        return { ...response, entry: filteredEntries };
+        // Update tasks with "requested" status to "received" on first retrieval
+        const updatedEntries = [];
+        for (const entry of filteredEntries) {
+            const task = entry.resource;
+            if (task && task.status === "requested") {
+                try {
+                    console.log(`[ContributorTasks] Auto-updating Task/${task.id} from "requested" to "received"`);
+
+                    // Create a clean copy for update
+                    const taskToUpdate = JSON.parse(JSON.stringify(task));
+                    taskToUpdate.status = "received";
+
+                    // Remove source-related fields from meta before PUT
+                    if (taskToUpdate.meta) {
+                        const { source, versionId, lastUpdated, ...cleanMeta } = taskToUpdate.meta;
+                        taskToUpdate.meta = cleanMeta;
+                    }
+
+                    // Update the task on the server
+                    const updatedTask = await FHIRClient(url, getAccessToken("cp")).update(taskToUpdate);
+                    console.log(`[ContributorTasks] Task/${task.id} successfully updated to "received"`);
+                    updatedEntries.push({ ...entry, resource: updatedTask });
+                } catch (error) {
+                    console.error(`[ContributorTasks] Failed to update Task/${task.id} status:`, error);
+                    // Keep original task if update fails
+                    updatedEntries.push(entry);
+                }
+            } else {
+                updatedEntries.push(entry);
+            }
+        }
+                    return { ...response, entry: updatedEntries };
     } catch (error) {
         console.error('[ContributorTasks] Error:', error);
         return { entry: [], error };

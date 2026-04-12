@@ -45,21 +45,7 @@ export default function ContributorPanel() {
   }, [apiRef, rows, taskDialogOpen]);
 
 
-  const openTaskDialog = async (task) => {
-    if(task.status === "requested") {
-      // read task resource from server
-      FHIRClient(coordinationServer, getAccessToken("cp")).request(`Task/${task.id}`).then((response) => {
-        if (response.resourceType !== "Task") {
-          throw new Error("Expected a resource of type Task");
-        }
-        setCurrentTask(response);
-        setRefreshTasks((prev) => !prev);
-      }).catch((error) => {
-        console.error("Error fetching task", error);
-        alert("Error fetching task: " + error?.message);
-      });
-    }
-
+  const openTaskDialog = (task) => {
     setCurrentTask(task);
     setTaskDialogOpen(true);
   }
