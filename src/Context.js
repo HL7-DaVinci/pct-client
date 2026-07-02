@@ -29,5 +29,8 @@ export const AppContext = createContext({
   accountSettingsError: false,
   setAccountSettingsError: () => {},
 
+  loginRole: 'requester',
+  setLoginRole: () => {},
+
 });
 

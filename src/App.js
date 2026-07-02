@@ -1,10 +1,11 @@
-import React, { useMemo, useState } from "react";
+import React, {useEffect, useMemo, useState} from "react";
 
 import "./App.css";
 import { AppContext } from "./Context";
 import { Tabs, Tab, Grid } from "@mui/material";
 import MainPanel from "./components/MainPanel";
 import CoordinationPanel from "./components/coordination/CoordinationPanel";
+import {getParticipants} from "./util/taskUtils";
 
 function App() {
   const [selectedWorkflow, setSelectedWorkflow] = useState("coordinationPanel");
@@ -55,15 +56,30 @@ function App() {
   const [requesterDisplayName, setRequesterDisplayName] = useState(localStorage.getItem("pct-selected-requester-display") || "");
   const [contributorDisplayName, setContributorDisplayName] = useState(localStorage.getItem("pct-selected-contributor-display") || "");
   const [accountSettingsError, setAccountSettingsError] = useState(!requester || !contributor);
+  const [loginRole, setLoginRole] = useState('requester');
+  const [accountOptions, setAccountOptions] = useState([]);
 
-  
+  const isServerInList = coordinationServers?.some(
+      s => (s.value || s) === coordinationServer
+  );
+  // Fetched at app level so options persist across sign out and panel remounts.
+  useEffect(() => {
+    if (isServerInList) {
+      getParticipants(coordinationServer).then((options) => {
+        setAccountOptions(options || []);
+      }).catch(() => setAccountOptions([]));
+    } else {
+      setAccountOptions([]);
+    }
+  }, [coordinationServer, isServerInList]);
+
   const appContextValue = useMemo(
     () => ({ 
       coordinationServers, setCoordinationServers, coordinationServer, setCoordinationServer, 
       dataServers, setDataServers, dataServer, setDataServer, 
       payerServers, setPayerServers, payerServer, setPayerServer, 
-      requester, setRequester, requesterDisplayName, setRequesterDisplayName, contributor, setContributor, contributorDisplayName, setContributorDisplayName, accountSettingsError, setAccountSettingsError}),
-    [coordinationServers, coordinationServer, dataServers, dataServer, payerServers, payerServer, requester, requesterDisplayName, contributor, contributorDisplayName, accountSettingsError]
+      requester, setRequester, requesterDisplayName, setRequesterDisplayName, contributor, setContributor, contributorDisplayName, setContributorDisplayName, accountSettingsError, setAccountSettingsError, loginRole, setLoginRole, accountOptions, setAccountOptions}),
+    [coordinationServers, coordinationServer, dataServers, dataServer, payerServers, payerServer, requester, requesterDisplayName, contributor, contributorDisplayName, accountSettingsError, loginRole, accountOptions]
   );
 
   return (

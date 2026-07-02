@@ -11,7 +11,7 @@ import AEOBPanel from './AEOBPanel';
 import GFEPanel from './GFEPanel';
 import {getSupportedSearchParams} from "../../api";
 import {AppContext} from "../../Context";
-
+import Box from "@mui/material/Box";
 
 const useStyles = makeStyles((theme) =>
   createStyles({
@@ -35,7 +35,8 @@ export default function CoordinationPanel() {
   const [showAccountSettings, setShowAccountSettings] = useState(false);
   const [statusLogs, setStatusLogs] = useState([]);
   const [selectedButton, setSelectedButton] = useState('coordination');
-
+  const { loginRole, requester, contributor } = useContext(AppContext);
+  const isLoggedIn = loginRole === 'requester' ? !!requester : !!contributor;
   const classes = useStyles();
   const appContext = useContext(AppContext);
 
@@ -65,6 +66,14 @@ export default function CoordinationPanel() {
     fetchSupportedSearchParams();
   }, []);
 
+  useEffect(() => {
+    if (loginRole === 'requester') {
+      setCurrentTab('requesterTab');
+    } else {
+      setCurrentTab('contributorTab');
+    }
+  }, [loginRole]);
+
   // function addToLog(message, type, object) {
   const addToLog = (message, type, object) => {
     const consoleOuput = type === "error" ? console.error : console.log;
@@ -92,26 +101,33 @@ export default function CoordinationPanel() {
       content = (
         <>
           <div className="tab-navigation">
+            {loginRole === 'requester' && (
             <button
               className={`tab-button${currentTab === 'requesterTab' ? ' active' : ''}`}
               onClick={() => setCurrentTab('requesterTab')}
             >
               Coordination Tasks
             </button>
+            )}
+            {loginRole === 'contributor' && (
             <button
               className={`tab-button${currentTab === 'contributorTab' ? ' active' : ''}`}
               onClick={() => setCurrentTab('contributorTab')}
             >
               Contributor Tasks
             </button>
+            )}
           </div>
           <Grid size={12} sx={{ minHeight: 400 }}>
+            {loginRole === 'requester' ? (
             <TabPanel value={currentTab} index="requesterTab">
               <RequesterPanel addToLog={addToLog} />
             </TabPanel>
+            ) : (
             <TabPanel value={currentTab} index="contributorTab">
               <ContributorPanel addToLog={addToLog} />
             </TabPanel>
+            )}
           </Grid>
         </>
       );
@@ -140,36 +156,37 @@ export default function CoordinationPanel() {
             toggleSettings={(showSettings) => setShowSettings(showSettings)}
             showSettings={showSettings}
             toggleAccountSettings={(showAccountSettings) => setShowAccountSettings(showAccountSettings)}
+            onSignOut={() => setSelectedButton('coordination')}
             showAccountSettings={showAccountSettings}
             statusLogs={statusLogs}
             setStatusLogs={setStatusLogs}
           />
         </Grid>
-
+        {showAccountSettings && (
         <Grid size={12}>
-          {showAccountSettings ? (
             <AccountSettings
               className={classes.settings}
               selectedButton={selectedButton}
             />
-          ) : (
-            <span></span>
-          )}
         </Grid>
-        
-        <Grid size={12}>
-          {showSettings ? (
+        )}
+        {showSettings && (
+            <Grid size={12}>
             <Settings
               className={classes.settings}
               // resetState={resetState}
             />
-          ) : (
-            <span></span>
-          )}
         </Grid>
+        )}
       </Grid>
       <div className="layout-container">
-        {/* Navigation Pane (Left Side) */}
+        {!isLoggedIn ? (
+            <Box sx={{ p: 4, color: 'text.secondary', fontSize: '1rem' }}>
+              {/*Please select a {loginRole === 'requester' ? 'requester' : 'contributor'} in the account settings above to get started.*/}
+              Please select a requester/contributor in the account settings above to get started.
+            </Box>
+        ) : (
+            <>
         <div className="navigation-pane">
           <div className="nav-buttons">
             <button
@@ -178,6 +195,8 @@ export default function CoordinationPanel() {
             >
               Coordination
             </button>
+            {isLoggedIn && loginRole === 'requester' && (
+                <>
             <button
                 className={`nav-button${selectedButton === 'gfes' ? ' selected' : ''}`}
               onClick={() => setSelectedButton('gfes')}
@@ -190,14 +209,17 @@ export default function CoordinationPanel() {
             >
               My AEOBs
             </button>
+        </>
+        )}
           </div>
         </div>
         <div className="divider-line"></div>
-        <div className="content-area">
-          {content}
-        </div>
+              <div className="content-area">
+                {content}
+              </div>
+            </>
+        )}
       </div>
     </div>
   );
-
 }

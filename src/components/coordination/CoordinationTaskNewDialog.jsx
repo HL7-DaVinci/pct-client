@@ -3,7 +3,6 @@ import { AppContext } from "../../Context";
 import { Alert, Autocomplete, Button, Dialog, DialogActions, DialogContent, DialogTitle, List, ListItem, ListItemText, TextField, MenuItem, Box, InputAdornment, IconButton } from "@mui/material";
 import Grid from "@mui/material/Grid2";
 import { v4 } from "uuid";
-import { getParticipants } from "../../util/taskUtils";
 import coordinationTask from "../../resources/coordination-task.json";
 import contributorTask from "../../resources/contributor-task.json";
 import buildGFEInformationBundle from "../BuildGFEInformationBundle";
@@ -17,7 +16,7 @@ import SearchIcon from "@mui/icons-material/Search";
 
 export default function CoordinationTaskNewDialog({ open, onClose }) {
   
-  const { coordinationServer, coordinationServers, dataServer, requester } = useContext(AppContext);
+  const { coordinationServer, coordinationServers, dataServer, requester, accountOptions  } = useContext(AppContext);
 
 
   /* The participants are being fetched from coordinationServer itself, so a relative reference is used
@@ -85,7 +84,6 @@ export default function CoordinationTaskNewDialog({ open, onClose }) {
 
   const [startDate, setStartDate] = useState(undefined);
   const [endDate, setEndDate] = useState(undefined);
-  const [participants, setParticipants] = useState([]);
   const [selectedParticipants, setSelectedParticipants] = useState([]);
   const [step, setStep] = useState(0);
   const [patients, setPatients] = useState([]);
@@ -106,20 +104,11 @@ export default function CoordinationTaskNewDialog({ open, onClose }) {
     setErrorMsg(undefined);
     setNewCoordinationTask({...defaultCoordinationTask});
     if (isServerInList) {
-      setSelectedParticipants(participants.filter(p => p.value === requester));
+      setSelectedParticipants(accountOptions.filter(p => p.value === requester));
     } else {
       setSelectedParticipants(requester ? [{ value: requester, label: requester }] : []);
     }
-    }, [open, defaultCoordinationTask, requester, isServerInList, participants]);
-
-  useEffect(() => {
-    // For servers in the list, prefetch participants due to fewer resources; otherwise, allow manual fetch only by ID or Name.
-    if (isServerInList) {
-      getParticipants(coordinationServer).then((options) => {
-        setParticipants(options || []);
-      });
-    }
-  }, [coordinationServer, isServerInList]);
+    }, [open, defaultCoordinationTask, requester, isServerInList, accountOptions]);
 
   useEffect(() => {
     getPatients(dataServer).then(result => setPatients(result?.entry ?? []));
@@ -451,7 +440,7 @@ export default function CoordinationTaskNewDialog({ open, onClose }) {
             <Grid size={12}>
               <Autocomplete
                 multiple
-                options={participants}
+                options={accountOptions}
                 getOptionLabel={(option) => option.label}
                 value={selectedParticipants}
                 onChange={(e, newValue) => setSelectedParticipants(newValue)}

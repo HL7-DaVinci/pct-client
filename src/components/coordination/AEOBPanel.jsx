@@ -227,7 +227,7 @@ export default function AEOBPanel({ selectedButton }) {
           <span style={{ display: 'flex', alignItems: 'center' }}>
             <Person sx={{ verticalAlign: 'middle', mr: 1 }} style={{ fontSize: '1.15em' }} />
             <span style={{ fontWeight: 400, fontSize: '1rem', marginRight: 6 }}>Author:</span>
-            <span style={{ fontSize: '1rem' }}>{isSearchParamsSupported('author', 'DocumentReference', 'payer') ? (requesterDisplayName || "No requester selected") : "All"}</span>
+            <span style={{ fontSize: '1rem' }}>{isSearchParamsSupported('author', 'DocumentReference', 'payer') ? (requesterDisplayName || "No author selected") : "All"}</span>
           </span>
         </div>
       </Grid>
