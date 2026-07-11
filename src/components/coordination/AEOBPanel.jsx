@@ -10,7 +10,7 @@ import { AppContext } from '../../Context';
 import {Editor} from "@monaco-editor/react";
 import {Person} from "@mui/icons-material";
 import AEOBBundle from '../../components/response/AEOBBundle';
-import {getAccessToken, isSearchParamsSupported, searchDocumentReference} from '../../api';
+import {buildAuthHeaders, isSearchParamsSupported, searchDocumentReference} from '../../api';
 
 const columns = [
   { field: 'dateOfRequest', headerName: 'Date of request', flex: 1 },
@@ -43,8 +43,8 @@ const formatDate = dateStr => dateStr ? dateStr.split('T')[0] : '';
 const fetchAeobPacket = async (row, context = 'payer') => {
   const docRef = row?.fhirJson ? row.fhirJson : row;
   const attachment = docRef?.content?.[0]?.attachment;
-  const tokenValue = getAccessToken(context);
-  const headers = { Accept: 'application/fhir+json' };
+  const attachmentUrl = attachment?.url || '';
+  const headers = buildAuthHeaders(context, attachmentUrl);
 
   console.log('DocumentReference id:', docRef?.id);
   console.log('DocumentReference attachment.data present:', !!attachment?.data);
@@ -66,14 +66,7 @@ const fetchAeobPacket = async (row, context = 'payer') => {
     console.log('[fetchAeobPacket] No inline data found in attachment, trying URL fallback.');
   }
 
-  if (tokenValue && attachment?.url?.includes('healthsparq')) {
-    headers['Subject-Token'] = `${tokenValue}`;
-  } else if (tokenValue) {
-    headers['Authorization'] = `Bearer ${tokenValue}`;
-  }
-
   // 2. Fall back to URL
-  const attachmentUrl = attachment?.url;
   if (attachmentUrl) {
     try {
       const response = await fetch(attachmentUrl, {

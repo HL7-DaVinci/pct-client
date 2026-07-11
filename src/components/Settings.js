@@ -42,6 +42,7 @@ export default function Settings(props) {
 
     const handleCoordinationServerChanges = async (newValue) => {
         if (newValue === coordinationServer) return;
+        localStorage.removeItem('cp-token');
         setCoordinationServer(newValue);
         localStorage.setItem("pct-selected-coordination-server", newValue);
         // Clear requester and contributor selections when coordination server changes
@@ -59,6 +60,7 @@ export default function Settings(props) {
 
     const handleDataServerChanges = async (newValue) => {
         if (newValue === dataServer) return;
+        localStorage.removeItem('ehr-token');
         setDataServer(newValue);
         localStorage.setItem("pct-selected-data-server", newValue);
         // props.setDataServerChanged(true);
@@ -75,6 +77,7 @@ export default function Settings(props) {
 
     const handlePayerServerChanges = async (newValue) => {
         if (newValue === payerServer) return;
+        localStorage.removeItem('payer-token');
         setPayerServer(newValue);
         localStorage.setItem("pct-selected-payer-server", newValue);
         // props.setPayerServerChanged(true);

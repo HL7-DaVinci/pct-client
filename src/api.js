@@ -1,4 +1,5 @@
 import FHIR from 'fhirclient';
+import { buildSubscriptionPayload } from './util/subscriptionUtils';
 
 export const
     FHIRClient = (url, tokenValue) => {
@@ -10,6 +11,24 @@ export const
         };
     }
     return FHIR.client(config);
+};
+
+/**
+ * Build standard FHIR auth headers for a given context and URL.
+ * Handles both Bearer (standard) and Custom Subject-Token flow.
+ */
+export const buildAuthHeaders = (context, url = '', extra = {}) => {
+    const tokenValue = getAccessToken(context);
+    const headers = {
+        'Accept': 'application/fhir+json',
+        ...extra,
+    };
+    if (tokenValue && url.includes('healthsparq')) {
+        headers['Subject-Token'] = tokenValue;
+    } else if (tokenValue) {
+        headers['Authorization'] = `Bearer ${tokenValue}`;
+    }
+    return headers;
 };
 
 export const getOrganizations = (url, context = "cp") => {
@@ -53,36 +72,23 @@ export const getCoverageByPatient = (url, patientId) => {
 };
 
 export const retrieveGFEPacket = (url, taskId) => {
-    const tokenValue = getAccessToken("cp");
-    const headers = {
-        "Accept": "application/fhir+json",
-        "Accept-Encoding": "identity"
-    };
-    if (tokenValue) {
-        headers["Authorization"] = `Bearer ${tokenValue}`;
-    }
+    const headers = buildAuthHeaders("cp", url, {
+        "Accept-Encoding": "identity",
+    });
     return fetch(`${url}/Task/${taskId}/$gfe-retrieve`, {
         method: "POST",
-        headers: headers
+        headers
     });
 };
 
 export const submitGFEClaim = (url, bundle) => {
-    const headers = {
-        "Content-Type": "application/fhir+json",
-        "Accept": "application/fhir+json",
-        "Accept-Encoding": "identity"
-    };
-    if(url.includes("healthsparq")) {
-        const tokenValue = localStorage.getItem('payer-token');
-        if (tokenValue) {
-            headers['Subject-Token'] = `${tokenValue}`;
-            //headers['Content-Location'] = "";
-        }
-    }
+    const headers = buildAuthHeaders("payer", url, {
+        "Accept-Encoding": "identity",
+        "Content-Type": "application/fhir+json"
+    });
     return fetch(`${url}/Claim/$gfe-submit`, {
         method: "POST",
-        headers: headers,
+        headers,
         body: JSON.stringify(bundle)
     });
 };
@@ -206,8 +212,6 @@ export const getContributorTasks = async (url, dataServer, contributor) => {
             const task = entry.resource;
             if (task && task.status === "requested") {
                 try {
-                    console.log(`[ContributorTasks] Auto-updating Task/${task.id} from "requested" to "received"`);
-
                     // Create a clean copy for update
                     const taskToUpdate = JSON.parse(JSON.stringify(task));
                     taskToUpdate.status = "received";
@@ -220,7 +224,6 @@ export const getContributorTasks = async (url, dataServer, contributor) => {
 
                     // Update the task on the server
                     const updatedTask = await FHIRClient(url, getAccessToken("cp")).update(taskToUpdate);
-                    console.log(`[ContributorTasks] Task/${task.id} successfully updated to "received"`);
                     updatedEntries.push({ ...entry, resource: updatedTask });
                 } catch (error) {
                     console.error(`[ContributorTasks] Failed to update Task/${task.id} status:`, error);
@@ -266,15 +269,7 @@ export const searchDocumentReference = async (url, params, context) => {
     if (!isAuthorSupported) {
         delete searchParams['author'];
     }
-    const headers = {
-        "Accept": "application/fhir+json"
-    };
-    const tokenValue = getAccessToken(context)
-    if(tokenValue && url.includes("healthsparq")) {
-            headers['Subject-Token'] = `${tokenValue}`;
-    } else if (tokenValue) {
-        headers['Authorization'] = `Bearer ${tokenValue}`;
-    }
+    const headers = buildAuthHeaders(context, url);
     const query = new URLSearchParams(searchParams).toString();
     const fetchUrl = query ? `${url}/DocumentReference?${query}` : `${url}/DocumentReference`;
     let response = await fetch(fetchUrl, {
@@ -314,9 +309,7 @@ export const getAccessToken = (context) => {
         ehr: 'ehr-token',
         cp: 'cp-token'
     };
-    //console.log("Getting access token for key:", key);
     if (context && tokenKeyMap[context]) {
-        //console.log(`Retrieving token for key: ${key}, tokenKey: ${tokenKeyMap[key]}, tokenValue: ${localStorage.getItem(tokenKeyMap[key])}`);
         return localStorage.getItem(tokenKeyMap[context]);
     }
     return null;
@@ -324,9 +317,7 @@ export const getAccessToken = (context) => {
 
 export const getExpandedValueset = async (url, valueSetUrl, text = "") => {
     if (!url || !valueSetUrl || !text) return [];
-    const token = getAccessToken("ehr");
-    const headers = { "Accept": "application/fhir+json" };
-    if (token) headers["Authorization"] = `Bearer ${token}`;
+    const headers = buildAuthHeaders("ehr", url);
 
     // Helper function to fetch expansion results
     const fetchExpansion = async (expandUrl) => {
@@ -358,18 +349,8 @@ export const getExpandedValueset = async (url, valueSetUrl, text = "") => {
  * Fetches CapabilityStatement and extracts supported search parameters for a given resource type and server.
  */
 export const getSupportedSearchParams = async (url, resourceType = "Task", context) => {
-    const tokenValue = getAccessToken(context);
-    const headers = { "Accept": "application/fhir+json" };
-    if (tokenValue && url.includes("healthsparq")) {
-        headers['Subject-Token'] = `${tokenValue}`;
-    } else if (tokenValue) {
-        headers['Authorization'] = `Bearer ${tokenValue}`;
-    }
-
-    const response = await fetch(`${url}/metadata`, {
-        method: "GET",
-        headers
-    });
+    const headers = buildAuthHeaders(context, url);
+    const response = await fetch(`${url}/metadata`, { method: "GET", headers });
     const capability = await response.json();
     let searchParams = [];
     const localStorageKey = `searchParams_${resourceType}_${context}`;
@@ -380,7 +361,6 @@ export const getSupportedSearchParams = async (url, resourceType = "Task", conte
             if (resource && Array.isArray(resource.searchParam)) {
                 searchParams = resource.searchParam.map(param => param.name);
                 localStorage.setItem(localStorageKey, JSON.stringify(searchParams));
-                console.log(`${localStorageKey}:`, searchParams);
             } else {
                 console.warn(`Resource type '${resourceType}' not found in CapabilityStatement for context '${context}'.`);
                 localStorage.setItem(localStorageKey, JSON.stringify([]));
@@ -412,12 +392,10 @@ export const searchResourceByParams = async (url, type, params = [], context = "
         const queryString = params.map(([k, v]) => `${encodeURIComponent(k)}=${encodeURIComponent(v)}`).join('&');
         query += `?${queryString}`;
     }
-    console.log(`Searching for ${type} with params:`, query);
     try {
         const result = await FHIRClient(url, getAccessToken(context)).request(query);
         if (result && result.entry && result.entry.length > 0) {
             const resource = result.entry[0].resource;
-            console.log(`Found existing ${type} (id):`, resource.id);
             return resource;
         }
     } catch (e) {
@@ -439,27 +417,19 @@ export const upsertResource = async (url, resource, context = "ehr") => {
                 if (urnMatch) resource.id = urnMatch[1];
             }
             const resourceUrl = `${url}/${type}/${resource.id}`;
-            const token = getAccessToken(context);
             const response = await fetch(resourceUrl, {
                 method: "PUT",
-                headers: {
-                    "Content-Type": "application/fhir+json",
-                    "Accept": "application/fhir+json",
-                    ...(token ? { "Authorization": `Bearer ${token}` } : {})
-                },
+                headers: buildAuthHeaders(context, url, { "Content-Type": "application/fhir+json" }),
                 body: JSON.stringify(resource)
             });
             let createdResource = null;
             if (response.ok) {
                 createdResource = await response.json();
-                console.info(`[upsertResource] PUT succeeded for resourceType=${type}, id=${createdResource?.id}`);
             }
-            console.info("Response status:", response.status);
             return { resource: createdResource, created: response.status === 201, updated: response.status === 200 };
         } else {
             // No resource.id, create resource (POST) with server-generated id
             const created = await FHIRClient(url, getAccessToken(context)).create(resource);
-            console.info(`[upsertResource] POST (server-generated id) for ${type}:`, created.id);
             return { resource: created, created: true, updated: false };
         }
     } catch (e) {
@@ -470,10 +440,7 @@ export const upsertResource = async (url, resource, context = "ehr") => {
 
 export const searchCoordinationEntities = async (url, type, text = "") => {
     if (!url || !type || !text) return [];
-    const context = "cp";
-    const token = getAccessToken(context);
-    const headers = { "Accept": "application/fhir+json" };
-    if (token) headers["Authorization"] = `Bearer ${token}`;
+    const token = getAccessToken("cp");
     let results = [];
     try {
         // _id search first
@@ -491,4 +458,149 @@ export const searchCoordinationEntities = async (url, type, text = "") => {
         throw new Error(e?.message || "Error searching for entities");
     }
     return results;
+};
+
+export const createSubscription = async (url, {
+    filterCriteria,
+    notificationEndpoint,
+    channelType,
+    reason,
+    status,
+    topicUrl
+}, context) => {
+    if (!filterCriteria) {
+        console.warn("[createSubscription] Missing filterCriteria");
+        return { success: false, status: null, resource: null };
+    }
+    if (!notificationEndpoint) {
+        console.warn("[createSubscription] Missing notificationEndpoint");
+        return { success: false, status: null, resource: null };
+    }
+
+    const headers = buildAuthHeaders(context, url, { "Content-Type": "application/fhir+json" });
+
+    const subscription = buildSubscriptionPayload({
+        filterCriteria,
+        notificationEndpoint,
+        channelType,
+        reason,
+        status,
+        topicUrl
+    });
+
+    try {
+        const response = await fetch(`${url}/Subscription`, {
+            method: "POST",
+            headers,
+            body: JSON.stringify(subscription)
+        });
+
+        let resource = null;
+        try {
+            resource = await response.json();
+        } catch (parseError) {
+            console.warn("[createSubscription] Could not parse response body", parseError);
+        }
+
+        if (!response.ok) {
+            console.error("[createSubscription] Failed", {
+                status: response.status,
+                resource
+            });
+            return { success: false, status: response.status, resource };
+        }
+        return { success: true, status: response.status, resource };
+    } catch (error) {
+        console.error("[createSubscription] Error", error);
+        return { success: false, status: null, resource: null, error };
+    }
+};
+
+export const deleteSubscription = async (url, subscriptionId, context) => {
+    if (!subscriptionId) {
+        console.warn("[deleteSubscription] Missing subscriptionId");
+        return { success: false, id: null };
+    }
+    const headers = buildAuthHeaders(context, url);
+    try {
+        const response = await fetch(`${url}/Subscription/${subscriptionId}`, {
+            method: "DELETE",
+            headers
+        });
+        const success = response.ok;
+        if (!success) {
+            console.error("[deleteSubscription] Failed", { id: subscriptionId, status: response.status });
+        }
+        return { success, status: response.status, id: subscriptionId };
+    } catch (error) {
+        console.error("[deleteSubscription] Error", { id: subscriptionId, error });
+        return { success: false, id: subscriptionId, error };
+    }
+};
+
+export const getMySubscriptions = async (url, loginRole, requester, contributor, context) => {
+    try {
+        const headers = buildAuthHeaders(context, url);
+
+        const response = await fetch(`${url}/Subscription`, { method: "GET", headers });
+        const data = await response.json();
+        const subscriptions = (data.entry || []).map((entry) => entry.resource).filter(Boolean);
+        const normalize = (value) => {
+            if (!value) return "";
+            try {
+                return decodeURIComponent(String(value)).trim();
+            } catch {
+                return String(value).trim();
+            }
+        };
+
+        const getParam = (criteria, name) => {
+            if (!criteria || !criteria.includes("?")) return "";
+            const query = criteria.split("?")[1] || "";
+            const params = new URLSearchParams(query);
+            return normalize(params.get(name));
+        };
+
+        const hasQueryCriteria = (criteria) => Boolean(criteria && criteria.includes("?"));
+
+        const mySubscriptions = subscriptions.filter((sub) => {
+            const extensionCriteria = sub._criteria?.extension?.[0]?.valueString || "";
+            const fallbackCriteria = hasQueryCriteria(sub.criteria) ? sub.criteria : "";
+            const filterCriteria = extensionCriteria || fallbackCriteria;
+            const isDocumentReferenceCriteria = filterCriteria.startsWith("DocumentReference?");
+
+            const requesterParam = getParam(filterCriteria, "requester");
+            const ownerParam = getParam(filterCriteria, "owner");
+            const authorParam = getParam(filterCriteria, "author");
+            const requesterRef = normalize(requester);
+            const contributorRef = normalize(contributor);
+
+            const requesterTaskMatch = requesterRef && requesterParam === requesterRef;
+            const contributorTaskMatch = contributorRef && ownerParam === contributorRef;
+            const requesterDocRefMatch = isDocumentReferenceCriteria && requesterRef && (
+                authorParam === requesterRef
+            );
+
+            const contributorDocRefMatch = isDocumentReferenceCriteria && contributorRef && (
+                authorParam === contributorRef
+            );
+
+            if (loginRole === 'requester') {
+                return (
+                    requesterTaskMatch || requesterDocRefMatch
+                );
+            }
+            if (loginRole === 'contributor') {
+                return (
+                    contributorTaskMatch || contributorDocRefMatch
+                );
+            }
+            return false;
+        });
+
+        return mySubscriptions;
+    } catch (error) {
+        console.error("[getMySubscriptions] Error:", error);
+        return [];
+    }
 };

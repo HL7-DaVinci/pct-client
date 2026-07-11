@@ -8,7 +8,7 @@ import contributorTask from "../../resources/contributor-task.json";
 import buildGFEInformationBundle from "../BuildGFEInformationBundle";
 import { DateTimePicker, LocalizationProvider } from "@mui/x-date-pickers";
 import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs';
-import { getAccessToken, getPatients, getCoverageByPatient } from "../../api";
+import { buildAuthHeaders, getPatients, getCoverageByPatient } from "../../api";
 import RequestItem from "../RequestItem";
 import ParticipantSearchDialog from "../shared/ParticipantSearchDialog";
 import { getDisplayNameForParticipant } from '../../util/displayUtils';
@@ -314,13 +314,7 @@ export default function CoordinationTaskNewDialog({ open, onClose }) {
     setErrorMsg(undefined);
 
     try {
-      const cpToken = getAccessToken("cp");
-      const headers = {
-        "Content-Type": "application/fhir+json"
-      };
-      if (cpToken) {
-        headers["Authorization"] = `Bearer ${cpToken}`;
-      }
+      const headers = buildAuthHeaders("cp", coordinationServer, { "Content-Type": "application/fhir+json" });
 
       // Try new $gfe-coordination-request operation endpoint first
       let response = await fetch(`${coordinationServer}/$gfe-coordination-request`, {

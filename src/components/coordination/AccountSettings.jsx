@@ -1,4 +1,4 @@
-import React, { useContext, useEffect, useState } from 'react';
+import React, { useContext, useState } from 'react';
 import { Autocomplete, TextField, InputAdornment, RadioGroup, FormControlLabel, Radio, Box, Typography } from '@mui/material';
 import Grid from '@mui/material/Grid2';
 import { AppContext } from '../../Context';
@@ -9,19 +9,12 @@ import {getDisplayNameForParticipant} from "../../util/displayUtils";
 
 export default function AccountSettings({ selectedButton }) {
 
-  const { coordinationServer, coordinationServers, requester, setRequester, requesterDisplayName, setRequesterDisplayName, contributor, setContributor, contributorDisplayName, setContributorDisplayName, setAccountSettingsError, loginRole, setLoginRole, accountOptions, setAccountOptions,  } = useContext(AppContext);
+  const { coordinationServer, coordinationServers, requester, setRequester, requesterDisplayName, setRequesterDisplayName, contributor, setContributor, contributorDisplayName, setContributorDisplayName, loginRole, setLoginRole, accountOptions, setAccountOptions,  } = useContext(AppContext);
   const [searchDialogOpen, setSearchDialogOpen] = useState(false);
   const [searchTarget, setSearchTarget] = useState(null);
   const appContext = useContext(AppContext);
   const isServerInList = coordinationServers && coordinationServers.some(s => (s.value || s) === coordinationServer);
 
-  useEffect(() => {
-    if(loginRole === 'requester') {
-      setAccountSettingsError(!requester);
-    } else {
-      setAccountSettingsError(!contributor);
-    }
-  },[requester, contributor, loginRole, setAccountSettingsError]);
 
   const handleOpenSearchDialog = () => {
     setSearchTarget(loginRole);

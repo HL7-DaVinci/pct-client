@@ -55,9 +55,13 @@ function App() {
   const [contributor, setContributor] = useState(localStorage.getItem("pct-selected-contributor") || "");
   const [requesterDisplayName, setRequesterDisplayName] = useState(localStorage.getItem("pct-selected-requester-display") || "");
   const [contributorDisplayName, setContributorDisplayName] = useState(localStorage.getItem("pct-selected-contributor-display") || "");
-  const [accountSettingsError, setAccountSettingsError] = useState(!requester || !contributor);
   const [loginRole, setLoginRole] = useState('requester');
+  const [accountSettingsError, setAccountSettingsError] = useState(!requester);
   const [accountOptions, setAccountOptions] = useState([]);
+
+  useEffect(() => {
+    setAccountSettingsError(loginRole === 'requester' ? !requester : !contributor);
+  }, [loginRole, requester, contributor]);
 
   const isServerInList = coordinationServers?.some(
       s => (s.value || s) === coordinationServer
