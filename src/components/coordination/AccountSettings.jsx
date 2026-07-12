@@ -15,7 +15,7 @@ export default function AccountSettings({ selectedButton }) {
   const appContext = useContext(AppContext);
   const isServerInList = coordinationServers && coordinationServers.some(s => (s.value || s) === coordinationServer);
 
-
+ // Trigger build
   const handleOpenSearchDialog = () => {
     setSearchTarget(loginRole);
     setSearchDialogOpen(true);
