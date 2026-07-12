@@ -1,7 +1,6 @@
 export const NOTIFICATION_HOOK_PATH = '/notification/subscription-hook';
 export const LOCAL_PCT_NOTIFICATION_BASE_URL = 'http://localhost:8080';
 export const PCT_NOTIFICATION_BASE_URL = 'https://pct-coordination-platform.davinci.hl7.org';
-export const TASK_NOTIFICATIONS_URL = `${LOCAL_PCT_NOTIFICATION_BASE_URL}${NOTIFICATION_HOOK_PATH}`;
 export const KNOWN_NOTIFICATION_ENDPOINTS = [
     `${LOCAL_PCT_NOTIFICATION_BASE_URL}${NOTIFICATION_HOOK_PATH}`,
     `${PCT_NOTIFICATION_BASE_URL}${NOTIFICATION_HOOK_PATH}`,

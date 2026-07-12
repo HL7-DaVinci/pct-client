@@ -28,6 +28,7 @@ export default function CoordinationMenuBar(props) {
   const POLLING_STORAGE_KEY = 'pct-notification-polling-ms';
   const POLLING_CUSTOMIZED_KEY = 'pct-notification-polling-customized';
   const NOTIFICATION_FEED_URL_KEY = 'pct-notification-feed-url';
+  const LAST_SEEN_KEY_PREFIX = 'pct-last-seen';
 
   const normalizePollingMs = (value) => {
     if (value === null || value === undefined || value === '') return DEFAULT_POLLING_MS;
@@ -41,11 +42,14 @@ export default function CoordinationMenuBar(props) {
     const currentUser = loginRole === 'requester' ? requesterDisplayName : contributorDisplayName;
     const activeActor = loginRole === 'requester' ? requester : contributor;
     const actorKey = `${loginRole || ''}|${activeActor || ''}`;
+    const lastSeenStorageKey = `${LAST_SEEN_KEY_PREFIX}-${actorKey}`; // added to make last-seen notification state user-specific and survive refresh.
     const chipLabel = currentUser ? `${roleLabel}: ${currentUser}` : roleLabel;
     const [unreadCount, setUnreadCount] = useState(0);
-    const [lastSeen, setLastSeen] = useState(null);
+    const [lastSeen, setLastSeen] = useState(() => localStorage.getItem(lastSeenStorageKey) || null);
+    const [openCutoff, setOpenCutoff] = useState(null);
     const unreadCountByActorRef = useRef({});
     const lastSeenByActorRef = useRef({});
+    const openCutoffByActorRef = useRef({});
     const activeActorKeyRef = useRef(actorKey);
     const [subscriptionDialogOpen, setSubscriptionDialogOpen] = useState(false);
     const [notificationPollingMs, setNotificationPollingMs] = useState(() => {
@@ -86,8 +90,14 @@ export default function CoordinationMenuBar(props) {
     useEffect(() => {
         activeActorKeyRef.current = actorKey;
         setUnreadCount(unreadCountByActorRef.current[actorKey] || 0);
-        setLastSeen(lastSeenByActorRef.current[actorKey] || null);
-    }, [actorKey]);
+        const storedLastSeen = localStorage.getItem(lastSeenStorageKey);
+        const actorLastSeen = lastSeenByActorRef.current[actorKey] || storedLastSeen || null;
+        if (storedLastSeen && !lastSeenByActorRef.current[actorKey]) {
+            lastSeenByActorRef.current[actorKey] = storedLastSeen;
+        }
+        setLastSeen(actorLastSeen);
+        setOpenCutoff(openCutoffByActorRef.current[actorKey] || null);
+    }, [actorKey, lastSeenStorageKey]);
 
     // Background fetch to compute unread badge count
     const computeUnread = useCallback(async () => {
@@ -112,13 +122,16 @@ export default function CoordinationMenuBar(props) {
             const res = await fetch(notificationFeedUrl);
             const data = await res.json();
             const allNotifs = data.notifications || [];
+            const effectiveCutoff = subscriptionDialogOpen
+                ? (openCutoffByActorRef.current[requestActorKey] || openCutoff)
+                : lastSeen;
             const count = allNotifs.filter(n => {
                 const parsed = parseNotification(n);
                 if (!parsed) return false;
                 const isMatch = allSubs.some(sub => parsed.subscriptionRef === `Subscription/${sub.id}`);
                 if (!isMatch) return false;
                 // If notification timestamp is older than last time user opened the bell. Already seen — skip
-                if (lastSeen && new Date(n.timestamp) <= new Date(lastSeen)) return false;
+                if (effectiveCutoff && new Date(n.timestamp) <= new Date(effectiveCutoff)) return false;
                 return true;
             }).length;
             unreadCountByActorRef.current[requestActorKey] = count;
@@ -127,7 +140,7 @@ export default function CoordinationMenuBar(props) {
             unreadCountByActorRef.current[requestActorKey] = 0;
             if (activeActorKeyRef.current === requestActorKey) setUnreadCount(0);
         }
-    }, [loginRole, requester, contributor, actorKey, coordinationServer, payerServer, lastSeen, notificationFeedUrl]);
+    }, [loginRole, requester, contributor, actorKey, coordinationServer, payerServer, lastSeen, notificationFeedUrl, subscriptionDialogOpen, openCutoff]);
 
     useEffect(() => {
         computeUnread();
@@ -136,6 +149,9 @@ export default function CoordinationMenuBar(props) {
     }, [computeUnread, notificationPollingMs]);
 
     const handleBellClick = () => {
+        const openedAt = new Date().toISOString();
+        openCutoffByActorRef.current[actorKey] = openedAt;
+        setOpenCutoff(openedAt);
         setSubscriptionDialogOpen(true);
         // clear badge - user is viewing notifications. new arrivals while open will re-increment
         unreadCountByActorRef.current[actorKey] = 0;
@@ -152,6 +168,9 @@ export default function CoordinationMenuBar(props) {
         const cutoff = seenCutoff || new Date().toISOString();
         lastSeenByActorRef.current[actorKey] = cutoff;
         setLastSeen(cutoff);
+        localStorage.setItem(lastSeenStorageKey, cutoff);
+        delete openCutoffByActorRef.current[actorKey];
+        setOpenCutoff(null);
     };
 
     const [accountMenuAnchor, setAccountMenuAnchor] = useState(null);

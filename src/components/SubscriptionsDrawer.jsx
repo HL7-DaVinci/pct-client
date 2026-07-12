@@ -12,7 +12,6 @@ import {
     getTaskTopicOptions,
     findDuplicateSubscription,
     getNotificationFeedUrlForServer,
-    TASK_NOTIFICATIONS_URL,
     KNOWN_NOTIFICATION_ENDPOINTS,
 } from '../util/subscriptionUtils';
 
@@ -411,7 +410,7 @@ function NewTaskSubscriptionForm({ loginRole, requester, contributor, coordinati
 function NewAeobSubscriptionForm({ requester, payerServer, onSave, onCancel, existingSubscriptions = [] }) {
     const [selectedTopic, setSelectedTopic] = useState(AEOB_TOPIC_OPTIONS[0].label);
     const [criteria, setCriteria]           = useState(AEOB_TOPIC_OPTIONS[0].getCriteria(requester));
-    const [endpoint, setEndpoint]           = useState(TASK_NOTIFICATIONS_URL);
+    const [endpoint, setEndpoint]           = useState(() => getNotificationFeedUrlForServer(payerServer));
     const [useCustomEndpoint, setUseCustomEndpoint] = useState(false);
     const [reason, setReason]   = useState('');
     const [saving, setSaving]   = useState(false);
@@ -441,6 +440,10 @@ function NewAeobSubscriptionForm({ requester, payerServer, onSave, onCancel, exi
         if (result.success) await onSave(result.resource);
         else setError(`Failed to create subscription (${result.status || 'unknown error'})`);
     };
+
+    useEffect(() => {
+        if (!useCustomEndpoint) setEndpoint(getNotificationFeedUrlForServer(payerServer));
+    }, [payerServer, useCustomEndpoint]);
 
     return (
         <Box sx={{ border: '1px solid', borderColor: 'primary.light', borderRadius: 1, p: 1.5, mb: 2 }}>
@@ -921,7 +924,7 @@ export default function SubscriptionsDrawer({
     onUnreadCount,
     notificationPollingMs = DEFAULT_POLLING_MS,
     onNotificationPollingChange,
-    notificationFeedUrl = TASK_NOTIFICATIONS_URL,
+    notificationFeedUrl = '',
     onNotificationFeedUrlChange,
 }) {
     const { loginRole, requester, contributor, coordinationServer, payerServer } = useContext(AppContext);
