@@ -44,15 +44,44 @@ export default function CoordinationTaskDetailsDialog({ open, onClose, task, set
     }
 
     const infoBundleInput = (task.input || []).find((input) => input.type?.coding[0].code === "gfe-information-bundle");
-    if (infoBundleInput) {
+    // valueAttachment: data + contentType are both mandatory per profile
+    const loadFromAttachment = (attachment) => {
       try {
-        const bundleData = atob(infoBundleInput.valueAttachment.data);
-        setInfoBundle(JSON.parse(bundleData));
-      }
-      catch (e) {
-        console.error("Error parsing GFE Information Bundle", e);
+        const decoded = atob(attachment.data);
+        setInfoBundle(JSON.parse(decoded));
+      } catch (e) {
+        console.error("Error parsing GFE Information Bundle attachment", e);
         setInfoBundle(undefined);
       }
+    };
+
+    // valueReference: reference is mandatory, may be relative/absolute/internal (urn:uuid:)
+    const loadFromReference = (reference) => {
+      const ref = reference.reference;
+
+      if (ref.startsWith("urn:uuid:") || ref.startsWith("#")) {
+        console.warn("GFE Information Bundle valueReference is bundle-internal; cannot resolve from Task alone:", ref);
+        setInfoBundle(undefined);
+        return;
+      }
+
+      FHIRClient(coordinationServer, getAccessToken("cp"))
+          .read(ref)
+          .then((resource) => {
+            setInfoBundle(resource);
+          })
+          .catch((e) => {
+            console.error("Error resolving GFE Information Bundle valueReference", e);
+            setInfoBundle(undefined);
+          });
+    };
+
+    if (infoBundleInput?.valueAttachment) {
+      loadFromAttachment(infoBundleInput.valueAttachment);
+    } else if (infoBundleInput?.valueReference) {
+      loadFromReference(infoBundleInput.valueReference);
+    } else {
+      setInfoBundle(undefined);
     }
 
     getContributorTasksByPartOf(coordinationServer, task.id).then(setContributorTasks);
