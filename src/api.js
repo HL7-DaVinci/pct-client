@@ -538,13 +538,16 @@ export const deleteSubscription = async (url, subscriptionId, context) => {
     }
 };
 
+export const getAllSubscriptions = async (url, context) => {
+    const headers = buildAuthHeaders(context, url);
+    const response = await fetch(`${url}/Subscription?_count=50`, { method: "GET", headers });
+    const bundle = await response.json();
+    return (bundle?.entry || []).map((entry) => entry.resource).filter(Boolean);
+};
+
 export const getMySubscriptions = async (url, loginRole, requester, contributor, context) => {
     try {
-        const headers = buildAuthHeaders(context, url);
-
-        const response = await fetch(`${url}/Subscription`, { method: "GET", headers });
-        const data = await response.json();
-        const subscriptions = (data.entry || []).map((entry) => entry.resource).filter(Boolean);
+        const subscriptions = await getAllSubscriptions(url, context);
         const normalize = (value) => {
             if (!value) return "";
             try {
