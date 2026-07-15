@@ -278,7 +278,7 @@ export const searchDocumentReference = async (url, params, context) => {
     });
     response = await response.json();
     if (!isTypeSupported && requiredType) {
-        // Manual filter for type
+        // Manual filter for types
         try {
             if (response.entry && Array.isArray(response.entry)) {
                 const filteredEntries = response.entry.filter(entry => {
