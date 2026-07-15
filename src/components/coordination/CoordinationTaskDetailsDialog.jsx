@@ -66,7 +66,7 @@ export default function CoordinationTaskDetailsDialog({ open, onClose, task, set
       }
 
       FHIRClient(coordinationServer, getAccessToken("cp"))
-          .read(ref)
+          .request(ref)
           .then((resource) => {
             setInfoBundle(resource);
           })
