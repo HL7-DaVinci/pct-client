@@ -89,7 +89,7 @@ const fetchAeobPacket = async (row, context = 'payer') => {
 };
 
 export default function AEOBPanel({ selectedButton }) {
-  const [rows, setRows] = useState(undefined);
+  const [rows, setRows] = useState([]);
   const [requestDate, setRequestDate] = useState('');
   const [encounterDate, setEncounterDate] = useState('');
   const { payerServer, requester, requesterDisplayName } = useContext(AppContext);

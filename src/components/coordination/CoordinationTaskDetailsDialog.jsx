@@ -12,7 +12,7 @@ import AEOBResponsePanel from "../AEOBResponsePanel";
 import { Editor } from "@monaco-editor/react";
 import GFEInformationBundleView from "../shared/GFEInformationBundleView";
 import buildGFEPacketDocumentReference from "../BuildGFEPacketDocumentReference";
-
+import { loadInformationBundle } from "../../util/gfeInformationBundleUtil";
 
 export default function CoordinationTaskDetailsDialog({ open, onClose, task, setTask, addToLog }) {
 
@@ -43,46 +43,7 @@ export default function CoordinationTaskDetailsDialog({ open, onClose, task, set
       return;
     }
 
-    const infoBundleInput = (task.input || []).find((input) => input.type?.coding[0].code === "gfe-information-bundle");
-    // valueAttachment: data + contentType are both mandatory per profile
-    const loadFromAttachment = (attachment) => {
-      try {
-        const decoded = atob(attachment.data);
-        setInfoBundle(JSON.parse(decoded));
-      } catch (e) {
-        console.error("Error parsing GFE Information Bundle attachment", e);
-        setInfoBundle(undefined);
-      }
-    };
-
-    // valueReference: reference is mandatory, may be relative/absolute/internal (urn:uuid:)
-    const loadFromReference = (reference) => {
-      const ref = reference.reference;
-
-      if (ref.startsWith("urn:uuid:") || ref.startsWith("#")) {
-        console.warn("GFE Information Bundle valueReference is bundle-internal; cannot resolve from Task alone:", ref);
-        setInfoBundle(undefined);
-        return;
-      }
-
-      FHIRClient(coordinationServer, getAccessToken("cp"))
-          .request(ref)
-          .then((resource) => {
-            setInfoBundle(resource);
-          })
-          .catch((e) => {
-            console.error("Error resolving GFE Information Bundle valueReference", e);
-            setInfoBundle(undefined);
-          });
-    };
-
-    if (infoBundleInput?.valueAttachment) {
-      loadFromAttachment(infoBundleInput.valueAttachment);
-    } else if (infoBundleInput?.valueReference) {
-      loadFromReference(infoBundleInput.valueReference);
-    } else {
-      setInfoBundle(undefined);
-    }
+    loadInformationBundle(task, coordinationServer, setInfoBundle);
 
     getContributorTasksByPartOf(coordinationServer, task.id).then(setContributorTasks);
 

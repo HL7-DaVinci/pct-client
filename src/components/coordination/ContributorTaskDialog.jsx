@@ -13,7 +13,7 @@ import { Editor } from '@monaco-editor/react';
 import { FHIRClient, getAccessToken, upsertResource, searchResourceByParams } from '../../api';
 import GFEInformationBundleView from '../shared/GFEInformationBundleView';
 import DialogContentText from '@mui/material/DialogContentText';
-
+import { loadInformationBundle } from '../../util/gfeInformationBundleUtil';
 
 
 
@@ -39,17 +39,7 @@ export default function ContributorTaskDialog({ open, onClose, task, setTask }) 
     if (coordinationTaskRef) {
       FHIRClient(coordinationServer, getAccessToken("cp")).request(coordinationTaskRef).then((coordinationTask) => {
         setCoordinationTask(coordinationTask);
-        const infoBundleInput = (coordinationTask.input || []).find((input) => input.type?.coding[0].code === "gfe-information-bundle");
-        if (infoBundleInput) {
-          try {
-            const bundleData = atob(infoBundleInput.valueAttachment.data);
-            setInfoBundle(JSON.parse(bundleData));
-          }
-          catch (e) {
-            console.error("Error parsing GFE Information Bundle", e);
-            setInfoBundle(undefined);
-          }
-        }
+        loadInformationBundle(coordinationTask, coordinationServer, setInfoBundle);
       }).catch((error) => {
         console.error("Error loading coordination task", error);
         setCoordinationTaskRef(undefined);
@@ -335,24 +325,11 @@ export default function ContributorTaskDialog({ open, onClose, task, setTask }) 
 
   useEffect(() => {
     if (task && task.input) {
-      const providerInfoInput = (task.input || []).find(
-        (input) => input.type?.coding?.[0]?.code === "gfe-information-bundle"
-      );
-      if (providerInfoInput) {
-        try {
-          const bundleData = atob(providerInfoInput.valueAttachment.data);
-          setProviderInfoBundle(JSON.parse(bundleData));
-        } catch (e) {
-          console.error("Error parsing Provider GFE Information Bundle", e);
-          setProviderInfoBundle(undefined);
-        }
-      } else {
-        setProviderInfoBundle(undefined);
-      }
+      loadInformationBundle(task, coordinationServer, setProviderInfoBundle);
     } else {
       setProviderInfoBundle(undefined);
     }
-  }, [task]);
+  }, [task, coordinationServer]);
 
 
   return (

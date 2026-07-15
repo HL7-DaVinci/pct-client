@@ -45,6 +45,10 @@ export const buildSubscriptionPayload = ({
         throw new Error(`[buildSubscriptionPayload] No profile mapping found for topicUrl: ${topicUrl}`);
     }
 
+    const resolvedReason = typeof reason === "string" && reason.trim()
+        ? reason.trim()
+        : "Test PCT Subscriptions";
+
     return {
         resourceType: "Subscription",
         meta: {
@@ -54,7 +58,7 @@ export const buildSubscriptionPayload = ({
             ]
         },
         status,
-        reason,
+        reason: resolvedReason,
         criteria: topicUrl,
         _criteria: {
             extension: [
@@ -88,6 +92,10 @@ export const parseNotification = (notification) => {
     const docRefEntry = bundle.entry?.find(e => e.resource?.resourceType === 'DocumentReference');
     const params = parametersEntry?.resource?.parameter || [];
     const getParam = (name) => params.find(p => p.name === name);
+    const getParamValue = (name) => {
+        const p = getParam(name);
+        return p?.valueCode ?? p?.valueString ?? undefined;
+    };
     const subRef = getParam('subscription')?.valueReference?.reference;
     const notifEvent = getParam('notification-event');
     const focusRef = notifEvent?.part?.find(p => p.name === 'focus')?.valueReference?.reference;
@@ -96,8 +104,8 @@ export const parseNotification = (notification) => {
     return {
         timestamp: notification.timestamp,
         subscriptionRef: subRef,
-        status: getParam('status')?.valueCode,
-        type: getParam('type')?.valueCode,
+        status: getParamValue('status'),
+        type: getParamValue('type'),
         focusRef,
         taskId: task?.id,
         taskStatus: task?.status,

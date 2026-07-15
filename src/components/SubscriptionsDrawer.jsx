@@ -4,7 +4,7 @@ import { Dialog, DialogTitle, DialogContent, DialogActions, DialogContentText, B
 } from '@mui/material';
 import { Close, Delete, DeleteSweep, Add, ExpandMore, ExpandLess, Refresh, NotificationsNone, Segment, ViewListTwoTone } from '@mui/icons-material';
 import { AppContext } from '../Context';
-import { getMySubscriptions, createSubscription, deleteSubscription, buildAuthHeaders } from '../api';
+import { getMySubscriptions, getAllSubscriptions, createSubscription, deleteSubscription, buildAuthHeaders } from '../api';
 import {
     parseNotification,
     isMyNotification,
@@ -511,6 +511,7 @@ function NotificationCard({ notification, isNew = false, showSubRef = true, allS
             : 'Task';
     const typeColor = notificationType === 'AEOB' ? 'secondary' : notificationType === 'GFE' ? 'info' : 'primary';
     const focusLabel = notificationType === 'Task' ? parsed.taskId : parsed.docRefId;
+    const backportType = parsed.type || '—';
     return (
         <Box sx={{
             border: '1px solid',
@@ -552,6 +553,10 @@ function NotificationCard({ notification, isNew = false, showSubRef = true, allS
                 </Box>
             </Box>
             <Box sx={{ mt: 0.75, display: 'flex', flexWrap: 'wrap', gap: 2 }}>
+                <Box>
+                    <Typography variant="caption" color="text.secondary">Notification type</Typography>
+                    <Typography variant="body2" sx={{ fontSize: '0.75rem' }}>{backportType}</Typography>
+                </Box>
                 {parsed.taskRequester && (
                     <Box>
                         <Typography variant="caption" color="text.secondary">Requester</Typography>
@@ -1009,25 +1014,22 @@ export default function SubscriptionsDrawer({
 
     // Data loaders
     const handleAdminFetchTask = async (endpoint, criteria) => {
-        const res  = await fetch(`${coordinationServer}/Subscription`, { headers: buildAuthHeaders('cp', coordinationServer) });
-        const data = await res.json();
-        return (data.entry || []).map(e => e.resource).filter(Boolean)
+        const subscriptions = await getAllSubscriptions(coordinationServer, 'cp');
+        return subscriptions
             .filter(s => (!endpoint || s.channel?.endpoint === endpoint) && (!criteria || s.criteria === criteria));
     };
 
     const handleAdminFetchAeob = async (endpoint, criteria) => {
-        const res  = await fetch(`${payerServer}/Subscription`, { headers: buildAuthHeaders('payer', payerServer) });
-        const data = await res.json();
-        return (data.entry || []).map(e => e.resource).filter(Boolean)
+        const subscriptions = await getAllSubscriptions(payerServer, 'payer');
+        return subscriptions
             .filter(s => (!endpoint || s.channel?.endpoint === endpoint) && (!criteria || s.criteria === criteria));
     };
 
     const loadAllTaskSubscriptions = async () => {
         setAllTaskSubsLoading(true);
         try {
-            const res  = await fetch(`${coordinationServer}/Subscription`, { headers: buildAuthHeaders('cp', coordinationServer) });
-            const data = await res.json();
-            setAllTaskSubs([...(data.entry || []).map(e => e.resource).filter(Boolean)]);
+            const subscriptions = await getAllSubscriptions(coordinationServer, 'cp');
+            setAllTaskSubs([...subscriptions]);
             setTaskLastRefreshed(new Date().toISOString());
         } catch { setAllTaskSubs([]); }
         finally { setAllTaskSubsLoading(false); }
@@ -1036,9 +1038,8 @@ export default function SubscriptionsDrawer({
     const loadAllAeobSubscriptions = async () => {
         setAllAeobSubsLoading(true);
         try {
-            const res  = await fetch(`${payerServer}/Subscription`, { headers: buildAuthHeaders('payer', payerServer) });
-            const data = await res.json();
-            setAllAeobSubs([...(data.entry || []).map(e => e.resource).filter(Boolean)]);
+            const subscriptions = await getAllSubscriptions(payerServer, 'payer');
+            setAllAeobSubs([...subscriptions]);
             setAeobLastRefreshed(new Date().toISOString());
             setAllAeobLoaded(true);
         } catch { setAllAeobSubs([]); }
