@@ -11,6 +11,7 @@ import { getPlannedServicePeriod, getRequestInitiationTime } from '../../util/ta
 import { displayInstant, displayPeriod } from '../../util/displayUtils';
 import { Box } from '@mui/material';
 
+const PCT_REQUEST_TYPE_CS = "http://hl7.org/fhir/us/davinci-pct/CodeSystem/PCTGFERequestTypeCSTemporaryTrialUse";
 
 
 export default function RequesterPanel({addToLog}) {
@@ -131,7 +132,7 @@ export default function RequesterPanel({addToLog}) {
     {
       field: 'reason',
       headerName: 'Reason',
-      valueGetter: (value, row) => row.reasonCode?.coding?.find(c => c.system === "http://hl7.org/fhir/us/davinci-pct/CodeSystem/PCTGFERequestTaskCSTemporaryTrialUse")?.code
+      valueGetter: (value, row) => row.reasonCode?.coding?.find(c => c.system === PCT_REQUEST_TYPE_CS)?.code
     },
     {
       field: 'initiation',

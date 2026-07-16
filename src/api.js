@@ -155,7 +155,7 @@ export const getCoordinationTasks = async (url, dataServer, requester) => {
                 if (!isCodeSupported) {
                     const codingArr = entry.resource?.code?.coding;
                     codeMatch = Array.isArray(codingArr) && codingArr.some(coding =>
-                        coding.system === "http://hl7.org/fhir/us/davinci-pct/CodeSystem/PCTGFERequestTaskCSTemporaryTrialUse" &&
+                        coding.system === "http://hl7.org/fhir/us/davinci-pct/CodeSystem/PCTGFERequestTypeCSTemporaryTrialUse" &&
                         coding.code === "gfe-coordination-task"
                     );
                 }
@@ -195,7 +195,7 @@ export const getContributorTasks = async (url, dataServer, contributor) => {
                 if (!isCodeSupported) {
                     const codingArr = entry.resource?.code?.coding;
                     codeMatch = Array.isArray(codingArr) && codingArr.some(coding =>
-                        coding.system === "http://hl7.org/fhir/us/davinci-pct/CodeSystem/PCTGFERequestTaskCSTemporaryTrialUse" &&
+                        coding.system === "http://hl7.org/fhir/us/davinci-pct/CodeSystem/PCTGFERequestTypeCSTemporaryTrialUse" &&
                         coding.code === "gfe-contributor-task"
                     );
                 }

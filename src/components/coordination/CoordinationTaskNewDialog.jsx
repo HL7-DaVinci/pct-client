@@ -62,7 +62,7 @@ export default function CoordinationTaskNewDialog({ open, onClose }) {
         "type": {
           "coding": [
             {
-              "system": "http://hl7.org/fhir/us/davinci-pct/CodeSystem/PCTTaskInputTypeCS",
+              "system": "http://hl7.org/fhir/us/davinci-pct/CodeSystem/PCTDocumentTypeTemporaryTrialUse",
               "code": "gfe-information-bundle"
             }
           ],
@@ -209,7 +209,9 @@ export default function CoordinationTaskNewDialog({ open, onClose }) {
     };
 
 
-    newCoordinationTask.id = `urn:uuid:${v4()}`;
+    const coordinationTaskId = v4();
+    const coordinationTaskFullUrl = `urn:uuid:${coordinationTaskId}`;
+    newCoordinationTask.id = coordinationTaskId;
 
     if (!newCoordinationTask.extension) {
       newCoordinationTask.extension = [];
@@ -267,6 +269,7 @@ export default function CoordinationTaskNewDialog({ open, onClose }) {
 
     // add coordination task first
     bundle.entry.push({
+      fullUrl: coordinationTaskFullUrl,
       resource: newCoordinationTask,
       request: {
         method: "POST",
@@ -280,7 +283,7 @@ export default function CoordinationTaskNewDialog({ open, onClose }) {
 
       const newContributorTask = {
         ...defaultContributorTask,
-        partOf: [ { reference: newCoordinationTask.id } ],
+        partOf: [ { reference: coordinationTaskFullUrl } ],
         owner: { reference: participant?.value },
       }
 

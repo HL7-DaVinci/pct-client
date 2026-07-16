@@ -10,7 +10,7 @@
   "code": {
     "coding": [
       {
-        "system": "http://hl7.org/fhir/us/davinci-pct/CodeSystem/PCTGFERequestTaskCSTemporaryTrialUse",
+        "system": "http://hl7.org/fhir/us/davinci-pct/CodeSystem/PCTGFERequestTypeCSTemporaryTrialUse",
         "code": "gfe-coordination-task"
       }
     ],
@@ -19,7 +19,7 @@
   "reasonCode": {
     "coding": [
       {
-        "system": "http://hl7.org/fhir/us/davinci-pct/CodeSystem/PCTGFERequestTaskCSTemporaryTrialUse",
+        "system": "http://hl7.org/fhir/us/davinci-pct/CodeSystem/PCTGFERequestTypeCSTemporaryTrialUse",
         "code": "scheduled-request"
       }
     ]

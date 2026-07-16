@@ -8,6 +8,9 @@ import ContributorTaskDialog from './ContributorTaskDialog';
 import { displayInstant, displayPeriod } from '../../util/displayUtils';
 import { getPlannedServicePeriod, getRequestInitiationTime } from '../../util/taskUtils';
 import { Box } from '@mui/material';
+
+const PCT_REQUEST_TYPE_CS = "http://hl7.org/fhir/us/davinci-pct/CodeSystem/PCTGFERequestTypeCSTemporaryTrialUse";
+
 export default function ContributorPanel() {
 
   const apiRef = useGridApiRef();
@@ -103,7 +106,7 @@ export default function ContributorPanel() {
     { 
       field: 'reason',
       headerName: 'Reason',
-      valueGetter: (value, row) => row.reasonCode?.coding?.find(c => c.system === "http://hl7.org/fhir/us/davinci-pct/CodeSystem/PCTGFERequestTaskCSTemporaryTrialUse")?.code 
+      valueGetter: (value, row) => row.reasonCode?.coding?.find(c => c.system === PCT_REQUEST_TYPE_CS)?.code
     },
     { field: 'requester', headerName: 'Requester', valueGetter: (value, row) => value?.reference || '' },
     {
