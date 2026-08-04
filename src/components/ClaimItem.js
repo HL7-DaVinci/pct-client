@@ -10,7 +10,7 @@ import TextField from "@mui/material/TextField";
 import { AdapterDateFns } from "@mui/x-date-pickers/AdapterDateFns";
 import { LocalizationProvider } from "@mui/x-date-pickers/LocalizationProvider";
 
-export default function ClaimItem({ edit, rows, addOne, deleteOne }) {
+export default function ClaimItem({ edit, rows, addOne, deleteOne, posRequired = true }) {
   const [chosenVal, setChosenVal] = React.useState("");
   const [columnVal, setColumnVal] = React.useState("");
   const [dateValue, setDateValue] = React.useState("");
@@ -218,7 +218,8 @@ export default function ClaimItem({ edit, rows, addOne, deleteOne }) {
       type: "singleSelect",
       valueOptions: PlaceOfServiceList.map((pos) => pos.display),
       minWidth: 185,
-      required: false,
+      required: posRequired,
+      renderHeader: posRequired ? renderRequiredHeader : undefined,
       renderCell: (params) => {
         return (
           <FormControl fullWidth>

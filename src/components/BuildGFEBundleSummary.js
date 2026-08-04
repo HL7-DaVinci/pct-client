@@ -3,6 +3,7 @@ import { v4 } from "uuid";
 const buildGFEBundleSummary = (gfeBundle) => {
     console.log("Summarizing GFE bundle "+gfeBundle.id)
     const summaryId = `PCT-GFE-Summary-${v4()}`;
+    const now = new Date().toISOString();
     const summaryClaim = {
         resourceType: "Claim",
         id: summaryId,
@@ -19,6 +20,7 @@ const buildGFEBundleSummary = (gfeBundle) => {
             ]
         },
         use: "predetermination",
+        created: now,
         provider: {
             "extension": [
                 {

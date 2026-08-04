@@ -28,14 +28,8 @@ const useStyles = makeStyles((theme) =>
   })
 );
 
-function createProcedureList(procedureList) {
-  return procedureList.map((el, index) => {
-    return (
-      <ListItem key={index} disableGutters>
-        ({el.id}) {el.provider} ({el.type})
-      </ListItem>
-    );
-  });
+function createProcedureData(procedureList) {
+  return (procedureList || []).filter((el) => el?.procedure || el?.type);
 }
 
 function alertDialog(itemsMissing) {
@@ -302,9 +296,13 @@ export default function SummaryItem(props) {
               <SummaryText content="Procedure:" class="label" />
             </Grid>
             <Grid item xs={6}>
-              <Typography style={{ wordWrap: "break-word" }}>
-                {createProcedureList(summary.procedureList)}
-              </Typography>
+              <SummaryTable
+                headers={[
+                  { display: "Procedure", value: "procedure" },
+                  { display: "Type", value: "type" },
+                ]}
+                data={createProcedureData(summary.procedureList)}
+              />
             </Grid>
           </Grid>
         ) : null}

@@ -367,7 +367,7 @@ export const MockAeobResponse = {
                                         {
                                             "coding": [
                                                 {
-                                                    "system": "http://terminology.hl7.org/CodeSystem/ex-diagnosistype",
+                                                    "system": "http://terminology.hl7.org/CodeSystem/diagnosistype",
                                                     "code": "principal"
                                                 }
                                             ]
@@ -761,7 +761,7 @@ export const MockAeobResponse = {
                                         {
                                             "coding": [
                                                 {
-                                                    "system": "http://terminology.hl7.org/CodeSystem/ex-diagnosistype",
+                                                    "system": "http://terminology.hl7.org/CodeSystem/diagnosistype",
                                                     "code": "principal"
                                                 }
                                             ]

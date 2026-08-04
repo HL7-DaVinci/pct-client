@@ -290,10 +290,11 @@ export default function ContributorTaskDialog({ open, onClose, task, setTask }) 
   const attachGfeBundle = async (bundle, markCompleted = false) => {
     let gfeBundle = bundle;
     // if bundle is a collection bundle, pull GFE bundle from collection bundle
-    const nestedBundle = bundle.entry?.find(
+    const nestedBundle = bundle?.entry?.find(
         (entry) => entry.resource?.resourceType === "Bundle"
     );
     if(nestedBundle && nestedBundle.resource){
+      console.log("[AttachGfeBundle] Bundle Created", nestedBundle.resource);
       gfeBundle = nestedBundle.resource;
     }
     const output = [

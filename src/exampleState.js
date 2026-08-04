@@ -272,7 +272,7 @@ export const exampleSessions = {
                   coding: [
                     {
                       system:
-                        "http://terminology.hl7.org/CodeSystem/ex-diagnosistype",
+                        "http://terminology.hl7.org/CodeSystem/diagnosistype",
                       code: "principal",
                     },
                   ],
@@ -491,7 +491,7 @@ export const exampleSessions = {
                   coding: [
                     {
                       system:
-                        "http://terminology.hl7.org/CodeSystem/ex-diagnosistype",
+                        "http://terminology.hl7.org/CodeSystem/diagnosistype",
                       code: "principal",
                     },
                   ],
@@ -705,7 +705,7 @@ export const exampleSessions = {
                   coding: [
                     {
                       system:
-                        "http://terminology.hl7.org/CodeSystem/ex-diagnosistype",
+                        "http://terminology.hl7.org/CodeSystem/diagnosistype",
                       code: "principal",
                     },
                   ],
@@ -1927,7 +1927,7 @@ export const exampleSessions = {
                   coding: [
                     {
                       system:
-                        "http://terminology.hl7.org/CodeSystem/ex-diagnosistype",
+                        "http://terminology.hl7.org/CodeSystem/diagnosistype",
                       code: "principal",
                     },
                   ],
@@ -2175,7 +2175,7 @@ export const exampleSessions = {
                   coding: [
                     {
                       system:
-                        "http://terminology.hl7.org/CodeSystem/ex-diagnosistype",
+                        "http://terminology.hl7.org/CodeSystem/diagnosistype",
                       code: "principal",
                     },
                   ],

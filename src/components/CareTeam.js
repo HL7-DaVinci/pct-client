@@ -95,7 +95,7 @@ export default function CareTeam({
       editable: true,
       type: "singleSelect",
       valueOptions: providerList,
-      minWidth: 185,
+      minWidth: 320,
       renderHeader: renderRequiredHeader,
       required: true,
       renderCell: (params) => {
@@ -123,6 +123,7 @@ export default function CareTeam({
   return (
     <div style={{ width: "100%" }}>
       <DataGridComponent
+        style={{ width: "100%" }}
         rows={rows}
         columns={ourColumns}
         add={addOne}

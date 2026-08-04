@@ -28,3 +28,12 @@ export const SupportingInfoType = [
     },
   },
 ];
+
+export const TypeOfBillList = [
+  {
+    system: "https://www.nubc.org/CodeSystem/TypeOfBill",
+    code: "011X",
+    display: "Hospital Inpatient (Part A)",
+  },
+];
+

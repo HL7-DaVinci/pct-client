@@ -1,11 +1,31 @@
 const buildGFERequest = (input) => {
+    // Map role code -> canonical display text (from claimcareteamrole v1.0.1)
+    const CARE_TEAM_ROLE_DISPLAY = {
+        primary: "Primary provider",
+        assist: "Assisting Provider",
+        supervisor: "Supervising Provider",
+        attending: "Attending",
+        referring: "Referring",
+        operating: "Operating",
+        otheroperating: "Other Operating",
+        prescribing: "Prescribing provider",
+        purchasedservice: "Purchased Service",
+        rendering: "Rendering provider",
+        other: "Other"
+    };
+    const CARE_TEAM_ROLE_SYSTEM = "http://terminology.hl7.org/CodeSystem/claimcareteamrole";
+    const CARE_TEAM_ROLE_VERSION = "1.0.1";
     let GFERequest = {
         "resourceType": "Claim",
-        "text": {
-            "status": "extensions",
-            "div": "<div xmlns=\"http://www.w3.org/1999/xhtml\"><p><b>Generated Narrative</b></p><p><b>GFESubmitter</b>: <a href=\"Organization-Submitter-Org-1.html\">Generated Summary: Electronic Transmitter Identification Number: ETIN-10010001; active; name: GFE Service Help INC.</a></p><p><b>InterTransIdentifier</b>: id: GFEService0001</p><p><b>status</b>: active</p><p><b>type</b>: <span title=\"Codes: {http://terminology.hl7.org/CodeSystem/claim-type institutional}\">Institutional</span></p><p><b>use</b>: predetermination</p><p><b>patient</b>: <a href=\"Patient-patientBSJ1.html\">Generated Summary: Betsy Smith-Johnson</a></p><p><b>created</b>: 2021-09-07</p><p><b>insurer</b>: <a href=\"Organization-Insurer-Org-1.html\">Generated Summary: Electronic Transmitter Identification Number: ETIN-70010001; active; name: Blue Cross Blue Shield</a></p><p><b>provider</b>: <a href=\"PractitionerRole-Provider-Role-neurologist.html\">Generated Summary: active; <span title=\"Codes: {http://nucc.org/provider-taxonomy 2084N0400X}\">Neurology</span>; <span title=\"Codes: {http://nucc.org/provider-taxonomy 2084N0400X}\">Neurology</span></a></p><p><b>priority</b>: <span title=\"Codes: \">normal</span></p><h3>Payees</h3><table class=\"grid\"><tr><td>-</td><td><b>Type</b></td></tr><tr><td>*</td><td><span title=\"Codes: \">subscriber</span></td></tr></table><h3>Insurances</h3><table class=\"grid\"><tr><td>-</td><td><b>Sequence</b></td><td><b>Focal</b></td><td><b>Coverage</b></td></tr><tr><td>*</td><td>1</td><td>true</td><td><a href=\"Coverage-BSJ-Coverage-1.html\">Generated Summary: status: active; subscriberId: 123456789; period: 2020-12-01 --&gt; 2021-11-30</a></td></tr></table></div>"
+        "meta": input.gfeType === "institutional" ? {
+            "profile": [
+                "http://hl7.org/fhir/us/davinci-pct/StructureDefinition/davinci-pct-gfe-institutional"
+            ]
+        } : {
+            "profile": [
+                "http://hl7.org/fhir/us/davinci-pct/StructureDefinition/davinci-pct-gfe-professional"
+            ]
         },
-
         "status": "active",
         "use": "predetermination",
         "priority": {
@@ -16,28 +36,19 @@ const buildGFERequest = (input) => {
                 }
             ]
         },
-        "payee": {
-            "type": {
-                "coding": [
-                    {
-                        "code": "subscriber",
-                        "system": "http://terminology.hl7.org/CodeSystem/payeetype"
-                    }
-                ]
+        ...(input.gfeType !== "institutional" && {
+            "payee": {
+                "type": {
+                    "coding": [
+                        {
+                            "code": "subscriber",
+                            "system": "http://terminology.hl7.org/CodeSystem/payeetype"
+                        }
+                    ]
+                }
             }
-        },
-
+        }),
     };
-
-    GFERequest.meta = input.gfeType === "institutional" ? {
-        "profile": [
-            "http://hl7.org/fhir/us/davinci-pct/StructureDefinition/pct-gfe-Institutional"
-        ]
-    } : {
-        "profile": [
-            "http://hl7.org/fhir/us/davinci-pct/StructureDefinition/davinci-pct-gfe-professional"
-        ]
-    }
 
     GFERequest.identifier = input.identifier;
     
@@ -87,33 +98,42 @@ const buildGFERequest = (input) => {
     if (input.careTeam) {
         GFERequest.careTeam = [];
         input.careTeam.forEach(member => {
-            let memberRoleCodeSystem = undefined;
-            if(member.role === "primary") {
-                memberRoleCodeSystem = "http://terminology.hl7.org/CodeSystem/claimcareteamrole"
-            } else {
-                memberRoleCodeSystem = "http://hl7.org/fhir/us/davinci-pct/CodeSystem/PCTCareTeamRole"
+            if (!CARE_TEAM_ROLE_DISPLAY[member.role]) {
+                throw new Error(`Invalid careTeam role code: ${member.role}`);
             }
-            GFERequest.careTeam.push({
+
+            const entry = {
                 sequence: member.sequence,
                 role: {
                     coding: [
                         {
-                            "system": memberRoleCodeSystem,
-                            "code": member.role
+                            system: CARE_TEAM_ROLE_SYSTEM,
+                            version: CARE_TEAM_ROLE_VERSION,
+                            code: member.role,
+                            display: CARE_TEAM_ROLE_DISPLAY[member.role]
                         }
                     ]
                 },
-                provider: member.providerRef,
-                qualification: {
+                provider: member.providerRef
+            };
+
+            // qualification is mandatory for rendering, optional for referring/other slices
+            if (member.role === "rendering" && !member.qualification) {
+                throw new Error("qualification is required for rendering care team members");
+            }
+            if (member.qualification) {
+                entry.qualification = {
                     coding: [
                         {
-                            "system": "http://nucc.org/provider-taxonomy",
-                            "code": "207T00000X",
-                            "display": "Neurological Surgery Physician"
+                            system: "http://nucc.org/provider-taxonomy",
+                            code: member.qualification.code,
+                            display: member.qualification.display
                         }
                     ]
-                }
-            })
+                };
+            }
+
+            GFERequest.careTeam.push(entry);
         });
     }
 
@@ -129,44 +149,7 @@ const buildGFERequest = (input) => {
         }
     ];
 
-    /* GFE Submitter is no longer part of the GFE bundle in STU2
-    GFERequest.extension = [
-        {
-            url: "http://hl7.org/fhir/us/davinci-pct/StructureDefinition/gfeSubmitter",
-            valueReference: {
-                reference: input.submitter.reference
-            }
-        }
-    ];*/
-
-    if (input.billing.interTransIntermediary) {
-        if(!('extension' in GFERequest))
-        {
-            GFERequest.extension = [];        
-        }
-        GFERequest.extension.push({
-            url: "http://hl7.org/fhir/us/davinci-pct/StructureDefinition/interTransIdentifier",
-            valueIdentifier: {
-                value: input.billing.interTransIntermediary
-            }
-        })
-    };
-
-    if (input.billing.gfeAssignedServiceId) {
-        if(!('extension' in GFERequest))
-        {
-            GFERequest.extension = [];        
-        }
-        GFERequest.extension.push({
-            "url": "http://hl7.org/fhir/us/davinci-pct/StructureDefinition/gfeProviderAssignedIdentifier",
-            valueIdentifier: {
-                value: input.billing.gfeAssignedServiceId
-            }
-        });
-    }
-
     return GFERequest;
 };
 
 export default buildGFERequest;
-

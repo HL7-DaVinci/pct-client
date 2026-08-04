@@ -24,6 +24,26 @@ export const DiagnosisList = [
             "coding": [
                 {
                     "system": "http://hl7.org/fhir/sid/icd-10-cm",
+                    "code": "S06.30",
+                    "display": "Unspecified focal traumatic brain injury"
+                }
+            ]
+        },
+        "packageCode": {
+            "coding": [
+                {
+                    "system": "http://terminology.hl7.org/CodeSystem/ex-diagnosisrelatedgroup",
+                    "code": "400",
+                    "display": "Head trauma - concussion"
+                }
+            ]
+        }
+    },
+    {
+        "diagnosisCodeableConcept": {
+            "coding": [
+                {
+                    "system": "http://hl7.org/fhir/sid/icd-10-cm",
                     "code": "I10",
                     "display": "Essential (primary) hypertension"
                 }
@@ -75,6 +95,26 @@ export const DiagnosisList = [
                     "system": "http://terminology.hl7.org/CodeSystem/ex-diagnosisrelatedgroup",
                     "code": "300",
                     "display": "Asthma"
+                }
+            ]
+        }
+    },
+    {
+        "diagnosisCodeableConcept": {
+            "coding": [
+                {
+                    "system": "http://hl7.org/fhir/sid/icd-10-cm",
+                    "code": "M17.11",
+                    "display": "Unilateral primary osteoarthritis, right knee"
+                }
+            ]
+        },
+        "packageCode": {
+            "coding": [
+                {
+                    "system": "http://terminology.hl7.org/CodeSystem/ex-diagnosisrelatedgroup",
+                    "code": "470",
+                    "display": "Major joint replacement or reattachment of lower extremity without major complication or comorbidity"
                 }
             ]
         }

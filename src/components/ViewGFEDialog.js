@@ -75,7 +75,7 @@ export default function ViewGFERequestDialog(props) {
                                 <Editor 
                                     height="75vh"
                                     defaultLanguage="json"
-                                    defaultValue={JSON.stringify(request, undefined, 2)}
+                                    value={JSON.stringify(request, undefined, 2)}
                                     options={{readOnly: true}}
                                 />
                             )
