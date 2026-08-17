@@ -2,11 +2,11 @@ import React, {useEffect, useMemo, useState} from "react";
 
 import "./App.css";
 import { AppContext } from "./Context";
-import { Tabs, Tab, Grid } from "@mui/material";
+import { Tabs, Tab, Grid, Box, Typography } from "@mui/material";
 import MainPanel from "./components/MainPanel";
 import CoordinationPanel from "./components/coordination/CoordinationPanel";
 import {getParticipants} from "./util/taskUtils";
-
+import { CLIENT_VERSION } from "./constants/version";
 function App() {
   const [selectedWorkflow, setSelectedWorkflow] = useState("coordinationPanel");
   
@@ -102,12 +102,40 @@ function App() {
                 variant="fullWidth"
               >
                 <Tab
-                  label="Coordination Platform Workflow"
-                  id={"coordinationPanel"}
-                  value="coordinationPanel"
+                    label={<Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
+                      Coordination Platform Workflow
+                      <Typography
+                          component="span"
+                          variant="caption"
+                          sx={{
+                            textTransform: "none",
+                            color: "text.disabled",
+                            userSelect: "none",
+                            whiteSpace: "nowrap",
+                          }}
+                      >
+                        v{CLIENT_VERSION}
+                      </Typography>
+                    </Box>}
+                    id={"coordinationPanel"}
+                    value="coordinationPanel"
                 />
                 <Tab
-                  label="Single GFE Submission"
+                  label={<Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
+                    Single GFE Submission
+                    <Typography
+                      component="span"
+                      variant="caption"
+                      sx={{
+                        textTransform: "none",
+                        color: "text.disabled",
+                        userSelect: "none",
+                        whiteSpace: "nowrap",
+                      }}
+                    >
+                      v{CLIENT_VERSION}
+                    </Typography>
+                  </Box>}
                   id={"submissionPanel"}
                   value="submissionPanel"
                 />
