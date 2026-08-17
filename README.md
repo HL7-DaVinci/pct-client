@@ -4,7 +4,7 @@
 [![Foundry](https://shields.foundry.hl7.org/website?url=https://foundry.hl7.org/products/7edae207-25f4-4bf1-a6ef-1254daf1f1e6%2F&logo=fireship&label=foundry)](https://foundry.hl7.org/products/7edae207-25f4-4bf1-a6ef-1254daf1f1e6)
 
 This project provides a web application that is capable of generating GFE request and displaying the GFE response.
-This version of the reference Implementation supports the [STU1 version of the Da Vinci Patient Cost Transparency Implementation Guide](https://hl7.org/fhir/us/davinci-pct/STU1/)
+This version of the reference Implementation supports the [2.0.1 (STU2) version of the Da Vinci Patient Cost Transparency Implementation Guide](https://hl7.org/fhir/us/davinci-pct/STU2.0.1/)
 In addition, it provides a functionality to allow the client to send the inquiry request for Advance EOB and displays the response from the payer server.  This project is written in JavaScript and runs in [node.js](https://nodejs.org/en/).  
 
 ## Foundry
