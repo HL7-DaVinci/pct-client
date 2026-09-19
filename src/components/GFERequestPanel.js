@@ -264,8 +264,8 @@ class GFERequestBox extends Component {
 
       if (result.data && result.data.length > 0) {
         const subscriberText = result.data[0].subscriberId;
-        const relationshipText = result.data[0].relationship.coding[0].display;
-        const planName = result.data[0].class[0].name;
+        const relationshipText = result.data[0].relationship?.coding?.[0]?.display;
+        const planName = result.data[0].class?.[0]?.name;
         const coveragePeriodTextStart = result.data[0].period?.start || "";
         const coveragePeriodTextEnd = result.data[0].period?.end || "";
 

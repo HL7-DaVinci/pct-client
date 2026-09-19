@@ -88,7 +88,7 @@ export default function GFEPanel({ selectedButton }) {
       alert('Please enter Request/Encounter Date to search.');
       return;
     }
-    let params = { type: 'gfe-packet' };
+    let params = { type: '111480-0' };
     params['author'] = requester;
     if (requestDate) params['estimate-initiation-time'] = requestDate;
     if (encounterDate) {

@@ -119,7 +119,7 @@ export default function AEOBPanel({ selectedButton }) {
       alert('Please enter Request/Encounter Date to search.');
       return;
     }
-    let params = { type: 'aeob-packet' };
+    let params = { type: '111479-2' };
     params['author'] = requester;
     if (requestDate) params['estimate-initiation-time'] = requestDate;
     if (encounterDate) {
