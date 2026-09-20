@@ -184,11 +184,15 @@ export default function ContributorTaskDialog({ open, onClose, task, setTask }) 
             const covParams = [];
             if (patientCoverage.beneficiary?.reference) covParams.push(["beneficiary", patientCoverage.beneficiary.reference]);
             const subscriberRef = patientCoverage.subscriber?.reference;
-            // Use subscriberRef if present, otherwise assume subscriber is patient
+            // Only search by subscriber when the Coverage actually has one.
+            // Self-pay coverages may not have a subscriber at all.
             if (subscriberRef) {
               covParams.push(["subscriber", subscriberRef]);
             } else {
-              covParams.push(["subscriber", `Patient/${patient.id}`]);
+              console.debug(
+                "No subscriber reference found on Coverage; skipping subscriber search param (possible self-pay coverage).",
+                { patientId: patient.id, coverageId: patientCoverage.id }
+              );
             }
             if (Array.isArray(patientCoverage.payor) && patientCoverage.payor[0]?.reference) covParams.push(["payor", patientCoverage.payor[0].reference]);
             //if (patientCoverage.relationship?.coding && patientCoverage.relationship.coding[0]?.code) covParams.push(["relationship", patientCoverage.relationship.coding[0].code]);
@@ -271,6 +275,11 @@ export default function ContributorTaskDialog({ open, onClose, task, setTask }) 
       gfeType = "professional";
     }
     const patient = infoBundle?.entry?.find((entry) => entry.resource?.resourceType === "Patient")?.resource;
+    const coverage = infoBundle?.entry?.find((entry) => entry.resource?.resourceType === "Coverage")?.resource;
+    const payorReference = coverage?.payor?.find((ref) => ref?.reference)?.reference;
+    const payor = payorReference
+      ? infoBundle?.entry?.find((entry) => entry.resource?.id === payorReference.split("/").pop())?.resource
+      : undefined;
     const patientId = patient?.id;
     if (patientId) {
       setGfeSession((prevSession) => ({
@@ -279,6 +288,14 @@ export default function ContributorTaskDialog({ open, onClose, task, setTask }) 
         subjectInfo: {
           ...prevSession.subjectInfo,
           selectedPatient: patient.id,
+          selectedCoverage: coverage ?? prevSession.subjectInfo.selectedCoverage,
+          selectedPayor: payor ?? prevSession.subjectInfo.selectedPayor,
+          subscriber: coverage?.subscriberId ?? prevSession.subjectInfo.subscriber,
+          subscriberRelationship: coverage?.relationship?.coding?.[0]?.display ?? prevSession.subjectInfo.subscriberRelationship,
+          coveragePlan: coverage?.class?.[0]?.name ?? prevSession.subjectInfo.coveragePlan,
+          coveragePeriod: coverage?.period
+            ? `${coverage.period.start || "-"} to ${coverage.period.end || "-"}`
+            : prevSession.subjectInfo.coveragePeriod,
           selectedSubmitter: providerId,
           gfeType: gfeType,
         }

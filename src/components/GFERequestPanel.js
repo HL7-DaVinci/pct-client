@@ -260,9 +260,16 @@ class GFERequestBox extends Component {
   fetchAndSetPatientDetails = (patientId) => {
     // retrieve coverage and payer info about patient
     //adding other patient info here too
+    const presetCoverage = this.props.session.subjectInfo?.selectedCoverage;
     getCoverageByPatient(this.context.dataServer, patientId).then((result) => {
 
-      if (result.data && result.data.length > 0) {
+      if (presetCoverage) {
+        let subjectInfo = {
+          ...this.props.session.subjectInfo,
+          selectedPatient: patientId,
+        };
+        this.props.updateSessionInfo({ subjectInfo });
+      } else if (result.data && result.data.length > 0) {
         const subscriberText = result.data[0].subscriberId;
         const relationshipText = result.data[0].relationship?.coding?.[0]?.display;
         const planName = result.data[0].class?.[0]?.name;
@@ -282,12 +289,12 @@ class GFERequestBox extends Component {
             let subjectInfo = {
               ...this.props.session.subjectInfo,
               selectedPatient: patientId,
-              selectedPayor: resource,
-              selectedCoverage: coverageResult.data,
-              subscriber: subscriberText,
-              subscriberRelationship: relationshipText,
-              coveragePlan: planName,
-              coveragePeriod: coveragePeriod,
+              selectedPayor: presetCoverage ? this.props.session.subjectInfo.selectedPayor : resource,
+              selectedCoverage: presetCoverage || coverageResult.data,
+              subscriber: presetCoverage ? this.props.session.subjectInfo.subscriber : subscriberText,
+              subscriberRelationship: presetCoverage ? this.props.session.subjectInfo.subscriberRelationship : relationshipText,
+              coveragePlan: presetCoverage ? this.props.session.subjectInfo.coveragePlan : planName,
+              coveragePeriod: presetCoverage ? this.props.session.subjectInfo.coveragePeriod : coveragePeriod,
             };
             this.props.updateSessionInfo({ subjectInfo });
           }
@@ -514,18 +521,33 @@ class GFERequestBox extends Component {
       entry: input.request.coverage.resource,
     });
 
-    let insurerOrgRef = `Organization/${this.props.session.subjectInfo.selectedPayor.id}`;
-    input.insurer = {
-      reference: insurerOrgRef,
-      resource: this.props.session.subjectInfo.selectedPayor,
-    };
-
-    orgReferenceList.push(insurerOrgRef);
-    input.bundleResources.push({
-      type: 'payer',
-      fullUrl: `${fhirServerBaseUrl}/${input.insurer.reference}`,
-      entry: input.insurer.resource,
-    });
+    const selectedPayor = this.props.session.subjectInfo.selectedPayor;
+    const coveragePayorRef = Array.isArray(input.request.coverage.resource?.payor)
+      ? input.request.coverage.resource.payor.find((ref) => ref?.reference)?.reference
+      : input.request.coverage.resource?.payor?.reference;
+    const isSelfPay =
+      selectedPayor?.resourceType === "Patient" ||
+      coveragePayorRef?.startsWith("Patient/") ||
+      input.request.coverage.resource?.extension?.some(
+        (ext) => ext.url === "http://hl7.org/fhir/us/davinci-pct/StructureDefinition/selfPayDeclared" && ext.valueBoolean === true
+      );
+    const insurerRefType = selectedPayor?.resourceType || "Organization";
+    const insurerRefId = selectedPayor?.id;
+    let insurerOrgRef = insurerRefId ? `${insurerRefType}/${insurerRefId}` : undefined;
+    if (!isSelfPay && insurerOrgRef && selectedPayor) {
+      input.insurer = {
+        reference: insurerOrgRef,
+        resource: selectedPayor,
+      };
+      orgReferenceList.push(insurerOrgRef);
+      input.bundleResources.push({
+        type: 'payer',
+        fullUrl: `${fhirServerBaseUrl}/${input.insurer.reference}`,
+        entry: input.insurer.resource,
+      });
+    } else {
+      input.insurer = undefined;
+    }
 
     // FIND Provider Taxonomy here
     let providerReference = undefined,
@@ -1236,6 +1258,7 @@ class GFERequestBox extends Component {
     if (Object.keys(this.props.session.gfeInfo).length === 0) {
       return {};
     }
+    const selectedPayor = this.props.session.subjectInfo.selectedPayor;
     const displayableClaimItemList = this.props.session.gfeInfo[
       this.props.session.selectedGFE
     ].claimItemList.map((e) => {
@@ -1250,8 +1273,8 @@ class GFERequestBox extends Component {
       coverageId: this.props.session.subjectInfo.selectedCoverage
         ? this.props.session.subjectInfo.selectedCoverage.id
         : undefined,
-      payorId: this.props.session.subjectInfo.selectedPayor
-        ? this.props.session.subjectInfo.selectedPayor.id
+      payorId: selectedPayor
+        ? selectedPayor.id
         : undefined,
       addressId: this.props.session.subjectInfo.selectedAddress,
       birthdate: this.props.session.subjectInfo.birthdate,

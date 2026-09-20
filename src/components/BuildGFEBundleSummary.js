@@ -4,6 +4,16 @@ const buildGFEBundleSummary = (gfeBundle) => {
     console.log("Summarizing GFE bundle "+gfeBundle.id)
     const summaryId = `PCT-GFE-Summary-${v4()}`;
     const now = new Date().toISOString();
+    const isSelfPayBundle = (bundle) => (bundle.entry || []).some((entry) => {
+        const resource = entry.resource;
+        if (resource?.resourceType !== "Coverage") return false;
+        const coveragePayorRef = Array.isArray(resource.payor)
+            ? resource.payor.find((ref) => ref?.reference)?.reference
+            : resource.payor?.reference;
+        return coveragePayorRef?.startsWith("Patient/") ||
+            resource.extension?.some((ext) => ext.url === "http://hl7.org/fhir/us/davinci-pct/StructureDefinition/selfPayDeclared" && ext.valueBoolean === true);
+    });
+    const selfPay = isSelfPayBundle(gfeBundle);
     const summaryClaim = {
         resourceType: "Claim",
         id: summaryId,
@@ -50,7 +60,7 @@ const buildGFEBundleSummary = (gfeBundle) => {
                 summaryClaim.supportingInfo = resource.supportingInfo;
             }
 
-            if (!summaryClaim.insurer && resource.insurer) {
+            if (!selfPay && !summaryClaim.insurer && resource.insurer) {
                 summaryClaim.insurer = resource.insurer;
             }
 

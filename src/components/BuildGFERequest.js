@@ -87,9 +87,11 @@ const buildGFERequest = (input) => {
 
     GFERequest.procedure = input.procedure;
 
-    GFERequest.insurer = {
-        reference: input.insurer.reference
-    };
+    if (input.insurer?.reference) {
+        GFERequest.insurer = {
+            reference: input.insurer.reference
+        };
+    }
     GFERequest.provider = {
         reference: input.provider.reference,
         extension: input.provider.extension
